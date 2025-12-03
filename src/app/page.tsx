@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
 
@@ -51,33 +52,28 @@ export default function HomePage() {
   }, []);
 
   const statsByQuiz = useMemo(() => {
-    const sCount: Record<string, number> = {};
-    const qCount: Record<string, number> = {};
+    const subjectCount = subjects.reduce<Record<string, number>>((acc, subject) => {
+      const quizId = subject.quiz_id;
+      if (quizId) {
+        acc[quizId] = (acc[quizId] || 0) + 1;
+      }
+      return acc;
+    }, {});
 
-    subjects.forEach((s) => {
-      const anyS: any = s;
-      const qid = anyS.quiz_id as string | undefined;
-      if (!qid) return;
-      sCount[qid] = (sCount[qid] || 0) + 1;
-    });
+    const questionCount = questions.reduce<Record<string, number>>((acc, question) => {
+      const quizId = question.quiz_id;
+      if (quizId) {
+        acc[quizId] = (acc[quizId] || 0) + 1;
+      }
+      return acc;
+    }, {});
 
-    questions.forEach((q) => {
-      const anyQ: any = q;
-      const qid = anyQ.quiz_id as string | undefined;
-      if (!qid) return;
-      qCount[qid] = (qCount[qid] || 0) + 1;
-    });
-
-    return { sCount, qCount };
+    return { subjectCount, questionCount };
   }, [subjects, questions]);
 
   // Mostra solo concorsi NON archiviati
   const visibleQuizzes = useMemo(
-    () =>
-      quizzes.filter((quiz) => {
-        const anyQ: any = quiz;
-        return !anyQ.is_archived; // se null/undefined ⇒ considerato attivo
-      }),
+    () => quizzes.filter((quiz) => !quiz.is_archived),
     [quizzes]
   );
 
@@ -112,10 +108,13 @@ export default function HomePage() {
           ) : (
             <div className="space-y-3">
               {visibleQuizzes.map((quiz) => {
-                const anyQ: any = quiz;
-                const { sCount, qCount } = statsByQuiz;
-                const subjectsNum = sCount[quiz.id] || 0;
-                const questionsNum = qCount[quiz.id] || 0;
+                const { subjectCount, questionCount } = statsByQuiz;
+                const subjectsNum = subjectCount[quiz.id] || 0;
+                const questionsNum = questionCount[quiz.id] || 0;
+
+                const quizTitle = quiz.title || "Concorso senza titolo";
+                const quizDescription = quiz.description || "";
+                const quizYear = quiz.year ? `Anno ${quiz.year}` : null;
 
                 return (
                   <Link key={quiz.id} href={`/quiz/${quiz.id}`}>
@@ -123,28 +122,28 @@ export default function HomePage() {
                       <div className="flex flex-wrap justify-between gap-2">
                         <div>
                           <h3 className="text-sm md:text-base font-semibold">
-                            {anyQ.title || "Concorso senza titolo"}
+                            {quizTitle}
                           </h3>
                           <p className="text-xs text-slate-300">
-                            {anyQ.year && <>Anno {anyQ.year} · </>}
+                            {quizYear && <>{quizYear} · </>}
                             {subjectsNum} materia
                             {subjectsNum === 1 ? "" : "e"} · {questionsNum} domanda
                             {questionsNum === 1 ? "" : "e"}
                           </p>
                         </div>
                         <div className="text-xs text-slate-400">
-                          {anyQ.total_questions && (
-                            <div>Domande ufficiali: {anyQ.total_questions}</div>
+                          {quiz.total_questions && (
+                            <div>Domande ufficiali: {quiz.total_questions}</div>
                           )}
-                          {anyQ.time_limit && (
-                            <div>Tempo: {anyQ.time_limit} min</div>
+                          {quiz.time_limit && (
+                            <div>Tempo: {quiz.time_limit} min</div>
                           )}
                         </div>
                       </div>
 
-                      {anyQ.description && (
+                      {quizDescription && (
                         <p className="mt-2 text-xs text-slate-300 line-clamp-2">
-                          {anyQ.description}
+                          {quizDescription}
                         </p>
                       )}
                     </div>
