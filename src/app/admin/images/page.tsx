@@ -86,7 +86,6 @@ export default function AdminImagesPage() {
     setSuccess(null);
 
     try {
-      const ext = file.name.split(".").pop();
       const safeName = file.name.replace(/\s+/g, "_").toLowerCase();
       const filePath = `${Date.now()}_${safeName}`;
 
