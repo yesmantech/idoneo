@@ -233,7 +233,7 @@ export default function AdminQuizzesPage() {
         payload.id = editingQuizId;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("quizzes")
         .upsert(payload)
         .select()

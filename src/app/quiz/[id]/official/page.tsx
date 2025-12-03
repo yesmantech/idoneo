@@ -24,7 +24,6 @@ export default function OfficialQuizPage({
 
   const [quiz, setQuiz] = useState<QuizRow | null>(null);
   const [questions, setQuestions] = useState<FullQuestion[]>([]);
-  const [rules, setRules] = useState<RuleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,8 +116,6 @@ export default function OfficialQuizPage({
         } else {
           rulesList = (rulesData || []) as RuleRow[];
         }
-
-        setRules(rulesList);
 
         // 3) domande con info materia
         const { data: questionsData, error: questionsError } = await supabase
@@ -663,7 +660,7 @@ export default function OfficialQuizPage({
 
             const isSelected = currentAnswer === optKey;
 
-            let base =
+            const base =
               "w-full rounded-xl border px-3 py-2 text-left text-xs md:text-sm transition ";
             let style = "";
 

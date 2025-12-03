@@ -50,10 +50,12 @@ export default function AdminQuestionsPage() {
       }
 
       setQuestions((data || []) as QuestionListItem[]);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Errore imprevisto caricando domande:", err);
       setError(
-        err?.message || "Errore imprevisto nel caricamento delle domande."
+        err instanceof Error
+          ? err.message
+          : "Errore imprevisto nel caricamento delle domande."
       );
       setQuestions([]);
     } finally {
@@ -93,15 +95,13 @@ export default function AdminQuestionsPage() {
   const filteredQuestions = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    return questions.filter((q) => {
-      if (!showArchived && q.is_archived) return false;
-
+    return questions.filter((question) => {
+      if (!showArchived && question.is_archived) return false;
       if (!term) return true;
 
-      const anyQ: any = q;
-      const text = (anyQ.text || "").toLowerCase();
-      const subjName = (anyQ.subjects?.name || "").toLowerCase();
-      const quizTitle = (anyQ.quizzes?.title || "").toLowerCase();
+      const text = (question.text || "").toLowerCase();
+      const subjName = (question.subjects?.name || "").toLowerCase();
+      const quizTitle = (question.quizzes?.title || "").toLowerCase();
 
       return (
         text.includes(term) ||
@@ -117,10 +117,7 @@ export default function AdminQuestionsPage() {
         <h1 className="text-xl font-semibold mb-1">Admin – Domande</h1>
         <p className="text-xs text-slate-300 mb-4">
           Gestisci il database delle domande. Da qui puoi archiviare/riattivare
-          e{" "}
-          <span className="font-semibold text-slate-100">
-            modificare il contenuto delle singole domande
-          </span>
+          e <span className="font-semibold text-slate-100">modificare il contenuto delle singole domande</span>
           .
         </p>
 
@@ -210,17 +207,17 @@ export default function AdminQuestionsPage() {
                 </thead>
                 <tbody>
                   {filteredQuestions.map((q) => {
-                    const anyQ: any = q;
                     const shortId = q.id.slice(0, 8);
-                    const textPreview =
-                      (anyQ.text || "").length > 120
-                        ? (anyQ.text as string).slice(0, 120) + "…"
-                        : anyQ.text || "";
+                    const textPreview = (q.text || "").slice(0, 120);
+                    const truncatedText =
+                      q.text && q.text.length > 120
+                        ? `${textPreview}…`
+                        : q.text || "";
+
                     const subjectLabel =
-                      anyQ.subjects?.name ||
-                      (anyQ.subject_id ? "Materia" : "—");
+                      q.subjects?.name || (q.subject_id ? "Materia" : "—");
                     const quizLabel =
-                      anyQ.quizzes?.title || (anyQ.quiz_id ? "Concorso" : "—");
+                      q.quizzes?.title || (q.quiz_id ? "Concorso" : "—");
 
                     return (
                       <tr
@@ -231,7 +228,7 @@ export default function AdminQuestionsPage() {
                           {shortId}
                         </td>
                         <td className="py-2 px-2 align-top text-slate-100">
-                          {textPreview || (
+                          {truncatedText || (
                             <span className="text-slate-500">
                               (senza testo)
                             </span>
@@ -242,10 +239,9 @@ export default function AdminQuestionsPage() {
                         </td>
                         <td className="py-2 px-2 align-top text-slate-200">
                           {quizLabel}
-                          {anyQ.quizzes?.year && (
+                          {q.quizzes?.year && (
                             <span className="text-slate-400">
-                              {" "}
-                              ({anyQ.quizzes.year})
+                              {" "}({q.quizzes.year})
                             </span>
                           )}
                         </td>
