@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
@@ -24,7 +24,6 @@ export default function OfficialQuizPage({
 
   const [quiz, setQuiz] = useState<QuizRow | null>(null);
   const [questions, setQuestions] = useState<FullQuestion[]>([]);
-  const [rules, setRules] = useState<RuleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,13 +51,11 @@ export default function OfficialQuizPage({
     "a" | "b" | "c" | "d" | null
   >(null);
 
-  // Feedback di verifica istantanea:
-  // index = indice domanda per cui è stato calcolato il feedback
-  // correct = true/false se la risposta data è corretta
-  const [feedback, setFeedback] = useState<{
-    index: number;
-    correct: boolean | null;
-  } | null>(null);
+  // Feedback di verifica istantanea per domanda
+  const [feedbackByQuestion, setFeedbackByQuestion] = useState<
+    { correct: boolean | null }[]
+  >([]);
+  const autoNextTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Risultati finali
   const [results, setResults] = useState<{
@@ -117,8 +114,6 @@ export default function OfficialQuizPage({
         } else {
           rulesList = (rulesData || []) as RuleRow[];
         }
-
-        setRules(rulesList);
 
         // 3) domande con info materia
         const { data: questionsData, error: questionsError } = await supabase
@@ -193,7 +188,9 @@ export default function OfficialQuizPage({
             selectedOption: null,
           }))
         );
-        setFeedback(null);
+        setFeedbackByQuestion(
+          Array.from({ length: fullQuestions.length }, () => ({ correct: null }))
+        );
 
         // timer: se il quiz ha time_limit (minuti) lo convertiamo in secondi
         if (qz.time_limit && qz.time_limit > 0) {
@@ -248,6 +245,12 @@ export default function OfficialQuizPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingSeconds, finished]);
 
+  useEffect(() => {
+    return () => {
+      clearAutoNextTimeout();
+    };
+  }, []);
+
   const currentQuestion = useMemo(() => {
     if (currentIndex < 0 || currentIndex >= questions.length) return null;
     return questions[currentIndex];
@@ -256,18 +259,25 @@ export default function OfficialQuizPage({
   const totalQuestions = questions.length;
   const currentAnswer = answers[currentIndex]?.selectedOption ?? null;
 
+  const clearAutoNextTimeout = () => {
+    if (autoNextTimeoutRef.current) {
+      clearTimeout(autoNextTimeoutRef.current);
+      autoNextTimeoutRef.current = null;
+    }
+  };
+
   const handlePrev = () => {
     // nei quiz ufficiali, se il concorso è non navigabile, non puoi tornare indietro
     if (!navigable) return;
+    clearAutoNextTimeout();
     setCurrentIndex((prev) => Math.max(0, prev - 1));
-    setFeedback(null);
   };
 
   const handleNext = () => {
+    clearAutoNextTimeout();
     setCurrentIndex((prev) =>
       Math.min(totalQuestions - 1, prev + 1)
     );
-    setFeedback(null);
   };
 
   const computeResults = () => {
@@ -293,6 +303,7 @@ export default function OfficialQuizPage({
 
   const handleFinish = (autoByTime = false) => {
     if (finished) return;
+    clearAutoNextTimeout();
     setFinished(true);
     setRemainingSeconds(0);
 
@@ -320,6 +331,8 @@ export default function OfficialQuizPage({
   const applyOptionSelection = (opt: "a" | "b" | "c" | "d") => {
     if (!currentQuestion || finished) return;
 
+    clearAutoNextTimeout();
+
     const correctKey =
       (currentQuestion as any).correct_option?.toLowerCase?.() ?? null;
 
@@ -333,34 +346,30 @@ export default function OfficialQuizPage({
       return copy;
     });
 
-    // Calcolo feedback SOLO al momento del click,
-    // dipende dallo stato attuale di instantCheck
-    if (instantCheck && correctKey) {
-      const isCorrect = opt === (correctKey as any);
-      setFeedback({
-        index: currentIndex,
-        correct: isCorrect,
-      });
-    } else {
-      setFeedback(null);
-    }
+    const isCorrect = correctKey ? opt === (correctKey as any) : null;
+
+    setFeedbackByQuestion((prev) => {
+      const copy = [...prev];
+      copy[currentIndex] = { correct: isCorrect };
+      return copy;
+    });
+
+    const goNext = () => {
+      if (currentIndex >= totalQuestions - 1) {
+        handleFinish(false);
+        return;
+      }
+      setCurrentIndex((prev) => Math.min(totalQuestions - 1, prev + 1));
+    };
 
     if (autoNext) {
       if (instantCheck) {
         // auto-next + verifica istantanea:
         // mostra il colore per ~1.2s, poi avanza
-        setTimeout(() => {
-          setCurrentIndex((prev) =>
-            Math.min(totalQuestions - 1, prev + 1)
-          );
-          setFeedback(null);
-        }, 1200);
+        autoNextTimeoutRef.current = setTimeout(goNext, 1200);
       } else {
         // solo auto-next, nessun delay
-        setCurrentIndex((prev) =>
-          Math.min(totalQuestions - 1, prev + 1)
-        );
-        setFeedback(null);
+        goNext();
       }
     }
   };
@@ -535,16 +544,14 @@ export default function OfficialQuizPage({
     (quiz as any)?.official_non_navigable ?? false
   );
 
-  // mostra validazione solo se:
-  // - instantCheck è attivo al momento del click (salvato in feedback)
-  // - feedback.index == currentIndex (domanda corrente)
-  const showValidation =
-    !!feedback &&
-    feedback.index === currentIndex &&
-    feedback.correct !== null &&
-    instantCheck; // se disattivi il toggle, nascondiamo di nuovo il feedback
+  const feedbackForCurrent = feedbackByQuestion[currentIndex];
 
-  const isCurrentCorrect = showValidation && feedback?.correct === true;
+  const showValidation =
+    instantCheck &&
+    feedbackForCurrent !== undefined &&
+    feedbackForCurrent.correct !== null;
+
+  const isCurrentCorrect = showValidation && feedbackForCurrent?.correct === true;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -663,7 +670,7 @@ export default function OfficialQuizPage({
 
             const isSelected = currentAnswer === optKey;
 
-            let base =
+            const base =
               "w-full rounded-xl border px-3 py-2 text-left text-xs md:text-sm transition ";
             let style = "";
 
