@@ -12,14 +12,7 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // 2. Fetch User Profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-
-  // 3. Fetch Attempts (with Quiz info)
+  // 2. Fetch Attempts (with Quiz info)
   // Note: We select *, quizzes(title) to join data
   const { data: attempts } = await supabase
     .from('attempts')
@@ -27,7 +20,7 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('started_at', { ascending: false });
 
-  // 4. Calculate Stats
+  // 3. Calculate Stats
   const totalAttempts = attempts?.length || 0;
   
   const averageScore = totalAttempts > 0
