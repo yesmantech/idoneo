@@ -90,7 +90,6 @@ export default function CustomQuizPage({
 
   const [quiz, setQuiz] = useState<QuizRow | null>(null);
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
-  const [questions, setQuestions] = useState<QuestionRow[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<QuestionRow[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -294,7 +293,7 @@ export default function CustomQuizPage({
             .filter(([, st]) => st.wrong > 0)
             .sort((a, b) => b[1].wrong - a[1].wrong);
 
-          for (const [qid, st] of sorted.slice(0, limit)) {
+          for (const [qid] of sorted.slice(0, limit)) {
             if (!activeById[qid]) continue;
             selected.push(activeById[qid]);
           }
@@ -326,7 +325,6 @@ export default function CustomQuizPage({
 
         setQuiz(qz);
         setSubjects(sbj);
-        setQuestions(activeQuestions);
         setSelectedQuestions(selected);
         setAnswers(initialAnswers);
         setCustomTimeLimit(minutes);
