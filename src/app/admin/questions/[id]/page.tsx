@@ -8,6 +8,13 @@ import type { Database } from "@/types/database";
 type QuestionRow = Database["public"]["Tables"]["questions"]["Row"];
 type SubjectRow = Database["public"]["Tables"]["subjects"]["Row"];
 
+const formatErrorMessage = (error: unknown) => {
+  if (!error) return "Errore sconosciuto";
+  if (typeof error === "string") return error;
+  if (error instanceof Error) return error.message;
+  return String(error);
+};
+
 const BUCKET = "question-images"; // nome bucket Storage
 
 export default function AdminQuestionEditPage({
@@ -88,18 +95,16 @@ export default function AdminQuestionEditPage({
         setSubjects(subj);
 
         // 3) inizializza form
-        const anyQ: any = q;
-
-        setText(anyQ.text ?? "");
-        setOptionA(anyQ.option_a ?? "");
-        setOptionB(anyQ.option_b ?? "");
-        setOptionC(anyQ.option_c ?? "");
-        setOptionD(anyQ.option_d ?? "");
+        setText(q.text ?? "");
+        setOptionA(q.option_a ?? "");
+        setOptionB(q.option_b ?? "");
+        setOptionC(q.option_c ?? "");
+        setOptionD(q.option_d ?? "");
         setCorrectOption(
-          (anyQ.correct_option as "a" | "b" | "c" | "d" | "") ?? ""
+          (q.correct_option as "a" | "b" | "c" | "d" | "") ?? ""
         );
-        setImageUrl(anyQ.image_url ?? "");
-        setSubjectId(anyQ.subject_id ?? "");
+        setImageUrl(q.image_url ?? "");
+        setSubjectId(q.subject_id ?? "");
       } catch (err) {
         console.error("Errore imprevisto in edit domanda:", err);
         setError("Errore nel caricamento della domanda.");
@@ -154,14 +159,12 @@ export default function AdminQuestionEditPage({
 
       if (updateError) {
         const msg =
-          (updateError as any)?.message ||
-          (updateError as any)?.details ||
-          String(updateError);
+          updateError.message || updateError.details || String(updateError);
         console.error("Supabase UPDATE questions error:", updateError, {
-          message: (updateError as any)?.message,
-          details: (updateError as any)?.details,
-          hint: (updateError as any)?.hint,
-          code: (updateError as any)?.code,
+          message: updateError.message,
+          details: updateError.details,
+          hint: updateError.hint,
+          code: updateError.code,
         });
         setError(`Errore durante il salvataggio della domanda: ${msg}`);
         return;
@@ -174,9 +177,12 @@ export default function AdminQuestionEditPage({
 
       setQuestion(updated as QuestionRow);
       setSuccess("Domanda salvata con successo.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Errore imprevisto salvataggio domanda:", err);
-      setError(err?.message || "Errore durante il salvataggio della domanda.");
+      setError(
+        formatErrorMessage(err) ||
+          "Errore durante il salvataggio della domanda."
+      );
     } finally {
       setSaving(false);
     }
@@ -185,9 +191,6 @@ export default function AdminQuestionEditPage({
   const handleGoBack = () => {
     router.push("/admin");
   };
-
-  const anyQ: any = question || {};
-
   // 🔹 gestione upload immagine diretto: carica su Storage + salva SUBITO nel DB
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
@@ -250,10 +253,10 @@ export default function AdminQuestionEditPage({
 
       if (updateError) {
         console.error("Errore aggiornando image_url nel DB:", updateError, {
-          message: (updateError as any)?.message,
-          details: (updateError as any)?.details,
-          hint: (updateError as any)?.hint,
-          code: (updateError as any)?.code,
+          message: updateError.message,
+          details: updateError.details,
+          hint: updateError.hint,
+          code: updateError.code,
         });
         setImageUploadError(
           updateError.message ||
@@ -272,10 +275,10 @@ export default function AdminQuestionEditPage({
         "Immagine caricata e salvata nel DB. L'URL è stato impostato automaticamente."
       );
       setImageFile(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Errore imprevisto upload immagine:", err);
       setImageUploadError(
-        err?.message || "Errore durante l'upload dell'immagine."
+        formatErrorMessage(err) || "Errore durante l'upload dell'immagine."
       );
     } finally {
       setUploadingImage(false);
@@ -310,12 +313,12 @@ export default function AdminQuestionEditPage({
               <span className="font-mono text-slate-100">
                 {id}
               </span>
-              {anyQ.quiz_id && (
+              {question.quiz_id && (
                 <>
                   {" "}
                   · Quiz:{" "}
                   <span className="font-mono text-slate-100">
-                    {anyQ.quiz_id}
+                    {question.quiz_id}
                   </span>
                 </>
               )}
@@ -340,11 +343,10 @@ export default function AdminQuestionEditPage({
                   >
                     <option value="">(Nessuna materia)</option>
                     {subjects.map((s) => {
-                      const anyS: any = s;
                       return (
                         <option key={s.id} value={s.id}>
-                          {anyS.name || "Materia"}{" "}
-                          {anyS.code ? `(${anyS.code})` : ""}
+                          {s.name || "Materia"}{" "}
+                          {s.code ? `(${s.code})` : ""}
                         </option>
                       );
                     })}
