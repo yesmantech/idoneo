@@ -1,22 +1,17 @@
-"use client";
-
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
+import AdminLayout from "../../AdminLayout";
 
 type QuestionRow = Database["public"]["Tables"]["questions"]["Row"];
 type SubjectRow = Database["public"]["Tables"]["subjects"]["Row"];
 
 const BUCKET = "question-images";
 
-export default function AdminQuestionEditPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
-  const router = useRouter();
+export default function AdminQuestionEditPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [question, setQuestion] = useState<QuestionRow | null>(null);
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
@@ -34,6 +29,7 @@ export default function AdminQuestionEditPage({
   const [correctOption, setCorrectOption] = useState<"a" | "b" | "c" | "d" | "">("");
   const [imageUrl, setImageUrl] = useState("");
   const [subjectId, setSubjectId] = useState<string>("");
+  const [explanation, setExplanation] = useState("");
 
   // Image Upload State
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -47,6 +43,8 @@ export default function AdminQuestionEditPage({
       setError(null);
 
       try {
+        if (!id) throw new Error("ID mancante");
+
         // 1. Load Question
         const { data: qData, error: qError } = await supabase
           .from("questions")
@@ -65,7 +63,7 @@ export default function AdminQuestionEditPage({
             .select("*")
             .eq("quiz_id", q.quiz_id)
             .order("name", { ascending: true });
-          
+
           setSubjects((subjData || []) as SubjectRow[]);
         }
 
@@ -78,6 +76,7 @@ export default function AdminQuestionEditPage({
         setCorrectOption((q.correct_option as "a" | "b" | "c" | "d") ?? "");
         setImageUrl(q.image_url ?? "");
         setSubjectId(q.subject_id ?? "");
+        setExplanation(q.explanation ?? "");
 
       } catch (err: any) {
         console.error(err);
@@ -111,6 +110,7 @@ export default function AdminQuestionEditPage({
           correct_option: correctOption,
           image_url: imageUrl.trim() || null,
           subject_id: subjectId || null,
+          explanation: explanation.trim() || null,
         })
         .eq("id", id)
         .select()
@@ -129,7 +129,7 @@ export default function AdminQuestionEditPage({
   };
 
   const handleUploadImage = async () => {
-    if (!imageFile) return;
+    if (!imageFile || !id) return;
     setUploadingImage(true);
     setImageUploadError(null);
     setImageUploadSuccess(null);
@@ -150,7 +150,7 @@ export default function AdminQuestionEditPage({
         .getPublicUrl(filePath);
 
       const publicUrl = urlData.publicUrl;
-      
+
       // Auto-save URL to DB
       const { error: dbError } = await supabase
         .from("questions")
@@ -170,21 +170,21 @@ export default function AdminQuestionEditPage({
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Caricamento...</div>;
-  if (!question) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-red-400">{error || "Non trovato"}</div>;
+  if (loading) return <AdminLayout><div className="flex items-center justify-center text-slate-400">Caricamento...</div></AdminLayout>;
+  if (!question) return <AdminLayout><div className="flex items-center justify-center text-red-400">{error || "Non trovato"}</div></AdminLayout>;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <AdminLayout>
       <div className="mx-auto max-w-4xl px-4 py-8">
-        <button onClick={() => router.push("/admin")} className="text-xs text-slate-400 hover:text-white mb-4">← Torna alla lista</button>
-        
+        <button onClick={() => navigate("/admin")} className="text-xs text-slate-400 hover:text-white mb-4">← Torna alla lista</button>
+
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-100">Modifica Domanda</h1>
           <span className="text-xs font-mono text-slate-500 bg-slate-900 px-2 py-1 rounded border border-slate-800">{id}</span>
         </div>
 
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-sm">
-          
+
           {/* Main Fields */}
           <div className="space-y-4 mb-6">
             <div>
@@ -205,6 +205,24 @@ export default function AdminQuestionEditPage({
                 className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 min-h-[100px] outline-none focus:border-sky-500"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1">Testo Domanda</label>
+              <textarea
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 min-h-[100px] outline-none focus:border-sky-500"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1">Spiegazione (Opzionale)</label>
+              <textarea
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 min-h-[80px] outline-none focus:border-sky-500"
+                value={explanation}
+                onChange={(e) => setExplanation(e.target.value)}
+                placeholder="Inserisci la spiegazione della risposta corretta..."
               />
             </div>
           </div>
@@ -252,7 +270,7 @@ export default function AdminQuestionEditPage({
           {/* Image */}
           <div className="mb-6 p-4 rounded-xl bg-slate-950/50 border border-slate-800">
             <label className="block text-xs font-medium text-slate-400 mb-2">Immagine (Opzionale)</label>
-            
+
             <div className="flex gap-4 items-end mb-3">
               <div className="flex-1">
                 <input
@@ -299,7 +317,7 @@ export default function AdminQuestionEditPage({
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => router.back()}
+                onClick={() => navigate(-1)}
                 className="px-4 py-2 border border-slate-700 text-slate-300 text-sm rounded-lg hover:bg-slate-800"
               >
                 Annulla
@@ -316,6 +334,6 @@ export default function AdminQuestionEditPage({
 
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

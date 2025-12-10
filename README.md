@@ -1,20 +1,69 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Idoneo
 
-# Run and deploy your AI Studio app
+Platform for competitive exams preparation (Concorsi Pubblici).
+Migrated from Next.js to **Vite + React**.
 
-This contains everything you need to run your app locally.
+## Getting Started
 
-View your app in AI Studio: https://ai.studio/apps/drive/1OVjzc1Z9kluhzOJhtGyAH5KvAHiMCF0Z
+### Prerequisites
 
-## Run Locally
+- Node.js 18+
+- npm
 
-**Prerequisites:**  Node.js
+### Installation
 
+1.  Clone the repository.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Set up environment variables:
+    - Copy `.env.local.example` (if exists) or create `.env.local`
+    - Add:
+      ```
+      VITE_SUPABASE_URL=your_project_url
+      VITE_SUPABASE_ANON_KEY=your_anon_key
+      ```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Development
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Project Structure
+
+- **`src/app`**: Main application pages (Client-side routing).
+  - `admin/`: Admin Dashboard (protected routes).
+  - `concorsi/`: Public flow for browsing contests.
+  - `quiz/`: Quiz engine and simulation logic.
+- **`src/components`**: Reusable UI components.
+- **`src/lib`**: Utilities and Supabase client.
+- **`src/App.tsx`**: Main router configuration.
+
+## Admin Dashboard
+
+Access the admin panel at `/admin`.
+Features:
+- Manage Structure (Categories > Roles)
+- Manage Quizzes (Contests > Subjects)
+- Manage Questions (Add, Edit, Image Upload)
+- Bulk Import via CSV
+
+## Deployment
+
+Build the application for production:
+
+```bash
+npm run build
+```
+
+Preview the build:
+
+```bash
+npm run preview
+```

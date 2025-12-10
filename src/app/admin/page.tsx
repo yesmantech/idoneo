@@ -1,11 +1,14 @@
-
-"use client";
-
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
+import {
+  AdminLayout,
+  AdminPageHeader,
+  AdminTable,
+  EmptyState,
+  StatusBadge
+} from "@/components/admin";
 
 type QuestionRow = Database["public"]["Tables"]["questions"]["Row"];
 type SubjectRow = Database["public"]["Tables"]["subjects"]["Row"];
@@ -18,7 +21,7 @@ type QuestionListItem = QuestionRow & {
 };
 
 export default function AdminQuestionsPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const [questions, setQuestions] = useState<QuestionListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,9 +51,12 @@ export default function AdminQuestionsPage() {
 
       // Cast needed because Supabase types joins as array or object depending on relationship
       setQuestions((data as unknown) as QuestionListItem[]);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Errore imprevisto.";
       console.error("Errore caricando domande:", err);
-      setError(err.message || "Errore imprevisto.");
+      if (!message.includes('Failed to fetch')) {
+        setError(message);
+      }
       setQuestions([]);
     } finally {
       setLoading(false);
@@ -101,162 +107,162 @@ export default function AdminQuestionsPage() {
     });
   }, [questions, search, showArchived]);
 
+  // Table Config
+  const columns = [
+    {
+      key: 'id',
+      label: 'ID',
+      width: '80px',
+      render: (q: QuestionListItem) => (
+        <span className="font-mono text-[10px] text-slate-500">{q.id.slice(0, 6)}</span>
+      )
+    },
+    {
+      key: 'text',
+      label: 'Testo',
+      render: (q: QuestionListItem) => {
+        const truncatedText = q.text && q.text.length > 120
+          ? `${q.text.slice(0, 120)}...`
+          : q.text || "(senza testo)";
+
+        // Check for missing data (simple heuristic)
+        // Note: casting to any to check for correct_answer which might exist in legacy data?
+        // Actually adhering to strict types for now
+        const hasMissingData = !q.correct_option;
+
+        return (
+          <div className="relative pr-4">
+            <span className="text-slate-200 font-medium block">
+              {truncatedText}
+            </span>
+            {hasMissingData && (
+              <span
+                className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold text-white bg-rose-600 rounded-full"
+                title="Risposta corretta mancante"
+              >!</span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'subject',
+      label: 'Materia',
+      width: '150px',
+      render: (q: QuestionListItem) => (
+        <span className="text-slate-400 text-xs">
+          {q.subjects?.name || (q.subject_id ? "..." : "-")}
+        </span>
+      )
+    },
+    {
+      key: 'quiz',
+      label: 'Concorso',
+      width: '180px',
+      render: (q: QuestionListItem) => (
+        <span className="text-slate-400 text-xs truncate max-w-[150px] block" title={q.quizzes?.title}>
+          {q.quizzes?.title || (q.quiz_id ? "..." : "-")}
+        </span>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Stato',
+      width: '100px',
+      render: (q: QuestionListItem) => (
+        <StatusBadge
+          label={q.is_archived ? 'Archiviata' : 'Attiva'}
+          variant={q.is_archived ? 'warning' : 'success'}
+        />
+      )
+    }
+  ];
+
+  const rowActions = (q: QuestionListItem) => [
+    {
+      label: 'Modifica',
+      icon: '✏️',
+      onClick: () => navigate(`/admin/questions/${q.id}`)
+    },
+    {
+      label: q.is_archived ? 'Ripristina' : 'Archivia',
+      icon: q.is_archived ? '📤' : '📁',
+      onClick: () => handleToggleArchived(q)
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="text-2xl font-semibold mb-6">Admin Dashboard</h1>
+    <AdminLayout>
+      <AdminPageHeader
+        title="Domande"
+        subtitle="Gestione completa della banca dati domande"
+        action={{
+          label: "Nuova Domanda (WIP)",
+          icon: "+",
+          onClick: () => alert("Funzionalità in arrivo!"),
+          variant: "secondary"
+        }}
+        breadcrumb={[
+          { label: 'Admin', path: '/admin' },
+          { label: 'Domande' }
+        ]}
+      />
 
-        {/* NAV ADMIN */}
-        <nav className="mb-8 flex flex-wrap gap-2">
-          <button className="px-4 py-2 rounded-md text-sm font-medium border bg-white text-slate-900 border-white shadow-sm transition-colors">
-            Domande
-          </button>
-          <button
-            onClick={() => router.push("/admin/structure")}
-            className="px-4 py-2 rounded-md text-sm font-medium border bg-slate-900 text-emerald-400 border-emerald-900 hover:border-emerald-500 hover:text-white transition-colors"
-          >
-            Struttura (Categorie/Ruoli)
-          </button>
-          <button
-            onClick={() => router.push("/admin/quiz")}
-            className="px-4 py-2 rounded-md text-sm font-medium border bg-slate-900 text-slate-300 border-slate-700 hover:border-sky-500 hover:text-white transition-colors"
-          >
-            Concorsi &amp; Materie
-          </button>
-          <button
-            onClick={() => router.push("/admin/images")}
-            className="px-4 py-2 rounded-md text-sm font-medium border bg-slate-900 text-slate-300 border-slate-700 hover:border-sky-500 hover:text-white transition-colors"
-          >
-            Immagini
-          </button>
-          <button
-            onClick={() => router.push("/admin/upload-csv")}
-            className="px-4 py-2 rounded-md text-sm font-medium border bg-slate-900 text-slate-300 border-slate-700 hover:border-sky-500 hover:text-white transition-colors"
-          >
-            Upload CSV
-          </button>
-        </nav>
-
-        {/* FILTRI */}
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-          <div className="flex-1 max-w-lg">
-            <input
-              className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 outline-none transition-colors"
-              placeholder="Cerca domanda, materia o concorso..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-sky-600 focus:ring-sky-600"
-                checked={showArchived}
-                onChange={(e) => setShowArchived(e.target.checked)}
-              />
-              <span>Mostra archiviate</span>
-            </label>
-            <button
-              type="button"
-              onClick={loadQuestions}
-              className="rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
-            >
-              Ricarica
-            </button>
-          </div>
+      {/* SEARCH & FILTER BAR */}
+      <div className="mb-6 p-4 bg-slate-900/50 border border-slate-800 rounded-xl flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="flex-1 w-full md:max-w-md relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
+          <input
+            className="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+            placeholder="Cerca per testo, materia, concorso..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
-        {/* LISTA DOMANDE */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden shadow-sm">
-          {loading ? (
-            <p className="p-8 text-slate-400 text-sm text-center animate-pulse">
-              Caricamento domande...
-            </p>
-          ) : error ? (
-            <p className="p-8 text-red-400 text-sm text-center">{error}</p>
-          ) : filteredQuestions.length === 0 ? (
-            <p className="p-8 text-slate-400 text-sm text-center">
-              Nessuna domanda trovata.
-            </p>
-          ) : (
-            <div className="overflow-x-auto max-h-[70vh]">
-              <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 bg-slate-950/90 backdrop-blur-sm text-slate-400 border-b border-slate-800 uppercase font-medium z-10">
-                  <tr>
-                    <th className="py-3 px-4 w-20">ID</th>
-                    <th className="py-3 px-4">Testo</th>
-                    <th className="py-3 px-4 w-32">Materia</th>
-                    <th className="py-3 px-4 w-40">Concorso</th>
-                    <th className="py-3 px-4 w-24">Stato</th>
-                    <th className="py-3 px-4 w-32 text-right">Azioni</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50">
-                  {filteredQuestions.map((q) => {
-                    const shortId = q.id.slice(0, 6);
-                    const truncatedText = q.text && q.text.length > 120
-                        ? `${q.text.slice(0, 120)}...`
-                        : q.text || "(senza testo)";
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-emerald-500"
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+            />
+            Mostra archiviate
+          </label>
 
-                    const subjectLabel = q.subjects?.name || (q.subject_id ? "..." : "-");
-                    const quizLabel = q.quizzes?.title || (q.quiz_id ? "..." : "-");
-                    
-                    // Check for missing data (simple heuristic)
-                    const hasMissingData = !q.correct_option && !(q as any).correct_answer;
-
-                    return (
-                      <tr
-                        key={q.id}
-                        className="hover:bg-slate-800/30 transition-colors"
-                      >
-                        <td className="py-3 px-4 font-mono text-[10px] text-slate-500">
-                          {shortId}
-                        </td>
-                        <td className="py-3 px-4 text-slate-200 font-medium relative">
-                          {hasMissingData && (
-                            <span className="absolute top-1 right-1 inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold text-white bg-red-600 rounded-full" title="Risposta corretta mancante">!</span>
-                          )}
-                          {truncatedText}
-                        </td>
-                        <td className="py-3 px-4 text-slate-400">
-                          {subjectLabel}
-                        </td>
-                        <td className="py-3 px-4 text-slate-400 truncate max-w-[150px]" title={quizLabel}>
-                          {quizLabel}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${
-                            q.is_archived
-                              ? "bg-slate-800 text-slate-400 border-slate-700"
-                              : "bg-emerald-900/30 text-emerald-400 border-emerald-800"
-                          }`}>
-                            {q.is_archived ? "Archiviata" : "Attiva"}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right space-x-2">
-                          <Link
-                            href={`/admin/questions/${q.id}`}
-                            className="text-sky-400 hover:text-sky-300 font-medium"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleToggleArchived(q)}
-                            className={`${q.is_archived ? "text-emerald-400 hover:text-emerald-300" : "text-rose-400 hover:text-rose-300"} font-medium`}
-                          >
-                            {q.is_archived ? "Ripristina" : "Archivia"}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <button
+            onClick={loadQuestions}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            title="Ricarica"
+          >
+            🔄
+          </button>
         </div>
       </div>
-    </div>
+
+      {/* ERROR */}
+      {error && (
+        <div className="mb-4 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400">
+          {error}
+        </div>
+      )}
+
+      {/* TABLE */}
+      <AdminTable
+        columns={columns}
+        data={filteredQuestions}
+        loading={loading}
+        rowKey={q => q.id}
+        rowActions={rowActions}
+        emptyState={
+          <EmptyState
+            icon="❓"
+            title="Nessuna domanda trovata"
+            description={search ? "Prova a modificare i filtri di ricerca." : "Il database delle domande è vuoto."}
+          />
+        }
+      />
+    </AdminLayout>
   );
 }

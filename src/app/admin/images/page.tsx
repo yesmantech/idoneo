@@ -1,8 +1,7 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
+import { AdminLayout } from "@/components/admin";
 
 const BUCKET = "question-images";
 
@@ -13,7 +12,7 @@ type StoredImage = {
 };
 
 export default function AdminImagesPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<StoredImage[]>([]);
@@ -59,7 +58,7 @@ export default function AdminImagesPage() {
     try {
       const safeName = `${Date.now()}_${file.name.replace(/\s+/g, "_").toLowerCase()}`;
       const { error } = await supabase.storage.from(BUCKET).upload(safeName, file, { cacheControl: "3600", upsert: false });
-      
+
       if (error) throw error;
 
       setMsg({ type: 'success', text: "Upload completato!" });
@@ -80,9 +79,9 @@ export default function AdminImagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <AdminLayout>
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <button onClick={() => router.push("/admin")} className="text-xs text-slate-400 hover:text-white mb-4">← Dashboard</button>
+        <button onClick={() => navigate("/admin")} className="text-xs text-slate-400 hover:text-white mb-4">← Dashboard</button>
         <h1 className="text-2xl font-bold mb-6 text-slate-100">Gestione Immagini</h1>
 
         {/* Upload Card */}
@@ -124,7 +123,7 @@ export default function AdminImagesPage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.publicUrl} alt={img.name} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button 
+                    <button
                       onClick={() => handleCopy(img.publicUrl)}
                       className="px-3 py-1 bg-slate-200 text-slate-900 text-xs rounded font-medium hover:bg-white"
                     >
@@ -140,6 +139,6 @@ export default function AdminImagesPage() {
           )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

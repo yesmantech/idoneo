@@ -1,11 +1,9 @@
-'use client';
-
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +29,7 @@ export default function LoginPage() {
         });
         if (error) throw error;
       }
-      router.refresh();
-      router.push('/');
+      navigate('/');
     } catch (err: any) {
       setError(err.message || "Authentication error");
     } finally {

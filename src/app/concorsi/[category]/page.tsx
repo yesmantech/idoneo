@@ -1,86 +1,86 @@
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useConcorsoData } from '@/hooks/useConcorsoData';
+import ConcorsoHubHeader from '@/components/concorsi/ConcorsoHubHeader';
+import RoleAccordion from '@/components/concorsi/RoleAccordion';
 
-"use client";
+export default function ConcorsoHubPage() {
+  const { category } = useParams<{ category: string }>();
+  const { category: categoryData, roles, loading, error } = useConcorsoData(category || '');
 
-import { use, useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getCategoryBySlug, getRolesByCategory, type Category, type Role } from "@/lib/data";
+  // Accordion state - only one open at a time for cleanliness
+  const [openRoleId, setOpenRoleId] = useState<string | null>(null);
 
-export default function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  const { category } = use(params);
-  const router = useRouter();
-  
-  const [categoryData, setCategoryData] = useState<Category | null>(null);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
+  const toggleRole = (roleId: string) => {
+    setOpenRoleId(prev => prev === roleId ? null : roleId);
+  };
 
-  useEffect(() => {
-    const load = async () => {
-      const cat = await getCategoryBySlug(category);
-      if (cat) {
-        setCategoryData(cat);
-        const rls = await getRolesByCategory(category);
-        setRoles(rls);
-      }
-      setLoading(false);
-    };
-    load();
-  }, [category]);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
 
-  if (loading) return <div className="p-8 text-center text-slate-400">Caricamento...</div>;
-  if (!categoryData) return <div className="p-8 text-center">Categoria non trovata</div>;
+  if (error || !categoryData) {
+    return (
+      <div className="min-h-screen bg-slate-50 pt-20 px-4 text-center">
+        <h1 className="text-2xl font-bold text-slate-800 mb-4">Ops! Qualcosa è andato storto.</h1>
+        <p className="text-slate-600 mb-8">{error || "Categoria non trovata."}</p>
+        <Link to="/" className="text-emerald-600 font-medium hover:underline">
+          ← Torna alla Home
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* Top Bar */}
-      <div className="sticky top-0 bg-white z-10 px-4 h-16 flex items-center">
-        <button onClick={() => router.back()} className="p-2 -ml-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-        </button>
-      </div>
-
-      <div className="px-6 pb-10">
-        {/* Header */}
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-32 h-12 border-2 border-slate-900 rounded-xl flex items-center justify-center mb-4 font-bold tracking-wider">
-            LOGO
-          </div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">
-            Preparazione per la prova scritta di preselezione
-          </p>
-          <h1 className="text-2xl font-bold font-serif">
-            {categoryData.title}
-          </h1>
-        </div>
-
-        {/* Informazioni */}
-        <div className="mb-8">
-          <h3 className="text-sm font-semibold mb-2">Informazioni</h3>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            {categoryData.description || "Nessuna descrizione disponibile."}
-          </p>
-        </div>
-
-        {/* Concorsi Disponibili (Roles) */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">Concorsi disponibili</h3>
-          <div className="space-y-3">
-            {roles.map((role) => (
-              <Link 
-                key={role.slug} 
-                href={`/concorsi/${category}/${role.slug}`}
-                className="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-900 hover:bg-slate-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-slate-200 rounded-lg"></div>
-                  <span className="font-medium text-lg">{role.title}</span>
-                </div>
-                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </Link>
-            ))}
-          </div>
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* Breadcrumb / Top Nav Placeholder */}
+      <div className="bg-white border-b border-slate-100">
+        <div className="container mx-auto px-4 py-3 flex items-center gap-2 text-sm text-slate-500">
+          <Link to="/" className="hover:text-emerald-600">Home</Link>
+          <span>/</span>
+          <span className="font-medium text-slate-900 capitalize">{categoryData.title}</span>
         </div>
       </div>
+
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* 1. Standardized Hero Header */}
+        <ConcorsoHubHeader
+          title={categoryData.title}
+          subtitle={`Preparazione completa per i concorsi ${categoryData.title}`}
+          description={categoryData.description}
+          logoUrl={categoryData.inner_banner_url}
+        />
+
+        {/* 2. Roles Section */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-slate-900">
+              Ruoli Disponibili <span className="text-slate-400 font-normal ml-2">({roles.length})</span>
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            {roles.length > 0 ? (
+              roles.map(role => (
+                <RoleAccordion
+                  key={role.id}
+                  role={role}
+                  isOpen={openRoleId === role.id}
+                  onToggle={() => toggleRole(role.id)}
+                />
+              ))
+            ) : (
+              <div className="p-8 text-center bg-white rounded-xl border border-dashed border-slate-300 text-slate-500">
+                Nessun ruolo disponibile per questa categoria al momento.
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

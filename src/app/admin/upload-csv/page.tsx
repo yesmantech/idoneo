@@ -1,9 +1,8 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
+import { AdminLayout } from "@/components/admin";
 
 type QuizRow = Database["public"]["Tables"]["quizzes"]["Row"];
 type SubjectRow = Database["public"]["Tables"]["subjects"]["Row"];
@@ -17,6 +16,7 @@ type CsvRow = {
   correct_option: string;
   subject_id?: string;
   image_name?: string;
+  explanation?: string;
 };
 
 const BUCKET = "question-images";
@@ -26,7 +26,7 @@ function normalizeImageName(original: string): string {
 }
 
 export default function AdminUploadCsvPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const [quizzes, setQuizzes] = useState<QuizRow[]>([]);
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
@@ -71,7 +71,7 @@ export default function AdminUploadCsvPage() {
     // Auto-detect separator
     const headerLine = lines[0];
     const separator = headerLine.includes(";") ? ";" : ",";
-    
+
     // Helper to split CSV line respecting quotes (basic)
     const splitLine = (line: string) => {
       // Regex matches: quoted fields OR non-comma/semicolon sequences
@@ -81,7 +81,7 @@ export default function AdminUploadCsvPage() {
     };
 
     const headers = splitLine(headerLine).map(h => h.toLowerCase().replace(/['"]/g, "").trim());
-    
+
     // Map common aliases
     const findIdx = (candidates: string[]) => headers.findIndex(h => candidates.includes(h));
 
@@ -93,11 +93,12 @@ export default function AdminUploadCsvPage() {
     const idxCorrect = findIdx(["correct_option", "correct", "correct_answer", "risposta", "esatta"]);
     const idxSubj = findIdx(["subject_id", "subject", "materia"]);
     const idxImg = findIdx(["image_name", "image", "immagine", "img"]);
+    const idxExp = findIdx(["explanation", "spiegazione", "commento"]);
 
     if (idxText === -1 || idxA === -1 || idxCorrect === -1) {
       throw new Error(`Colonne obbligatorie mancanti. Trovate: ${headers.join(", ")}. Servono: question_text, option_a... correct_option`);
     }
-    
+
     const result: CsvRow[] = [];
 
     for (let i = 1; i < lines.length; i++) {
@@ -123,6 +124,7 @@ export default function AdminUploadCsvPage() {
         correct_option: cleanCorrect,
         subject_id: idxSubj > -1 ? cols[idxSubj] : undefined,
         image_name: idxImg > -1 ? cols[idxImg] : undefined,
+        explanation: idxExp > -1 ? cols[idxExp] : undefined,
       });
     }
 
@@ -149,7 +151,7 @@ export default function AdminUploadCsvPage() {
   const handleImport = async () => {
     if (!selectedQuizId || !csvFile) return;
     setImporting(true);
-    
+
     try {
       const rows = await parseCsv(csvFile);
       const toInsert = [];
@@ -159,8 +161,8 @@ export default function AdminUploadCsvPage() {
         // If subject_id in CSV is just a name, we can't map it easily without fetching all subjects.
         // For now, we fallback to selected default if CSV subject is missing.
         if (!sid && selectedSubjectId) sid = selectedSubjectId;
-        
-        if (!sid) continue; 
+
+        if (!sid) continue;
 
         let imgUrl = null;
         if (row.image_name) {
@@ -177,7 +179,8 @@ export default function AdminUploadCsvPage() {
           option_c: row.option_c,
           option_d: row.option_d,
           correct_option: row.correct_option,
-          image_url: imgUrl
+          image_url: imgUrl,
+          explanation: row.explanation
         });
       }
 
@@ -228,22 +231,42 @@ export default function AdminUploadCsvPage() {
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const headers = ["question_text", "option_a", "option_b", "option_c", "option_d", "correct_option", "subject", "image_name", "explanation"];
+    const rows = [
+      ['"Qual è la capitale d\'Italia?"', '"Roma"', '"Milano"', '"Napoli"', '"Torino"', '"A"', '"Geografia"', '"capitale.jpg"', '"Roma è la capitale dal 1871..."'],
+      ['"Quanto fa 2+2?"', '"3"', '"4"', '"5"', '"6"', '"B"', '"Matematica"', '""', '""']
+    ];
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(r => r.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "template_domande.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <AdminLayout>
       <div className="mx-auto max-w-4xl px-4 py-8">
-        <button onClick={() => router.push("/admin")} className="text-xs text-slate-400 hover:text-white mb-4">← Dashboard</button>
+        <button onClick={() => navigate("/admin")} className="text-xs text-slate-400 hover:text-white mb-4">← Dashboard</button>
         <h1 className="text-2xl font-bold mb-2 text-slate-100">Import Massivo</h1>
         <p className="text-sm text-slate-400 mb-8">Supporta CSV separati da virgola (,) o punto e virgola (;)</p>
 
         <div className="grid md:grid-cols-2 gap-8">
-          
+
           {/* CSV Section */}
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6">
             <h2 className="text-lg font-semibold mb-4 text-emerald-400">1. Domande (CSV)</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">Concorso</label>
-                <select 
+                <select
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none"
                   value={selectedQuizId}
                   onChange={(e) => setSelectedQuizId(e.target.value)}
@@ -252,10 +275,10 @@ export default function AdminUploadCsvPage() {
                   {quizzes.map(q => <option key={q.id} value={q.id}>{q.title}</option>)}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">Materia Default</label>
-                <select 
+                <select
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none"
                   value={selectedSubjectId}
                   onChange={(e) => setSelectedSubjectId(e.target.value)}
@@ -266,8 +289,11 @@ export default function AdminUploadCsvPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">File CSV</label>
-                <input 
+                <label className="block text-xs font-medium text-slate-400 mb-1">
+                  File CSV
+                  <button onClick={handleDownloadTemplate} className="ml-2 text-[10px] text-sky-400 underline hover:text-sky-300">(Scarica Template)</button>
+                </label>
+                <input
                   type="file" accept=".csv"
                   className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700"
                   onChange={handleFileChange}
@@ -321,8 +347,8 @@ export default function AdminUploadCsvPage() {
                 Carica tutte le immagini citate nel CSV (colonna <code>image_name</code>).
                 I nomi file verranno normalizzati (es. &quot;Fig 1.jpg&quot; &rarr; &quot;fig_1.jpg&quot;).
               </p>
-              
-              <input 
+
+              <input
                 type="file" accept="image/*" multiple
                 className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700"
                 onChange={(e) => setImageFiles(e.target.files)}
@@ -346,6 +372,6 @@ export default function AdminUploadCsvPage() {
 
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

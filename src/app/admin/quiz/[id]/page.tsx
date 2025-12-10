@@ -2,8 +2,8 @@
 
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
 
@@ -11,13 +11,9 @@ type QuizRow = Database["public"]["Tables"]["quizzes"]["Row"];
 type SubjectRow = Database["public"]["Tables"]["subjects"]["Row"];
 type RuleRow = Database["public"]["Tables"]["quiz_subject_rules"]["Row"];
 
-export default function AdminQuizRulesPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id: quizId } = use(params);
-  const router = useRouter();
+export default function AdminQuizRulesPage() {
+  const { id: quizId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [quiz, setQuiz] = useState<QuizRow | null>(null);
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
@@ -146,7 +142,7 @@ export default function AdminQuizRulesPage({
         .from("quiz_subject_rules")
         .select("*")
         .eq("quiz_id", quizId);
-      
+
       setRules((rulesData || []) as RuleRow[]);
       setSaveSuccess("Regole salvate correttamente.");
     } catch (err: any) {
@@ -170,7 +166,7 @@ export default function AdminQuizRulesPage({
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="max-w-md px-4 text-center">
           <p className="text-red-400 mb-4">{error || "Non trovato"}</p>
-          <button onClick={() => router.push("/admin/quiz")} className="underline text-sm">
+          <button onClick={() => navigate("/admin/quiz")} className="underline text-sm">
             Indietro
           </button>
         </div>
@@ -188,7 +184,7 @@ export default function AdminQuizRulesPage({
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <button
-              onClick={() => router.push("/admin/quiz")}
+              onClick={() => navigate("/admin/quiz")}
               className="text-xs text-slate-400 hover:text-white mb-2 transition-colors"
             >
               ← Torna ai concorsi
@@ -196,7 +192,7 @@ export default function AdminQuizRulesPage({
             <h1 className="text-2xl font-bold text-slate-100">Regole Concorso</h1>
             <p className="text-slate-400 text-sm mt-1">{quiz.title} {quiz.year ? `(${quiz.year})` : ""}</p>
           </div>
-          
+
           <div className="text-right bg-slate-900/50 p-3 rounded-lg border border-slate-800">
             <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Totale Domande</p>
             <div className="flex items-baseline justify-end gap-2">
@@ -226,7 +222,7 @@ export default function AdminQuizRulesPage({
         )}
         {hasMismatch && (
           <div className="mb-6 p-3 rounded-lg bg-amber-900/10 border border-amber-800/50 text-amber-200 text-xs">
-            <strong>Attenzione:</strong> La somma delle domande ({totalQuestionsFromRules}) non corrisponde al totale previsto nel bando ({expectedTotal}). 
+            <strong>Attenzione:</strong> La somma delle domande ({totalQuestionsFromRules}) non corrisponde al totale previsto nel bando ({expectedTotal}).
             Il quiz funzionerà comunque, ma la simulazione potrebbe non essere fedele.
           </div>
         )}
