@@ -20,7 +20,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // Ensure only Admins can see the MainLayout (App).
     const { user, profile, loading } = useAuth();
 
-    if (!loading) {
+    // DEV MODE: Skip waitlist lock on localhost
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+
+    if (!loading && !isLocalhost) {
         if (!user && !isAdmin) {
             // Guest in App -> Waitlist
             return <Navigate to="/waitlist" replace />;

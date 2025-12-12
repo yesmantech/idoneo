@@ -18,7 +18,7 @@ export default function HomePage() {
     });
   }, []);
 
-  // Mock data splitting for demo purpose since we don't have real "featured" vs "recent" flags yet
+  // Mock data splitting for demo purpose
   const featured = categories.slice(0, 5);
   const recent = categories.slice(5, 10).length > 0 ? categories.slice(5, 10) : categories.slice(0, 4);
   const closing = categories.slice(0, 4);
@@ -78,4 +78,3 @@ export default function HomePage() {
     </div>
   );
 }
-

@@ -30,6 +30,11 @@ export default function WaitlistGuard({ children }: { children: React.ReactNode 
 
     // 3. For all other App routes (/concorsi, /quiz, /profile...):
 
+    // DEV MODE: Allow localhost access for testing
+    if (window.location.hostname === 'localhost') {
+        return <>{children}</>;
+    }
+
     // If Admin -> Allow access to App
     if (profile?.role === 'admin') {
         return <>{children}</>;

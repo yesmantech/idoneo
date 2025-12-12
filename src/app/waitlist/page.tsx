@@ -80,7 +80,7 @@ export default function WaitlistPage() {
                 {/* Hero Text */}
                 <div className="space-y-3 text-center">
                     <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-                        Vinci il tuo<br />prossimo concorso
+                        Passa il tuo<br />prossimo concorso
                     </h1>
                     <h2 className="text-[17px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
                         Analytics, simulazioni e un piano di studio guidato in un’unica app
