@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { BlogPost } from '@/types/blog';
+import { ChevronRight } from 'lucide-react';
 
 // ================== TYPES ==================
 
@@ -17,7 +18,8 @@ function BlogCard({ post, className = '' }: BlogCardProps) {
     return (
         <Link
             to={`/blog/${post.slug}`}
-            className={`group relative overflow-hidden rounded-card bg-white shadow-soft hover:shadow-card transition-all duration-300 ease-ios ${className}`}
+            className={`group relative overflow-hidden rounded-2xl bg-white shadow-md shadow-slate-200/50 
+                        hover:shadow-xl hover:shadow-slate-300/50 transition-all duration-300 ${className}`}
         >
             {/* Background Image */}
             {post.cover_image_url ? (
@@ -28,9 +30,19 @@ function BlogCard({ post, className = '' }: BlogCardProps) {
                     loading="lazy"
                 />
             ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#F5F5F5] to-slate-200" />
             )}
 
+            {/* Overlay with title */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-4">
+                <p className="text-[10px] uppercase font-bold text-[#00B1FF] tracking-wider mb-1">
+                    Blog
+                </p>
+                <h3 className="text-white font-bold text-sm md:text-base leading-snug line-clamp-2">
+                    {post.title}
+                </h3>
+            </div>
         </Link>
     );
 }
@@ -38,19 +50,19 @@ function BlogCard({ post, className = '' }: BlogCardProps) {
 function BlogHeroSkeleton() {
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center px-1">
-                <div className="h-6 w-32 bg-slate-200 rounded animate-pulse" />
-                <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
+            <div className="flex justify-between items-center">
+                <div className="h-6 w-32 bg-[#F5F5F5] rounded-xl animate-pulse" />
+                <div className="h-4 w-20 bg-[#F5F5F5] rounded-xl animate-pulse" />
             </div>
             {/* Desktop Grid */}
             <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3].map(i => (
-                    <div key={i} className="h-48 lg:h-56 bg-slate-200 rounded-2xl animate-pulse" />
+                    <div key={i} className="h-48 lg:h-56 bg-[#F5F5F5] rounded-2xl animate-pulse" />
                 ))}
             </div>
             {/* Mobile */}
             <div className="md:hidden">
-                <div className="h-48 bg-slate-200 rounded-2xl animate-pulse" />
+                <div className="h-48 bg-[#F5F5F5] rounded-2xl animate-pulse" />
             </div>
         </div>
     );
@@ -87,25 +99,26 @@ export default function BlogHero() {
     }, []);
 
     if (loading) return <BlogHeroSkeleton />;
-    if (error) return null; // Silently fail for non-critical component
+    if (error) return null;
     if (posts.length === 0) return null;
 
     return (
         <div className="space-y-4">
             {/* Header */}
-            <div className="flex justify-between items-center px-1">
-                <h2 className="text-text-primary font-bold text-xl flex items-center gap-2">
+            <div className="flex justify-between items-center">
+                <h2 className="text-lg md:text-xl font-bold text-slate-900">
                     📰 Blog & Novità
                 </h2>
                 <Link
                     to="/blog"
-                    className="text-sm font-semibold text-brand-cyan hover:text-brand-cyan/80 transition-colors"
+                    className="text-sm font-semibold text-[#00B1FF] hover:text-[#0099e6] transition-colors flex items-center gap-1"
                 >
                     Vedi tutti
+                    <ChevronRight className="w-4 h-4" />
                 </Link>
             </div>
 
-            {/* Desktop: Grid Layout (hidden on mobile) */}
+            {/* Desktop: Grid Layout */}
             <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {posts.map(post => (
                     <BlogCard
@@ -116,14 +129,14 @@ export default function BlogHero() {
                 ))}
             </div>
 
-            {/* Mobile: Horizontal Scroll Carousel (hidden on desktop) */}
-            <div className="md:hidden -mx-4 px-4">
-                <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+            {/* Mobile: Horizontal Scroll Carousel */}
+            <div className="md:hidden -mx-5 px-5">
+                <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
                     {posts.map(post => (
                         <BlogCard
                             key={post.id}
                             post={post}
-                            className="flex-shrink-0 w-[85vw] h-48 snap-center"
+                            className="flex-shrink-0 w-[80vw] h-44 snap-center"
                         />
                     ))}
                     {/* Right padding spacer */}
@@ -133,3 +146,4 @@ export default function BlogHero() {
         </div>
     );
 }
+

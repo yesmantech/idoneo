@@ -4,8 +4,10 @@ import { getCategories, type Category } from "../lib/data";
 import BlogHero from "../components/home/BlogHero";
 import SearchSection from "../components/home/SearchSection";
 import ConcorsiSection from "../components/home/ConcorsiSection";
+import { useAuth } from "@/context/AuthContext";
 
 export default function HomePage() {
+  const { user, profile } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,41 +19,54 @@ export default function HomePage() {
   }, []);
 
   // Mock data splitting for demo purpose since we don't have real "featured" vs "recent" flags yet
-  // In a real app, you'd filter by these properties.
   const featured = categories.slice(0, 5);
   const recent = categories.slice(5, 10).length > 0 ? categories.slice(5, 10) : categories.slice(0, 4);
-  const closing = categories.slice(0, 4); // Just reusing for layout demo
+  const closing = categories.slice(0, 4);
+
+  // Greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Buongiorno';
+    if (hour < 18) return 'Buon pomeriggio';
+    return 'Buonasera';
+  };
 
   return (
-    <div className="min-h-screen bg-canvas-light text-slate-900 pb-24 md:pb-20"> {/* Updated to canvas-light */}
+    <div className="min-h-screen bg-white text-slate-900 pb-24 md:pb-20">
 
-      <main className="container mx-auto px-5 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8 max-w-[1600px]"> {/* Added generous spacing */}
+      <main className="container mx-auto px-5 md:px-6 py-6 md:py-8 space-y-6 md:space-y-10 max-w-[1200px]">
 
-        {/* 1. Blog Hero Section */}
-        <section>
-          <BlogHero />
+        {/* Welcome Header */}
+        <section className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+            {profile?.nickname ? `${getGreeting()}, ${profile.nickname}` : getGreeting()}! 👋
+          </h1>
+          <p className="text-[15px] md:text-base text-[#6B6B6B] font-medium">
+            Cosa vuoi studiare oggi?
+          </p>
         </section>
 
-        {/* 2. Main Search Hero */}
+        {/* Search */}
         <section>
           <SearchSection />
         </section>
 
-        {/* 3. Concorsi Sections */}
-        <div className="space-y-8 md:space-y-12">
+        {/* Blog Hero Section */}
+        <section>
+          <BlogHero />
+        </section>
 
-          {/* In Primo Piano */}
+        {/* Concorsi Sections */}
+        <div className="space-y-8 md:space-y-10">
+
           <section>
-            {/* Mobile: Vertical List handled deeply in ConcorsiSection or generic CSS */}
-            <ConcorsiSection title="🔥 Concorsi in primo piano" contests={featured} />
+            <ConcorsiSection title="🔥 In primo piano" contests={featured} />
           </section>
 
-          {/* Aperti di Recente */}
           <section>
             <ConcorsiSection title="🆕 Aperti di recente" contests={recent} />
           </section>
 
-          {/* In Scadenza (Example of 3rd section) */}
           <section>
             <ConcorsiSection title="⏳ In scadenza" contests={closing} />
           </section>
@@ -63,3 +78,4 @@ export default function HomePage() {
     </div>
   );
 }
+
