@@ -91,6 +91,26 @@ export default function ProfileSetupPage() {
             setSaving(true);
             setError(null);
 
+            // CHECK: Is nickname already taken by another user?
+            const { data: existingNickname, error: checkError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('nickname', nickname.trim())
+                .neq('id', currentUser.id)
+                .maybeSingle();
+
+            if (checkError) {
+                console.error("DEBUG: Nickname check error:", checkError);
+                // Don't block on check errors, proceed with save
+            }
+
+            if (existingNickname) {
+                // Nickname is already taken!
+                setError('Questo nickname è già in uso. Scegline un altro!');
+                setSaving(false);
+                return;
+            }
+
             // Use UPDATE instead of UPSERT to avoid INSERT RLS issues
             // The profile should already exist (created by trigger on signup)
             const { error: updateError, data } = await supabase
