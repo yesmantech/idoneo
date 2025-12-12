@@ -39,9 +39,7 @@ export default function LoginPage() {
             if (error) throw error;
 
             setSuccess(true);
-            setTimeout(() => {
-                navigate('/profile/setup');
-            }, 800);
+            // No redirect - user must check email
         } catch (err: any) {
             setError(err.message || 'Errore durante la registrazione');
         } finally {
@@ -75,57 +73,76 @@ export default function LoginPage() {
             {/* Bottom Half: Content */}
             <div className="w-full max-w-md mx-auto px-6 flex flex-col items-center justify-center space-y-8 animate-in slide-in-from-bottom-10 fade-in duration-700 delay-300 relative z-10 pb-8">
 
-                {/* Header */}
-                <div className="space-y-3 text-center w-full">
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-                        Benvenuto
-                    </h1>
-                    <h2 className="text-[17px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
-                        Inserisci le tue credenziali per registrarti
-                    </h2>
-                </div>
+                {/* Header or Success Message */}
+                {!success ? (
+                    <div className="space-y-3 text-center w-full">
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+                            Benvenuto
+                        </h1>
+                        <h2 className="text-[17px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
+                            Inserisci le tue credenziali per registrarti
+                        </h2>
+                    </div>
+                ) : (
+                    <div className="space-y-4 text-center w-full animate-in zoom-in-50 duration-500">
+                        <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                            <Sparkles className="w-10 h-10 text-green-600" />
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                            Controlla l'email
+                        </h1>
+                        <p className="text-lg text-slate-600 leading-relaxed max-w-sm mx-auto">
+                            Ti abbiamo inviato un link magico per accedere. Cliccalo per confermare la tua identità!
+                        </p>
+                        <div className="p-4 bg-slate-50 rounded-xl text-sm text-slate-500 border border-slate-100">
+                            Non trovi l'email? Controlla nello spam o riprova.
+                        </div>
+                    </div>
+                )}
 
                 {/* Form */}
-                <form onSubmit={handleLogin} className="w-full space-y-4">
-                    <div className="space-y-3">
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
-                        />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
-                        />
-                    </div>
-
-                    {error && (
-                        <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-sm font-medium text-center animate-in fade-in slide-in-from-top-2">
-                            {error}
+                {!success && (
+                    <form onSubmit={handleLogin} className="w-full space-y-4">
+                        <div className="space-y-3">
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                            />
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                            />
                         </div>
-                    )}
 
-                    <button
-                        type="submit"
-                        disabled={loading || success}
-                        className={`w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20 flex items-center justify-center ${success ? 'bg-green-600' : ''}`}
-                    >
-                        {loading ? 'Registrazione in corso...' : success ? 'Registrazione effettuata!' : 'Registrati'}
-                    </button>
+                        {error && (
+                            <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-sm font-medium text-center animate-in fade-in slide-in-from-top-2">
+                                {error}
+                            </div>
+                        )}
 
+                        <button
+                            type="submit"
+                            disabled={loading || success}
+                            className={`w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20 flex items-center justify-center ${success ? 'bg-green-600' : ''}`}
+                        >
+                            {loading ? 'Registrazione in corso...' : 'Registrati'}
+                        </button>
+                    </form>
+                )}
 
-                </form>
-
-                <p className="text-[11px] text-slate-400 font-medium">
-                    CloudMascot moved to next page
-                </p>
+                {!success && (
+                    <p className="text-[11px] text-slate-400 font-medium">
+                        CloudMascot moved to next page
+                    </p>
+                )}
             </div>
         </div>
     );
