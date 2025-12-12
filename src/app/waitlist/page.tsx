@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Flame, Shield, Siren, Key, MapPin,
     FlameKindling, Star, Plane, Anchor,
     Car, CreditCard, Landmark, Umbrella,
     Building2, Gavel
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function WaitlistPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    // Capture referral code from URL and store in localStorage
+    useEffect(() => {
+        const refCode = searchParams.get('ref');
+        if (refCode) {
+            localStorage.setItem('referral_code', refCode.toUpperCase());
+            console.log('Referral code captured:', refCode);
+        }
+    }, [searchParams]);
+
     // Icon mapping using close Lucide equivalents
 
     const icons = [

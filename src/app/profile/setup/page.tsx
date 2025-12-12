@@ -111,6 +111,28 @@ export default function ProfileSetupPage() {
                 return;
             }
 
+            // REFERRAL ATTRIBUTION: Check for stored referral code
+            let referredBy: string | null = null;
+            const storedRefCode = localStorage.getItem('referral_code');
+
+            if (storedRefCode) {
+                // Look up the referrer by their code
+                const { data: referrer } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('referral_code', storedRefCode.toUpperCase())
+                    .neq('id', currentUser.id) // Prevent self-referral
+                    .maybeSingle();
+
+                if (referrer) {
+                    referredBy = referrer.id;
+                    console.log('Referral attribution:', storedRefCode, '->', referredBy);
+                }
+
+                // Clear the stored code after use
+                localStorage.removeItem('referral_code');
+            }
+
             // Use UPDATE instead of UPSERT to avoid INSERT RLS issues
             // The profile should already exist (created by trigger on signup)
             const { error: updateError, data } = await supabase
@@ -119,6 +141,7 @@ export default function ProfileSetupPage() {
                     nickname,
                     avatar_url: avatarUrl,
                     email: currentUser.email,
+                    referred_by: referredBy,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', currentUser.id);
