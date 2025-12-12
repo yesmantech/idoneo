@@ -35,9 +35,9 @@ const VARIANT_STYLES: Record<StatusVariant, { bg: string; text: string; border: 
         border: 'border-sky-500/20',
     },
     neutral: {
-        bg: 'bg-slate-500/10',
+        bg: 'bg-slate-800',
         text: 'text-slate-400',
-        border: 'border-slate-500/20',
+        border: 'border-slate-700',
     },
 };
 

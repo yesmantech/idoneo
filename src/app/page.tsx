@@ -23,9 +23,9 @@ export default function HomePage() {
   const closing = categories.slice(0, 4); // Just reusing for layout demo
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 md:pb-20"> {/* pb-24 for bottom nav */}
+    <div className="min-h-screen bg-canvas-light text-slate-900 pb-24 md:pb-20"> {/* Updated to canvas-light */}
 
-      <main className="container mx-auto px-4 py-4 md:py-6 space-y-4 md:space-y-6 max-w-[1600px]">
+      <main className="container mx-auto px-5 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8 max-w-[1600px]"> {/* Added generous spacing */}
 
         {/* 1. Blog Hero Section */}
         <section>
@@ -33,7 +33,7 @@ export default function HomePage() {
         </section>
 
         {/* 2. Main Search Hero */}
-        <section className="sticky top-16 md:static z-20 md:z-auto">
+        <section>
           <SearchSection />
         </section>
 

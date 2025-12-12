@@ -209,11 +209,11 @@ export default function AdminQuestionsPage() {
       />
 
       {/* SEARCH & FILTER BAR */}
-      <div className="mb-6 p-4 bg-slate-900/50 border border-slate-800 rounded-xl flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="mb-8 p-4 bg-slate-900 border border-slate-800 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex-1 w-full md:max-w-md relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
           <input
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-slate-950 border border-transparent rounded-xl text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:bg-slate-925 focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan transition-all"
             placeholder="Cerca per testo, materia, concorso..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -221,10 +221,10 @@ export default function AdminQuestionsPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm text-slate-400 font-medium cursor-pointer select-none hover:text-slate-200 transition-colors">
             <input
               type="checkbox"
-              className="rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-emerald-500"
+              className="rounded-md bg-slate-800 border-slate-700 text-brand-cyan focus:ring-brand-cyan"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
             />
@@ -233,7 +233,7 @@ export default function AdminQuestionsPage() {
 
           <button
             onClick={loadQuestions}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            className="p-2.5 text-slate-400 hover:text-brand-cyan hover:bg-brand-cyan/5 rounded-xl transition-colors"
             title="Ricarica"
           >
             🔄

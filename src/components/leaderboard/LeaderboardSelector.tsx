@@ -42,9 +42,14 @@ export default function LeaderboardSelector({
 
     // Determine Label
     let currentLabel = "Gold League";
+    let icon = <span className="text-brand-orange text-2xl">🏆</span>;
+
     if (currentSelection !== 'xp') {
         const q = [...activeQuizzes, ...otherQuizzes].find(x => x.id === currentSelection);
-        if (q) currentLabel = q.title;
+        if (q) {
+            currentLabel = q.title;
+            icon = <span className="text-brand-cyan text-2xl">📊</span>;
+        }
     }
 
     return (
@@ -52,19 +57,15 @@ export default function LeaderboardSelector({
             {/* Trigger */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity text-slate-900 dark:text-white"
+                className="flex items-center gap-3 px-6 py-3 bg-white rounded-pill shadow-soft hover:shadow-card hover:scale-[1.02] transition-all duration-300 border border-transparent hover:border-canvas-light"
             >
-                {/* Dynamic Icon based on selection */}
-                {currentSelection === 'xp' ? (
-                    <span className="text-amber-500">🏆</span>
-                ) : (
-                    <span className="text-emerald-500">📊</span>
-                )}
+                {/* Dynamic Icon */}
+                {icon}
 
-                <span>{currentLabel}</span>
+                <span className="text-xl font-black text-text-primary tracking-tight">{currentLabel}</span>
 
                 <svg
-                    className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`w-5 h-5 text-text-tertiary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -73,31 +74,33 @@ export default function LeaderboardSelector({
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-                    <div className="max-h-[80vh] overflow-y-auto scrollbar-thin">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-80 bg-white rounded-card shadow-soft border border-transparent overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200">
+                    <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
 
                         {/* 1. Global XP */}
-                        <div className="p-2 border-b border-slate-100 dark:border-slate-700">
+                        <div className="p-2 border-b border-canvas-light">
                             <button
                                 onClick={() => handleSelect('xp')}
                                 className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${currentSelection === 'xp'
-                                    ? 'bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200'
-                                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-200'
+                                    ? 'bg-brand-orange/10 text-brand-orange'
+                                    : 'hover:bg-canvas-light text-text-secondary hover:text-text-primary'
                                     }`}
                             >
-                                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-600 text-sm">🏆</div>
-                                <div>
-                                    <div className="font-bold text-sm">Gold League</div>
-                                    <div className="text-xs opacity-70">Classifica Globale XP</div>
+                                <div className={`w-10 h-10 rounded-squircle flex items-center justify-center text-lg ${currentSelection === 'xp' ? 'bg-brand-orange text-white' : 'bg-canvas-light text-text-tertiary'}`}>
+                                    🏆
                                 </div>
-                                {currentSelection === 'xp' && <CheckIcon />}
+                                <div className="flex-1">
+                                    <div className="font-bold text-sm">Gold League</div>
+                                    <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">Classifica Globale XP</div>
+                                </div>
+                                {currentSelection === 'xp' && <CheckIcon color="text-brand-orange" />}
                             </button>
                         </div>
 
                         {/* 2. My Concorsi */}
                         {activeQuizzes.length > 0 && (
-                            <div className="p-2 border-b border-slate-100 dark:border-slate-700">
-                                <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">I Tuoi Concorsi</div>
+                            <div className="p-2 border-b border-canvas-light">
+                                <div className="px-3 py-2 text-[10px] uppercase font-bold text-text-tertiary tracking-widest">I Tuoi Concorsi</div>
                                 {activeQuizzes.map(q => (
                                     <OptionRow
                                         key={q.id}
@@ -111,8 +114,8 @@ export default function LeaderboardSelector({
 
                         {/* 3. Other Concorsi */}
                         <div className="p-2">
-                            <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tutti i Concorsi</div>
-                            {otherQuizzes.length === 0 && <div className="px-4 py-2 text-xs text-slate-400">Nessun altro concorso</div>}
+                            <div className="px-3 py-2 text-[10px] uppercase font-bold text-text-tertiary tracking-widest">Tutti i Concorsi</div>
+                            {otherQuizzes.length === 0 && <div className="px-4 py-2 text-xs text-text-tertiary font-medium">Nessun altro concorso</div>}
                             {otherQuizzes.map(q => (
                                 <OptionRow
                                     key={q.id}
@@ -134,22 +137,22 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
         <button
             onClick={onClick}
             className={`w-full text-left px-4 py-2.5 rounded-xl flex items-center gap-3 transition-colors mb-1 ${isSelected
-                ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200'
-                : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-200'
+                ? 'bg-brand-cyan/10 text-brand-cyan'
+                : 'hover:bg-canvas-light text-text-secondary hover:text-text-primary'
                 }`}
         >
-            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500">
+            <div className={`w-10 h-10 rounded-squircle flex items-center justify-center text-xs font-black ${isSelected ? 'bg-brand-cyan text-white' : 'bg-canvas-light text-text-tertiary'}`}>
                 {quiz.title.substring(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
                 <div className="font-bold text-sm truncate">{quiz.title}</div>
             </div>
-            {isSelected && <CheckIcon color="text-emerald-600" />}
+            {isSelected && <CheckIcon color="text-brand-cyan" />}
         </button>
     );
 }
 
-function CheckIcon({ color = "text-amber-600" }: { color?: string }) {
+function CheckIcon({ color = "text-brand-orange" }: { color?: string }) {
     return (
         <svg className={`w-5 h-5 ${color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />

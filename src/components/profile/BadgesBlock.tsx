@@ -18,19 +18,19 @@ export default function BadgesBlock() {
     ];
 
     return (
-        <div className="px-6 mb-8">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">I tuoi Badge</h3>
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
+        <div className="mb-8">
+            <h3 className="text-lg font-bold text-text-primary mb-4 px-2">I tuoi Badge</h3>
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x px-2">
                 {badges.map(badge => (
                     <div
                         key={badge.id}
                         className={`flex-none snap-start w-24 flex flex-col items-center gap-2 group ${badge.unlocked ? '' : 'opacity-50 grayscale'}`}
                     >
-                        {/* Hexagon Shape CSS or simple rounded for now */}
-                        <div className={`w-20 h-20 flex items-center justify-center text-4xl bg-white border-2 ${badge.unlocked ? 'border-amber-400 bg-amber-50' : 'border-slate-200'} rounded-2xl shadow-sm transition-transform group-hover:scale-105`}>
+                        {/* Squircle Shape */}
+                        <div className={`w-20 h-20 flex items-center justify-center text-4xl bg-white ${badge.unlocked ? 'bg-gradient-to-br from-brand-orange/10 to-brand-orange/20 border-brand-orange/20 shadow-sm' : 'bg-canvas-light border-transparent'} border rounded-squircle transition-transform group-hover:scale-105`}>
                             {badge.icon}
                         </div>
-                        <span className="text-xs font-bold text-center text-slate-600 leading-tight">{badge.name}</span>
+                        <span className="text-xs font-bold text-center text-text-secondary leading-tight mt-1">{badge.name}</span>
                     </div>
                 ))}
             </div>

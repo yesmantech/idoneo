@@ -135,8 +135,8 @@ export default function QuizResultsPage() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-white flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
+        <div className="min-h-screen bg-canvas-light flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cyan"></div>
         </div>
     );
 
@@ -183,7 +183,7 @@ export default function QuizResultsPage() {
     const hasErrors = (wrongList.length + skippedList.length) > 0;
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col relative pb-32">
+        <div className="min-h-screen bg-canvas-light flex flex-col relative pb-32">
 
             {/* 1. Hero */}
             <ResultHero score={attempt.score} maxScore={30} passed={passed} xpEarned={xpEarned} />
@@ -204,15 +204,15 @@ export default function QuizResultsPage() {
             />
 
             {/* 4. Bottom Actions (Sticky) */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 bg-white border-t border-slate-200 shadow-xl z-50">
+            <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/90 backdrop-blur-md border-t border-canvas-light shadow-soft z-50">
                 <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4">
 
                     <button
                         onClick={handleRipassaErrori}
                         disabled={!hasErrors || processingReview}
-                        className={`flex-1 py-4 px-6 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.02] ${hasErrors
-                            ? 'bg-slate-900 text-white hover:bg-slate-800'
-                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                        className={`flex-1 py-4 px-6 rounded-pill font-bold text-lg shadow-soft flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 ease-ios ${hasErrors
+                            ? 'bg-brand-cyan text-white hover:bg-brand-cyan/90 hover:shadow-card'
+                            : 'bg-canvas-light text-text-tertiary cursor-not-allowed shadow-none'
                             }`}
                     >
                         {processingReview ? (
@@ -229,7 +229,7 @@ export default function QuizResultsPage() {
 
                     <button
                         onClick={() => navigate("/")}
-                        className="py-4 px-8 rounded-xl font-bold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                        className="py-4 px-8 rounded-pill font-bold text-text-secondary bg-transparent hover:bg-canvas-light hover:text-text-primary transition-colors duration-300"
                     >
                         Non ora
                     </button>

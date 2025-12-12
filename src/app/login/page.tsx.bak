@@ -1,0 +1,230 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabaseClient';
+
+export default function LoginPage() {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) throw error;
+
+            setSuccess(true);
+            setTimeout(() => {
+                navigate('/');
+            }, 800);
+        } catch (err: any) {
+            setError(err.message || 'Errore durante l\'accesso');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center px-5 bg-canvas-light selection:bg-brand-cyan/20">
+            {/* Main Container - Centered Modal Card Pattern */}
+            <div
+                className="w-full max-w-[420px] flex flex-col items-center gap-8 animate-fade-in-up"
+            >
+                {/* Logo Badge - Squircle Shape (Signature Brand Element) */}
+                <div
+                    className="w-20 h-20 flex items-center justify-center animate-float shadow-lg"
+                    style={{
+                        background: 'linear-gradient(135deg, #00C7BE 0%, #00A39B 100%)',
+                        borderRadius: '22%', // Squircle approximation
+                        boxShadow: '0 8px 24px rgba(0, 199, 190, 0.25)'
+                    }}
+                >
+                    <span className="text-white font-bold text-3xl tracking-tighter">
+                        I
+                    </span>
+                </div>
+
+                {/* Login Card - White on Gray Canvas */}
+                <div className="w-full bg-canvas-white rounded-card p-8 shadow-soft">
+                    {/* Cloud Mascot - Friendly & Playful */}
+                    <div className="flex justify-center mb-6">
+                        <div
+                            className="relative animate-[cloud-bob_3s_ease-in-out_infinite]"
+                        >
+                            <svg
+                                width="80"
+                                height="65"
+                                viewBox="0 0 64 52"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="drop-shadow-md"
+                            >
+                                {/* Cloud body - soft, rounded shape */}
+                                <path
+                                    d="M52 26C52 18.268 45.732 12 38 12C36.8 12 35.63 12.13 34.5 12.38C31.7 6.06 25.4 2 18 2C8.06 2 0 10.06 0 20C0 29.94 8.06 38 18 38H50C57.18 38 63 32.18 63 25C63 18.5 58.1 13.2 51.8 12.2C51.93 12.79 52 13.39 52 14V26Z"
+                                    fill="url(#cloud-gradient)"
+                                />
+                                {/* Softer cloud bumps */}
+                                <ellipse cx="16" cy="28" rx="14" ry="12" fill="url(#cloud-gradient)" />
+                                <ellipse cx="32" cy="18" rx="16" ry="14" fill="url(#cloud-gradient)" />
+                                <ellipse cx="50" cy="26" rx="12" ry="10" fill="url(#cloud-gradient)" />
+                                <ellipse cx="24" cy="20" rx="12" ry="11" fill="url(#cloud-gradient)" />
+                                <ellipse cx="42" cy="22" rx="13" ry="11" fill="url(#cloud-gradient)" />
+
+                                {/* Friendly eyes */}
+                                <circle cx="24" cy="24" r="3" fill="#111827" />
+                                <circle cx="40" cy="24" r="3" fill="#111827" />
+
+                                {/* Eye shine */}
+                                <circle cx="25" cy="23" r="1" fill="white" />
+                                <circle cx="41" cy="23" r="1" fill="white" />
+
+                                {/* Gentle smile */}
+                                <path
+                                    d="M28 32C28 32 30 35 32 35C34 35 36 32 36 32"
+                                    stroke="#111827"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    fill="none"
+                                />
+
+                                {/* Blush cheeks */}
+                                <ellipse cx="18" cy="28" rx="4" ry="2" fill="#FFB6C1" opacity="0.6" />
+                                <ellipse cx="46" cy="28" rx="4" ry="2" fill="#FFB6C1" opacity="0.6" />
+
+                                {/* Gradient definition */}
+                                <defs>
+                                    <linearGradient id="cloud-gradient" x1="0" y1="0" x2="64" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stopColor="#E0F2FE" />
+                                        <stop offset="1" stopColor="#BAE6FD" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Header - Centered with breathing room */}
+                    <div className="text-center mb-10">
+                        <h1 className="text-[28px] font-bold leading-tight text-text-primary mb-3">
+                            Bentornato
+                        </h1>
+                        <p className="text-base font-medium text-text-secondary">
+                            Accedi al tuo account Idoneo
+                        </p>
+                    </div>
+
+                    {/* Form */}
+                    <form onSubmit={handleLogin} className="flex flex-col gap-5">
+                        {/* Email Input */}
+                        <div>
+                            <label htmlFor="email" className="sr-only">Email</label>
+                            <input
+                                type="email"
+                                id="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full h-[56px] px-5 rounded-input bg-canvas-light border-none text-base font-medium text-text-primary placeholder:text-text-tertiary outline-none transition-all duration-300 ease-ios focus:shadow-[0_0_0_2px_#06D6D3] focus:bg-white"
+                                required
+                            />
+                        </div>
+
+                        {/* Password Input */}
+                        <div>
+                            <label htmlFor="password" className="sr-only">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full h-[56px] px-5 rounded-input bg-canvas-light border-none text-base font-medium text-text-primary placeholder:text-text-tertiary outline-none transition-all duration-300 ease-ios focus:shadow-[0_0_0_2px_#06D6D3] focus:bg-white"
+                                required
+                            />
+                        </div>
+
+                        {/* Error Message */}
+                        {error && (
+                            <div className="px-4 py-3 rounded-2xl bg-semantic-errorBg text-semantic-error text-sm font-semibold text-center animate-fade-in-up">
+                                {error}
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={loading || success}
+                            className={`
+                                w-full h-[56px] mt-4 rounded-pill text-white text-[16px] font-bold border-none 
+                                flex items-center justify-center gap-2 transition-all duration-300 ease-ios
+                                ${success
+                                    ? 'bg-semantic-success shadow-[0_4px_12px_rgba(52,199,89,0.3)] scale-[1.02]'
+                                    : 'bg-brand-cyan shadow-[0_4px_12px_rgba(6,214,211,0.25)] hover:bg-[#05bfbc] hover:scale-[1.02] hover:shadow-[0_6px_16px_rgba(6,214,211,0.35)] active:scale-[0.98]'
+                                }
+                                ${loading || success ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}
+                            `}
+                        >
+                            {success ? (
+                                <>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    Accesso effettuato
+                                </>
+                            ) : loading ? (
+                                <div className="w-6 h-6 border-[3px] border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                'Continua'
+                            )}
+                        </button>
+
+                        {/* Forgot Password Link */}
+                        <div className="text-center mt-2">
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm font-medium text-text-secondary no-underline transition-colors duration-200 hover:text-brand-blue"
+                            >
+                                Password dimenticata?
+                            </Link>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Footer - Register Link */}
+                <div className="text-center">
+                    <p className="text-sm font-normal text-text-tertiary">
+                        Non hai un account?{' '}
+                        <Link
+                            to="/register"
+                            className="font-semibold text-brand-blue no-underline transition-opacity duration-200 hover:opacity-80"
+                        >
+                            Registrati
+                        </Link>
+                    </p>
+                </div>
+            </div>
+
+            {/* Keyframe animations */}
+            <style>{`
+                @keyframes cloud-bob {
+                    0%, 100% { 
+                        transform: translateY(0px); 
+                    }
+                    50% { 
+                        transform: translateY(-8px); 
+                    }
+                }
+            `}</style>
+        </div>
+    );
+}

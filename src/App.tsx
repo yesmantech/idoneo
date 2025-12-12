@@ -2,6 +2,8 @@ import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import HomePage from './app/page';
 import LoginPage from './app/login/page';
+import WaitlistPage from './app/waitlist/page';
+import WaitlistSuccessPage from './app/waitlist/success/page';
 
 
 import ConcorsoHubPage from './app/concorsi/[category]/page';
@@ -16,6 +18,7 @@ import CustomQuizWizardPage from './app/concorsi/[category]/[role]/[contestSlug]
 import QuizRunnerPage from './app/quiz/run/[attemptId]/page';
 import QuizResultsPage from './app/quiz/results/[attemptId]/page';
 import ExplanationPage from './app/quiz/explanations/[attemptId]/[questionId]/page';
+import OfficialQuizStarterPage from './app/quiz/official/[id]/page';
 import StatsPage from './app/stats/page';
 
 // Admin Pages (Lazy Loaded for Code Splitting)
@@ -72,6 +75,8 @@ export default function App() {
                     <SidebarProvider>
                         <Routes>
                             <Route path="/login" element={<LoginPage />} />
+                            <Route path="/waitlist" element={<WaitlistPage />} />
+                            <Route path="/waitlist/success" element={<WaitlistSuccessPage />} />
 
                             {/* Main App Layout */}
                             <Route path="/" element={
@@ -102,11 +107,11 @@ export default function App() {
                             <Route path="/concorsi/:category/:role/:contestSlug" element={<MainLayout><ContestPage /></MainLayout>} />
                             <Route path="/concorsi/:category/:role/:contestSlug/simulazione" element={<MainLayout><SimulationTypePage /></MainLayout>} />
                             <Route path="/concorsi/:category/:role/:contestSlug/simulazione/:type/regole" element={<MainLayout><QuizRulesPage /></MainLayout>} />
-                            <Route path="/concorsi/:category/:role/:contestSlug/custom" element={<MainLayout><CustomQuizWizardPage /></MainLayout>} />
+                            <Route path="/concorsi/:category/:role/:contestSlug/custom" element={<CustomQuizWizardPage />} />
 
                             {/* Quiz Engine (Wrapped) */}
-                            <Route path="/quiz/:id/official" element={<MainLayout><QuizRunnerPage /></MainLayout>} />
-                            <Route path="/quiz/run/:attemptId" element={<MainLayout><QuizRunnerPage /></MainLayout>} />
+                            <Route path="/quiz/:id/official" element={<MainLayout><OfficialQuizStarterPage /></MainLayout>} />
+                            <Route path="/quiz/run/:attemptId" element={<QuizRunnerPage />} />
                             <Route path="/quiz/results/:attemptId" element={<MainLayout><QuizResultsPage /></MainLayout>} />
                             <Route path="/quiz/explanations/:attemptId/:questionId" element={<MainLayout><ExplanationPage /></MainLayout>} />
                             {/* <Route path="/stats" element={<MainLayout><StatsPage /></MainLayout>} /> */}

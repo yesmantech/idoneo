@@ -63,8 +63,8 @@ export default function SubjectRadarChart({ data }: SubjectRadarChartProps) {
                             key={level}
                             points={levelPoints}
                             fill="none"
-                            stroke="#e2e8f0"
-                            strokeWidth="1"
+                            stroke="#F3F5F7" // canvas-light
+                            strokeWidth="1.5"
                         />
                     );
                 })}
@@ -72,13 +72,13 @@ export default function SubjectRadarChart({ data }: SubjectRadarChartProps) {
                 {/* Axes */}
                 {axes.map((axis, i) => (
                     <g key={i}>
-                        <line x1={center} y1={center} x2={axis.x} y2={axis.y} stroke="#e2e8f0" strokeWidth="1" />
+                        <line x1={center} y1={center} x2={axis.x} y2={axis.y} stroke="#F3F5F7" strokeWidth="1.5" />
                         <text
                             x={axis.lx}
                             y={axis.ly}
                             textAnchor="middle"
                             dominantBaseline="middle"
-                            className="text-[10px] fill-slate-500 font-bold uppercase"
+                            className="text-[10px] fill-text-tertiary font-bold uppercase tracking-wider"
                         >
                             {axis.label.substring(0, 15)}
                         </text>
@@ -88,9 +88,9 @@ export default function SubjectRadarChart({ data }: SubjectRadarChartProps) {
                 {/* Data Polygon */}
                 <polygon
                     points={points}
-                    fill="rgba(16, 185, 129, 0.2)"
-                    stroke="#10b981"
-                    strokeWidth="2"
+                    fill="rgba(6, 214, 211, 0.2)" // Brand Cyan / 20
+                    stroke="#06D6D3" // Brand Cyan
+                    strokeWidth="3"
                     strokeLinejoin="round"
                 />
 
@@ -98,7 +98,7 @@ export default function SubjectRadarChart({ data }: SubjectRadarChartProps) {
                 {data.map((d, i) => {
                     const { x, y } = getCoordinates(d.accuracy, i);
                     return (
-                        <circle key={i} cx={x} cy={y} r="4" fill="#10b981" stroke="white" strokeWidth="2" />
+                        <circle key={i} cx={x} cy={y} r="5" fill="#06D6D3" stroke="white" strokeWidth="3" />
                     );
                 })}
             </svg>
@@ -111,13 +111,13 @@ function FallbackBarChart({ data }: { data: SubjectData[] }) {
         <div className="space-y-4 w-full">
             {data.map(d => (
                 <div key={d.subject}>
-                    <div className="flex justify-between mb-1">
-                        <span className="text-sm font-bold text-slate-700">{d.subject}</span>
-                        <span className="text-sm font-medium text-slate-500">{d.accuracy.toFixed(0)}%</span>
+                    <div className="flex justify-between mb-2">
+                        <span className="text-sm font-bold text-text-secondary">{d.subject}</span>
+                        <span className="text-sm font-bold text-text-primary">{d.accuracy.toFixed(0)}%</span>
                     </div>
-                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-canvas-light rounded-pill overflow-hidden">
                         <div
-                            className={`h-full rounded-full transition-all duration-500 ${d.accuracy >= 70 ? 'bg-emerald-500' : d.accuracy >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                            className={`h-full rounded-pill transition-all duration-500 ${d.accuracy >= 70 ? 'bg-semantic-success' : d.accuracy >= 50 ? 'bg-brand-orange' : 'bg-semantic-error'}`}
                             style={{ width: `${d.accuracy}%` }}
                         />
                     </div>

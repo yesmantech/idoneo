@@ -1,107 +1,132 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabaseClient";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabaseClient';
+import {
+    Star, Shield, Zap, Heart,
+    Cloud, Sun, Moon, Music,
+    Gift, Crown, Bell, Sparkles
+} from "lucide-react";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+    // Decorative icons scattered around the center
+    const decorativeIcons = [
+        { Icon: Star, color: "text-amber-400", bg: "bg-amber-100", top: "15%", left: "10%", size: "w-12 h-12", delay: "0s" },
+        { Icon: Cloud, color: "text-sky-400", bg: "bg-sky-100", top: "12%", right: "15%", size: "w-16 h-16", delay: "0.5s" },
+        { Icon: Zap, color: "text-yellow-500", bg: "bg-yellow-100", bottom: "20%", left: "8%", size: "w-14 h-14", delay: "1s" },
+        { Icon: Heart, color: "text-rose-400", bg: "bg-rose-100", bottom: "15%", right: "10%", size: "w-12 h-12", delay: "1.5s" },
+        { Icon: Shield, color: "text-indigo-400", bg: "bg-indigo-100", top: "45%", left: "5%", size: "w-10 h-10", delay: "2s" },
+        { Icon: Sparkles, color: "text-purple-400", bg: "bg-purple-100", top: "40%", right: "5%", size: "w-14 h-14", delay: "2.5s" },
+    ];
 
-    try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-      }
-      navigate('/');
-    } catch (err: any) {
-      setError(err.message || "Authentication error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
 
-  return (
-    <div className="flex justify-center items-center h-screen bg-slate-950 text-white">
-      <div className="w-full max-w-sm bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-xl shadow-slate-900/50">
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-900/20 mb-3">
-            I
-          </div>
-          <h1 className="text-2xl font-bold text-slate-100">
-            {isLogin ? 'Bentornato' : 'Crea Account'}
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            {isLogin ? 'Accedi per continuare i tuoi quiz' : 'Inizia la tua preparazione oggi'}
-          </p>
-        </div>
+        try {
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+            });
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1 ml-1">Email</label>
-            <input
-              type="email"
-              placeholder="nome@esempio.it"
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-600 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all"
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+            if (error) throw error;
 
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1 ml-1">Password</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-600 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all"
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+            setSuccess(true);
+            setTimeout(() => {
+                navigate('/waitlist/success');
+            }, 800);
+        } catch (err: any) {
+            setError(err.message || 'Errore durante la registrazione');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-          {error && (
-            <div className="p-3 rounded-lg bg-rose-900/20 border border-rose-800 text-rose-300 text-xs">
-              {error}
+    return (
+        <div className="min-h-screen bg-white text-slate-900 font-sans flex flex-col justify-center overflow-hidden relative">
+
+            {/* Decorative Background Icons */}
+            <div className="absolute inset-0 pointer-events-none">
+                {decorativeIcons.map((item, idx) => (
+                    <div
+                        key={idx}
+                        className={`absolute rounded-full flex items-center justify-center ${item.bg} ${item.size} animate-in fade-in zoom-in duration-1000`}
+                        style={{
+                            top: item.top,
+                            left: item.left,
+                            right: item.right,
+                            bottom: item.bottom,
+                            animationDelay: item.delay
+                        }}
+                    >
+                        <item.Icon className={`w-1/2 h-1/2 ${item.color}`} strokeWidth={2.5} />
+                    </div>
+                ))}
             </div>
-          )}
 
-          <button
-            disabled={loading}
-            type="submit"
-            className="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-sky-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Elaborazione...' : isLogin ? 'Accedi' : 'Registrati'}
-          </button>
-        </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-slate-500">
-            {isLogin ? "Non hai un account?" : "Hai già un account?"}
-            <button
-              className="ml-1 text-sky-400 hover:text-sky-300 font-medium underline-offset-2 hover:underline"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Registrati" : "Accedi"}
-            </button>
-          </p>
+            {/* Bottom Half: Content */}
+            <div className="w-full max-w-md mx-auto px-6 flex flex-col items-center justify-center space-y-8 animate-in slide-in-from-bottom-10 fade-in duration-700 delay-300 relative z-10 pb-8">
+
+                {/* Header */}
+                <div className="space-y-3 text-center w-full">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+                        Benvenuto
+                    </h1>
+                    <h2 className="text-[17px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
+                        Inserisci le tue credenziali per registrarti
+                    </h2>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleLogin} className="w-full space-y-4">
+                    <div className="space-y-3">
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                        />
+                    </div>
+
+                    {error && (
+                        <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-sm font-medium text-center animate-in fade-in slide-in-from-top-2">
+                            {error}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={loading || success}
+                        className={`w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20 flex items-center justify-center ${success ? 'bg-green-600' : ''}`}
+                    >
+                        {loading ? 'Registrazione in corso...' : success ? 'Registrazione effettuata!' : 'Registrati'}
+                    </button>
+
+
+                </form>
+
+                <p className="text-[11px] text-slate-400 font-medium">
+                    CloudMascot moved to next page
+                </p>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

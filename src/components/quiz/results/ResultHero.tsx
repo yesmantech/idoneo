@@ -21,9 +21,9 @@ const AnimatedIcon = ({ passed }: { passed: boolean | null }) => {
     }
 
     return (
-        <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-xl ${passed ? 'bg-emerald-100' : 'bg-red-100'}`}>
+        <div className={`w-28 h-28 rounded-squircle flex items-center justify-center mb-6 shadow-soft ${passed ? 'bg-semantic-success/10' : 'bg-semantic-error/10'}`}>
             {passed ? (
-                <svg className="w-12 h-12 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-14 h-14 text-semantic-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <motion.path
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: 1 }}
@@ -32,7 +32,7 @@ const AnimatedIcon = ({ passed }: { passed: boolean | null }) => {
                     />
                 </svg>
             ) : (
-                <svg className="w-12 h-12 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-14 h-14 text-semantic-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <motion.path
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: 1 }}
@@ -60,9 +60,9 @@ export default function ResultHero({ score, passed, xpEarned }: ResultHeroProps)
     };
 
     const getHeroColor = () => {
-        if (passed === true) return 'text-emerald-600';
-        if (passed === false) return 'text-red-600';
-        return 'text-slate-800';
+        if (passed === true) return 'text-semantic-success';
+        if (passed === false) return 'text-semantic-error';
+        return 'text-text-primary';
     };
 
     const getMessage = () => {
@@ -72,31 +72,32 @@ export default function ResultHero({ score, passed, xpEarned }: ResultHeroProps)
     };
 
     return (
-        <div className="flex flex-col items-center justify-center py-10 px-4 text-center bg-white border-b border-slate-100">
+        <div className="flex flex-col items-center justify-center pt-12 pb-8 px-4 text-center bg-white rounded-b-[40px] shadow-soft mb-8">
             <AnimatedIcon passed={passed} />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
+                className="w-full max-w-md mx-auto"
             >
-                <h1 className={`text-3xl font-black mb-2 tracking-tight ${getHeroColor()}`}>
+                <h1 className={`text-4xl font-bold mb-3 tracking-tight ${getHeroColor()}`}>
                     {getHeroText()}
                 </h1>
-                <p className="text-slate-500 font-medium mb-6 max-w-sm mx-auto">
+                <p className="text-text-secondary text-lg mb-8 max-w-sm mx-auto leading-relaxed">
                     {getMessage()}
                 </p>
 
                 <div className="flex gap-4 justify-center">
-                    <div className="bg-slate-50 px-6 py-3 rounded-2xl inline-flex flex-col border border-slate-200 shadow-sm">
-                        <span className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">Punteggio Totale</span>
-                        <span className="text-3xl font-black text-slate-900">{score.toFixed(2)}</span>
+                    <div className="bg-canvas-light px-8 py-4 rounded-card inline-flex flex-col items-center min-w-[140px]">
+                        <span className="text-[10px] uppercase tracking-widest text-text-tertiary font-bold mb-1">Punteggio</span>
+                        <span className="text-4xl font-bold text-text-primary">{score.toFixed(2)}</span>
                     </div>
 
                     {xpEarned !== undefined && xpEarned !== null && xpEarned > 0 && (
-                        <div className="bg-violet-50 px-6 py-3 rounded-2xl inline-flex flex-col border border-violet-100 shadow-sm animate-bounce-short">
-                            <span className="text-xs uppercase tracking-widest text-violet-400 font-bold mb-1">XP Guadagnati</span>
-                            <span className="text-3xl font-black text-violet-600">+{xpEarned}</span>
+                        <div className="bg-brand-purple/5 px-8 py-4 rounded-card inline-flex flex-col items-center border border-brand-purple/10 min-w-[140px] animate-bounce-short">
+                            <span className="text-[10px] uppercase tracking-widest text-brand-purple font-bold mb-1">XP Guadagnati</span>
+                            <span className="text-4xl font-bold text-brand-purple">+{xpEarned}</span>
                         </div>
                     )}
                 </div>

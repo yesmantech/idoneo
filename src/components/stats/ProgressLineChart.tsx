@@ -47,22 +47,22 @@ export default function ProgressLineChart({ data }: ProgressLineChartProps) {
                 {/* Gradient Definition */}
                 <defs>
                     <linearGradient id="gradientArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                        <stop offset="0%" stopColor="#06D6D3" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#06D6D3" stopOpacity="0" />
                     </linearGradient>
                 </defs>
 
                 {/* Y Axis Grid */}
                 {[0, 0.5, 1].map(t => {
                     const y = getY(minScore + (maxScore - minScore) * t);
-                    return <line key={t} x1={padding} y1={y} x2={width - padding} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4" />;
+                    return <line key={t} x1={padding} y1={y} x2={width - padding} stroke="#F3F5F7" strokeWidth="1.5" strokeDasharray="4" />;
                 })}
 
                 {/* Area */}
                 <path d={areaD} fill="url(#gradientArea)" />
 
                 {/* Line */}
-                <path d={pathD} fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={pathD} fill="none" stroke="#06D6D3" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
 
                 {/* Dots */}
                 {data.map((d, i) => (
@@ -70,8 +70,8 @@ export default function ProgressLineChart({ data }: ProgressLineChartProps) {
                         key={i}
                         cx={getX(i)}
                         cy={getY(d.score)}
-                        r="4"
-                        className="fill-white stroke-emerald-500 stroke-2 hover:r-6 transition-all cursor-pointer"
+                        r="5"
+                        className="fill-white stroke-brand-cyan stroke-[3] hover:r-7 transition-all cursor-pointer"
                     >
                         <title>{d.date}: {d.score.toFixed(1)}</title>
                     </circle>

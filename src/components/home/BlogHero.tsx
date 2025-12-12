@@ -17,7 +17,7 @@ function BlogCard({ post, className = '' }: BlogCardProps) {
     return (
         <Link
             to={`/blog/${post.slug}`}
-            className={`group relative overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all ${className}`}
+            className={`group relative overflow-hidden rounded-card bg-white shadow-soft hover:shadow-card transition-all duration-300 ease-ios ${className}`}
         >
             {/* Background Image */}
             {post.cover_image_url ? (
@@ -94,12 +94,12 @@ export default function BlogHero() {
         <div className="space-y-4">
             {/* Header */}
             <div className="flex justify-between items-center px-1">
-                <h2 className="text-slate-800 font-bold text-lg flex items-center gap-2">
+                <h2 className="text-text-primary font-bold text-xl flex items-center gap-2">
                     📰 Blog & Novità
                 </h2>
                 <Link
                     to="/blog"
-                    className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                    className="text-sm font-semibold text-brand-cyan hover:text-brand-cyan/80 transition-colors"
                 >
                     Vedi tutti
                 </Link>

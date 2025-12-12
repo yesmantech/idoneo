@@ -57,13 +57,13 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
                     e.stopPropagation();
                     setOpen(!open);
                 }}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
             >
                 ⋮
             </button>
 
             {open && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden">
+                <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     {actions.map((action, idx) => (
                         <button
                             key={idx}
@@ -73,8 +73,8 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
                                 action.onClick();
                             }}
                             className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${action.variant === 'destructive'
-                                    ? 'text-rose-400 hover:bg-rose-500/10'
-                                    : 'text-slate-300 hover:bg-slate-700'
+                                ? 'text-rose-400 hover:bg-rose-950/20'
+                                : 'text-slate-300 hover:bg-slate-800'
                                 }`}
                         >
                             {action.icon && <span>{action.icon}</span>}
@@ -131,17 +131,17 @@ export default function AdminTable<T>({
     }
 
     return (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
+        <div className="rounded-[24px] border border-slate-800 bg-slate-900 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     {/* Header */}
-                    <thead className="bg-slate-900/80 border-b border-slate-800">
+                    <thead className="bg-slate-950/50 border-b border-slate-800">
                         <tr>
                             {columns.map(col => (
                                 <th
                                     key={col.key}
-                                    className={`py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider ${col.align === 'center' ? 'text-center' :
-                                            col.align === 'right' ? 'text-right' : 'text-left'
+                                    className={`py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest ${col.align === 'center' ? 'text-center' :
+                                        col.align === 'right' ? 'text-right' : 'text-left'
                                         }`}
                                     style={{ width: col.width }}
                                 >
@@ -155,21 +155,21 @@ export default function AdminTable<T>({
                     </thead>
 
                     {/* Body */}
-                    <tbody className="divide-y divide-slate-800/50">
+                    <tbody className="divide-y divide-slate-800">
                         {data.map((item, rowIndex) => (
                             <tr
                                 key={rowKey(item)}
                                 onClick={() => onRowClick?.(item)}
-                                className={`transition-colors ${onRowClick
-                                        ? 'cursor-pointer hover:bg-slate-800/50'
-                                        : 'hover:bg-slate-800/30'
+                                className={`transition-all duration-200 group ${onRowClick
+                                    ? 'cursor-pointer hover:bg-slate-800'
+                                    : 'hover:bg-slate-800/50'
                                     }`}
                             >
                                 {columns.map(col => (
                                     <td
                                         key={col.key}
-                                        className={`py-3 px-4 text-slate-300 ${col.align === 'center' ? 'text-center' :
-                                                col.align === 'right' ? 'text-right' : 'text-left'
+                                        className={`py-4 px-6 text-slate-300 font-medium ${col.align === 'center' ? 'text-center' :
+                                            col.align === 'right' ? 'text-right' : 'text-left'
                                             }`}
                                     >
                                         {col.render

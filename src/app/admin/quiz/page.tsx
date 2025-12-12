@@ -408,32 +408,45 @@ export default function AdminQuizzesPage() {
 
   return (
     <AdminLayout>
-      {loading && <p className="text-sm text-slate-400 animate-pulse">Caricamento...</p>}
-      {globalError && <p className="text-red-400 mb-4">{globalError}</p>}
+      {loading && <p className="text-sm text-slate-500 animate-pulse text-center py-4">Caricamento...</p>}
+      {globalError && <p className="text-rose-400 mb-4 bg-rose-500/10 p-3 rounded-lg border border-rose-500/20 font-medium">{globalError}</p>}
 
       {/* ─── QUIZ FORM ─── */}
-      <section className="mb-10 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-sm">
+      <section className="mb-8 rounded-[24px] border border-slate-800 bg-slate-900 p-6 shadow-sm">
         <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-          <h2 className="text-xl font-bold text-slate-100">{editingQuizId ? "Modifica Concorso & Regole" : "Nuovo Concorso"}</h2>
-          {editingQuizId && <button onClick={resetQuizForm} className="text-xs text-sky-400 hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded">Crea Nuovo invece</button>}
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <span className="text-2xl">🏆</span>
+            {editingQuizId ? "Modifica Concorso & Regole" : "Nuovo Concorso"}
+          </h2>
+          {editingQuizId && (
+            <button
+              onClick={resetQuizForm}
+              className="text-xs font-bold text-slate-500 hover:text-brand-cyan hover:bg-brand-cyan/5 transition-colors px-3 py-1.5 rounded-lg border border-transparent hover:border-brand-cyan/20"
+            >
+              + Crea Nuovo invece
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSaveQuiz} className="grid md:grid-cols-2 gap-8 text-sm">
           {/* LEFT: INFO BASI */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-2">1. Dettagli Generali</h3>
+          <div className="space-y-5">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <span className="w-4 h-4 rounded bg-slate-800 text-slate-400 flex items-center justify-center text-[10px]">1</span>
+              Dettagli Generali
+            </h3>
 
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="mb-1 block text-slate-400">Titolo *</label>
-                <input required className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100 focus:border-sky-500 outline-none" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} placeholder="Es. Allievo Maresciallo 2025" />
+                <label className="mb-1.5 block font-bold text-slate-400">Titolo *</label>
+                <input required className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none transition-all placeholder-slate-600 font-bold" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} placeholder="Es. Allievo Maresciallo 2025" />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-slate-400">Ruolo</label>
+                  <label className="mb-1.5 block font-bold text-slate-400">Ruolo</label>
                   <select
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-2 text-slate-100"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-slate-200 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none transition-all"
                     value={quizRoleId}
                     onChange={e => setQuizRoleId(e.target.value)}
                   >
@@ -445,34 +458,37 @@ export default function AdminQuizzesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-slate-400">Anno</label>
-                  <input className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100" value={quizYear} onChange={e => setQuizYear(e.target.value)} placeholder="YYYY" />
+                  <label className="mb-1.5 block font-bold text-slate-400">Anno</label>
+                  <input className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none transition-all" value={quizYear} onChange={e => setQuizYear(e.target.value)} placeholder="YYYY" />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-slate-400">Slug URL</label>
-                <input className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100 font-mono text-xs" value={quizSlug} onChange={e => setQuizSlug(e.target.value)} placeholder="slug-url-concorso" />
+                <label className="mb-1.5 block font-bold text-slate-400">Slug URL</label>
+                <input className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-500 font-mono text-xs focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none transition-all" value={quizSlug} onChange={e => setQuizSlug(e.target.value)} placeholder="slug-url-concorso" />
               </div>
 
               <div>
-                <label className="mb-1 block text-slate-400">Descrizione</label>
-                <textarea className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-slate-100 h-20" value={quizDescription} onChange={e => setQuizDescription(e.target.value)} />
+                <label className="mb-1.5 block font-bold text-slate-400">Descrizione</label>
+                <textarea className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none transition-all h-24" value={quizDescription} onChange={e => setQuizDescription(e.target.value)} />
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
-                <input type="checkbox" id="arch_q" className="w-4 h-4" checked={quizIsArchived} onChange={e => setQuizIsArchived(e.target.checked)} />
-                <label htmlFor="arch_q" className="text-slate-300 select-none cursor-pointer">Segna come Archiviato (Nascosto)</label>
+              <div className="flex items-center gap-3 pt-2">
+                <input type="checkbox" id="arch_q" className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-brand-cyan focus:ring-brand-cyan" checked={quizIsArchived} onChange={e => setQuizIsArchived(e.target.checked)} />
+                <label htmlFor="arch_q" className="text-slate-400 font-medium select-none cursor-pointer">Segna come Archiviato (Nascosto)</label>
               </div>
             </div>
           </div>
 
           {/* RIGHT: SIMULATION CONFIG */}
-          <div className="space-y-4 border-l border-slate-800 pl-8">
+          <div className="space-y-5 md:border-l md:border-slate-800 md:pl-8">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-semibold text-purple-400 uppercase tracking-wider mb-2">2. Configurazione Simulazione</h3>
+              <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-[10px] border border-purple-500/20">2</span>
+                Configurazione Simulazione
+              </h3>
               <select
-                className="text-xs bg-slate-900 border border-purple-900/50 text-purple-300 rounded px-2 py-1"
+                className="text-xs bg-purple-500/10 border border-purple-500/20 text-purple-300 font-bold rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                 value={selectedPresetId}
                 onChange={(e) => handleApplyPreset(e.target.value)}
               >
@@ -481,47 +497,54 @@ export default function AdminQuizzesPage() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 bg-slate-950/50 p-4 rounded-lg border border-slate-800">
+            <div className="grid grid-cols-2 gap-4 bg-purple-500/5 p-5 rounded-2xl border border-purple-500/10">
               <div>
-                <label className="block text-slate-400 text-xs mb-1">Tempo (minuti)</label>
-                <input className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center font-mono" value={quizTimeLimit} onChange={e => setQuizTimeLimit(e.target.value)} />
+                <label className="block text-slate-400 font-bold text-xs mb-1.5">Tempo (minuti)</label>
+                <div className="relative">
+                  <input className="w-full bg-slate-950 border border-purple-500/20 rounded-xl px-3 py-2 text-center font-mono font-bold text-slate-200 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" value={quizTimeLimit} onChange={e => setQuizTimeLimit(e.target.value)} />
+                  <span className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-600 text-[10px] pointer-events-none">min</span>
+                </div>
               </div>
               <div>
-                <label className="block text-slate-400 text-xs mb-1">Totale Domande</label>
-                <div className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-center font-mono text-slate-300 opacity-80 cursor-not-allowed" title="Calcolato automaticamente">
-                  {currentTotalQuestions}
+                <label className="block text-slate-400 font-bold text-xs mb-1.5">Totale Domande</label>
+                <div className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2 text-center font-mono font-bold text-slate-500 cursor-not-allowed flex items-center justify-center gap-1" title="Calcolato automaticamente">
+                  <span>∑</span> {currentTotalQuestions}
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              <div><label className="block text-[10px] text-slate-500 uppercase">Punti Esatta</label><input className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-center text-emerald-400 font-bold" value={quizPointsCorrect} onChange={e => setQuizPointsCorrect(e.target.value)} /></div>
-              <div><label className="block text-[10px] text-slate-500 uppercase">Punti Errata</label><input className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-center text-rose-400 font-bold" value={quizPointsWrong} onChange={e => setQuizPointsWrong(e.target.value)} /></div>
-              <div><label className="block text-[10px] text-slate-500 uppercase">Punti Omessa</label><input className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-center text-slate-400 font-bold" value={quizPointsBlank} onChange={e => setQuizPointsBlank(e.target.value)} /></div>
+            <div className="grid grid-cols-3 gap-3">
+              <div><label className="block text-[10px] font-bold text-emerald-400 uppercase mb-1">Punti Esatta</label><input className="w-full bg-slate-950 border border-emerald-500/20 rounded-xl p-2.5 text-center text-emerald-400 font-bold focus:outline-none focus:border-emerald-500" value={quizPointsCorrect} onChange={e => setQuizPointsCorrect(e.target.value)} /></div>
+              <div><label className="block text-[10px] font-bold text-rose-400 uppercase mb-1">Punti Errata</label><input className="w-full bg-slate-950 border border-rose-500/20 rounded-xl p-2.5 text-center text-rose-400 font-bold focus:outline-none focus:border-rose-500" value={quizPointsWrong} onChange={e => setQuizPointsWrong(e.target.value)} /></div>
+              <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Punti Omessa</label><input className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-center text-slate-400 font-bold focus:outline-none focus:border-slate-500" value={quizPointsBlank} onChange={e => setQuizPointsBlank(e.target.value)} /></div>
             </div>
 
-            <div className="mt-4">
-              <h4 className="text-xs font-bold text-slate-300 mb-2">Distribuzione Materie</h4>
+            <div className="mt-6">
+              <h4 className="text-xs font-bold text-slate-300 mb-3 flex items-center gap-2">
+                <span>📚</span> Distribuzione Materie
+              </h4>
               {!editingQuizId ? (
-                <p className="text-xs text-slate-500 italic">Salva il concorso prima di configurare le materie.</p>
+                <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 text-center">
+                  <p className="text-xs text-slate-500">Salva il concorso prima di configurare le materie.</p>
+                </div>
               ) : (
-                <div className="bg-slate-950 border border-slate-800 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
-                  {activeSubjectsForEditingQuiz.length === 0 && <p className="p-4 text-xs text-slate-500 text-center">Nessuna materia attiva associata.</p>}
+                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden max-h-60 overflow-y-auto shadow-sm">
+                  {activeSubjectsForEditingQuiz.length === 0 && <p className="p-6 text-xs text-slate-500 text-center italic">Nessuna materia attiva associata.</p>}
                   <table className="w-full text-xs">
-                    <thead className="bg-slate-900 text-slate-400">
+                    <thead className="bg-slate-950 text-slate-500 font-bold border-b border-slate-800">
                       <tr>
-                        <th className="px-3 py-2 text-left">Materia</th>
-                        <th className="px-3 py-2 w-24 text-center"># Domande</th>
+                        <th className="px-4 py-3 text-left">Materia</th>
+                        <th className="px-4 py-3 w-32 text-center"># Domande</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                       {activeSubjectsForEditingQuiz.map(s => (
-                        <tr key={s.id}>
-                          <td className="px-3 py-2 text-slate-300">{s.name}</td>
-                          <td className="px-3 py-2 text-center">
+                        <tr key={s.id} className="hover:bg-slate-800/50">
+                          <td className="px-4 py-3 text-slate-300 font-medium">{s.name}</td>
+                          <td className="px-4 py-3 text-center">
                             <input
                               type="number"
-                              className="w-16 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-center text-white focus:border-purple-500 outline-none"
+                              className="w-20 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-center text-slate-200 font-bold focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
                               value={subjectCounts[s.id] || 0}
                               onChange={(e) => {
                                 const val = parseInt(e.target.value) || 0;
@@ -540,12 +563,12 @@ export default function AdminQuizzesPage() {
           </div>
 
           {/* ACTIONS */}
-          <div className="md:col-span-2 border-t border-slate-800 pt-4 flex items-center justify-between">
-            <div className="text-xs">
-              {quizFormError && <p className="text-red-400 font-bold">{quizFormError}</p>}
-              {quizFormSuccess && <p className="text-emerald-400 font-bold">{quizFormSuccess}</p>}
+          <div className="md:col-span-2 border-t border-slate-800 pt-6 flex items-center justify-between">
+            <div className="text-sm">
+              {quizFormError && <p className="text-rose-400 font-bold flex items-center gap-2"><span>⚠️</span> {quizFormError}</p>}
+              {quizFormSuccess && <p className="text-emerald-400 font-bold flex items-center gap-2"><span>✅</span> {quizFormSuccess}</p>}
             </div>
-            <button type="submit" disabled={quizSaving} className="rounded-lg bg-sky-600 px-8 py-3 font-bold text-white shadow hover:bg-sky-500 disabled:opacity-50 transition-all">
+            <button type="submit" disabled={quizSaving} className="rounded-full bg-brand-cyan hover:bg-brand-cyan/90 px-8 py-3 font-bold text-slate-900 shadow-[0_0_20px_rgba(6,214,211,0.3)] hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:translate-y-0">
               {quizSaving ? "Salvataggio..." : "Salva Configurazione"}
             </button>
           </div>
@@ -554,44 +577,57 @@ export default function AdminQuizzesPage() {
 
       {/* ─── QUIZ LIST ─── */}
       <section className="mb-12">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-sm font-semibold text-slate-300">ELENCO CONCORSI</h2>
-          <label className="flex gap-2 text-xs cursor-pointer text-slate-400 hover:text-white"><input type="checkbox" checked={showArchivedQuizzes} onChange={e => setShowArchivedQuizzes(e.target.checked)} /> Mostra archiviati</label>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">ELENCO CONCORSI</h2>
+          <label className="flex gap-2 text-xs cursor-pointer text-slate-400 hover:text-slate-200 font-medium bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800 shadow-sm transition-all hover:bg-slate-800">
+            <input type="checkbox" className="rounded bg-slate-800 border-slate-700 text-brand-cyan focus:ring-brand-cyan" checked={showArchivedQuizzes} onChange={e => setShowArchivedQuizzes(e.target.checked)} />
+            Mostra archiviati
+          </label>
         </div>
-        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/40">
-          {visibleQuizzes.length === 0 && <p className="p-6 text-center text-sm text-slate-500">Nessun concorso trovato.</p>}
+        <div className="overflow-x-auto rounded-[24px] border border-slate-800 bg-slate-900 shadow-sm">
+          {visibleQuizzes.length === 0 && (
+            <div className="p-12 text-center">
+              <p className="text-slate-500 mb-2 text-2xl">📭</p>
+              <p className="text-sm text-slate-500 font-medium">Nessun concorso trovato.</p>
+            </div>
+          )}
           {visibleQuizzes.length > 0 && (
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase">
+              <thead className="bg-slate-950 text-slate-500 font-bold border-b border-slate-800 uppercase tracking-wider">
                 <tr>
-                  <th className="px-4 py-3">Titolo</th>
-                  <th className="px-4 py-3">Ruolo</th>
-                  <th className="px-4 py-3">Impostazioni</th>
-                  <th className="px-4 py-3 text-right">Azioni</th>
+                  <th className="px-6 py-4">Titolo</th>
+                  <th className="px-6 py-4">Ruolo</th>
+                  <th className="px-6 py-4">Impostazioni</th>
+                  <th className="px-6 py-4 text-right">Azioni</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {visibleQuizzes.map(q => {
                   const anyQ = q as any;
                   const roleName = roles.find(r => r.id === anyQ.role_id)?.title || "-";
+                  const isArchived = q.is_archived;
                   // Show summary of rules
                   return (
-                    <tr key={q.id} className={`hover:bg-slate-800/30 transition-colors ${q.is_archived ? "opacity-50 bg-slate-900/50" : ""}`}>
-                      <td className="px-4 py-3">
-                        <div className="font-bold text-slate-200">{q.title}</div>
-                        <div className="text-[10px] text-slate-500 font-mono">{anyQ.slug}</div>
+                    <tr key={q.id} className={`hover:bg-slate-800 transition-colors group ${isArchived ? "bg-slate-900/50 grayscale opacity-40" : ""}`}>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-200 text-sm mb-0.5">{q.title}</div>
+                        <div className="text-[10px] text-slate-500 font-mono bg-slate-950 inline-block px-1.5 rounded border border-slate-800">{anyQ.slug}</div>
                       </td>
-                      <td className="px-4 py-3 text-sky-400">{roleName}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2 text-[10px]">
-                          <span className="bg-purple-900/30 text-purple-300 px-2 py-0.5 rounded border border-purple-900/50">{q.time_limit || 0} min</span>
-                          <span className="bg-emerald-900/30 text-emerald-300 px-2 py-0.5 rounded border border-emerald-900/50">{q.total_questions || 0} quest</span>
+                      <td className="px-6 py-4 text-slate-400 font-medium">{roleName}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2 text-[10px] font-bold">
+                          <span className="bg-purple-500/10 text-purple-400 px-2 py-1 rounded-md border border-purple-500/20">{q.time_limit || 0} min</span>
+                          <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/20">{q.total_questions || 0} quest</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <button onClick={() => handleEditRules(q)} className="text-purple-400 hover:text-purple-300 mr-3 font-semibold text-[10px] uppercase border border-purple-900/50 px-2 py-1 rounded hover:bg-purple-900/20">Regole Sim.</button>
-                        <button onClick={() => handleEditQuiz(q)} className="text-sky-400 hover:text-sky-300 mr-3 font-semibold">Gestisci</button>
-                        <button onClick={() => handleToggleArchiveQuiz(q)} className="text-slate-500 hover:text-white">{q.is_archived ? "Attiva" : "Archivia"}</button>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditRules(q)} className="text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all">Regole Sim.</button>
+                          <button onClick={() => handleEditQuiz(q)} className="text-brand-cyan hover:text-cyan-300 bg-brand-cyan/10 hover:bg-brand-cyan/20 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all">Gestisci</button>
+                          <button onClick={() => handleToggleArchiveQuiz(q)} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${q.is_archived ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"}`}>
+                            {q.is_archived ? "Attiva" : "Archivia"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -603,110 +639,113 @@ export default function AdminQuizzesPage() {
       </section>
 
       {/* ─── SUBJECTS SECTION ─── */}
-      <section id="subject-form" className="bg-slate-900/40 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold mb-4 text-emerald-400 flex items-center gap-2">
+      <section id="subject-form" className="bg-slate-900 border border-slate-800 rounded-[24px] p-8 shadow-sm">
+        <h2 className="text-lg font-black text-white mb-6 flex items-center gap-3">
+          <span className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center text-sm border border-amber-500/20">📚</span>
           Gestione Materie
-          <span className="text-xs font-normal text-slate-500 ml-2">(Create qui, poi configurate nel Concorso)</span>
+          <span className="text-xs font-medium text-slate-500 bg-slate-950 px-2 py-1 rounded-full border border-slate-800 self-center mt-0.5">(Create qui, poi configurate nel Concorso)</span>
         </h2>
 
         <div className="grid md:grid-cols-3 gap-8">
           {/* SUBJECT FORM */}
           <div className="md:col-span-1">
-            <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-              <h3 className="text-sm font-semibold text-slate-300 mb-3">{editingSubjectId ? "Modifica Materia" : "Nuova Materia"}</h3>
-              <form onSubmit={handleSaveSubject} className="space-y-3 text-xs">
+            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 sticky top-4">
+              <h3 className="text-sm font-bold text-white mb-4">{editingSubjectId ? "Modifica Materia" : "Nuova Materia"}</h3>
+              <form onSubmit={handleSaveSubject} className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-slate-400 mb-1">Concorso Afferenza *</label>
-                  <select className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" value={subjectQuizId} onChange={e => setSubjectQuizId(e.target.value)}>
+                  <label className="block font-bold text-slate-400 mb-1.5">Concorso Afferenza *</label>
+                  <select className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-medium" value={subjectQuizId} onChange={e => setSubjectQuizId(e.target.value)}>
                     {quizzes.map(q => <option key={q.id} value={q.id}>{q.title}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">Nome Materia *</label>
-                  <input required className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" value={subjectName} onChange={e => setSubjectName(e.target.value)} />
+                  <label className="block font-bold text-slate-400 mb-1.5">Nome Materia *</label>
+                  <input required className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-medium placeholder-slate-600" value={subjectName} onChange={e => setSubjectName(e.target.value)} placeholder="es. Diritto Costituzionale" />
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">Codice (opz)</label>
-                  <input className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" value={subjectCode} onChange={e => setSubjectCode(e.target.value)} />
+                  <label className="block font-bold text-slate-400 mb-1.5">Codice (opz)</label>
+                  <input className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-mono text-xs" value={subjectCode} onChange={e => setSubjectCode(e.target.value)} placeholder="DIR-COST" />
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">Descrizione</label>
-                  <textarea className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white h-16" value={subjectDescription} onChange={e => setSubjectDescription(e.target.value)} />
+                  <label className="block font-bold text-slate-400 mb-1.5">Descrizione</label>
+                  <textarea className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none h-20" value={subjectDescription} onChange={e => setSubjectDescription(e.target.value)} />
                 </div>
 
-                <div className="flex gap-2 pt-2">
-                  {editingSubjectId && <button type="button" onClick={resetSubjectForm} className="bg-slate-800 text-slate-300 px-3 py-2 rounded flex-1 hover:bg-slate-700">Annulla</button>}
-                  <button type="submit" disabled={subjectSaving} className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded font-bold flex-1">
+                <div className="flex gap-3 pt-2">
+                  {editingSubjectId && <button type="button" onClick={resetSubjectForm} className="bg-slate-900 border border-slate-700 text-slate-500 font-bold px-4 py-2.5 rounded-xl flex-1 hover:bg-slate-800 hover:text-slate-300 transition-colors">Annulla</button>}
+                  <button type="submit" disabled={subjectSaving} className="bg-brand-cyan hover:bg-brand-cyan/90 text-slate-900 px-4 py-2.5 rounded-xl font-bold flex-1 shadow-soft hover:shadow-md transition-all">
                     {subjectSaving ? "..." : (editingSubjectId ? "Aggiorna" : "Crea")}
                   </button>
                 </div>
-                {subjectFormError && <p className="text-red-400">{subjectFormError}</p>}
-                {subjectFormSuccess && <p className="text-emerald-400">{subjectFormSuccess}</p>}
+                <div className="min-h-[20px]">
+                  {subjectFormError && <p className="text-rose-400 font-bold">{subjectFormError}</p>}
+                  {subjectFormSuccess && <p className="text-emerald-400 font-bold">{subjectFormSuccess}</p>}
+                </div>
               </form>
             </div>
           </div>
 
           {/* SUBJECT LIST */}
           <div className="md:col-span-2">
-            <div className="flex justify-between items-end mb-3">
-              <h3 className="text-sm font-semibold text-slate-300">
+            <div className="flex justify-between items-end mb-4">
+              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
                 Elenco Materie
-                <span className="text-xs text-slate-500 ml-2 font-normal">
-                  Filtrate per: {quizzes.find(q => q.id === subjectQuizId)?.title || "..."}
+                <span className="text-[10px] text-slate-600 ml-2 font-normal normal-case break-all block sm:inline">
+                  per: <strong className="text-slate-400">{quizzes.find(q => q.id === subjectQuizId)?.title || "..."}</strong>
                 </span>
               </h3>
 
               {/* Filter Tabs */}
-              <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-[10px]">
+              <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-[10px] font-bold">
                 <button
                   onClick={() => setShowArchivedSubjects(false)}
-                  className={`px-3 py-1 rounded ${!showArchivedSubjects ? "bg-slate-800 text-white shadow" : "text-slate-500 hover:text-slate-300"}`}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${!showArchivedSubjects ? "bg-slate-800 text-slate-200 shadow-sm" : "text-slate-500 hover:text-slate-400"}`}
                 >
                   Attive
                 </button>
                 <button
                   onClick={() => setShowArchivedSubjects(true)}
-                  className={`px-3 py-1 rounded ${showArchivedSubjects ? "bg-slate-800 text-white shadow" : "text-slate-500 hover:text-slate-300"}`}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${showArchivedSubjects ? "bg-slate-800 text-slate-200 shadow-sm" : "text-slate-500 hover:text-slate-400"}`}
                 >
                   Archiviate
                 </button>
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-800 bg-slate-950 overflow-hidden min-h-[200px]">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden min-h-[300px] shadow-sm">
               <table className="w-full text-xs text-left">
-                <thead className="bg-slate-900 text-slate-400">
+                <thead className="bg-slate-950 text-slate-500 border-b border-slate-800">
                   <tr>
-                    <th className="p-3">Nome / Codice</th>
-                    <th className="p-3">Descrizione</th>
-                    <th className="p-3 text-right">Stato</th>
+                    <th className="p-4 font-bold">Nome / Codice</th>
+                    <th className="p-4 font-bold">Descrizione</th>
+                    <th className="p-4 font-bold text-right">Stato</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
                   {filteredSubjects.length === 0 && (
-                    <tr><td colSpan={3} className="p-8 text-center text-slate-500">
+                    <tr><td colSpan={3} className="p-12 text-center text-slate-500">
                       {showArchivedSubjects ? "Nessuna materia archiviata." : "Nessuna materia attiva per questo concorso."}
                     </td></tr>
                   )}
                   {filteredSubjects.map(s => (
-                    <tr key={s.id} className="hover:bg-slate-900/50 group">
-                      <td className="p-3">
-                        <div className="font-bold text-slate-200">{s.name}</div>
-                        <div className="text-[10px] text-slate-500 mono">{s.code}</div>
+                    <tr key={s.id} className="hover:bg-slate-800 transition-colors group">
+                      <td className="p-4">
+                        <div className="font-bold text-slate-200 text-sm">{s.name}</div>
+                        {s.code && <div className="text-[10px] text-slate-500 font-mono bg-slate-950 inline-block px-1 rounded mt-1 border border-slate-800">{s.code}</div>}
                       </td>
-                      <td className="p-3 text-slate-400 truncate max-w-[200px]">{s.description || "-"}</td>
-                      <td className="p-3 text-right">
-                        <div className="flex justify-end items-center gap-3">
+                      <td className="p-4 text-slate-500 truncate max-w-[200px]">{s.description || "-"}</td>
+                      <td className="p-4 text-right">
+                        <div className="flex justify-end items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           {/* Edit */}
-                          <button onClick={() => handleEditSubject(s)} className="text-sky-500 hover:text-sky-400 font-medium">Edit</button>
+                          <button onClick={() => handleEditSubject(s)} className="text-sky-400 hover:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 px-3 py-1.5 rounded-lg font-bold transition-all">Edit</button>
 
                           {/* Archive/Restore Action */}
                           {s.is_archived ? (
-                            <button onClick={() => handleArchiveSubject(s.id, false)} className="text-emerald-500 hover:text-emerald-400 flex items-center gap-1">
+                            <button onClick={() => handleArchiveSubject(s.id, false)} className="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-all">
                               <span>⟲</span> Ripristina
                             </button>
                           ) : (
-                            <button onClick={() => handleArchiveSubject(s.id, true)} className="text-slate-500 hover:text-rose-500 flex items-center gap-1 group-hover:visible">
+                            <button onClick={() => handleArchiveSubject(s.id, true)} className="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-all">
                               <span>×</span> Archivia
                             </button>
                           )}

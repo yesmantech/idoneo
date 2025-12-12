@@ -28,21 +28,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-in-out">
 
-                {/* Mobile Header (Hamburger) */}
-                <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-30">
-                    <Link to="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold">I</div>
-                        <span className="font-bold text-slate-800 tracking-tight">IDONEO</span>
-                    </Link>
-                    <button
-                        onClick={() => setMobileOpen(true)}
-                        className="p-2 -mr-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                    </button>
-                </header>
-
-                <main className="flex-1 p-4 lg:p-8 pb-24 lg:pb-8 animate-in fade-in duration-500">
+                <main className="flex-1 p-4 lg:p-8 pb-24 lg:pb-8 pt-safe mt-4 lg:mt-0 animate-in fade-in duration-500">
                     {children}
                 </main>
 

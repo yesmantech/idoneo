@@ -30,11 +30,12 @@ export default function DashboardList({ userId }: DashboardListProps) {
 
     if (quizzes.length === 0) {
         return (
-            <div className="text-center py-8 bg-slate-100 rounded-2xl border border-slate-200 border-dashed mb-8">
-                <p className="text-slate-500 font-medium mb-2">Non hai ancora iniziato nessun corso.</p>
+            <div className="text-center py-12 bg-canvas-light rounded-card border-none mb-8">
+                <div className="text-4xl mb-3">☁️</div>
+                <p className="text-text-secondary font-medium mb-6">Non hai ancora iniziato nessun corso.</p>
                 <button
                     onClick={() => navigate('/')}
-                    className="text-emerald-600 font-bold hover:underline"
+                    className="text-white bg-brand-cyan px-6 py-3 rounded-pill font-bold hover:shadow-lg hover:scale-105 transition-all"
                 >
                     Inizia ora!
                 </button>
@@ -43,10 +44,10 @@ export default function DashboardList({ userId }: DashboardListProps) {
     }
 
     return (
-        <div className="space-y-4 mb-8">
+        <div className="space-y-6 mb-8">
             <div className="flex items-center justify-between px-1">
-                <h3 className="text-lg font-bold text-slate-800">La tua Dashboard</h3>
-                <button onClick={() => navigate('/')} className="text-sm font-bold text-emerald-600 hover:text-emerald-700">
+                <h3 className="text-lg font-bold text-text-primary">La tua Dashboard</h3>
+                <button onClick={() => navigate('/')} className="text-sm font-bold text-brand-cyan hover:text-brand-cyan/80 px-4 py-2 bg-brand-cyan/10 rounded-pill transition-colors">
                     + Nuovo
                 </button>
             </div>
@@ -68,7 +69,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
             <div className="md:hidden">
                 <button
                     onClick={() => navigate('/')}
-                    className="w-full py-3 rounded-xl border-2 border-slate-200 border-dashed text-slate-400 font-bold hover:bg-slate-50 transition-colors"
+                    className="w-full py-4 rounded-card border-2 border-canvas-light text-text-tertiary font-bold hover:bg-canvas-light hover:text-text-secondary transition-colors"
                 >
                     + Aggiungi corsi
                 </button>

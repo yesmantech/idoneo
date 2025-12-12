@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSidebar } from '@/context/SidebarContext';
+import { useAuth } from '@/context/AuthContext';
+import MobileDrawer from './MobileDrawer';
 
 const MENU_ITEMS = [
     { icon: '🏠', label: 'Home', path: '/' },
@@ -23,9 +25,9 @@ function NavItem({ item, collapsed }: { item: any; collapsed: boolean; key?: Rea
     return (
         <Link
             to={item.path}
-            className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
-                ? 'bg-slate-800 text-emerald-400 shadow-lg shadow-emerald-900/10'
-                : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+            className={`group relative flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${isActive
+                ? 'bg-canvas-light text-brand-cyan shadow-sm'
+                : 'text-text-secondary hover:bg-canvas-light hover:text-text-primary'
                 }`}
             title={collapsed ? item.label : undefined}
             onClick={() => setMobileOpen(false)}
@@ -41,28 +43,26 @@ function NavItem({ item, collapsed }: { item: any; collapsed: boolean; key?: Rea
             )}
 
             {isActive && !collapsed && (
-                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-cyan shadow-[0_0_8px_rgba(6,214,211,0.5)]" />
             )}
         </Link>
     );
 }
 
-import { useAuth } from '@/context/AuthContext';
-
 function SidebarContent({ collapsed }: { collapsed: boolean }) {
     const { toggleCollapse, setMobileOpen } = useSidebar();
-    const { user, profile } = useAuth(); // Assuming AuthContext provides user & profile
+    const { user, profile } = useAuth();
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-white text-text-primary">
             {/* Logo Area */}
             <div className={`flex items-center gap-3 p-6 h-20 ${collapsed ? 'justify-center p-4' : ''} transition-all`}>
                 <Link to="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                    <div className="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20 shrink-0">
+                    <div className="w-10 h-10 bg-brand-cyan rounded-squircle flex items-center justify-center text-white font-black text-xl shadow-soft hover:scale-105 transition-transform shrink-0">
                         I
                     </div>
                     {!collapsed && (
-                        <span className="text-white font-bold text-xl tracking-tight whitespace-nowrap animate-in fade-in">
+                        <span className="text-text-primary font-black text-xl tracking-tight whitespace-nowrap animate-in fade-in">
                             IDONEO
                         </span>
                     )}
@@ -70,9 +70,9 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                 {!collapsed && (
                     <button
                         onClick={toggleCollapse}
-                        className="ml-auto p-1.5 text-slate-500 hover:text-white bg-slate-800/50 hover:bg-slate-700 rounded-lg transition-colors hidden lg:block"
+                        className="ml-auto p-2 text-text-tertiary hover:text-brand-cyan bg-canvas-light hover:bg-brand-cyan/10 rounded-squircle transition-colors hidden lg:block"
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                     </button>
                 )}
             </div>
@@ -82,15 +82,15 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                 <div className="px-4 pb-4 hidden lg:flex justify-center">
                     <button
                         onClick={toggleCollapse}
-                        className="p-2 text-slate-500 hover:text-white bg-slate-800/50 hover:bg-slate-700 rounded-lg transition-colors"
+                        className="p-2 text-text-tertiary hover:text-brand-cyan bg-canvas-light hover:bg-brand-cyan/10 rounded-squircle transition-colors"
                     >
-                        <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                     </button>
                 </div>
             )}
 
             {/* Scrollable Nav */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
                 <div className="px-3 space-y-8 pb-8">
                     {/* Primary */}
                     <div className="space-y-1">
@@ -100,7 +100,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                     {/* Secondary */}
                     <div>
                         {!collapsed && (
-                            <h3 className="px-3 text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-2 animate-in fade-in">
+                            <h3 className="px-3 text-[10px] uppercase tracking-widest font-bold text-text-tertiary mb-3 animate-in fade-in">
                                 Categorie
                             </h3>
                         )}
@@ -110,43 +110,28 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                         </div>
                     </div>
 
-                    {/* Promo Box */}
-                    {!collapsed && (
-                        <div className="mx-1 p-5 rounded-2xl bg-gradient-to-br from-emerald-900/40 to-slate-800/50 border border-emerald-500/10 animate-in zoom-in-95 duration-300">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="text-emerald-400">🔥</span>
-                                <p className="text-xs text-white font-bold uppercase tracking-wide">Premium</p>
-                            </div>
-                            <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
-                                Sblocca simulazioni illimitate e tutor IA.
-                            </p>
-                            <button className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/20 hover:shadow-emerald-900/40">
-                                Upgrade ora
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
 
             {/* User Footer */}
-            <div className={`p-4 border-t border-slate-800 bg-slate-900 ${collapsed ? 'flex justify-center' : ''}`}>
-                <Link to={user ? "/profile" : "/login"} className={`flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800 transition-colors group ${collapsed ? 'justify-center' : ''}`}>
+            <div className={`p-4 border-t border-canvas-light bg-white ${collapsed ? 'flex justify-center' : ''}`}>
+                <Link to={user ? "/profile" : "/login"} className={`flex items-center gap-3 p-2 rounded-xl hover:bg-canvas-light transition-colors group ${collapsed ? 'justify-center' : ''}`}>
                     {user && profile?.avatar_url ? (
-                        <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center overflow-hidden ring-2 ring-slate-800 group-hover:ring-slate-700 transition-all">
+                        <div className="w-10 h-10 rounded-squircle bg-canvas-light flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-brand-cyan/20 transition-all shadow-sm">
                             <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                         </div>
                     ) : (
-                        <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-300 group-hover:bg-slate-600 ring-2 ring-slate-800 group-hover:ring-slate-700 transition-all">
+                        <div className="w-10 h-10 rounded-squircle bg-canvas-light flex items-center justify-center text-lg text-text-tertiary group-hover:bg-white group-hover:text-brand-cyan ring-2 ring-transparent group-hover:ring-brand-cyan/20 transition-all shadow-sm">
                             {user ? '👤' : '🔑'}
                         </div>
                     )}
 
                     {!collapsed && (
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white">
+                            <p className="text-sm font-bold text-text-primary truncate group-hover:text-brand-cyan transition-colors">
                                 {user ? (profile?.nickname || user.email?.split('@')[0]) : 'Accedi'}
                             </p>
-                            <p className="text-xs text-slate-500 truncate">
+                            <p className="text-xs text-text-tertiary truncate font-medium">
                                 {user ? 'Visualizza profilo' : 'Per salvare i progressi'}
                             </p>
                         </div>
@@ -157,8 +142,6 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
     );
 }
 
-import MobileDrawer from './MobileDrawer';
-
 export default function Sidebar() {
     const { isCollapsed, setMobileOpen } = useSidebar();
 
@@ -166,12 +149,12 @@ export default function Sidebar() {
         <>
             {/* Desktop Sidebar */}
             <aside
-                className={`hidden lg:flex flex-col bg-slate-900 border-r border-slate-800 h-screen sticky top-0 flex-shrink-0 transition-[width] duration-300 ease-in-out ${isCollapsed ? 'w-24' : 'w-72'}`}
+                className={`hidden lg:flex flex-col bg-white border-r border-transparent shadow-soft h-screen sticky top-0 flex-shrink-0 transition-[width] duration-300 ease-in-out ${isCollapsed ? 'w-24' : 'w-72'}`}
             >
                 <SidebarContent collapsed={isCollapsed} />
             </aside>
 
-            {/* Mobile Drawer (Extracted) */}
+            {/* Mobile Drawer */}
             <MobileDrawer />
         </>
     );

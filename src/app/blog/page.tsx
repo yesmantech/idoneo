@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { BlogPost, BlogCategory, STATUS_CONFIG } from "@/types/blog";
+import { BlogPost, BlogCategory } from "@/types/blog";
 
 export default function BlogIndexPage() {
     const navigate = useNavigate();
@@ -43,10 +43,6 @@ export default function BlogIndexPage() {
         ? posts
         : posts.filter(p => p.category_id === activeCategory);
 
-    // Featured post (first is_featured or first post)
-    const featuredPost = posts.find(p => p.is_featured) || posts[0];
-    const regularPosts = filteredPosts.filter(p => p.id !== featuredPost?.id);
-
     const formatDate = (dateStr: string | null) => {
         if (!dateStr) return '';
         return new Date(dateStr).toLocaleDateString('it-IT', {
@@ -58,143 +54,130 @@ export default function BlogIndexPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="text-slate-500">Caricamento...</div>
+            <div className="min-h-screen bg-canvas-light flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 rounded-squircle bg-brand-cyan/20 animate-pulse flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-brand-cyan animate-bounce" />
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-white">
-            {/* Header */}
-            <header className="border-b border-slate-100">
-                <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <Link to="/" className="text-xl font-black text-slate-900">IDONEO</Link>
-                    <nav className="flex items-center gap-6">
-                        <Link to="/concorsi" className="text-slate-600 hover:text-slate-900">Concorsi</Link>
-                        <Link to="/blog" className="text-emerald-600 font-medium">Blog</Link>
-                        <Link to="/stats" className="text-slate-600 hover:text-slate-900">Statistiche</Link>
+        <div className="min-h-screen bg-canvas-light font-sans text-slate-900 selection:bg-brand-cyan/20">
+            {/* Header - Simple & Clean */}
+            <header className="sticky top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
+                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                    <Link to="/" className="flex items-center gap-2 group">
+                        <div className="w-8 h-8 rounded-squircle bg-brand-cyan flex items-center justify-center text-white font-black text-lg shadow-sm group-hover:scale-105 transition-transform">
+                            I
+                        </div>
+                        <span className="font-bold text-lg tracking-tight text-slate-900">IDONEO</span>
+                    </Link>
+                    <nav className="hidden md:flex items-center gap-6">
+                        <Link to="/concorsi" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Concorsi</Link>
+                        <Link to="/blog" className="text-sm font-medium text-brand-cyan">Blog</Link>
+                        <Link to="/stats" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Statistiche</Link>
                     </nav>
                 </div>
             </header>
 
-            {/* Hero Section */}
-            <section className="bg-gradient-to-br from-emerald-50 to-white py-16">
-                <div className="max-w-6xl mx-auto px-6">
-                    <div className="text-center mb-12">
-                        <h1 className="text-4xl font-black text-slate-900 mb-3">Blog & Novità</h1>
-                        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                            Guide pratiche, news sui concorsi pubblici e strategie di studio per vincere il tuo concorso.
+            <main className="pb-20">
+                {/* Categories Bar - Sticky below header */}
+                <div className="sticky top-16 z-40 bg-canvas-light/95 backdrop-blur-sm border-b border-slate-200/50">
+                    <div className="max-w-7xl mx-auto px-6 py-4">
+                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide mask-fade-right">
+                            <button
+                                onClick={() => setActiveCategory('all')}
+                                className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-200 ${activeCategory === 'all'
+                                        ? 'bg-slate-900 text-white shadow-sm'
+                                        : 'bg-white text-slate-500 hover:bg-slate-100'
+                                    }`}
+                            >
+                                Tutti
+                            </button>
+                            {categories.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setActiveCategory(cat.id)}
+                                    className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-200 ${activeCategory === cat.id
+                                            ? 'bg-slate-900 text-white shadow-sm'
+                                            : 'bg-white text-slate-500 hover:bg-slate-100'
+                                        }`}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-6 py-8">
+                    {/* Title Section */}
+                    <div className="mb-10 mt-4">
+                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Blog & Novità</h1>
+                        <p className="text-xl text-slate-500 max-w-2xl">
+                            Consigli, strategie e aggiornamenti per vincere il tuo concorso.
                         </p>
                     </div>
 
-                    {/* Featured Post */}
-                    {featuredPost && (
-                        <Link
-                            to={`/blog/${featuredPost.slug}`}
-                            className="block bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow border border-slate-100"
-                        >
-                            <div className="grid md:grid-cols-2 gap-6">
-                                {featuredPost.cover_image_url && (
-                                    <div className="aspect-video md:aspect-auto">
-                                        <img
-                                            src={featuredPost.cover_image_url}
-                                            alt={featuredPost.title}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )}
-                                <div className="p-6 md:p-8 flex flex-col justify-center">
-                                    {featuredPost.category && (
-                                        <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full mb-3 w-fit">
-                                            {featuredPost.category.name}
-                                        </span>
-                                    )}
-                                    <h2 className="text-2xl font-bold text-slate-900 mb-2">{featuredPost.title}</h2>
-                                    {featuredPost.subtitle && (
-                                        <p className="text-slate-600 mb-4">{featuredPost.subtitle}</p>
-                                    )}
-                                    <div className="flex items-center gap-4 text-sm text-slate-400">
-                                        <span>{formatDate(featuredPost.published_at)}</span>
-                                        <span>•</span>
-                                        <span>{featuredPost.reading_time_minutes} min lettura</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                    )}
-                </div>
-            </section>
-
-            {/* Category Filters */}
-            <section className="border-b border-slate-100 sticky top-0 bg-white z-10">
-                <div className="max-w-6xl mx-auto px-6 py-4">
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                        <button
-                            onClick={() => setActiveCategory('all')}
-                            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === 'all'
-                                    ? 'bg-slate-900 text-white'
-                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
-                        >
-                            Tutti
-                        </button>
-                        {categories.map(cat => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setActiveCategory(cat.id)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat.id
-                                        ? 'bg-slate-900 text-white'
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                    }`}
-                            >
-                                {cat.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Posts Grid */}
-            <section className="py-12">
-                <div className="max-w-6xl mx-auto px-6">
-                    {regularPosts.length === 0 ? (
-                        <div className="text-center py-12 text-slate-400">
-                            Nessun articolo in questa categoria
+                    {/* Posts Grid */}
+                    {filteredPosts.length === 0 ? (
+                        <div className="text-center py-20 bg-white rounded-[32px] shadow-sm border border-dashed border-slate-200">
+                            <div className="w-16 h-16 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-3xl mb-4">👻</div>
+                            <h3 className="text-lg font-bold text-slate-900">Nessun articolo trovato</h3>
+                            <p className="text-slate-500">Prova a cambiare categoria.</p>
                         </div>
                     ) : (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {regularPosts.map(post => (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {filteredPosts.map(post => (
                                 <Link
                                     key={post.id}
                                     to={`/blog/${post.slug}`}
-                                    className="group bg-white rounded-xl border border-slate-100 overflow-hidden hover:shadow-lg transition-shadow"
+                                    className="group flex flex-col h-full bg-transparent hover:bg-white hover:shadow-soft rounded-[24px] p-2 transition-all duration-300 hover:-translate-y-1"
                                 >
-                                    {post.cover_image_url && (
-                                        <div className="aspect-video overflow-hidden">
+                                    {/* Image Wrapper */}
+                                    <div className="aspect-[16/9] overflow-hidden rounded-[20px] bg-slate-100 mb-4 relative">
+                                        {post.cover_image_url ? (
                                             <img
                                                 src={post.cover_image_url}
                                                 alt={post.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                             />
-                                        </div>
-                                    )}
-                                    <div className="p-5">
-                                        {post.category && (
-                                            <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded mb-2">
-                                                {post.category.name}
-                                            </span>
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-slate-300 font-black opacity-30">IDONEO</div>
                                         )}
-                                        <h3 className="font-bold text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex flex-col flex-1 px-2 pb-2">
+                                        {/* Date and Reading Time */}
+                                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">
+                                            <span>{formatDate(post.published_at)}</span>
+                                            <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                            <span>{post.reading_time_minutes} MIN</span>
+                                        </div>
+
+                                        {/* Title */}
+                                        <h3 className="text-xl font-bold text-slate-900 mb-3 leading-snug group-hover:text-brand-blue transition-colors">
                                             {post.title}
                                         </h3>
+
+                                        {/* Subtitle/Excerpt */}
                                         {post.subtitle && (
-                                            <p className="text-sm text-slate-500 line-clamp-2 mb-3">{post.subtitle}</p>
+                                            <p className="text-sm text-slate-500 line-clamp-3 leading-relaxed mb-6 flex-1">
+                                                {post.subtitle}
+                                            </p>
                                         )}
-                                        <div className="flex items-center gap-3 text-xs text-slate-400">
-                                            <span>{formatDate(post.published_at)}</span>
-                                            <span>•</span>
-                                            <span>{post.reading_time_minutes} min</span>
+
+                                        {/* Footer: Category & Author (if available) */}
+                                        <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100/50">
+                                            {post.category && (
+                                                <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md group-hover:bg-brand-cyan/10 group-hover:text-brand-cyan transition-colors">
+                                                    {post.category.name}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </Link>
@@ -202,12 +185,20 @@ export default function BlogIndexPage() {
                         </div>
                     )}
                 </div>
-            </section>
+            </main>
 
-            {/* Footer */}
-            <footer className="bg-slate-50 border-t border-slate-100 py-8">
-                <div className="max-w-6xl mx-auto px-6 text-center text-sm text-slate-500">
-                    © {new Date().getFullYear()} IDONEO - La piattaforma per prepararti ai concorsi pubblici
+            {/* Simple Footer */}
+            <footer className="border-t border-slate-200 bg-white py-12">
+                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all">
+                        <div className="w-6 h-6 rounded-squircle bg-brand-cyan flex items-center justify-center text-white font-black text-xs">
+                            I
+                        </div>
+                        <span className="font-bold text-slate-900">IDONEO</span>
+                    </div>
+                    <div className="text-sm text-slate-400 font-medium">
+                        © {new Date().getFullYear()} Idoneo.io
+                    </div>
                 </div>
             </footer>
         </div>

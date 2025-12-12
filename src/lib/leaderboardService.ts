@@ -108,39 +108,67 @@ export const leaderboardService = {
 
     // 2. Fetch Global XP Leaderboard
     async getXPLeaderboard(seasonId: string | null = null, limit = 50): Promise<LeaderboardEntry[]> {
-        let query = supabase
-            .from('user_xp')
-            .select('user_id, xp');
-
+        // If Season ID is provided, fetch specific season XP
         if (seasonId) {
-            query = query.eq('season_id', seasonId);
+            const { data: rankings, error } = await supabase
+                .from('user_xp')
+                .select('user_id, xp')
+                .eq('season_id', seasonId)
+                .order('xp', { ascending: false })
+                .limit(limit);
+
+            if (error) {
+                console.error("Error fetching season XP:", error);
+                return [];
+            }
+            if (!rankings || rankings.length === 0) return []; // Or fallback to mock if strictly needed for dev
+
+            // Fetch Profiles for nicknames
+            const userIds = rankings.map(r => r.user_id);
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, nickname, avatar_url')
+                .in('id', userIds);
+
+            const profileMap = new Map(profiles?.map(p => [p.id, p]));
+
+            return rankings.map((row, idx) => {
+                const profile = profileMap.get(row.user_id);
+                return {
+                    rank: idx + 1,
+                    user: {
+                        id: row.user_id,
+                        nickname: profile?.nickname || `Player ${row.user_id.slice(0, 4)}`,
+                        avatarUrl: profile?.avatar_url
+                    },
+                    score: row.xp
+                };
+            });
         }
 
-        const { data: rankings, error } = await query.order('xp', { ascending: false }).limit(limit);
-
-        if (error || !rankings || rankings.length === 0) return [];
-
-        // Fetch Profiles
-        const userIds = rankings.map(r => r.user_id);
-        const { data: profiles } = await supabase
+        // Default: Fetch ALL TIME XP from profiles
+        const { data: profiles, error } = await supabase
             .from('profiles')
-            .select('id, nickname, avatar_url')
-            .in('id', userIds);
+            .select('id, nickname, avatar_url, total_xp')
+            .order('total_xp', { ascending: false }) // Sorting by total_xp
+            .limit(limit);
 
-        const profileMap = new Map(profiles?.map(p => [p.id, p]));
+        if (error) {
+            console.error("Error fetching all-time XP:", error);
+            return [];
+        }
 
-        return rankings.map((row, idx) => {
-            const profile = profileMap.get(row.user_id);
-            return {
-                rank: idx + 1,
-                user: {
-                    id: row.user_id,
-                    nickname: profile?.nickname || `Player ${row.user_id.slice(0, 4)}`,
-                    avatarUrl: profile?.avatar_url
-                },
-                score: row.xp
-            };
-        });
+        if (!profiles || profiles.length === 0) return [];
+
+        return profiles.map((p, idx) => ({
+            rank: idx + 1,
+            user: {
+                id: p.id,
+                nickname: p.nickname || `User ${p.id.slice(0, 4)}`,
+                avatarUrl: p.avatar_url
+            },
+            score: p.total_xp || 0
+        }));
     },
 
     // 3. Get User's Active Quizzes (for "My Concorsi" selector)

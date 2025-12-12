@@ -23,7 +23,7 @@ export default function SubjectProgressBar({ subjectName, totalQuestions, comple
             className={`bg-white rounded-xl border border-slate-200 p-4 transition-all ${onClick ? 'cursor-pointer hover:border-slate-300 hover:shadow-sm' : ''}`}
         >
             <div className="flex justify-between items-end mb-3">
-                <h4 className="font-bold text-slate-800 line-clamp-1" title={subjectName}>
+                <h4 className="font-bold text-slate-800 line-clamp-2" title={subjectName}>
                     {subjectName}
                 </h4>
                 <div className="text-right">

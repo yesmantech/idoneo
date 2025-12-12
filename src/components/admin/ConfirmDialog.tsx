@@ -93,14 +93,14 @@ export default function ConfirmDialog({
                     <button
                         onClick={onClose}
                         disabled={loading}
-                        className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+                        className="px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
                     >
                         {cancelLabel}
                     </button>
                     <button
                         onClick={handleConfirm}
                         disabled={loading}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg shadow-lg transition-all disabled:opacity-50 ${confirmButtonClasses}`}
+                        className={`px-4 py-3 text-sm font-medium rounded-lg shadow-lg transition-all disabled:opacity-50 ${confirmButtonClasses}`}
                     >
                         {loading ? (
                             <span className="flex items-center gap-2">

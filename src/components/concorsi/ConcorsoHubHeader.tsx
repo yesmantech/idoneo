@@ -10,7 +10,7 @@ interface ConcorsoHubHeaderProps {
 
 export default function ConcorsoHubHeader({ title, subtitle, description, logoUrl }: ConcorsoHubHeaderProps) {
     return (
-        <div className={`relative rounded-2xl border border-slate-200 overflow-hidden mb-8 shadow-sm ${logoUrl ? 'p-0' : 'p-8 bg-white'}`}>
+        <div className={`relative rounded-card overflow-hidden mb-8 shadow-soft ${logoUrl ? 'p-0' : 'p-8 bg-white'}`}>
 
             {/* Background Image logic */}
             {logoUrl && (
@@ -27,7 +27,7 @@ export default function ConcorsoHubHeader({ title, subtitle, description, logoUr
                 */}
 
                 {!logoUrl && (
-                    <div className="w-20 h-20 bg-slate-900 rounded-xl flex items-center justify-center shrink-0 shadow-md">
+                    <div className="w-20 h-20 bg-brand-cyan rounded-squircle flex items-center justify-center shrink-0 shadow-md">
                         <span className="text-2xl font-bold text-white">
                             {title.substring(0, 3).toUpperCase()}
                         </span>
@@ -36,11 +36,11 @@ export default function ConcorsoHubHeader({ title, subtitle, description, logoUr
 
                 <div className="space-y-4 flex-1">
                     <div>
-                        <h1 className={`text-3xl font-bold mb-2 ${logoUrl ? 'text-white' : 'text-slate-900'}`}>{title}</h1>
-                        <p className={`text-lg font-medium ${logoUrl ? 'text-slate-200' : 'text-slate-600'}`}>{subtitle}</p>
+                        <h1 className={`text-4xl font-bold mb-2 ${logoUrl ? 'text-white' : 'text-text-primary'}`}>{title}</h1>
+                        <p className={`text-lg font-semibold ${logoUrl ? 'text-slate-200' : 'text-text-secondary'}`}>{subtitle}</p>
                     </div>
 
-                    <div className={`p-4 rounded-xl border leading-relaxed max-w-3xl ${logoUrl ? 'bg-white/10 border-white/10 text-slate-100 backdrop-blur-sm' : 'bg-slate-50 border-slate-100 text-slate-700'}`}>
+                    <div className={`p-5 rounded-card leading-relaxed max-w-3xl ${logoUrl ? 'bg-white/10 border-0 text-slate-100 backdrop-blur-sm' : 'bg-canvas-light text-text-secondary'}`}>
                         {description || "Nessuna descrizione disponibile per questo concorso."}
                     </div>
                 </div>

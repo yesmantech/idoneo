@@ -41,9 +41,9 @@ export default function ProfilePage() {
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24 md:py-8 lg:px-8">
+        <div className="min-h-screen bg-canvas-light pb-24 md:py-8 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-2xl font-black text-slate-900 mb-6 hidden md:block">Il tuo Profilo</h1>
+                <h1 className="text-2xl font-black text-text-primary mb-6 hidden md:block">Il tuo Profilo</h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 
@@ -61,7 +61,7 @@ export default function ProfilePage() {
                         <ProfileStatsCard xp={xp} />
 
                         {/* 4. Badges (moved here for desktop sidebar feel) */}
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 hidden lg:block">
+                        <div className="bg-white rounded-card shadow-soft p-6 hidden lg:block">
                             <BadgesBlock />
                         </div>
                     </div>
@@ -70,19 +70,19 @@ export default function ProfilePage() {
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* 3. Dashboard (Concorsi List) */}
-                        <div className="bg-white md:rounded-3xl md:border md:border-slate-200 md:shadow-sm md:p-8 p-4 rounded-xl">
+                        <div className="bg-white md:rounded-card md:shadow-soft md:p-8 p-4 rounded-xl">
                             <DashboardList userId={user?.id || ''} />
                         </div>
 
                         {/* Mobile Badges (Visible only on mobile) */}
-                        <div className="lg:hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mx-4">
+                        <div className="lg:hidden bg-white rounded-card shadow-soft p-6 mx-0">
                             <BadgesBlock />
                         </div>
 
                         {/* Recent Activity (Placeholder for now) */}
-                        <div className="bg-white md:rounded-3xl md:border md:border-slate-200 md:shadow-sm md:p-8 p-4 rounded-xl">
-                            <h3 className="text-lg font-bold text-slate-800 mb-4">Attività Recente</h3>
-                            <div className="text-center py-10 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <div className="bg-white md:rounded-card md:shadow-soft md:p-8 p-4 rounded-xl">
+                            <h3 className="text-lg font-bold text-text-primary mb-6">Attività Recente</h3>
+                            <div className="text-center py-10 text-text-tertiary bg-canvas-light rounded-2xl border border-dashed border-text-tertiary/20">
                                 Nessuna attività recente da mostrare.
                             </div>
                         </div>

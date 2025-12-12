@@ -170,6 +170,7 @@ export default function CustomQuizWizardPage() {
                 total_questions: richAnswers.length,
                 correct: 0, wrong: 0, blank: 0,
                 started_at: new Date().toISOString(),
+                mode: 'custom', // Track attempt type
             }).select().single();
 
             if (error) throw error;
@@ -383,12 +384,12 @@ export default function CustomQuizWizardPage() {
 
 
                 {/* Sticky Footer */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur border-t border-slate-200">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur border-t border-slate-200 pb-safe">
                     <div className="max-w-md mx-auto">
                         <button
                             onClick={handleStart}
                             disabled={generating || totalSelectedQuestions === 0}
-                            className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-lg shadow-lg shadow-slate-900/20 hover:bg-slate-800 disabled:opacity-50 disabled:shadow-none"
+                            className="w-full py-4 bg-brand-cyan text-white rounded-2xl font-bold text-lg shadow-lg shadow-brand-cyan/20 hover:bg-brand-cyan/90 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
                         >
                             {generating ? "Creazione in corso..." : `Avvia Prova (${totalSelectedQuestions})`}
                         </button>

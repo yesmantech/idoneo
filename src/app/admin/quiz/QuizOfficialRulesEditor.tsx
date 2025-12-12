@@ -185,74 +185,75 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
     const availableSubjects = subjects.filter(s => !rules.find(r => r.subject_id === s.id));
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-900 border border-slate-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl flex flex-col">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] shadow-2xl flex flex-col animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
-                <div className="p-6 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-slate-900 z-10">
+                <div className="p-8 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-slate-900/95 backdrop-blur z-10">
                     <div>
-                        <h2 className="text-xl font-bold text-white">Regole Simulazione Ufficiale</h2>
-                        <p className="text-sm text-slate-400">{quiz.title}</p>
+                        <h2 className="text-2xl font-black text-white tracking-tight">Regole Simulazione Ufficiale</h2>
+                        <p className="text-sm font-medium text-slate-500 mt-1">{quiz.title}</p>
                     </div>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white pb-1">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 p-2 rounded-full">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
 
                 {loading ? (
-                    <div className="p-10 text-center text-slate-400">Caricamento...</div>
+                    <div className="p-20 text-center text-slate-500 animate-pulse font-bold">Caricamento configurazione...</div>
                 ) : (
-                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
 
                         {/* LEFT: Global Settings */}
                         <div className="space-y-6">
-                            <div className="bg-slate-950 p-5 rounded-xl border border-slate-800">
-                                <h3 className="text-emerald-400 font-bold mb-4 flex items-center gap-2">
-                                    <span>⚙️</span> Impostazioni Globali
+                            <div className="bg-slate-950/50 p-6 rounded-[24px] border border-slate-800">
+                                <h3 className="text-emerald-400 font-black text-lg mb-6 flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-sm border border-emerald-500/20">⚙️</span>
+                                    Impostazioni Globali
                                 </h3>
-                                <div className="space-y-4">
+                                <div className="space-y-5">
                                     <div>
-                                        <label className="block text-slate-400 text-xs mb-1">Durata (minuti)</label>
+                                        <label className="block text-slate-400 font-bold text-xs uppercase tracking-wider mb-2">Durata (minuti)</label>
                                         <input
                                             type="number"
-                                            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
+                                            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                                             value={timeLimit}
                                             onChange={e => setTimeLimit(Number(e.target.value))}
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-3 gap-3">
                                         <div>
-                                            <label className="block text-slate-400 text-xs mb-1">Punti Esatti</label>
-                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-white w-full p-2 rounded" value={pointsCorrect} onChange={e => setPointsCorrect(Number(e.target.value))} />
+                                            <label className="block text-slate-400 font-bold text-[10px] uppercase tracking-wider mb-2">Esatti</label>
+                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-emerald-400 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500 text-center" value={pointsCorrect} onChange={e => setPointsCorrect(Number(e.target.value))} />
                                         </div>
                                         <div>
-                                            <label className="block text-slate-400 text-xs mb-1">Punti Errati</label>
-                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-white w-full p-2 rounded" value={pointsWrong} onChange={e => setPointsWrong(Number(e.target.value))} />
+                                            <label className="block text-slate-400 font-bold text-[10px] uppercase tracking-wider mb-2">Errati</label>
+                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-rose-400 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-rose-500 text-center" value={pointsWrong} onChange={e => setPointsWrong(Number(e.target.value))} />
                                         </div>
                                         <div>
-                                            <label className="block text-slate-400 text-xs mb-1">Punti Vuoti</label>
-                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-white w-full p-2 rounded" value={pointsBlank} onChange={e => setPointsBlank(Number(e.target.value))} />
+                                            <label className="block text-slate-400 font-bold text-[10px] uppercase tracking-wider mb-2">Vuoti</label>
+                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-slate-400 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-slate-500 text-center" value={pointsBlank} onChange={e => setPointsBlank(Number(e.target.value))} />
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 pt-2">
+                                    <div className="flex items-center gap-3 pt-2 bg-slate-900 p-3 rounded-xl border border-slate-800">
                                         <input
                                             type="checkbox"
                                             id="isOfficial"
-                                            className="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
+                                            className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
                                             checked={isOfficial}
                                             onChange={e => setIsOfficial(e.target.checked)}
                                         />
-                                        <label htmlFor="isOfficial" className="text-white text-sm cursor-pointer select-none">
-                                            Abilita "Simulazione Ufficiale" per gli studenti
+                                        <label htmlFor="isOfficial" className="text-slate-200 font-bold text-sm cursor-pointer select-none">
+                                            Simulazione Ufficiale
                                         </label>
                                     </div>
 
                                     <button
                                         onClick={handleSaveGlobal}
                                         disabled={saving}
-                                        className="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded transition-colors"
+                                        className="w-full mt-4 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-3 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-lg hover:-translate-y-0.5 transition-all"
                                     >
                                         Salva Globali
                                     </button>
@@ -262,17 +263,18 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
 
                         {/* RIGHT: Subject Rules */}
                         <div className="space-y-6">
-                            <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 h-full flex flex-col">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-purple-400 font-bold flex items-center gap-2">
-                                        <span>📚</span> Materie e Domande
+                            <div className="bg-slate-950/50 p-6 rounded-[24px] border border-slate-800 h-full flex flex-col">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-purple-400 font-black text-lg flex items-center gap-2">
+                                        <span className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-sm border border-purple-500/20">📚</span>
+                                        Materie
                                     </h3>
 
                                     {/* Add Subject Dropdown */}
                                     {availableSubjects.length > 0 && (
                                         <div className="flex gap-2">
                                             <select
-                                                className="bg-slate-900 text-slate-300 text-xs p-2 rounded border border-slate-700 max-w-[150px]"
+                                                className="bg-slate-900 text-slate-300 text-xs font-bold p-2.5 rounded-xl border border-slate-700 max-w-[150px] focus:outline-none focus:border-purple-500"
                                                 onChange={(e) => {
                                                     if (e.target.value) {
                                                         handleAddRule(e.target.value);
@@ -289,9 +291,11 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                     )}
                                 </div>
 
-                                <div className="flex-1 overflow-y-auto space-y-3 min-h-[300px]">
+                                <div className="flex-1 overflow-y-auto space-y-3 min-h-[300px] pr-2 custom-scrollbar">
                                     {rules.length === 0 ? (
-                                        <p className="text-slate-500 text-center italic mt-10">Nessuna materia configurata.</p>
+                                        <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-xl">
+                                            <p className="text-slate-600 font-bold">Nessuna materia configurata.</p>
+                                        </div>
                                     ) : (
                                         rules.map((rule, idx) => {
                                             const subjectName = subjects.find(s => s.id === rule.subject_id)?.name || "Unknown";
@@ -299,26 +303,26 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                             const isError = rule.question_count > available;
 
                                             return (
-                                                <div key={rule.subject_id} className="bg-slate-900 p-3 rounded border border-slate-800 flex items-center justify-between gap-3">
-                                                    <div className="flex-1">
-                                                        <p className="font-bold text-slate-200 text-sm">{subjectName}</p>
-                                                        <p className="text-[10px] text-slate-500">Disponibili: {available}</p>
+                                                <div key={rule.subject_id} className="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4 transition-all hover:border-slate-700">
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-slate-200 text-sm truncate" title={subjectName}>{subjectName}</p>
+                                                        <p className="text-[10px] text-slate-500 font-medium mt-0.5">Disponibili: <span className="text-slate-400">{available}</span></p>
                                                     </div>
 
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-3">
                                                         <div className="flex flex-col items-end">
                                                             <input
                                                                 type="number"
-                                                                className={`w-16 bg-slate-950 border ${isError ? 'border-rose-500 text-rose-500' : 'border-slate-700 text-white'} rounded p-1 text-center text-sm`}
+                                                                className={`w-16 bg-slate-950 border ${isError ? 'border-rose-500 text-rose-500' : 'border-slate-700 text-white'} rounded-lg p-2 text-center text-sm font-bold focus:outline-none`}
                                                                 value={rule.question_count}
                                                                 onChange={e => handleUpdateRuleCount(idx, parseInt(e.target.value) || 0)}
                                                             />
-                                                            {isError && <span className="text-[10px] text-rose-500 font-bold">Max {available}!</span>}
+                                                            {isError && <span className="text-[10px] text-rose-500 font-bold mt-1">Max {available}!</span>}
                                                         </div>
 
                                                         <button
                                                             onClick={() => handleRemoveRule(idx)}
-                                                            className="text-slate-500 hover:text-rose-400 p-1"
+                                                            className="text-slate-600 hover:text-rose-400 p-2 hover:bg-rose-500/10 rounded-lg transition-colors"
                                                         >
                                                             ✕
                                                         </button>
@@ -329,14 +333,15 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                     )}
                                 </div>
 
-                                <div className="pt-4 border-t border-slate-800 mt-4">
-                                    <div className="flex justify-between items-center text-xs text-slate-400 mb-4">
-                                        <span>Totale domade: <b className="text-white">{rules.reduce((a, b) => a + b.question_count, 0)}</b></span>
+                                <div className="pt-6 border-t border-slate-800 mt-4">
+                                    <div className="flex justify-between items-center text-xs text-slate-500 font-bold mb-4 uppercase tracking-wider">
+                                        <span>Totale domande</span>
+                                        <b className="text-white text-lg">{rules.reduce((a, b) => a + b.question_count, 0)}</b>
                                     </div>
                                     <button
                                         onClick={handleSaveRules}
                                         disabled={saving || rules.some(r => r.question_count > (subjectStats[r.subject_id] || 0))}
-                                        className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-3 rounded-xl shadow-[0_0_20px_rgba(147,51,234,0.3)] hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                                     >
                                         Salva Regole Materie
                                     </button>

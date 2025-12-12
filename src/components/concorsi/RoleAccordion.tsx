@@ -11,21 +11,22 @@ interface RoleAccordionProps {
 
 export default function RoleAccordion({ role, isOpen, onToggle }: RoleAccordionProps) {
     return (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+        <div className="bg-white rounded-card shadow-soft overflow-hidden transition-all duration-300 ease-ios hover:shadow-card">
             {/* Header / Trigger */}
             <button
                 onClick={onToggle}
-                className="w-full flex items-center justify-between p-5 text-left bg-white hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center justify-between p-4 md:p-6 text-left bg-white hover:bg-canvas-light transition-colors duration-300"
             >
                 <div>
-                    <h3 className="text-xl font-bold text-slate-900">{role.title}</h3>
-                    <div className="text-sm text-slate-500 font-medium mt-1">
+                    <h3 className="text-xl font-bold text-text-primary">{role.title}</h3>
+                    <div className="text-sm text-text-secondary font-medium mt-1">
                         {role.contests.length} {role.contests.length === 1 ? 'edizione disponibile' : 'edizioni disponibili'}
                     </div>
                 </div>
 
-                <div className={`p-2 rounded-full bg-slate-100 text-slate-600 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-emerald-100 text-emerald-600' : ''}`}>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-ios ${isOpen ? 'rotate-180 bg-brand-cyan/10 text-brand-cyan' : 'bg-canvas-light text-text-secondary'
+                    }`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
@@ -33,10 +34,10 @@ export default function RoleAccordion({ role, isOpen, onToggle }: RoleAccordionP
 
             {/* Expanded Content */}
             <div
-                className={`transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                className={`transition-[max-height,opacity] duration-300 ease-ios overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                     }`}
             >
-                <div className="border-t border-slate-100 bg-slate-50/50 p-3 space-y-2">
+                <div className="bg-canvas-light/50 p-4 space-y-3">
                     {role.contests.length > 0 ? (
                         role.contests.map((contest, index) => {
                             // Logic for "New" badge - mock for now, assume first item is newest
@@ -48,18 +49,18 @@ export default function RoleAccordion({ role, isOpen, onToggle }: RoleAccordionP
                                     to={`/concorsi/${contest.categorySlug}/${contest.roleSlug}/${contest.slug}`}
                                     className="block relative group"
                                 >
-                                    <div className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg hover:border-emerald-400 hover:shadow-sm transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">
+                                    <div className="flex items-center justify-between p-4 bg-white rounded-card shadow-soft hover:shadow-card hover:scale-[1.01] transition-all duration-300 ease-ios">
+                                        <div className="flex items-center gap-3">
+                                            <div className="font-bold text-text-primary group-hover:text-brand-cyan transition-colors">
                                                 {contest.title}
                                             </div>
                                             {isNew && (
-                                                <span className="px-2 py-0.5 rounded textxs font-bold bg-emerald-100 text-emerald-700 uppercase tracking-wide text-[10px]">
+                                                <span className="px-3 py-1 rounded-pill text-xs font-bold bg-brand-cyan/10 text-brand-cyan uppercase tracking-wide">
                                                     Nuovo
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="text-slate-400 group-hover:translate-x-1 transition-transform">
+                                        <div className="text-text-secondary group-hover:translate-x-1 transition-transform">
                                             →
                                         </div>
                                     </div>

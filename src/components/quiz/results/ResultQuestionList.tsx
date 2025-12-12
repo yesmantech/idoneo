@@ -35,19 +35,19 @@ export default function ResultQuestionList({ wrong, correct, skipped, attemptId 
     return (
         <div className="max-w-4xl mx-auto px-6 mb-24">
             {/* Tabs */}
-            <div className="flex p-1 bg-slate-100 rounded-xl mb-6 overflow-x-auto">
+            <div className="flex p-1.5 bg-white rounded-card shadow-soft mb-8 overflow-x-auto">
                 {tabs.map(tab => {
                     const isActive = activeTab === tab.id;
                     let activeClass = "";
-                    if (isActive && tab.color === 'rose') activeClass = "bg-white text-rose-600 shadow-sm";
-                    if (isActive && tab.color === 'emerald') activeClass = "bg-white text-emerald-600 shadow-sm";
-                    if (isActive && tab.color === 'slate') activeClass = "bg-white text-slate-800 shadow-sm";
+                    if (isActive && tab.color === 'rose') activeClass = "bg-semantic-error/10 text-semantic-error";
+                    if (isActive && tab.color === 'emerald') activeClass = "bg-semantic-success/10 text-semantic-success";
+                    if (isActive && tab.color === 'slate') activeClass = "bg-canvas-light text-text-primary";
 
                     return (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as TabType)}
-                            className={`flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-bold transition-all ${isActive ? activeClass : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 min-w-[120px] py-3 rounded-xl text-sm font-bold transition-all duration-300 ${isActive ? activeClass : 'text-text-tertiary hover:text-text-secondary'}`}
                         >
                             {tab.label}
                         </button>
@@ -66,31 +66,31 @@ export default function ResultQuestionList({ wrong, correct, skipped, attemptId 
                 {currentList.map((q, i) => (
                     <div
                         key={i}
-                        className="bg-white border border-slate-200 rounded-xl p-4 flex items-start gap-4 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
+                        className="bg-white rounded-card p-5 flex items-start gap-5 hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer group"
                         onClick={() => navigate(`/quiz/explanations/${attemptId}/${q.id}`)}
                     >
                         {/* Icon */}
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${q.isCorrect ? 'bg-emerald-100 text-emerald-600' :
-                            q.isSkipped ? 'bg-slate-100 text-slate-400' : 'bg-rose-100 text-rose-600'
+                        <div className={`w-10 h-10 rounded-squircle flex items-center justify-center shrink-0 mt-0.5 text-lg font-bold ${q.isCorrect ? 'bg-semantic-success/10 text-semantic-success' :
+                            q.isSkipped ? 'bg-canvas-light text-text-tertiary' : 'bg-semantic-error/10 text-semantic-error'
                             }`}>
                             {q.isCorrect ? '✓' : q.isSkipped ? '–' : '✕'}
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                            <p className="text-slate-800 font-medium leading-relaxed line-clamp-2 mb-1.5">{q.text}</p>
+                            <p className="text-text-primary font-medium leading-relaxed line-clamp-2 mb-2">{q.text}</p>
 
-                            <div className="text-xs space-y-0.5">
+                            <div className="text-xs space-y-1">
                                 {q.isSkipped ? (
-                                    <span className="text-slate-400 font-medium italic">Risposta omessa</span>
+                                    <span className="text-text-tertiary font-bold uppercase tracking-wider">Risposta omessa</span>
                                 ) : (
                                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
-                                        <span className={`${q.isCorrect ? 'text-emerald-600' : 'text-rose-600'} font-bold`}>
-                                            Hai risposto: {q.userAnswer}
+                                        <span className={`${q.isCorrect ? 'text-semantic-success' : 'text-semantic-error'} font-bold`}>
+                                            Hai risposto: <span className="font-normal text-text-primary">{q.userAnswer}</span>
                                         </span>
                                         {!q.isCorrect && (
-                                            <span className="text-emerald-600 font-bold">
-                                                Corretta: {q.correctAnswer}
+                                            <span className="text-semantic-success font-bold">
+                                                Corretta: <span className="font-normal text-text-primary">{q.correctAnswer}</span>
                                             </span>
                                         )}
                                     </div>
@@ -99,7 +99,7 @@ export default function ResultQuestionList({ wrong, correct, skipped, attemptId 
                         </div>
 
                         {/* Chevron */}
-                        <div className="text-slate-300 group-hover:text-slate-500 transition-colors self-center">
+                        <div className="text-text-tertiary group-hover:text-brand-cyan transition-colors self-center bg-canvas-light p-2 rounded-full">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                         </div>
                     </div>

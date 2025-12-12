@@ -32,7 +32,8 @@ function normalizeDBAnswer(val: string | null | undefined): string | null {
 }
 
 export default function QuizRunnerPage() {
-    const { attemptId } = useParams<{ attemptId: string }>();
+    const { attemptId, id } = useParams<{ attemptId?: string; id?: string }>();
+    const quizAttemptId = attemptId || id; // Support both route patterns
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -52,6 +53,7 @@ export default function QuizRunnerPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [finished, setFinished] = useState(false);
     const [isMobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+    const [showTerminateConfirm, setShowTerminateConfirm] = useState(false);
 
     // Modes & Config
     const [instantCheck, setInstantCheck] = useState(false);
@@ -71,15 +73,15 @@ export default function QuizRunnerPage() {
 
     // Load attempt data
     useEffect(() => {
-        if (!attemptId) return;
+        if (!quizAttemptId) return;
 
         const load = async () => {
-            const { data } = await supabase.from("quiz_attempts").select("*").eq("id", attemptId).single();
+            const { data } = await supabase.from("quiz_attempts").select("*").eq("id", quizAttemptId).single();
             if (data) {
                 let loadedAnswers = Array.isArray(data.answers) ? data.answers : [];
 
                 // Check LocalStorage for backup (in case of refresh)
-                const localBackup = localStorage.getItem(`quiz_progress_${attemptId}`);
+                const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
                 if (localBackup) {
                     try {
                         const parsed = JSON.parse(localBackup);
@@ -127,7 +129,7 @@ export default function QuizRunnerPage() {
             setLoading(false);
         };
         load();
-    }, [attemptId]);
+    }, [quizAttemptId]);
 
     // Timer State
     const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -204,19 +206,19 @@ export default function QuizRunnerPage() {
         setAnswering(nextList);
 
         // Backup to LocalStorage
-        if (attemptId) {
-            localStorage.setItem(`quiz_progress_${attemptId}`, JSON.stringify(nextList));
+        if (quizAttemptId) {
+            localStorage.setItem(`quiz_progress_${quizAttemptId}`, JSON.stringify(nextList));
         }
-    }, [finished, currentIndex, instantCheck, attemptId, answering]); // Added dependencies
+    }, [finished, currentIndex, instantCheck, quizAttemptId, answering]); // Added dependencies
 
     const handleFinish = async () => {
-        if (finished || !attemptId) return;
+        if (finished || !quizAttemptId) return;
         setFinished(true);
 
         // Get answers from best available source
         let finalAnswersSource = answeringRef.current.length > 0 ? answeringRef.current : answering;
 
-        const localBackup = localStorage.getItem(`quiz_progress_${attemptId}`);
+        const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
         if (localBackup) {
             try {
                 const parsed = JSON.parse(localBackup);
@@ -272,7 +274,7 @@ export default function QuizRunnerPage() {
             duration_seconds: remainingSeconds !== null ? (parseFloat(timeLimitParam || "0") * 60 - remainingSeconds) : 0,
             is_idoneo: quizConfig?.useCustomPassThreshold ? correct >= (quizConfig.minCorrectForPass || 0) : null,
             pass_threshold: quizConfig?.useCustomPassThreshold ? quizConfig.minCorrectForPass : null,
-        }).eq("id", attemptId).select();
+        }).eq("id", quizAttemptId).select();
 
         if (error) {
             console.error("Save error:", error);
@@ -286,10 +288,10 @@ export default function QuizRunnerPage() {
         }
 
         // Cleanup LocalStorage
-        localStorage.removeItem(`quiz_progress_${attemptId}`);
+        localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
 
         // Redirect to Results
-        navigate(`/quiz/results/${attemptId}`);
+        navigate(`/quiz/results/${quizAttemptId}`);
     };
 
     const formatTime = (seconds: number | null) => {
@@ -300,8 +302,8 @@ export default function QuizRunnerPage() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
+        <div className="min-h-screen bg-canvas-light flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cyan"></div>
         </div>
     );
 
@@ -324,7 +326,16 @@ export default function QuizRunnerPage() {
             header={
                 <QuizHeader
                     title={"Prova Personalizzata"}
-                    onExit={() => navigate(-1)}
+                    onExit={() => {
+                        alert('Exit button clicked!'); // DEBUG
+                        // Check if there is a history stack to go back to
+                        if (window.history.length > 2) {
+                            navigate(-1);
+                        } else {
+                            // Fallback to home if direct link or clean tab
+                            navigate('/', { replace: true });
+                        }
+                    }}
                     onSettings={() => alert("Impostazioni: In arrivo!")}
                     instantCheck={instantCheck}
                     setInstantCheck={setInstantCheck}
@@ -352,41 +363,41 @@ export default function QuizRunnerPage() {
 
                 {/* Question Header */}
                 <div className="mb-8">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{currentIndex + 1} / {answering.length} • {currentQ.subjectName}</span>
-                    <h2 className="text-2xl font-medium mt-2 leading-relaxed text-slate-900">{currentQ.text}</h2>
+                    <span className="text-xs font-bold text-text-tertiary uppercase tracking-widest">{currentIndex + 1} / {answering.length} • {currentQ.subjectName}</span>
+                    <h2 className="text-2xl md:text-3xl font-bold mt-3 leading-snug text-text-primary">{currentQ.text}</h2>
                     {isLocked && (
-                        <div className="mt-2 text-xs font-bold text-amber-500 flex items-center gap-1">
+                        <div className="mt-3 text-xs font-bold text-semantic-warning flex items-center gap-1">
                             <span>🔒</span> Risposta bloccata (Verifica Istantanea)
                         </div>
                     )}
                 </div>
 
                 {/* Answer Options */}
-                <div className="space-y-4 mb-8">
+                <div className="space-y-2 md:space-y-4 mb-8">
                     {['a', 'b', 'c', 'd'].map(optKey => {
                         const optText = (currentQ.options as any)[optKey];
                         const isSelected = currentQ.selectedOption === optKey;
 
-                        let containerClass = "border-2 border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm";
-                        let textClass = "text-slate-700";
+                        let containerClass = "bg-white shadow-soft hover:shadow-card hover:scale-[1.01] border border-transparent";
+                        let textClass = "text-text-secondary";
                         const isDisabled = isLocked;
 
                         if (isSelected) {
-                            containerClass = "border-2 border-slate-900 bg-slate-50 shadow-md";
-                            textClass = "text-slate-900 font-medium";
+                            containerClass = "bg-brand-cyan/5 border-brand-cyan shadow-md ring-1 ring-brand-cyan";
+                            textClass = "text-brand-cyan font-semibold";
                         }
 
                         // Locking UI Logic
                         if (isLocked) {
                             if (optKey === normalizedCorrect) {
-                                containerClass = "border-emerald-500 bg-emerald-50 border-2";
-                                textClass = "text-emerald-900 font-bold";
+                                containerClass = "bg-semantic-success/10 border-semantic-success ring-1 ring-semantic-success";
+                                textClass = "text-semantic-success font-bold";
                             } else if (isSelected) {
-                                containerClass = "border-rose-500 bg-rose-50 border-2";
-                                textClass = "text-rose-900 font-bold";
+                                containerClass = "bg-semantic-error/10 border-semantic-error ring-1 ring-semantic-error";
+                                textClass = "text-semantic-error font-bold";
                             } else {
-                                containerClass = "border-slate-100 bg-slate-50 opacity-60";
-                                textClass = "text-slate-400";
+                                containerClass = "bg-canvas-light opacity-60 shadow-none";
+                                textClass = "text-text-tertiary";
                             }
                         }
 
@@ -395,15 +406,15 @@ export default function QuizRunnerPage() {
                                 key={optKey}
                                 onClick={() => !isDisabled && handleSelect(optKey)}
                                 disabled={isDisabled}
-                                className={`w-full p-6 rounded-2xl flex items-center gap-6 text-left transition-all group ${containerClass} ${isDisabled ? 'cursor-not-allowed' : ''}`}
+                                className={`w-full p-3 md:p-5 rounded-xl md:rounded-card flex items-center gap-3 md:gap-5 text-left transition-all duration-300 ease-ios group ${containerClass} ${isDisabled ? 'cursor-not-allowed transform-none' : ''}`}
                             >
-                                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors ${isSelected || (isLocked && optKey === normalizedCorrect)
+                                <span className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-squircle flex items-center justify-center text-xs md:text-sm font-bold border-2 transition-colors shrink-0 ${isSelected || (isLocked && optKey === normalizedCorrect)
                                     ? 'border-current'
-                                    : 'border-slate-300 text-slate-400 group-hover:border-slate-400 group-hover:text-slate-500'
+                                    : 'border-canvas-light bg-canvas-light text-text-tertiary group-hover:border-text-tertiary/30 group-hover:text-text-secondary'
                                     }`}>
                                     {optKey.toUpperCase()}
                                 </span>
-                                <span className={`text-lg ${textClass}`}>{optText}</span>
+                                <span className={`text-[15px] md:text-lg leading-snug md:leading-relaxed ${textClass}`}>{optText}</span>
                             </button>
                         )
                     })}
@@ -411,52 +422,92 @@ export default function QuizRunnerPage() {
 
                 {/* Inline Explanation */}
                 {isLocked && instantCheck && (currentQ as any).explanation && (
-                    <div className="mb-12 bg-blue-50/50 rounded-2xl p-6 border border-blue-100 animate-in fade-in slide-in-from-top-2 duration-500">
-                        <h3 className="text-sm uppercase tracking-widest font-bold text-blue-900 mb-2 flex items-center gap-2">
-                            <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <div className="mb-12 bg-white rounded-card p-6 shadow-soft border-l-4 border-brand-cyan animate-in fade-in slide-in-from-top-2 duration-500">
+                        <h3 className="text-sm uppercase tracking-widest font-bold text-brand-cyan mb-2 flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             Spiegazione
                         </h3>
-                        <div className="prose prose-blue prose-sm max-w-none text-slate-700">
+                        <div className="prose prose-slate prose-sm max-w-none text-text-secondary leading-relaxed">
                             {(currentQ as any).explanation}
                         </div>
                     </div>
                 )}
 
-                {/* Bottom Navigation (Fixed on mobile, static on Desktop) */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 lg:static lg:bg-transparent lg:border-none lg:p-0 mt-auto z-40">
-                    <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+                {/* Bottom Navigation Sheet (Mobile) */}
+                <div className="fixed bottom-0 left-0 right-0 bg-white lg:static lg:bg-transparent mt-auto z-40 pb-safe">
 
-                        {/* Mobile Grid Trigger */}
+                    {/* Curved Notch with Chevron */}
+                    <div className="lg:hidden flex justify-center -mt-6">
                         <button
                             onClick={() => setMobileDrawerOpen(true)}
-                            className="lg:hidden p-3 text-slate-400 hover:text-slate-900 bg-slate-50 rounded-xl"
+                            className="bg-white px-8 pt-2 pb-3 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)] transition-transform active:scale-95"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            <svg className="w-5 h-5 text-brand-cyan" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Question Number Pills */}
+                    <div className="lg:hidden px-4 py-3">
+                        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+                            {answering.map((_, idx) => {
+                                const isActive = idx === currentIndex;
+                                const hasAnswer = answering[idx]?.selectedOption !== null;
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setCurrentIndex(idx)}
+                                        className={`w-10 h-10 shrink-0 rounded-squircle font-bold text-sm transition-all active:scale-95 ${isActive
+                                            ? 'bg-brand-cyan text-white shadow-md shadow-brand-cyan/30'
+                                            : hasAnswer
+                                                ? 'bg-canvas-light text-text-secondary border border-slate-200'
+                                                : 'bg-canvas-light text-text-tertiary'
+                                            }`}
+                                    >
+                                        {idx + 1}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Navigation Buttons */}
+                    <div className="px-4 pb-4 lg:pb-0 flex gap-3">
+                        <button
+                            onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
+                            disabled={currentIndex === 0}
+                            className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] transition-all active:scale-[0.98] ${currentIndex === 0
+                                ? 'text-text-tertiary bg-canvas-light cursor-not-allowed'
+                                : 'text-text-secondary bg-canvas-light hover:bg-slate-200 active:bg-slate-300'
+                                }`}
+                        >
+                            Precedente
                         </button>
 
-                        {/* Desktop Help Button */}
-                        <button className="hidden lg:flex text-slate-400 font-medium hover:text-slate-600 items-center gap-2 px-2 py-2">
-                            <span className="text-xl">?</span>
-                            <span>Aiuto</span>
-                        </button>
-
-                        <div className="flex gap-4 flex-1 justify-end lg:flex-none">
+                        {currentIndex === answering.length - 1 ? (
                             <button
-                                onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
-                                disabled={currentIndex === 0}
-                                className={`flex-1 lg:flex-none px-6 lg:px-8 py-3 rounded-xl font-bold transition-colors ${currentIndex === 0 ? 'text-slate-300 cursor-not-allowed bg-slate-50' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}
+                                onClick={() => setShowTerminateConfirm(true)}
+                                className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] transition-all active:scale-[0.98] bg-semantic-error text-white hover:bg-semantic-error/90"
                             >
-                                Indietro
+                                Termina
                             </button>
-
+                        ) : (
                             <button
                                 onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
-                                disabled={currentIndex === answering.length - 1}
-                                className="flex-1 lg:flex-none px-6 lg:px-10 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] transition-all active:scale-[0.98] text-text-secondary bg-canvas-light hover:bg-slate-200 active:bg-slate-300"
                             >
                                 Successiva
                             </button>
-                        </div>
+                        )}
+                    </div>
+
+                    {/* Desktop Help */}
+                    <div className="hidden lg:flex justify-center py-4">
+                        <button className="text-text-tertiary font-medium hover:text-brand-cyan flex items-center gap-2 px-4 py-2 transition-colors">
+                            <span className="text-xl">?</span>
+                            <span>Aiuto</span>
+                        </button>
                     </div>
                 </div>
 
@@ -472,6 +523,38 @@ export default function QuizRunnerPage() {
                 onJumpToQuestion={(idx) => setCurrentIndex(idx)}
                 onTerminate={handleFinish}
             />
+
+            {/* Terminate Confirmation Popup */}
+            {showTerminateConfirm && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"
+                        onClick={() => setShowTerminateConfirm(false)}
+                    />
+
+                    {/* Popup */}
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold text-text-primary text-center mb-6">
+                            Sei sicuro di voler terminare il quiz?
+                        </h3>
+
+                        <button
+                            onClick={handleFinish}
+                            className="w-full py-3.5 bg-semantic-error hover:bg-semantic-error/90 text-white font-bold rounded-xl transition-colors"
+                        >
+                            Termina
+                        </button>
+
+                        <button
+                            onClick={() => setShowTerminateConfirm(false)}
+                            className="w-full mt-3 py-3 text-text-tertiary font-medium hover:text-text-secondary transition-colors"
+                        >
+                            Chiudi
+                        </button>
+                    </div>
+                </div>
+            )}
 
         </QuizLayout>
     );

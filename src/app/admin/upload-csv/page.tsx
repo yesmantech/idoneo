@@ -253,109 +253,172 @@ export default function AdminUploadCsvPage() {
 
   return (
     <AdminLayout>
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <button onClick={() => navigate("/admin")} className="text-xs text-slate-400 hover:text-white mb-4">← Dashboard</button>
-        <h1 className="text-2xl font-bold mb-2 text-slate-100">Import Massivo</h1>
-        <p className="text-sm text-slate-400 mb-8">Supporta CSV separati da virgola (,) o punto e virgola (;)</p>
+      <div className="mx-auto max-w-5xl">
+        <button onClick={() => navigate("/admin")} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-brand-cyan mb-6 transition-colors bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 shadow-sm w-fit hover:border-brand-cyan/20">
+          <span>←</span> Torna alla Dashboard
+        </button>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-white tracking-tight mb-2">Import Massivo</h1>
+            <p className="text-slate-400 text-sm">Carica domande e immagini in blocco per popolare i tuoi concorsi.</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Formati Supportati</p>
+            <div className="flex gap-2">
+              <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">.CSV (UTF-8)</span>
+              <span className="px-2 py-1 rounded-md bg-sky-500/10 text-sky-400 text-[10px] font-bold border border-sky-500/20">.JPG / .PNG</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 items-start">
 
           {/* CSV Section */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6">
-            <h2 className="text-lg font-semibold mb-4 text-emerald-400">1. Domande (CSV)</h2>
-            <div className="space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-[24px] p-8 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <span className="text-9xl grayscale">📄</span>
+            </div>
+            <h2 className="text-xl font-black mb-6 text-white flex items-center gap-3 relative z-10">
+              <span className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-sm border border-emerald-500/20">1</span>
+              Domande (CSV)
+            </h2>
+
+            <div className="space-y-5 relative z-10">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Concorso</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Concorso Destinazione</label>
                 <select
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan transition-all font-medium"
                   value={selectedQuizId}
                   onChange={(e) => setSelectedQuizId(e.target.value)}
                 >
-                  <option value="">Seleziona...</option>
+                  <option value="">Seleziona un concorso...</option>
                   {quizzes.map(q => <option key={q.id} value={q.id}>{q.title}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Materia Default</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Materia Default (Fallback)</label>
                 <select
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   value={selectedSubjectId}
                   onChange={(e) => setSelectedSubjectId(e.target.value)}
                   disabled={!selectedQuizId}
                 >
+                  <option value="">-- Seleziona Materia --</option>
                   {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
+                <p className="text-[10px] text-slate-500 mt-1.5 leading-snug">
+                  Usata se la colonna <code>subject_id</code> nel CSV è vuota.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">
+              <div className="pt-2">
+                <label className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                   File CSV
-                  <button onClick={handleDownloadTemplate} className="ml-2 text-[10px] text-sky-400 underline hover:text-sky-300">(Scarica Template)</button>
+                  <button onClick={handleDownloadTemplate} className="text-brand-cyan hover:text-cyan-400 underline transition-colors font-medium normal-case flex items-center gap-1">
+                    <span>⬇️</span> Scarica Template
+                  </button>
                 </label>
-                <input
-                  type="file" accept=".csv"
-                  className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700"
-                  onChange={handleFileChange}
-                />
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-800 border-dashed rounded-2xl cursor-pointer bg-slate-950 hover:bg-slate-950/80 transition-all group hover:border-slate-700">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <p className="mb-2 text-2xl group-hover:scale-110 transition-transform">📂</p>
+                    <p className="mb-1 text-sm text-slate-400 font-medium"><span className="font-bold text-slate-200">Clicca per caricare</span> o trascina</p>
+                    <p className="text-xs text-slate-500">CSV delimitato da virgola o punto e virgola</p>
+                  </div>
+                  <input type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
+                </label>
+                {csvFile && (
+                  <div className="mt-2 flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-lg border border-emerald-500/20">
+                    <span>✅ File selezionato:</span>
+                    <span className="text-emerald-300">{csvFile.name}</span>
+                  </div>
+                )}
               </div>
 
               {importMsg && (
-                <div className={`text-xs p-2 rounded border ${importMsg.type === 'error' ? 'bg-red-900/20 border-red-800 text-red-300' : 'bg-emerald-900/20 border-emerald-800 text-emerald-300'}`}>
+                <div className={`text-xs p-3 rounded-xl border font-medium flex items-start gap-2 ${importMsg.type === 'error' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+                  <span>{importMsg.type === 'error' ? '⚠️' : '🎉'}</span>
                   {importMsg.text}
                 </div>
               )}
 
               {/* Preview */}
               {parsedPreview.length > 0 && (
-                <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[10px] text-slate-400 overflow-x-auto">
-                  <p className="font-semibold mb-1 text-slate-300">Anteprima (Prime 5 righe):</p>
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="border-b border-slate-800">
-                        <th className="p-1">Domanda</th>
-                        <th className="p-1 text-emerald-400">Risposta</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {parsedPreview.map((r, i) => (
-                        <tr key={i} className="border-b border-slate-800/50">
-                          <td className="p-1 truncate max-w-[150px]">{r.question_text}</td>
-                          <td className="p-1 font-mono text-emerald-400">{r.correct_option}</td>
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-hidden">
+                  <p className="font-bold text-xs text-slate-500 uppercase tracking-wider mb-3">Anteprima (Prime 5 righe)</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs bg-slate-900 rounded-lg overflow-hidden shadow-sm">
+                      <thead className="bg-slate-950 text-slate-400 font-bold border-b border-slate-800">
+                        <tr>
+                          <th className="p-2">Domanda</th>
+                          <th className="p-2 w-16 text-center text-emerald-500">Risp</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {parsedPreview.map((r, i) => (
+                          <tr key={i} className="group hover:bg-slate-800 transition-colors">
+                            <td className="p-2 truncate max-w-[150px] text-slate-300 font-medium">{r.question_text}</td>
+                            <td className="p-2 font-mono text-center font-bold text-emerald-400 bg-emerald-500/5">{r.correct_option}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 
               <button
                 onClick={handleImport}
                 disabled={importing || !csvFile || !selectedQuizId}
-                className="w-full py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-500 disabled:opacity-50"
+                className="w-full py-4 bg-emerald-500 text-slate-900 text-sm font-black rounded-xl hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
               >
-                {importing ? "Importazione..." : "Importa CSV"}
+                {importing ? (
+                  <>
+                    <span className="animate-spin text-lg">⏳</span> Importazione in corso...
+                  </>
+                ) : "🚀  Esegui Importazione CSV"}
               </button>
             </div>
           </div>
 
           {/* Images Section */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6">
-            <h2 className="text-lg font-semibold mb-4 text-sky-400">2. Immagini (Bulk)</h2>
-            <div className="space-y-4">
-              <p className="text-xs text-slate-400">
-                Carica tutte le immagini citate nel CSV (colonna <code>image_name</code>).
-                I nomi file verranno normalizzati (es. &quot;Fig 1.jpg&quot; &rarr; &quot;fig_1.jpg&quot;).
-              </p>
+          <div className="bg-slate-900 border border-slate-800 rounded-[24px] p-8 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <span className="text-9xl grayscale">🖼️</span>
+            </div>
+            <h2 className="text-xl font-black mb-6 text-white flex items-center gap-3 relative z-10">
+              <span className="w-8 h-8 rounded-full bg-sky-500/10 text-sky-500 flex items-center justify-center text-sm border border-sky-500/20">2</span>
+              Immagini (Bulk)
+            </h2>
 
-              <input
-                type="file" accept="image/*" multiple
-                className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700"
-                onChange={(e) => setImageFiles(e.target.files)}
-              />
+            <div className="space-y-5 relative z-10">
+              <div className="bg-sky-500/10 p-4 rounded-xl border border-sky-500/20">
+                <p className="text-xs text-sky-300 font-medium leading-relaxed">
+                  Carica tutte le immagini citate nel CSV (colonna <code className="bg-slate-950 px-1 py-0.5 rounded border border-sky-500/30 font-mono text-sky-200">image_name</code>).
+                  I nomi file verranno normalizzati automaticamente (es. &quot;Fig 1.jpg&quot; &rarr; &quot;fig_1.jpg&quot;).
+                </p>
+              </div>
+
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-800 border-dashed rounded-2xl cursor-pointer bg-slate-950 hover:bg-slate-950/80 transition-all group hover:border-slate-700">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <p className="mb-2 text-2xl group-hover:scale-110 transition-transform">🌇</p>
+                  <p className="mb-1 text-sm text-slate-400 font-medium"><span className="font-bold text-slate-200">Seleziona immagini</span> (multiplo)</p>
+                  <p className="text-xs text-slate-500">JPG, PNG supportati</p>
+                </div>
+                <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => setImageFiles(e.target.files)} />
+              </label>
+
+              {imageFiles && imageFiles.length > 0 && (
+                <div className="mt-2 flex items-center gap-2 text-xs font-bold text-sky-400 bg-sky-500/10 px-3 py-2 rounded-lg border border-sky-500/20">
+                  <span>📸 Selezionate:</span>
+                  <span className="text-sky-300">{imageFiles.length} immagini</span>
+                </div>
+              )}
 
               {imageMsg && (
-                <div className={`text-xs p-2 rounded border ${imageMsg.type === 'error' ? 'bg-red-900/20 border-red-800 text-red-300' : 'bg-sky-900/20 border-sky-800 text-sky-300'}`}>
+                <div className={`text-xs p-3 rounded-xl border font-medium flex items-start gap-2 ${imageMsg.type === 'error' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+                  <span>{imageMsg.type === 'error' ? '⚠️' : '✅'}</span>
                   {imageMsg.text}
                 </div>
               )}
@@ -363,9 +426,13 @@ export default function AdminUploadCsvPage() {
               <button
                 onClick={handleUploadImages}
                 disabled={uploadingImages || !imageFiles}
-                className="w-full py-2 bg-sky-600 text-white text-sm font-semibold rounded-lg hover:bg-sky-500 disabled:opacity-50"
+                className="w-full py-4 bg-sky-500 text-slate-900 text-sm font-black rounded-xl hover:bg-sky-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
               >
-                {uploadingImages ? "Caricamento..." : "Carica Immagini"}
+                {uploadingImages ? (
+                  <>
+                    <span className="animate-spin text-lg">⏳</span> Caricamento...
+                  </>
+                ) : "☁️  Carica Immagini su Cloud"}
               </button>
             </div>
           </div>

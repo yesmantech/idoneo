@@ -17,18 +17,18 @@ export default function ConcorsoHubPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      <div className="min-h-screen bg-canvas-light flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cyan"></div>
       </div>
     );
   }
 
   if (error || !categoryData) {
     return (
-      <div className="min-h-screen bg-slate-50 pt-20 px-4 text-center">
-        <h1 className="text-2xl font-bold text-slate-800 mb-4">Ops! Qualcosa è andato storto.</h1>
-        <p className="text-slate-600 mb-8">{error || "Categoria non trovata."}</p>
-        <Link to="/" className="text-emerald-600 font-medium hover:underline">
+      <div className="min-h-screen bg-canvas-light pt-20 px-4 text-center">
+        <h1 className="text-2xl font-bold text-text-primary mb-4">Ops! Qualcosa è andato storto.</h1>
+        <p className="text-text-secondary mb-8">{error || "Categoria non trovata."}</p>
+        <Link to="/" className="text-brand-cyan font-semibold hover:text-brand-cyan/80 transition-colors">
           ← Torna alla Home
         </Link>
       </div>
@@ -36,17 +36,17 @@ export default function ConcorsoHubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      {/* Breadcrumb / Top Nav Placeholder */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-2 text-sm text-slate-500">
-          <Link to="/" className="hover:text-emerald-600">Home</Link>
+    <div className="min-h-screen bg-canvas-light pb-20">
+      {/* Breadcrumb / Top Nav */}
+      <div className="bg-white shadow-soft">
+        <div className="container mx-auto px-5 md:px-6 py-4 flex items-center gap-2 text-sm text-text-secondary">
+          <Link to="/" className="hover:text-brand-cyan transition-colors font-medium">Home</Link>
           <span>/</span>
-          <span className="font-medium text-slate-900 capitalize">{categoryData.title}</span>
+          <span className="font-semibold text-text-primary capitalize">{categoryData.title}</span>
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-5 md:px-6 py-8 max-w-4xl">
         {/* 1. Standardized Hero Header */}
         <ConcorsoHubHeader
           title={categoryData.title}

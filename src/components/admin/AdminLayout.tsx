@@ -35,38 +35,38 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }, [navigate]);
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white flex">
+        <div className="min-h-screen bg-slate-950 text-slate-200 flex font-sans">
             {/* Sidebar */}
             <AdminSidebar />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-h-screen">
                 {/* Top Bar */}
-                <header className="h-14 bg-slate-900/50 border-b border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10 backdrop-blur-sm">
-                    <div className="text-sm text-slate-400">
+                <header className="h-16 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10 backdrop-blur-md">
+                    <div className="text-sm text-slate-500 font-medium">
                         {/* Breadcrumb or search could go here */}
                     </div>
 
                     <div className="flex items-center gap-4">
                         {/* Notifications placeholder */}
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                        <button className="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
                             🔔
                         </button>
 
                         {/* User menu */}
-                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-colors">
-                            <div className="w-7 h-7 bg-slate-700 rounded-full flex items-center justify-center text-xs font-bold">
+                        <button className="flex items-center gap-3 px-2 py-1.5 rounded-full hover:bg-slate-800 hover:shadow-sm transition-all border border-transparent hover:border-slate-700/50">
+                            <div className="w-8 h-8 bg-slate-800 rounded-squircle flex items-center justify-center text-xs font-bold text-slate-300">
                                 A
                             </div>
-                            <span>Admin</span>
+                            <span className="text-sm font-semibold text-slate-300">Admin</span>
                             <span className="text-slate-500 text-xs">▾</span>
                         </button>
                     </div>
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 p-6 overflow-y-auto">
-                    <div className="max-w-6xl mx-auto">
+                <main className="flex-1 p-8 overflow-y-auto">
+                    <div className="max-w-7xl mx-auto">
                         {children}
                     </div>
                 </main>

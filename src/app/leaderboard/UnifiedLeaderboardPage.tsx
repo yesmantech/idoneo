@@ -109,15 +109,10 @@ export default function UnifiedLeaderboardPage() {
     const isXP = selection === 'xp';
     const theme = isXP ? 'gold' : 'emerald';
 
-    // Background Gradients
-    const bgGradient = isXP
-        ? 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-900 dark:to-amber-900/10'
-        : 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-900 dark:to-emerald-900/10';
-
     return (
-        <div className={`flex flex-col h-screen overflow-hidden ${bgGradient} transition-colors duration-500`}>
+        <div className="flex flex-col h-screen overflow-hidden bg-canvas-light text-text-primary">
             {/* Header Area */}
-            <div className="flex-none p-4 lg:pt-8 flex flex-col items-center justify-center relative z-10">
+            <div className="flex-none p-6 pt-8 flex flex-col items-center justify-center relative z-40">
                 <LeaderboardSelector
                     currentSelection={selection}
                     onSelect={setSelection}
@@ -126,19 +121,14 @@ export default function UnifiedLeaderboardPage() {
                 />
 
                 {/* Subtitle / Context */}
-                <p className="mt-2 text-sm text-slate-500 font-medium animate-in fade-in slide-in-from-top-2">
+                <p className="mt-3 text-sm text-text-tertiary font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-2">
                     {isXP ? 'Classifica Settimanale' : 'Classifica Concorso'}
                 </p>
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-hidden relative w-full max-w-2xl mx-auto lg:pb-8">
-                {/* Visual Decor */}
-                <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-3xl opacity-30 pointer-events-none blur-3xl 
-                    ${isXP ? 'bg-amber-200/50 dark:bg-amber-900/20' : 'bg-emerald-200/50 dark:bg-emerald-900/20'} transition-colors duration-500`}
-                />
-
-                <div className="relative h-full bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-t-3xl border-t border-r border-l border-white/50 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-hidden relative w-full max-w-2xl mx-auto px-4 lg:px-0 lg:pb-8">
+                <div className="relative h-full bg-white rounded-t-[32px] shadow-soft overflow-hidden flex flex-col border border-transparent">
                     <LeaderboardView
                         data={data}
                         loading={loading}

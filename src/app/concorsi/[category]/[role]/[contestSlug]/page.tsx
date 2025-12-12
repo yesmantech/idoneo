@@ -176,8 +176,8 @@ export default function ContestPage() {
               </div>
             </div>
 
-            {/* 5. Useful Tools & PRO (Moved from Sidebar) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* 5. Useful Tools (Full Width) */}
+            <div>
               {/* Tools */}
               <div>
                 <h3 className="text-lg font-bold text-slate-900 mb-4">Strumenti Utili</h3>
@@ -199,20 +199,6 @@ export default function ContestPage() {
                       <div className="font-medium text-slate-900">Condividi Banca Dati</div>
                       <div className="text-xs text-slate-500">Link condivisibile</div>
                     </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* PRO Ad */}
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4 opacity-0">Pro</h3>
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-lg h-[168px] flex flex-col justify-between">
-                  <div>
-                    <h4 className="font-bold text-lg mb-1">Accedi a Idoneo PRO</h4>
-                    <p className="text-sm text-slate-300">Sblocca statistiche avanzate, simulazioni illimitate e tutor IA.</p>
-                  </div>
-                  <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-colors">
-                    Scopri di più
                   </button>
                 </div>
               </div>
