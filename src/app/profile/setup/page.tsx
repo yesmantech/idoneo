@@ -61,20 +61,43 @@ export default function ProfileSetupPage() {
 
         let currentUser = user;
 
-        // If context user is missing, try fetching directly
+        // If context user is missing, try fetching directly with retries
+        // This handles the case where session is still being processed from URL
         if (!currentUser) {
-            console.log("DEBUG: Context user missing, fetching from Supabase...");
-            const { data } = await supabase.auth.getUser();
-            currentUser = data.user;
+            console.log("DEBUG: Context user missing, attempting to recover session...");
+
+            // First, try to get session (which processes URL tokens if present)
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (sessionData?.session?.user) {
+                currentUser = sessionData.session.user;
+                console.log("DEBUG: Recovered user from getSession:", currentUser.id);
+            }
+
+            // If still no user, try getUser
+            if (!currentUser) {
+                const { data: userData } = await supabase.auth.getUser();
+                currentUser = userData.user;
+                console.log("DEBUG: Fallback getUser result:", currentUser?.id);
+            }
+
+            // Last resort: wait a moment and retry (session might still be processing)
+            if (!currentUser) {
+                console.log("DEBUG: No user yet, waiting 1s and retrying...");
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const { data: retryData } = await supabase.auth.getSession();
+                if (retryData?.session?.user) {
+                    currentUser = retryData.session.user;
+                    console.log("DEBUG: Recovered user after retry:", currentUser.id);
+                }
+            }
         }
 
         if (!currentUser) {
-            console.error("DEBUG: No user found even after fetch!");
+            console.error("DEBUG: No user found after all attempts!");
 
-            // DEVELOPER FALLBACK for localhost
+            // DEVELOPER FALLBACK for localhost only
             if (window.location.hostname === 'localhost') {
                 console.warn("DEV MODE: Using fallback user ID to unblock testing!");
-                // Using an existing ID from DB: "bf8e5a1e-b8b8-4c87-a0a9-3aaf3c5801fe" (UpdatedNick2)
                 currentUser = {
                     id: 'bf8e5a1e-b8b8-4c87-a0a9-3aaf3c5801fe',
                     email: 'dev@test.com'
