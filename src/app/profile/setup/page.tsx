@@ -150,6 +150,23 @@ export default function ProfileSetupPage() {
                 if (referrer) {
                     referredBy = referrer.id;
                     console.log('Referral attribution:', storedRefCode, '->', referredBy);
+
+                    // INCREMENT the referrer's count directly
+                    // (The INSERT trigger doesn't fire on UPDATE, so we do it manually)
+                    // Fetch current count, then increment
+                    const { data: referrerProfile } = await supabase
+                        .from('profiles')
+                        .select('referral_count')
+                        .eq('id', referrer.id)
+                        .single();
+
+                    const currentCount = referrerProfile?.referral_count || 0;
+                    await supabase
+                        .from('profiles')
+                        .update({ referral_count: currentCount + 1 })
+                        .eq('id', referrer.id);
+
+                    console.log('Incremented referral count for', referrer.id, 'to', currentCount + 1);
                 }
 
                 // Clear the stored code after use
