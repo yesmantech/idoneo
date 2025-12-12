@@ -135,6 +135,7 @@ export default function AdminDashboardPage() {
             <div className="mb-8">
                 <h2 className="text-lg font-semibold text-white mb-4">Azioni rapide</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <QuickAction icon="👥" label="Gestisci utenti" to="/admin/users" />
                     <QuickAction icon="✏️" label="Nuovo articolo" to="/admin/blog/nuovo" />
                     <QuickAction icon="📋" label="Gestisci domande" to="/admin/questions" />
                     <QuickAction icon="🎯" label="Regole simulazione" to="/admin/rules" />

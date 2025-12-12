@@ -41,8 +41,26 @@ export default function WaitlistSuccessPage() {
         return () => clearInterval(interval);
     }, []);
 
+    const handleScreenClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        // Calculate click position relative to viewport (0-1 range)
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+
+        confetti({
+            particleCount: 40,
+            spread: 70,
+            origin: { x, y },
+            colors: ['#22C55E', '#00B1FF', '#FBBF24', '#F472B6', '#1E293B'],
+            zIndex: 50,
+            disableForReducedMotion: true
+        });
+    };
+
     return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden font-sans">
+        <div
+            onClick={handleScreenClick}
+            className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden font-sans cursor-pointer active:scale-[0.99] transition-transform duration-100"
+        >
 
             {/* Top Text Content */}
             <div className="w-full max-w-sm mx-auto z-10 space-y-4 pt-10">
