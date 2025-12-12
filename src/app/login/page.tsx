@@ -9,6 +9,7 @@ import {
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const [isLogin, setIsLogin] = useState(false); // Default to Register mode
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -25,29 +26,47 @@ export default function LoginPage() {
         { Icon: Sparkles, color: "text-purple-400", bg: "bg-purple-100", top: "40%", right: "5%", size: "w-14 h-14", delay: "2.5s" },
     ];
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
         try {
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    emailRedirectTo: `${window.location.origin}/profile/setup`,
-                },
-            });
-
-            if (error) throw error;
-
-            setSuccess(true);
-            // No redirect - user must check email
+            if (isLogin) {
+                // LOGIN LOGIC
+                const { error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (error) throw error;
+                // Success Login -> Redirect
+                navigate('/profile/setup');
+            } else {
+                // REGISTER LOGIC
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/profile/setup`,
+                    },
+                });
+                if (error) throw error;
+                // Success Register -> Show Email Check Screen
+                setSuccess(true);
+            }
         } catch (err: any) {
-            setError(err.message || 'Errore durante la registrazione');
+            setError(err.message || 'Errore durante l\'autenticazione');
         } finally {
             setLoading(false);
         }
+    };
+
+    const toggleMode = () => {
+        setIsLogin(!isLogin);
+        setError(null);
+        setSuccess(false);
+        setEmail('');
+        setPassword('');
     };
 
     return (
@@ -80,10 +99,13 @@ export default function LoginPage() {
                 {!success ? (
                     <div className="space-y-3 text-center w-full">
                         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-                            Benvenuto
+                            {isLogin ? 'Bentornato' : 'Benvenuto'}
                         </h1>
                         <h2 className="text-[17px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
-                            Inserisci le tue credenziali per registrarti
+                            {isLogin
+                                ? 'Inserisci le tue credenziali per accedere'
+                                : 'Inserisci le tue credenziali per registrarti'
+                            }
                         </h2>
                     </div>
                 ) : (
@@ -100,12 +122,18 @@ export default function LoginPage() {
                         <div className="p-4 bg-slate-50 rounded-xl text-sm text-slate-500 border border-slate-100">
                             Non trovi l'email? Controlla nello spam o riprova.
                         </div>
+                        <button
+                            onClick={toggleMode}
+                            className="text-[#00B1FF] font-bold text-sm hover:underline mt-4"
+                        >
+                            Torna al login
+                        </button>
                     </div>
                 )}
 
                 {/* Form */}
                 {!success && (
-                    <form onSubmit={handleLogin} className="w-full space-y-4">
+                    <form onSubmit={handleSubmit} className="w-full space-y-4">
                         <div className="space-y-3">
                             <input
                                 type="email"
@@ -133,18 +161,28 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            disabled={loading || success}
-                            className={`w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20 flex items-center justify-center ${success ? 'bg-green-600' : ''}`}
+                            disabled={loading}
+                            className={`w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20 flex items-center justify-center`}
                         >
-                            {loading ? 'Registrazione in corso...' : 'Registrati'}
+                            {loading
+                                ? (isLogin ? 'Accesso in corso...' : 'Registrazione in corso...')
+                                : (isLogin ? 'Accedi' : 'Registrati')
+                            }
                         </button>
                     </form>
                 )}
 
                 {!success && (
-                    <p className="text-[11px] text-slate-400 font-medium">
-                        CloudMascot moved to next page
-                    </p>
+                    <div className="text-center space-y-4">
+                        <button
+                            onClick={toggleMode}
+                            className="text-[#00B1FF] font-medium text-sm hover:underline transition-all"
+                        >
+                            {isLogin
+                                ? "Non hai un account? Registrati"
+                                : "Hai già un account? Accedi"}
+                        </button>
+                    </div>
                 )}
             </div>
         </div>
