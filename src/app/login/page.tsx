@@ -50,12 +50,23 @@ export default function LoginPage() {
                         emailRedirectTo: `${window.location.origin}/profile/setup`,
                     },
                 });
+
                 if (error) throw error;
-                // Success Register -> Show Email Check Screen
+
+                // If successful (and NOT suppressed by security settings), show check email
                 setSuccess(true);
             }
         } catch (err: any) {
-            setError(err.message || 'Errore durante l\'autenticazione');
+            console.error("Auth Error:", err);
+
+            // Handle "User already registered" specifically
+            if (err.message && (err.message.includes('already registered') || err.message.includes('User already exists'))) {
+                setError('Questo indirizzo email è già registrato. Accedi al tuo account!');
+                // Optional: Auto-switch to login? 
+                // setIsLogin(true); 
+            } else {
+                setError(err.message || 'Errore durante l\'autenticazione');
+            }
         } finally {
             setLoading(false);
         }
