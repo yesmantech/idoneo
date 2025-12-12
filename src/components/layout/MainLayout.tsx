@@ -8,10 +8,29 @@ interface MainLayoutProps {
     children: React.ReactNode;
 }
 
+import { useAuth } from '@/context/AuthContext';
+import { Navigate } from 'react-router-dom';
+
 export default function MainLayout({ children }: MainLayoutProps) {
     const { isCollapsed, setMobileOpen } = useSidebar();
     const location = useLocation();
     const isAdmin = location.pathname.startsWith('/admin');
+
+    // REDUNDANT WAITLIST LOCK:
+    // Ensure only Admins can see the MainLayout (App).
+    const { user, profile, loading } = useAuth();
+
+    if (!loading) {
+        if (!user && !isAdmin) {
+            // Guest in App -> Waitlist
+            return <Navigate to="/waitlist" replace />;
+        }
+        if (user && profile?.role !== 'admin' && !isAdmin) {
+            // User in App -> Success Page
+            return <Navigate to="/waitlist/success" replace />;
+        }
+    }
+
 
     // Bottom Nav Items
     const NAV_ITEMS = [
