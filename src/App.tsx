@@ -55,6 +55,7 @@ import { AuthProvider } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 import ProfilePage from './app/profile/page';
 import ProfileSettingsPage from './app/profile/settings/page';
+import ProfileSetupPage from './app/profile/setup/page';
 import QuizStatsPage from './app/profile/stats/QuizStatsPage';
 
 import MainLayout from './components/layout/MainLayout';
@@ -94,6 +95,7 @@ export default function App() {
                                         <ProfilePage />
                                     </MainLayout>
                                 } />
+                                <Route path="/profile/setup" element={<ProfileSetupPage />} />
                                 <Route path="/profile/settings" element={
                                     <MainLayout>
                                         <ProfileSettingsPage />

@@ -17,8 +17,8 @@ export default function WaitlistGuard({ children }: { children: React.ReactNode 
         );
     }
 
-    // 1. Always allow public routes (Login, Waitlist, Success)
-    if (path.startsWith('/login') || path.startsWith('/waitlist')) {
+    // 1. Always allow public routes (Login, Waitlist, Success, Profile Setup)
+    if (path.startsWith('/login') || path.startsWith('/waitlist') || path.startsWith('/profile/setup')) {
         return <>{children}</>;
     }
 

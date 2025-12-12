@@ -40,7 +40,7 @@ export default function LoginPage() {
 
             setSuccess(true);
             setTimeout(() => {
-                navigate('/waitlist/success');
+                navigate('/profile/setup');
             }, 800);
         } catch (err: any) {
             setError(err.message || 'Errore durante la registrazione');
