@@ -43,7 +43,7 @@ export default function LoginPage() {
                 navigate('/profile/setup');
             } else {
                 // REGISTER LOGIC
-                const { error } = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
@@ -53,7 +53,15 @@ export default function LoginPage() {
 
                 if (error) throw error;
 
-                // If successful (and NOT suppressed by security settings), show check email
+                // WORKAROUND: Supabase with "Email Enumeration Protection" ON
+                // returns success but with empty identities for existing users
+                if (data?.user?.identities?.length === 0) {
+                    // User already exists! Show error instead of success
+                    setError('Questo indirizzo email è già registrato. Accedi al tuo account!');
+                    return;
+                }
+
+                // If genuinely new user, show check email
                 setSuccess(true);
             }
         } catch (err: any) {
