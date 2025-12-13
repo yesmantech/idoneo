@@ -46,17 +46,24 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-[#F5F5F7] pb-24">
 
             {/* 1. HERO HEADER */}
-            <header className="bg-slate-900 h-32 relative flex justify-end p-4 pt-6">
-                <div className="flex gap-3">
+            {/* 1. HERO HEADER (Dark Navy/Charcoal Gradient) */}
+            <header className="relative pt-safe h-48 bg-gradient-to-b from-[#0B1121] to-[#1a2333] flex justify-end items-start p-4 overflow-hidden">
+                {/* Background decorative glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-md pointer-events-none opacity-40">
+                    <div className="absolute top-[-50%] left-[-20%] w-[80%] h-[150%] bg-[#00B1FF] blur-[100px] rounded-full mix-blend-screen" />
+                </div>
+
+                {/* Actions */}
+                <div className="relative z-10 flex gap-3 mt-2">
                     <button
                         onClick={() => alert("Condivisione in arrivo!")}
-                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:bg-white/20 active:scale-95"
+                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/5 flex items-center justify-center transition-all hover:bg-white/20 active:scale-95 shadow-lg shadow-black/10"
                     >
                         <Share2 className="w-5 h-5 text-white" />
                     </button>
                     <button
                         onClick={() => navigate('/profile/settings')}
-                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:bg-white/20 active:scale-95"
+                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/5 flex items-center justify-center transition-all hover:bg-white/20 active:scale-95 shadow-lg shadow-black/10"
                     >
                         <Settings className="w-5 h-5 text-white" />
                     </button>
