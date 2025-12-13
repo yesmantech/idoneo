@@ -75,26 +75,26 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
 
                     {/* Buttons */}
                     <div className="flex flex-col gap-3 mt-6">
-                        {/* Delete Button */}
-                        <button
-                            type="submit"
-                            disabled={!isValid}
-                            className={`w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isValid
-                                    ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/25'
-                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                }`}
-                        >
-                            <Trash2 className="w-5 h-5" />
-                            Elimina definitivamente
-                        </button>
-
-                        {/* Cancel Button */}
+                        {/* Cancel Button - Primary */}
                         <button
                             type="button"
                             onClick={handleClose}
-                            className="w-full py-3 text-[15px] font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+                            className="w-full py-4 rounded-2xl font-bold text-[15px] bg-slate-900 hover:bg-slate-800 text-white shadow-lg transition-all active:scale-[0.98]"
                         >
                             Annulla
+                        </button>
+
+                        {/* Delete Button - Text style */}
+                        <button
+                            type="submit"
+                            disabled={!isValid}
+                            className={`w-full py-3 text-[14px] font-semibold transition-colors flex items-center justify-center gap-1.5 ${isValid
+                                    ? 'text-rose-500 hover:text-rose-600'
+                                    : 'text-slate-300 cursor-not-allowed'
+                                }`}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Elimina definitivamente
                         </button>
                     </div>
                 </form>
