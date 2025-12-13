@@ -21,6 +21,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // REDUNDANT WAITLIST LOCK:
     // Ensure only Admins can see the MainLayout (App).
     const { user, profile, loading } = useAuth();
+    const isSuperUser = user?.email === 'alessandro.valenza22@gmail.com';
 
     // DEV MODE: Skip waitlist lock on localhost
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
@@ -30,7 +31,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
             // Guest in App -> Waitlist
             return <Navigate to="/waitlist" replace />;
         }
-        if (user && profile?.role !== 'admin' && !isAdmin) {
+        // Allow if: Admin Role OR SuperUser Email OR Admin Route
+        if (user && profile?.role !== 'admin' && !isAdmin && !isSuperUser) {
             // User in App -> Success Page
             return <Navigate to="/waitlist/success" replace />;
         }
