@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil, Check, AlertTriangle, Loader2 } from 'lucide-react';
+import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 
 export default function ProfileSettingsPage() {
     const { user, profile, loading, refreshProfile } = useAuth();
@@ -15,6 +16,7 @@ export default function ProfileSettingsPage() {
     const [saving, setSaving] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,11 +90,15 @@ export default function ProfileSettingsPage() {
         }
     };
 
-    // Deletion (Placeholder)
+    // Deletion
     const handleDeleteAccount = () => {
-        if (confirm("Sei sicuro di voler eliminare il tuo account? Questa azione è irreversibile.")) {
-            alert('Funzionalità in arrivo.');
-        }
+        setShowDeleteModal(true);
+    };
+
+    const confirmDeleteAccount = () => {
+        // Placeholder for actual deletion logic
+        alert('Funzionalità in arrivo. Il tuo account verrà eliminato.');
+        setShowDeleteModal(false);
     };
 
     if (loading) return (
@@ -154,8 +160,8 @@ export default function ProfileSettingsPage() {
                 {/* Message Toast */}
                 {msg && (
                     <div className={`mb-6 p-4 rounded-2xl text-[14px] text-center font-semibold flex items-center justify-center gap-2 ${msg.type === 'success'
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                            : 'bg-rose-50 text-rose-600 border border-rose-100'
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                        : 'bg-rose-50 text-rose-600 border border-rose-100'
                         }`}>
                         {msg.type === 'success' ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                         {msg.text}
@@ -219,6 +225,13 @@ export default function ProfileSettingsPage() {
                 </div>
 
             </div>
+
+            {/* Delete Account Modal */}
+            <DeleteAccountModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDeleteAccount}
+            />
         </div>
     );
 }
