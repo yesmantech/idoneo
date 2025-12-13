@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import AdminPageHeader from '@/components/admin/AdminPageHeader'; // Reusing header for consistency
+import { ArrowLeft, Pencil, Check, AlertTriangle, Loader2 } from 'lucide-react';
 
 export default function ProfileSettingsPage() {
     const { user, profile, loading, refreshProfile } = useAuth();
@@ -13,6 +13,7 @@ export default function ProfileSettingsPage() {
 
     // Form States
     const [saving, setSaving] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
     const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -40,14 +41,12 @@ export default function ProfileSettingsPage() {
             const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
 
-            // Upload
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
                 .upload(filePath, file);
 
             if (uploadError) throw uploadError;
 
-            // Get Public URL
             const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
             setAvatarUrl(data.publicUrl);
             setMsg({ type: 'success', text: 'Immagine caricata. Ricordati di salvare!' });
@@ -79,7 +78,8 @@ export default function ProfileSettingsPage() {
             if (error) throw error;
 
             await refreshProfile();
-            setMsg({ type: 'success', text: 'Profilo aggiornato con successo!' });
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 2000);
         } catch (err: any) {
             console.error(err);
             setMsg({ type: 'error', text: `Errore: ${err.message || 'Salvataggio fallito'}` });
@@ -95,38 +95,52 @@ export default function ProfileSettingsPage() {
         }
     };
 
-
-    if (loading) return <div className="p-8 text-center animate-pulse">Caricamento impostazioni...</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            <div className="bg-white shadow-sm px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
-                <button onClick={() => navigate('/profile')} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
-                    <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
-                <h1 className="text-lg font-bold">Impostazioni Profilo</h1>
-            </div>
+        <div className="min-h-screen bg-[#F5F5F7] pb-28">
 
-            <div className="max-w-md mx-auto p-6">
+            {/* Header */}
+            <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-100">
+                <div className="flex items-center justify-between px-4 py-4 max-w-md mx-auto">
+                    <button
+                        onClick={() => navigate('/profile')}
+                        className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all hover:bg-slate-200 active:scale-95"
+                    >
+                        <ArrowLeft className="w-5 h-5 text-slate-600" />
+                    </button>
+                    <h1 className="text-[17px] font-bold text-slate-900">Impostazioni Profilo</h1>
+                    <div className="w-10" /> {/* Spacer for centering */}
+                </div>
+            </header>
+
+            <div className="max-w-md mx-auto px-5 pt-8">
 
                 {/* Avatar Section */}
-                <div className="flex flex-col items-center mb-8">
-                    <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <div className="w-32 h-32 rounded-full border-4 border-white bg-slate-200 overflow-hidden shadow-lg relative">
+                <div className="flex flex-col items-center mb-10">
+                    <div
+                        className="relative cursor-pointer group"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        {/* Avatar Circle */}
+                        <div className="w-28 h-28 rounded-[32px] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] overflow-hidden transition-all group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] group-active:scale-95">
                             {avatarUrl ? (
                                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-5xl">👤</div>
+                                <div className="w-full h-full flex items-center justify-center text-4xl bg-slate-100">👤</div>
                             )}
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-white text-xs font-bold">Modifica</span>
-                            </div>
                         </div>
-                        <div className="absolute bottom-1 right-1 bg-emerald-500 text-white p-2 rounded-full border-2 border-white shadow-md">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+
+                        {/* Edit Badge */}
+                        <div className="absolute -bottom-1 -right-1 w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 border-[3px] border-[#F5F5F7] transition-all group-hover:scale-110">
+                            <Pencil className="w-4 h-4 text-white" />
                         </div>
                     </div>
+
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -134,52 +148,73 @@ export default function ProfileSettingsPage() {
                         accept="image/*"
                         onChange={handleFileChange}
                     />
-                    <p className="text-sm text-slate-400 mt-2">Tocca per cambiare foto</p>
+                    <p className="text-[13px] text-slate-400 mt-4 font-medium">Tocca per cambiare foto</p>
                 </div>
 
+                {/* Message Toast */}
                 {msg && (
-                    <div className={`mb-6 p-3 rounded-lg text-sm text-center font-medium ${msg.type === 'success' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}`}>
+                    <div className={`mb-6 p-4 rounded-2xl text-[14px] text-center font-semibold flex items-center justify-center gap-2 ${msg.type === 'success'
+                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                            : 'bg-rose-50 text-rose-600 border border-rose-100'
+                        }`}>
+                        {msg.type === 'success' ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                         {msg.text}
                     </div>
                 )}
 
-                <form onSubmit={handleSave} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Nickname</label>
+                {/* Nickname Input */}
+                <form onSubmit={handleSave} className="space-y-8">
+                    <div className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                            Nickname
+                        </label>
                         <input
                             type="text"
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
-                            className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all placeholder-slate-400 font-bold text-lg"
+                            className="w-full px-0 py-2 bg-transparent border-b-2 border-slate-100 focus:border-emerald-400 outline-none transition-all text-[18px] font-bold text-slate-900 placeholder-slate-300"
                             placeholder="Come vuoi chiamarti?"
                             required
                             minLength={3}
                             maxLength={20}
                         />
-                        <p className="text-xs text-slate-400 mt-1 pl-1">Questo nome sarà visibile nelle classifiche.</p>
+                        <p className="text-[12px] text-slate-400 mt-3">
+                            Questo nome sarà visibile nelle classifiche.
+                        </p>
                     </div>
 
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg uppercase tracking-wide"
-                        >
-                            {saving ? (
-                                <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
-                            ) : null}
-                            {saving ? 'Salvataggio...' : 'Salva Modifiche'}
-                        </button>
-                    </div>
+                    {/* Save Button */}
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-[16px] active:scale-[0.98]"
+                    >
+                        {saving ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Salvataggio...
+                            </>
+                        ) : showSuccess ? (
+                            <>
+                                <Check className="w-5 h-5" />
+                                Salvato!
+                            </>
+                        ) : (
+                            'Salva modifiche'
+                        )}
+                    </button>
                 </form>
 
-                <div className="mt-12 pt-6 border-t border-slate-200">
-                    <h3 className="font-bold text-slate-900 mb-4">Zona Pericolo</h3>
+                {/* Danger Zone */}
+                <div className="mt-12 pt-8 border-t border-slate-200/60">
+                    <h3 className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                        Zona pericolo
+                    </h3>
                     <button
                         onClick={handleDeleteAccount}
-                        className="w-full py-3 border-2 border-rose-100 text-rose-500 font-bold rounded-xl hover:bg-rose-50 transition-colors"
+                        className="w-full py-3.5 bg-white border-2 border-rose-100 text-rose-500 font-bold rounded-2xl hover:bg-rose-50 hover:border-rose-200 transition-all active:scale-[0.98]"
                     >
-                        Elimina Account
+                        Elimina account
                     </button>
                 </div>
 
