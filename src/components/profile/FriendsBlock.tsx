@@ -1,62 +1,111 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { Users, Gift, UserPlus } from 'lucide-react';
+import { Users, Gift, UserPlus, Search, Check, X } from 'lucide-react';
 import ReferralModal from '@/components/referral/ReferralModal';
-
-interface Friend {
-    id: string;
-    nickname: string;
-    avatar_url: string | null;
-    created_at: string;
-}
+import AddFriendModal from './AddFriendModal';
+import { friendService, FriendProfile } from '@/lib/friendService';
 
 interface FriendsBlockProps {
     userId: string;
 }
 
 export default function FriendsBlock({ userId }: FriendsBlockProps) {
-    const [friends, setFriends] = useState<Friend[]>([]);
+    const [friends, setFriends] = useState<FriendProfile[]>([]);
+    const [pendingReceived, setPendingReceived] = useState<FriendProfile[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Modals
     const [showReferralModal, setShowReferralModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
+
+    const refreshData = async () => {
+        if (!userId) return;
+        try {
+            const { friends: f, pendingReceived: p } = await friendService.getFriendsAndRequests(userId);
+            setFriends(f);
+            setPendingReceived(p);
+        } catch (err) {
+            console.error('Error fetching friends:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        async function fetchFriends() {
-            if (!userId) return;
-            try {
-                // Fetch users who were referred by the current user
-                // The 'referred_by' column stores the referrer's UUID
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('id, nickname, avatar_url, created_at')
-                    .eq('referred_by', userId)
-                    .order('created_at', { ascending: false })
-                    .limit(50); // Increased limit to 50
-
-                if (error) throw error;
-                setFriends(data || []);
-            } catch (err) {
-                console.error('Error fetching friends:', err);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchFriends();
+        refreshData();
     }, [userId]);
+
+    const handleAccept = async (friendshipId?: string) => {
+        if (!friendshipId) return;
+        await friendService.acceptRequest(friendshipId);
+        refreshData();
+    };
+
+    const handleReject = async (friendshipId?: string) => {
+        if (!friendshipId) return;
+        await friendService.removeFriendship(friendshipId);
+        refreshData();
+    };
 
     return (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+            {/* Header with TWO actions */}
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-900">I tuoi Amici</h3>
-                {friends.length > 0 && (
+                <div className="flex gap-2">
                     <button
-                        onClick={() => setShowReferralModal(true)}
-                        className="text-sm font-bold text-[#00B1FF] hover:text-[#0099e6] transition-colors"
+                        onClick={() => setShowAddModal(true)}
+                        className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                        title="Cerca amici"
                     >
-                        Invita
+                        <Search className="w-4 h-4" />
                     </button>
-                )}
+                    {friends.length > 0 && (
+                        <button
+                            onClick={() => setShowReferralModal(true)}
+                            className="text-sm font-bold text-[#00B1FF] hover:text-[#0099e6] transition-colors"
+                        >
+                            Invita
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {/* PENDING REQUESTS SECTION */}
+            {pendingReceived.length > 0 && (
+                <div className="mb-6 bg-amber-50 rounded-2xl p-4 border border-amber-100">
+                    <h4 className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-3">Richieste in attesa</h4>
+                    <div className="space-y-3">
+                        {pendingReceived.map(req => (
+                            <div key={req.id} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden">
+                                        {req.avatar_url ? (
+                                            <img src={req.avatar_url} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="flex items-center justify-center w-full h-full">👤</span>
+                                        )}
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-900">{req.nickname}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleAccept(req.friendship_id)}
+                                        className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200"
+                                    >
+                                        <Check className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleReject(req.friendship_id)}
+                                        className="p-1.5 bg-red-100 text-red-500 rounded-lg hover:bg-red-200"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="space-y-3">
@@ -77,22 +126,30 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                         <Users className="w-7 h-7 text-[#00B1FF]" />
                     </div>
                     <p className="text-sm font-medium text-slate-500 mb-4 px-4">
-                        Non hai ancora invitato nessuno. <br />
-                        Invita i tuoi amici e scala la classifica!
+                        Non hai ancora amici. <br />
+                        Cerca per nickname o invitali!
                     </p>
-                    <button
-                        onClick={() => setShowReferralModal(true)}
-                        className="px-6 py-3 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all"
-                    >
-                        <Gift className="w-4 h-4" />
-                        Invita Amici
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="px-5 py-2.5 bg-white text-slate-600 border border-slate-200 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm"
+                        >
+                            Cerca
+                        </button>
+                        <button
+                            onClick={() => setShowReferralModal(true)}
+                            className="px-5 py-2.5 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all text-sm"
+                        >
+                            <Gift className="w-4 h-4" />
+                            Invita
+                        </button>
+                    </div>
                 </div>
             ) : (
                 // Friends List
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                     {friends.map(friend => (
-                        <div key={friend.id} className="flex gap-4 items-center">
+                        <div key={friend.id} className="flex gap-4 items-center group">
                             <div className="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-100">
                                 {friend.avatar_url ? (
                                     <img src={friend.avatar_url} alt={friend.nickname} className="w-full h-full object-cover" />
@@ -100,23 +157,35 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                                     <span className="text-lg">👤</span>
                                 )}
                             </div>
-                            <div>
-                                <p className="text-sm font-bold text-slate-900 leading-tight">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-slate-900 leading-tight truncate">
                                     {friend.nickname || 'Utente'}
                                 </p>
-                                <p className="text-xs text-slate-400 mt-0.5">
-                                    Iscritto il {new Date(friend.created_at).toLocaleDateString()}
-                                </p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    {friend.status === 'referral' && (
+                                        <span className="text-[10px] font-bold bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">INVITATO</span>
+                                    )}
+                                    <p className="text-xs text-slate-400">
+                                        Iscritto il {new Date(friend.created_at).toLocaleDateString()}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Invite Modal */}
+            {/* Modals */}
             <ReferralModal
                 isOpen={showReferralModal}
                 onClose={() => setShowReferralModal(false)}
+            />
+
+            <AddFriendModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                currentUserId={userId}
+                onRequestSent={refreshData}
             />
         </div>
     );
