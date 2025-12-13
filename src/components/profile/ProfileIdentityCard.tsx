@@ -14,7 +14,7 @@ export default function ProfileIdentityCard({ user, profile }: ProfileIdentityCa
     const isPro = false;
 
     return (
-        <div className="relative -mt-20 mb-8 mx-2 z-20">
+        <div className="relative -mt-10 mb-4 mx-2 z-20">
             <div className="bg-white rounded-[32px] p-6 pb-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center flex flex-col items-center border border-white/50">
 
                 {/* Avatar */}

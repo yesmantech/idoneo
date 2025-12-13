@@ -47,14 +47,25 @@ export default function ProfilePage() {
 
             {/* 1. HERO HEADER */}
             {/* 1. HERO HEADER (Dark Navy/Charcoal Gradient) */}
-            <header className="relative pt-safe h-48 bg-gradient-to-b from-[#0B1121] to-[#1a2333] flex justify-end items-start p-4 overflow-hidden">
-                {/* Background decorative glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-md pointer-events-none opacity-40">
-                    <div className="absolute top-[-50%] left-[-20%] w-[80%] h-[150%] bg-[#00B1FF] blur-[100px] rounded-full mix-blend-screen" />
+            <header className="relative pt-safe h-36 bg-gradient-to-b from-[#0B1121] to-[#1a2333] flex justify-end items-start p-4 overflow-hidden">
+
+                {/* Background Animations */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    {/* Floating Orbs */}
+                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[120%] bg-[#00B1FF]/30 blur-[80px] rounded-full mix-blend-screen animate-[float_6s_ease-in-out_infinite]" />
+                    <div className="absolute bottom-[-40%] right-[-10%] w-[50%] h-[100%] bg-[#10B981]/20 blur-[60px] rounded-full mix-blend-screen animate-[float_8s_ease-in-out_infinite_1s]" />
+
+                    {/* Sparkles (Subtle) */}
+                    <div className="absolute top-12 left-8 opacity-60 animate-[sparkle_3s_ease-in-out_infinite]">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="#FBBF24" /></svg>
+                    </div>
+                    <div className="absolute top-8 right-20 opacity-40 animate-[sparkle_4s_ease-in-out_infinite_1.5s]">
+                        <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="#00B1FF" /></svg>
+                    </div>
                 </div>
 
                 {/* Actions */}
-                <div className="relative z-10 flex gap-3 mt-2">
+                <div className="relative z-10 flex gap-3 mt-1">
                     <button
                         onClick={() => alert("Condivisione in arrivo!")}
                         className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/5 flex items-center justify-center transition-all hover:bg-white/20 active:scale-95 shadow-lg shadow-black/10"
