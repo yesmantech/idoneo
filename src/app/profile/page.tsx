@@ -10,6 +10,7 @@ import ProfileStatsCard from '@/components/profile/ProfileStatsCard';
 import DashboardList from '@/components/profile/DashboardList';
 import BadgesBlock from '@/components/profile/BadgesBlock';
 import FriendsBlock from '@/components/profile/FriendsBlock';
+import { ProfileBackgroundDecor } from '@/components/ui/ProfileBackgroundDecor';
 
 import { xpService } from '@/lib/xpService';
 
@@ -43,7 +44,10 @@ export default function ProfilePage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] pb-24">
+        <div className="min-h-screen bg-[#F5F5F7] pb-24 relative overflow-hidden">
+
+            {/* Animated Background Decorations */}
+            <ProfileBackgroundDecor />
 
             {/* 1. HERO HEADER */}
             {/* 1. MINIMAL HEADER */}
