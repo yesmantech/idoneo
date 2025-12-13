@@ -22,6 +22,12 @@ export default function WaitlistGuard({ children }: { children: React.ReactNode 
         return <>{children}</>;
     }
 
+    // BYPASS: SuperUser
+    const isSuperUser = user?.email === 'alessandro.valenza22@gmail.com';
+    if (isSuperUser) {
+        return <>{children}</>;
+    }
+
     // 2. Always allow Admin routes (The developer needs access)
     // We assume AdminLayout handles its own auth checks, or we trust the route separation.
     if (path.startsWith('/admin')) {
