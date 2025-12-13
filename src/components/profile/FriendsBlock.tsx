@@ -30,7 +30,7 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                     .select('id, nickname, avatar_url, created_at')
                     .eq('referred_by', userId)
                     .order('created_at', { ascending: false })
-                    .limit(10); // Limit to recent 10 for profile view?
+                    .limit(50); // Increased limit to 50
 
                 if (error) throw error;
                 setFriends(data || []);
@@ -90,7 +90,7 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                 </div>
             ) : (
                 // Friends List
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                     {friends.map(friend => (
                         <div key={friend.id} className="flex gap-4 items-center">
                             <div className="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-100">
