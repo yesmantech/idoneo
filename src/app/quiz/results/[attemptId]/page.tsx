@@ -34,6 +34,7 @@ interface AttemptData {
     answers: RichAnswer[];
     is_idoneo: boolean | null;
     pass_threshold: number | null;
+    xp_awarded?: boolean; // Added
 }
 
 type TabType = 'errate' | 'corrette' | 'omesse';
@@ -77,9 +78,20 @@ export default function QuizResultsPage() {
         const awardXP = async () => {
             if (attempt && attempt.user_id && attemptId && !xpAwardedRef.current) {
                 xpAwardedRef.current = true;
+
+                // 1. If already awarded (by Runner), display the score
+                if (attempt.xp_awarded) {
+                    setXpEarned(attempt.correct || 0);
+                    return;
+                }
+
+                // 2. Otherwise try to award it now
                 const earned = await xpService.awardXpForAttempt(attemptId, attempt.user_id);
                 if (earned > 0) {
                     setXpEarned(earned);
+                } else if (earned === 0 && attempt.correct > 0) {
+                    // Fallback: If service returns 0 (maybe race condition), use correct count
+                    setXpEarned(attempt.correct);
                 }
             }
         };
