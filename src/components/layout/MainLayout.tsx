@@ -26,13 +26,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // DEV MODE: Skip waitlist lock on localhost
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
-    if (!loading && !isLocalhost) {
+    // IMMEDIATE UNLOCK FOR SUPERUSER
+    if (isSuperUser) {
+        // No checks. Just render.
+    } else if (!loading && !isLocalhost) {
         if (!user && !isAdmin) {
             // Guest in App -> Waitlist
             return <Navigate to="/waitlist" replace />;
         }
-        // Allow if: Admin Role OR SuperUser Email OR Admin Route
-        if (user && profile?.role !== 'admin' && !isAdmin && !isSuperUser) {
+        // Allow if: Admin Role OR Admin Route. SuperUser is handled above (falls through).
+        if (user && profile?.role !== 'admin' && !isAdmin) {
             // User in App -> Success Page
             return <Navigate to="/waitlist/success" replace />;
         }
