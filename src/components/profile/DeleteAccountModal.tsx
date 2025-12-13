@@ -89,12 +89,12 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
                             type="submit"
                             disabled={!isValid}
                             className={`w-full py-3 text-[14px] font-semibold transition-colors flex items-center justify-center gap-1.5 ${isValid
-                                    ? 'text-rose-500 hover:text-rose-600'
-                                    : 'text-slate-300 cursor-not-allowed'
+                                ? 'text-rose-500 hover:text-rose-600'
+                                : 'text-slate-300 cursor-not-allowed'
                                 }`}
                         >
                             <Trash2 className="w-4 h-4" />
-                            Elimina definitivamente
+                            Elimina
                         </button>
                     </div>
                 </form>
