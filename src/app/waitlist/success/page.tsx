@@ -4,9 +4,11 @@ import confetti from 'canvas-confetti';
 import { CloudMascot } from '@/components/ui/CloudMascot';
 import { Gift, Home } from 'lucide-react';
 import ReferralModal from '@/components/referral/ReferralModal';
+import { useAuth } from '@/context/AuthContext';
 
 export default function WaitlistSuccessPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [showReferralModal, setShowReferralModal] = useState(false);
 
     useEffect(() => {
@@ -113,6 +115,11 @@ export default function WaitlistSuccessPage() {
 
             {/* Background elements (optional subtle touches) */}
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
+
+            {/* DEBUG: User Identity */}
+            <div className="fixed bottom-1 left-0 right-0 text-[10px] text-slate-300 text-center z-[60] pointer-events-none opacity-50 font-mono">
+                {user?.email || 'No User'}
+            </div>
 
             {/* Referral Modal */}
             <ReferralModal
