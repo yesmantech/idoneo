@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import { useSidebar } from '@/context/SidebarContext';
 import AdminSidebar from '../admin/AdminSidebar';
 import InstallPrompt from '../pwa/InstallPrompt';
-import { Home, Search, BookOpen, BarChart3, User, Trophy } from 'lucide-react';
+import { Home, Search, BookOpen, BarChart3, User, Trophy, Newspaper } from 'lucide-react';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -45,7 +45,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const NAV_ITEMS = [
         { Icon: Home, label: 'Home', path: '/' },
         { Icon: Search, label: 'Cerca', path: '/concorsi/tutti' },
-        { Icon: BookOpen, label: 'Quiz', path: '/quiz' },
+        { Icon: Newspaper, label: 'Blog', path: '/blog' },
         { Icon: Trophy, label: 'Classifica', path: '/leaderboard' },
         { Icon: User, label: 'Profilo', path: '/profile' },
     ];
