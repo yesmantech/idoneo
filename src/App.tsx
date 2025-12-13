@@ -21,6 +21,8 @@ import QuizRunnerPage from './app/quiz/run/[attemptId]/page';
 import QuizResultsPage from './app/quiz/results/[attemptId]/page';
 import ExplanationPage from './app/quiz/explanations/[attemptId]/[questionId]/page';
 import OfficialQuizStarterPage from './app/quiz/official/[id]/page';
+import PracticeStartPage from './app/quiz/practice/[quizId]/page';
+import ReviewPage from './app/quiz/review/[quizId]/page';
 import StatsPage from './app/stats/page';
 
 // Admin Pages (Lazy Loaded for Code Splitting)
@@ -117,6 +119,8 @@ export default function App() {
 
                                 {/* Quiz Engine (Wrapped) */}
                                 <Route path="/quiz/:id/official" element={<MainLayout><OfficialQuizStarterPage /></MainLayout>} />
+                                <Route path="/quiz/:quizId/practice" element={<MainLayout><PracticeStartPage /></MainLayout>} />
+                                <Route path="/quiz/:quizId/review" element={<MainLayout><ReviewPage /></MainLayout>} />
                                 <Route path="/quiz/run/:attemptId" element={<QuizRunnerPage />} />
                                 <Route path="/quiz/results/:attemptId" element={<MainLayout><QuizResultsPage /></MainLayout>} />
                                 <Route path="/quiz/explanations/:attemptId/:questionId" element={<MainLayout><ExplanationPage /></MainLayout>} />

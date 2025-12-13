@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-
-// Layout Imports
-import QuizLayout from "@/components/quiz/QuizLayout";
-import QuizHeader from "@/components/quiz/QuizHeader";
-import QuizSidebar from "@/components/quiz/QuizSidebar";
-import MobileQuestionDrawer from "@/components/quiz/MobileQuestionDrawer";
+import { xpService } from "@/lib/xpService";
+import { statsService } from "@/lib/statsService";
+import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 // Types
 type RichAnswer = {
@@ -20,7 +17,7 @@ type RichAnswer = {
     correctOption: string | null;
     isCorrect: boolean;
     isSkipped: boolean;
-    isLocked?: boolean; // New: For Instant Check Logic
+    isLocked?: boolean;
     explanation?: string | null;
     options: { a: string; b: string; c: string; d: string };
 };
@@ -31,18 +28,17 @@ function normalizeDBAnswer(val: string | null | undefined): string | null {
     return val.replace(/[.,:;()\[\]]/g, "").trim().toLowerCase();
 }
 
+// =============================================================================
+// QUIZ RUNNER PAGE - Idoneo Redesign
+// =============================================================================
 export default function QuizRunnerPage() {
     const { attemptId, id } = useParams<{ attemptId?: string; id?: string }>();
-    const quizAttemptId = attemptId || id; // Support both route patterns
+    const quizAttemptId = attemptId || id;
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
     // Config from URL queries
     const timeLimitParam = searchParams.get("time");
-    // const initInstantCheck = searchParams.get("ic") === "true"; // Deprecated global init, user toggles it
-    // const initAutoNext = searchParams.get("auto") === "true";
-
-    // Scoring Config
     const pointsCorrect = parseFloat(searchParams.get("correct") || "1");
     const pointsWrong = parseFloat(searchParams.get("wrong") || "0");
     const pointsBlank = parseFloat(searchParams.get("blank") || "0");
@@ -52,10 +48,11 @@ export default function QuizRunnerPage() {
     const [answering, setAnswering] = useState<RichAnswer[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [finished, setFinished] = useState(false);
-    const [isMobileDrawerOpen, setMobileDrawerOpen] = useState(false);
     const [showTerminateConfirm, setShowTerminateConfirm] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [drawerExpanded, setDrawerExpanded] = useState(false);
 
-    // Modes & Config
+    // Modes
     const [instantCheck, setInstantCheck] = useState(false);
     const [autoNext, setAutoNext] = useState(false);
     const [quizConfig, setQuizConfig] = useState<{
@@ -63,10 +60,9 @@ export default function QuizRunnerPage() {
         minCorrectForPass: number | null;
     } | null>(null);
 
-    // Ref to hold latest answers (prevents stale closures)
+    // Ref to hold latest answers
     const answeringRef = useRef<RichAnswer[]>([]);
 
-    // Sync Ref with State
     useEffect(() => {
         answeringRef.current = answering;
     }, [answering]);
@@ -80,7 +76,6 @@ export default function QuizRunnerPage() {
             if (data) {
                 let loadedAnswers = Array.isArray(data.answers) ? data.answers : [];
 
-                // Check LocalStorage for backup (in case of refresh)
                 const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
                 if (localBackup) {
                     try {
@@ -93,7 +88,6 @@ export default function QuizRunnerPage() {
                     }
                 }
 
-                // Hydrate explanations (fetch fresh from DB)
                 const qIds = loadedAnswers.map((a: any) => a.questionId);
                 if (qIds.length > 0) {
                     const { data: freshQuestions } = await supabase
@@ -112,7 +106,6 @@ export default function QuizRunnerPage() {
                 setAnswering(loadedAnswers);
                 answeringRef.current = loadedAnswers;
 
-                // Load Quiz Config for Pass/Fail
                 const { data: quizData } = await supabase
                     .from('quizzes')
                     .select('use_custom_pass_threshold, min_correct_for_pass')
@@ -131,10 +124,9 @@ export default function QuizRunnerPage() {
         load();
     }, [quizAttemptId]);
 
-    // Timer State
+    // Timer
     const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
 
-    // Initialize timer
     useEffect(() => {
         if (timeLimitParam) {
             const minutes = parseFloat(timeLimitParam);
@@ -146,7 +138,6 @@ export default function QuizRunnerPage() {
         }
     }, [timeLimitParam]);
 
-    // Timer countdown
     useEffect(() => {
         if (remainingSeconds === null || finished) return;
         if (remainingSeconds <= 0) {
@@ -159,38 +150,48 @@ export default function QuizRunnerPage() {
         return () => clearInterval(timer);
     }, [remainingSeconds, finished]);
 
-    // AutoNext Logic
-    useEffect(() => {
-        if (!autoNext || finished) return;
-        const currentAns = answering[currentIndex];
+    // Action-based AutoNext tracking using State to ensure re-renders/effects fire reliably
+    const [lastAutoAdvanceTime, setLastAutoAdvanceTime] = useState<number>(0);
+    // Track processed time to avoid re-running effect or clearing timeout on re-renders
+    const lastProcessedTimeRef = useRef<number>(0);
 
-        if (currentAns?.selectedOption) {
-            // Auto Next Logic
+    // AutoNext effect - reacts to the timestamp update from handleSelect
+    useEffect(() => {
+        if (!autoNext || finished || lastAutoAdvanceTime === 0) return;
+
+        // Only run if this is a NEW event we haven't processed yet
+        if (lastAutoAdvanceTime > lastProcessedTimeRef.current) {
+            lastProcessedTimeRef.current = lastAutoAdvanceTime;
+
             const delay = instantCheck ? 1200 : 400;
             const timeout = setTimeout(() => {
-                if (currentIndex < answering.length - 1) {
-                    setCurrentIndex(p => p + 1);
-                }
+                setCurrentIndex(prevIndex => {
+                    if (prevIndex < answering.length - 1) {
+                        return prevIndex + 1;
+                    }
+                    return prevIndex;
+                });
             }, delay);
             return () => clearTimeout(timeout);
         }
-    }, [answering, currentIndex, autoNext, instantCheck, finished]);
+    }, [lastAutoAdvanceTime, autoNext, finished, instantCheck, answering.length]);
 
     const handleSelect = useCallback((opt: string) => {
         if (finished) return;
-
         const currentList = answeringRef.current.length > 0 ? answeringRef.current : answering;
         const currentQ = currentList[currentIndex];
 
-        if (!currentQ) return;
+        if (!currentQ || currentQ.isLocked) return;
 
-        // Locked Logic
-        if (currentQ.isLocked) return;
+        // AutoNext Logic:
+        // 1. AutoNext is enabled
+        // 2. The question currently has NO answer (first time answering)
+        if (autoNext && currentQ.selectedOption === null) {
+            setLastAutoAdvanceTime(Date.now());
+        }
 
         const nextList = [...currentList];
         const normalizedCorrect = normalizeDBAnswer(currentQ.correctOption);
-
-        // Locking Logic (Instant Check)
         const shouldLock = instantCheck;
 
         nextList[currentIndex] = {
@@ -201,23 +202,19 @@ export default function QuizRunnerPage() {
             isLocked: shouldLock
         };
 
-        // Update Ref & State
         answeringRef.current = nextList;
         setAnswering(nextList);
 
-        // Backup to LocalStorage
         if (quizAttemptId) {
             localStorage.setItem(`quiz_progress_${quizAttemptId}`, JSON.stringify(nextList));
         }
-    }, [finished, currentIndex, instantCheck, quizAttemptId, answering]); // Added dependencies
+    }, [finished, currentIndex, instantCheck, quizAttemptId, answering, autoNext]);
 
     const handleFinish = async () => {
         if (finished || !quizAttemptId) return;
         setFinished(true);
 
-        // Get answers from best available source
         let finalAnswersSource = answeringRef.current.length > 0 ? answeringRef.current : answering;
-
         const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
         if (localBackup) {
             try {
@@ -230,14 +227,13 @@ export default function QuizRunnerPage() {
             }
         }
 
-        // Build Stats & Re-eval correctness
         let correct = 0, wrong = 0, blank = 0;
         let score = 0;
 
         const finalAnswers = finalAnswersSource.map(a => {
             const normalizedCorrect = normalizeDBAnswer(a.correctOption);
-            const isCorrect = a.selectedOption !== null && a.selectedOption === normalizedCorrect;
-
+            const normalizedSelected = normalizeDBAnswer(a.selectedOption);
+            const isCorrect = normalizedSelected !== null && normalizedSelected === normalizedCorrect;
             if (a.selectedOption === null) {
                 blank++;
                 score += pointsBlank;
@@ -248,23 +244,12 @@ export default function QuizRunnerPage() {
                 wrong++;
                 score += pointsWrong;
             }
-
-            return {
-                ...a,
-                isCorrect,
-                isSkipped: a.selectedOption === null
-            }
+            return { ...a, isCorrect, isSkipped: a.selectedOption === null };
         });
 
         score = Math.round(score * 100) / 100;
 
-        if (finalAnswers.length === 0) {
-            alert("Errore: Nessuna risposta registrata.");
-            return;
-        }
-
-        // Update DB
-        const { data: updateResult, error } = await supabase.from("quiz_attempts").update({
+        const { error } = await supabase.from("quiz_attempts").update({
             finished_at: new Date().toISOString(),
             score,
             correct,
@@ -274,7 +259,7 @@ export default function QuizRunnerPage() {
             duration_seconds: remainingSeconds !== null ? (parseFloat(timeLimitParam || "0") * 60 - remainingSeconds) : 0,
             is_idoneo: quizConfig?.useCustomPassThreshold ? correct >= (quizConfig.minCorrectForPass || 0) : null,
             pass_threshold: quizConfig?.useCustomPassThreshold ? quizConfig.minCorrectForPass : null,
-        }).eq("id", quizAttemptId).select();
+        }).eq("id", quizAttemptId);
 
         if (error) {
             console.error("Save error:", error);
@@ -282,15 +267,39 @@ export default function QuizRunnerPage() {
             return;
         }
 
-        if (!updateResult || updateResult.length === 0) {
-            alert("Errore: Impossibile salvare i risultati. Verifica i permessi del database.");
-            return;
+        // TRIGGER UPDATES (Fire and forget, or await if critical)
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                // 1. Award XP
+                await xpService.awardXpForAttempt(quizAttemptId, user.id);
+
+                // 2. Update Goals
+                // We need the quiz_id from original data or we can fetch it. 
+                // Since we don't have quiz_id in scope easily without fetching, let's fetch it or rely on loading state
+                // Actually `data` (line 73) was local scope. 
+                // Let's refetch minimal data or just pass it if we store it.
+                // Simpler: fetch quiz_id from the attempt we just updated/read?
+                // Actually, let's just do a quick fetch since we need it for goals.
+                const { data: currentAttempt } = await supabase
+                    .from('quiz_attempts')
+                    .select('quiz_id')
+                    .eq('id', quizAttemptId)
+                    .single();
+
+                if (currentAttempt?.quiz_id) {
+                    await statsService.updateGoals(user.id, currentAttempt.quiz_id, {
+                        score,
+                        correct,
+                        total: finalAnswers.length
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Post-finish updates error:", err);
         }
 
-        // Cleanup LocalStorage
         localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
-
-        // Redirect to Results
         navigate(`/quiz/results/${quizAttemptId}`);
     };
 
@@ -301,104 +310,142 @@ export default function QuizRunnerPage() {
         return `${m}:${s.toString().padStart(2, "0")}`;
     };
 
-    if (loading) return (
-        <div className="min-h-screen bg-canvas-light flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cyan"></div>
-        </div>
-    );
+    // Timer color states
+    const getTimerColor = () => {
+        if (remainingSeconds === null) return "text-slate-600";
+        if (remainingSeconds < 60) return "text-red-500";
+        if (remainingSeconds < 300) return "text-amber-500";
+        return "text-slate-600";
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     const currentQ = answering[currentIndex];
+    if (!currentQ) return <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">Errore dati</div>;
 
-
-    if (!currentQ) return <div>Errore dati</div>;
     const isLocked = currentQ.isLocked || false;
     const normalizedCorrect = normalizeDBAnswer(currentQ.correctOption);
 
-    // Transform answers for sidebar
-    const answerMap: Record<number, any> = {};
-    answering.forEach((a, i) => {
-        if (a.selectedOption) answerMap[i] = a.selectedOption;
-    });
-
-
     return (
-        <QuizLayout
-            header={
-                <QuizHeader
-                    title={"Prova Personalizzata"}
-                    onExit={() => {
-                        alert('Exit button clicked!'); // DEBUG
-                        // Check if there is a history stack to go back to
-                        if (window.history.length > 2) {
-                            navigate(-1);
-                        } else {
-                            // Fallback to home if direct link or clean tab
-                            navigate('/', { replace: true });
-                        }
-                    }}
-                    onSettings={() => alert("Impostazioni: In arrivo!")}
-                    instantCheck={instantCheck}
-                    setInstantCheck={setInstantCheck}
-                    autoNext={autoNext}
-                    setAutoNext={setAutoNext}
-                    // Mobile Timer Props
-                    timerSeconds={remainingSeconds !== null ? remainingSeconds : undefined}
-                    totalQuestions={answering.length}
-                    currentQuestionIndex={currentIndex}
-                />
-            }
-            sidebar={
-                <QuizSidebar
-                    timerSeconds={remainingSeconds || 0}
-                    totalQuestions={answering.length}
-                    currentQuestionIndex={currentIndex}
-                    answers={answerMap}
-                    onJumpToQuestion={(idx) => setCurrentIndex(idx)}
-                    onTerminate={handleFinish}
-                    onSave={() => alert("Risposte salvate (Placeholder)")}
-                />
-            }
-        >
-            <div className="flex flex-col h-full max-w-4xl mx-auto px-6 py-8 pb-32 lg:pb-8"> {/* Added pb-32 for mobile nav safe area */}
+        <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
+            {/* ============================================================= */}
+            {/* TOP BAR */}
+            {/* ============================================================= */}
+            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+                <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
+                    {/* Left: Close */}
+                    <Link
+                        to="/"
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                    >
+                        <X className="w-5 h-5 text-slate-600" />
+                    </Link>
 
-                {/* Question Header */}
-                <div className="mb-8">
-                    <span className="text-xs font-bold text-text-tertiary uppercase tracking-widest">{currentIndex + 1} / {answering.length} • {currentQ.subjectName}</span>
-                    <h2 className="text-2xl md:text-3xl font-bold mt-3 leading-snug text-text-primary">{currentQ.text}</h2>
-                    {isLocked && (
-                        <div className="mt-3 text-xs font-bold text-semantic-warning flex items-center gap-1">
-                            <span>🔒</span> Risposta bloccata (Verifica Istantanea)
+                    {/* Center: Timer & Progress */}
+                    <div className="flex flex-col items-center">
+                        <span className={`font-mono font-bold text-xl ${getTimerColor()}`}>
+                            {formatTime(remainingSeconds)}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                            Domanda {currentIndex + 1}/{answering.length}
+                        </span>
+                    </div>
+
+                    {/* Right: Mode Toggle + Settings */}
+                    <div className="flex items-center gap-2">
+                        {/* Mode Toggle */}
+                        <div className="hidden sm:flex items-center bg-slate-100 rounded-full p-0.5">
+                            <button
+                                onClick={() => setInstantCheck(!instantCheck)}
+                                className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${instantCheck
+                                    ? 'bg-white text-[#00B1FF] shadow-sm'
+                                    : 'text-slate-500'
+                                    }`}
+                            >
+                                Check
+                            </button>
+                            <button
+                                onClick={() => setAutoNext(!autoNext)}
+                                className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${autoNext
+                                    ? 'bg-white text-[#00B1FF] shadow-sm'
+                                    : 'text-slate-500'
+                                    }`}
+                            >
+                                Auto
+                            </button>
                         </div>
-                    )}
+
+                        {/* Settings */}
+                        <button
+                            onClick={() => setShowSettings(true)}
+                            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+                        >
+                            <Settings className="w-5 h-5 text-slate-400" />
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* ============================================================= */}
+            {/* QUESTION CONTENT */}
+            {/* ============================================================= */}
+            <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-48">
+                {/* Question Meta */}
+                <div className="mb-3">
+                    <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-wider">
+                        {currentIndex + 1} / {answering.length} • {currentQ.subjectName}
+                    </span>
                 </div>
 
+                {/* Question Text */}
+                <h2 className="text-[20px] font-bold text-slate-900 leading-[1.4] mb-8">
+                    {currentQ.text}
+                </h2>
+
+                {/* Lock indicator */}
+                {isLocked && (
+                    <div className="mb-4 flex items-center gap-2 text-[12px] font-semibold text-amber-600">
+                        <span>🔒</span> Risposta bloccata
+                    </div>
+                )}
+
                 {/* Answer Options */}
-                <div className="space-y-2 md:space-y-4 mb-8">
+                <div className="space-y-3">
                     {['a', 'b', 'c', 'd'].map(optKey => {
                         const optText = (currentQ.options as any)[optKey];
-                        const isSelected = currentQ.selectedOption === optKey;
+                        if (!optText) return null;
 
-                        let containerClass = "bg-white shadow-soft hover:shadow-card hover:scale-[1.01] border border-transparent";
-                        let textClass = "text-text-secondary";
+                        const isSelected = currentQ.selectedOption === optKey;
+                        const isCorrectAnswer = optKey === normalizedCorrect;
                         const isDisabled = isLocked;
 
-                        if (isSelected) {
-                            containerClass = "bg-brand-cyan/5 border-brand-cyan shadow-md ring-1 ring-brand-cyan";
-                            textClass = "text-brand-cyan font-semibold";
-                        }
+                        // Determine styling
+                        let cardStyle = "bg-white border-slate-200";
+                        let badgeStyle = "bg-slate-100 text-slate-500";
+                        let textStyle = "text-slate-700";
 
-                        // Locking UI Logic
                         if (isLocked) {
-                            if (optKey === normalizedCorrect) {
-                                containerClass = "bg-semantic-success/10 border-semantic-success ring-1 ring-semantic-success";
-                                textClass = "text-semantic-success font-bold";
+                            if (isCorrectAnswer) {
+                                cardStyle = "bg-emerald-50 border-emerald-500";
+                                badgeStyle = "bg-emerald-500 text-white";
+                                textStyle = "text-emerald-700";
                             } else if (isSelected) {
-                                containerClass = "bg-semantic-error/10 border-semantic-error ring-1 ring-semantic-error";
-                                textClass = "text-semantic-error font-bold";
+                                cardStyle = "bg-red-50 border-red-500";
+                                badgeStyle = "bg-red-500 text-white";
+                                textStyle = "text-red-700";
                             } else {
-                                containerClass = "bg-canvas-light opacity-60 shadow-none";
-                                textClass = "text-text-tertiary";
+                                cardStyle = "bg-slate-50 border-slate-100 opacity-50";
                             }
+                        } else if (isSelected) {
+                            cardStyle = "bg-[#00B1FF]/5 border-[#00B1FF]";
+                            badgeStyle = "bg-[#00B1FF] text-white";
+                            textStyle = "text-[#00B1FF]";
                         }
 
                         return (
@@ -406,64 +453,120 @@ export default function QuizRunnerPage() {
                                 key={optKey}
                                 onClick={() => !isDisabled && handleSelect(optKey)}
                                 disabled={isDisabled}
-                                className={`w-full p-3 md:p-5 rounded-xl md:rounded-card flex items-center gap-3 md:gap-5 text-left transition-all duration-300 ease-ios group ${containerClass} ${isDisabled ? 'cursor-not-allowed transform-none' : ''}`}
+                                className={`w-full p-4 rounded-2xl border-2 flex items-start gap-4 text-left transition-all duration-200 ${cardStyle} ${!isDisabled ? 'hover:shadow-md active:scale-[0.99]' : ''
+                                    }`}
                             >
-                                <span className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-squircle flex items-center justify-center text-xs md:text-sm font-bold border-2 transition-colors shrink-0 ${isSelected || (isLocked && optKey === normalizedCorrect)
-                                    ? 'border-current'
-                                    : 'border-canvas-light bg-canvas-light text-text-tertiary group-hover:border-text-tertiary/30 group-hover:text-text-secondary'
-                                    }`}>
+                                {/* Letter Badge */}
+                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[13px] font-bold flex-shrink-0 ${badgeStyle}`}>
                                     {optKey.toUpperCase()}
                                 </span>
-                                <span className={`text-[15px] md:text-lg leading-snug md:leading-relaxed ${textClass}`}>{optText}</span>
+
+                                {/* Answer Text */}
+                                <span className={`text-[15px] leading-relaxed flex-1 ${textStyle}`}>
+                                    {optText}
+                                </span>
+
+                                {/* Feedback icon */}
+                                {isLocked && isCorrectAnswer && (
+                                    <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                )}
+                                {isLocked && isSelected && !isCorrectAnswer && (
+                                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                )}
                             </button>
-                        )
+                        );
                     })}
                 </div>
 
-                {/* Inline Explanation */}
-                {isLocked && instantCheck && (currentQ as any).explanation && (
-                    <div className="mb-12 bg-white rounded-card p-6 shadow-soft border-l-4 border-brand-cyan animate-in fade-in slide-in-from-top-2 duration-500">
-                        <h3 className="text-sm uppercase tracking-widest font-bold text-brand-cyan mb-2 flex items-center gap-2">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {/* Explanation */}
+                {isLocked && instantCheck && currentQ.explanation && (
+                    <div className="mt-6 bg-white rounded-2xl p-5 border border-[#00B1FF]/20">
+                        <h4 className="text-[12px] font-bold text-[#00B1FF] uppercase tracking-wider mb-2">
                             Spiegazione
-                        </h3>
-                        <div className="prose prose-slate prose-sm max-w-none text-text-secondary leading-relaxed">
-                            {(currentQ as any).explanation}
-                        </div>
+                        </h4>
+                        <p className="text-[14px] text-slate-600 leading-relaxed">
+                            {currentQ.explanation}
+                        </p>
                     </div>
                 )}
+            </main>
 
-                {/* Bottom Navigation Sheet (Mobile) */}
-                <div className="fixed bottom-0 left-0 right-0 bg-white lg:static lg:bg-transparent mt-auto z-40 pb-safe">
-
-                    {/* Curved Notch with Chevron */}
-                    <div className="lg:hidden flex justify-center -mt-6">
-                        <button
-                            onClick={() => setMobileDrawerOpen(true)}
-                            className="bg-white px-8 pt-2 pb-3 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)] transition-transform active:scale-95"
-                        >
-                            <svg className="w-5 h-5 text-brand-cyan" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+            {/* ============================================================= */}
+            {/* BOTTOM NAVIGATOR */}
+            {/* ============================================================= */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white pb-safe z-40">
+                {/* Raised Tab / Drawer Handle */}
+                <div className="relative flex justify-center">
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+                        {/* Rounded trapezoid tab */}
+                        <div className="relative w-28 h-8">
+                            {/* SVG: Rounded top corners, angled sides, flat bottom */}
+                            <svg
+                                className="absolute inset-0 w-full h-full"
+                                viewBox="0 0 112 32"
+                                fill="none"
+                                style={{ filter: 'drop-shadow(0 -2px 8px rgba(0,0,0,0.1))' }}
+                            >
+                                {/* Outer white shape */}
+                                <path
+                                    d="M10 32 L18 8 C20 3 24 0 30 0 L82 0 C88 0 92 3 94 8 L102 32 Z"
+                                    fill="white"
+                                />
                             </svg>
-                        </button>
+                            {/* Inner cyan button */}
+                            <button
+                                onClick={() => setDrawerExpanded(!drawerExpanded)}
+                                className="absolute left-1/2 -translate-x-1/2 top-2 w-16 h-5 rounded-md bg-gradient-to-b from-[#00B1FF] to-[#0095dd] flex items-center justify-center active:scale-95 transition-transform"
+                                style={{
+                                    boxShadow: '0 2px 4px rgba(0,177,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
+                                }}
+                            >
+                                <svg
+                                    width="14"
+                                    height="8"
+                                    viewBox="0 0 14 8"
+                                    fill="none"
+                                    className={`text-white transition-transform duration-200 ${drawerExpanded ? 'rotate-180' : ''}`}
+                                >
+                                    <path d="M1.5 6.5L7 1.5L12.5 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
+                </div>
 
-                    {/* Question Number Pills */}
-                    <div className="lg:hidden px-4 py-3">
-                        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                            {answering.map((_, idx) => {
+                {/* Border line */}
+                <div className="h-px bg-slate-100" />
+
+                {/* Collapsible Question Pills */}
+                <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-60' : 'max-h-14'
+                        }`}
+                >
+                    <div className="px-4 py-3 border-b border-slate-50">
+                        <div className={`flex gap-2 max-w-3xl mx-auto ${drawerExpanded
+                            ? 'flex-wrap justify-center'
+                            : 'overflow-x-auto scrollbar-hide'
+                            }`}>
+                            {answering.map((ans, idx) => {
                                 const isActive = idx === currentIndex;
-                                const hasAnswer = answering[idx]?.selectedOption !== null;
+                                const hasAnswer = ans.selectedOption !== null;
+
+                                let buttonClass = "bg-slate-200 text-slate-400"; // Default: Unanswered (Grey)
+
+                                if (isActive) {
+                                    // Current: Blue Outline ("corners only")
+                                    buttonClass = "bg-white text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm";
+                                } else if (hasAnswer) {
+                                    // Answered: Solid Blue
+                                    buttonClass = "bg-[#00B1FF] text-white shadow-sm";
+                                }
+
                                 return (
                                     <button
                                         key={idx}
                                         onClick={() => setCurrentIndex(idx)}
-                                        className={`w-10 h-10 shrink-0 rounded-squircle font-bold text-sm transition-all active:scale-95 ${isActive
-                                            ? 'bg-brand-cyan text-white shadow-md shadow-brand-cyan/30'
-                                            : hasAnswer
-                                                ? 'bg-canvas-light text-text-secondary border border-slate-200'
-                                                : 'bg-canvas-light text-text-tertiary'
-                                            }`}
+                                        className={`w-9 h-9 rounded-xl flex-shrink-0 font-semibold text-[13px] transition-all flex items-center justify-center ${buttonClass}`}
                                     >
                                         {idx + 1}
                                     </button>
@@ -471,84 +574,83 @@ export default function QuizRunnerPage() {
                             })}
                         </div>
                     </div>
-
-                    {/* Navigation Buttons */}
-                    <div className="px-4 pb-4 lg:pb-0 flex gap-3">
-                        <button
-                            onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
-                            disabled={currentIndex === 0}
-                            className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] transition-all active:scale-[0.98] ${currentIndex === 0
-                                ? 'text-text-tertiary bg-canvas-light cursor-not-allowed'
-                                : 'text-text-secondary bg-canvas-light hover:bg-slate-200 active:bg-slate-300'
-                                }`}
-                        >
-                            Precedente
-                        </button>
-
-                        {currentIndex === answering.length - 1 ? (
-                            <button
-                                onClick={() => setShowTerminateConfirm(true)}
-                                className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] transition-all active:scale-[0.98] bg-semantic-error text-white hover:bg-semantic-error/90"
-                            >
-                                Termina
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
-                                className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] transition-all active:scale-[0.98] text-text-secondary bg-canvas-light hover:bg-slate-200 active:bg-slate-300"
-                            >
-                                Successiva
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Desktop Help */}
-                    <div className="hidden lg:flex justify-center py-4">
-                        <button className="text-text-tertiary font-medium hover:text-brand-cyan flex items-center gap-2 px-4 py-2 transition-colors">
-                            <span className="text-xl">?</span>
-                            <span>Aiuto</span>
-                        </button>
-                    </div>
                 </div>
 
+                {/* Navigation Buttons */}
+                <div className="px-4 py-3 flex gap-3 max-w-3xl mx-auto">
+                    <button
+                        onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
+                        disabled={currentIndex === 0}
+                        className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
+                            ? 'bg-slate-100 text-slate-300'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'
+                            }`}
+                    >
+                        <ChevronLeft className="w-5 h-5" />
+                        Precedente
+                    </button>
+
+                    {currentIndex === answering.length - 1 ? (
+                        <button
+                            onClick={() => setShowTerminateConfirm(true)}
+                            className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all"
+                        >
+                            Termina Quiz
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
+                            className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        >
+                            Successiva
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    )}
+                </div>
             </div>
 
-            {/* Mobile Drawer Component */}
-            <MobileQuestionDrawer
-                isOpen={isMobileDrawerOpen}
-                onClose={() => setMobileDrawerOpen(false)}
-                totalQuestions={answering.length}
-                currentQuestionIndex={currentIndex}
-                answers={answerMap}
-                onJumpToQuestion={(idx) => setCurrentIndex(idx)}
-                onTerminate={handleFinish}
-            />
+            {/* ============================================================= */}
+            {/* SETTINGS MODAL */}
+            {/* ============================================================= */}
+            {showSettings && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowSettings(false)} />
+                    <div className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 animate-in slide-in-from-bottom duration-300">
+                        <h3 className="text-lg font-bold text-slate-900 mb-6">Impostazioni</h3>
 
-            {/* Terminate Confirmation Popup */}
-            {showTerminateConfirm && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-                    {/* Backdrop */}
-                    <div
-                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"
-                        onClick={() => setShowTerminateConfirm(false)}
-                    />
+                        <div className="space-y-4">
+                            {/* Instant Check */}
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-semibold text-slate-900">Verifica Istantanea</p>
+                                    <p className="text-[13px] text-slate-500">Mostra risposta corretta subito</p>
+                                </div>
+                                <button
+                                    onClick={() => setInstantCheck(!instantCheck)}
+                                    className={`w-12 h-7 rounded-full transition-colors ${instantCheck ? 'bg-[#00B1FF]' : 'bg-slate-200'}`}
+                                >
+                                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${instantCheck ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
 
-                    {/* Popup */}
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
-                        <h3 className="text-lg font-bold text-text-primary text-center mb-6">
-                            Sei sicuro di voler terminare il quiz?
-                        </h3>
+                            {/* Auto Next */}
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-semibold text-slate-900">Auto Successiva</p>
+                                    <p className="text-[13px] text-slate-500">Passa alla domanda successiva</p>
+                                </div>
+                                <button
+                                    onClick={() => setAutoNext(!autoNext)}
+                                    className={`w-12 h-7 rounded-full transition-colors ${autoNext ? 'bg-[#00B1FF]' : 'bg-slate-200'}`}
+                                >
+                                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${autoNext ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+                        </div>
 
                         <button
-                            onClick={handleFinish}
-                            className="w-full py-3.5 bg-semantic-error hover:bg-semantic-error/90 text-white font-bold rounded-xl transition-colors"
-                        >
-                            Termina
-                        </button>
-
-                        <button
-                            onClick={() => setShowTerminateConfirm(false)}
-                            className="w-full mt-3 py-3 text-text-tertiary font-medium hover:text-text-secondary transition-colors"
+                            onClick={() => setShowSettings(false)}
+                            className="w-full mt-6 py-3 bg-slate-100 text-slate-600 font-semibold rounded-xl"
                         >
                             Chiudi
                         </button>
@@ -556,6 +658,36 @@ export default function QuizRunnerPage() {
                 </div>
             )}
 
-        </QuizLayout>
+            {/* ============================================================= */}
+            {/* TERMINATE CONFIRMATION */}
+            {/* ============================================================= */}
+            {showTerminateConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowTerminateConfirm(false)} />
+                    <div className="relative bg-white rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold text-slate-900 text-center mb-2">
+                            Terminare il quiz?
+                        </h3>
+                        <p className="text-slate-500 text-center text-[14px] mb-6">
+                            Verranno salvate tutte le risposte date finora.
+                        </p>
+
+                        <button
+                            onClick={handleFinish}
+                            className="w-full py-3.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors"
+                        >
+                            Termina Quiz
+                        </button>
+
+                        <button
+                            onClick={() => setShowTerminateConfirm(false)}
+                            className="w-full mt-3 py-3 text-slate-500 font-medium"
+                        >
+                            Continua
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

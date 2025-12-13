@@ -1,5 +1,6 @@
 import React from 'react';
 import { LeaderboardEntry } from '@/lib/leaderboardService';
+import { Trophy, Crown, Medal } from 'lucide-react'; // Assuming lucide is available as per other files
 
 interface LeaderboardViewProps {
     data: LeaderboardEntry[];
@@ -14,51 +15,74 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
     const list = data.slice(3);
 
     const isGold = theme === 'gold';
-    const accentColor = isGold ? 'text-brand-orange' : 'text-brand-cyan';
-    const bgColor = isGold ? 'bg-brand-orange/10' : 'bg-brand-cyan/10';
 
+    // Loading State
     if (loading) {
         return (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-4 animate-pulse">
-                <div className="w-24 h-24 bg-canvas-light rounded-full"></div>
-                <div className="w-32 h-6 bg-canvas-light rounded-lg"></div>
-                <div className="w-full max-w-md h-12 bg-canvas-light rounded-xl"></div>
-                <div className="w-full max-w-md h-12 bg-canvas-light rounded-xl"></div>
+            <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6 animate-pulse">
+                <div className="flex items-end justify-center gap-4 w-full">
+                    <div className="w-20 h-24 bg-slate-100 rounded-t-2xl"></div>
+                    <div className="w-24 h-32 bg-slate-100 rounded-t-2xl"></div>
+                    <div className="w-20 h-20 bg-slate-100 rounded-t-2xl"></div>
+                </div>
+                <div className="space-y-3 w-full">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="w-full h-14 bg-slate-100 rounded-xl"></div>
+                    ))}
+                </div>
             </div>
         );
     }
 
+    // Empty State
     if (data.length === 0) {
         return (
-            <div className="flex-1 flex flex-col items-center justify-center text-text-tertiary p-8">
-                <div className={`w-16 h-16 rounded-squircle flex items-center justify-center text-3xl mb-4 ${bgColor} ${accentColor}`}>
-                    {isGold ? '🏆' : '📊'}
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8">
+                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-sm border border-slate-100 ${isGold ? 'bg-amber-50 text-amber-500' : 'bg-cyan-50 text-cyan-500'}`}>
+                    {isGold ? <Trophy className="w-10 h-10" /> : <span className="text-3xl">📊</span>}
                 </div>
-                <p className="font-bold text-lg text-text-primary">Nessun dato disponibile</p>
-                <p className="text-sm mt-2">{emptyMessage || "La classifica è vuota. Partecipa per primo!"}</p>
+                <h3 className="font-bold text-xl text-slate-900 mb-2">Classifica Vuota</h3>
+                <p className="text-center text-slate-500 max-w-[200px] leading-relaxed">
+                    {emptyMessage || "Ancora nessun partecipante. Sii il primo a scalare la vetta!"}
+                </p>
+                {/* CTA could go here */}
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-full overflow-hidden">
-            {/* Stats Header */}
-            <div className="text-center mb-12 mt-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-canvas-light rounded-pill text-[10px] font-bold text-text-tertiary uppercase tracking-widest">
-                    <span>👥 {data.length} Partecipanti</span>
-                    <span>•</span>
-                    <span className={accentColor}>{metricLabel}</span>
+        <div className="flex flex-col h-full bg-white">
+
+            {/* Meta Header */}
+            <div className="text-center py-6 border-b border-slate-50 bg-gradient-to-b from-white to-slate-50/50">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100/50 rounded-full border border-slate-200/50">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        {data.length} Partecipanti
+                    </span>
                 </div>
             </div>
 
-            {/* Podium */}
-            <Podium top3={top3} theme={theme} metricLabel={metricLabel} />
+            <div className="flex-1 overflow-y-auto scrollbar-hide relative">
+                <div className="px-4 pb-20 pt-6">
+                    {/* PODIUM */}
+                    <div className="mb-8">
+                        <Podium top3={top3} metricLabel={metricLabel} />
+                    </div>
 
-            {/* List */}
-            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3 scrollbar-thin scrollbar-thumb-gray-200">
-                {list.map(entry => (
-                    <RankingRow key={entry.rank} entry={entry} theme={theme} metricLabel={metricLabel} />
-                ))}
+                    {/* RANKING LIST */}
+                    <div className="space-y-1">
+                        {list.map(entry => (
+                            <RankingRow key={entry.rank} entry={entry} metricLabel={metricLabel} />
+                        ))}
+
+                        {/* Placeholder for 'User not ranked' if needed */}
+                        {/* Logic: If user is logged in but not in data, show message. 
+                            But data usually includes user if we fetch getUserActiveQuizzes? 
+                            Actual logic depends on backend. We'll rely on the list.
+                        */}
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -66,65 +90,81 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
 
 // --- Sub Components ---
 
-const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme: 'gold' | 'emerald', metricLabel: string }) => {
+const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: string }) => {
     const [first, second, third] = top3;
-    const isGold = theme === 'gold';
-
-    // Colors
-    const rankBg = isGold ? 'bg-brand-orange' : 'bg-brand-cyan';
 
     return (
-        <div className="flex items-end justify-center gap-4 mb-4 min-h-[170px] pb-6 px-4">
-            {/* 2nd Place */}
-            <div className="flex flex-col items-center gap-2 w-1/3 max-w-[100px]">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[190px] px-2">
+            {/* 2nd Place - Silver */}
+            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-1">
                 {second && (
                     <>
-                        <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft overflow-hidden bg-white`}>
-                                <img src={second.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${second.user.nickname}`} alt={second.user.nickname} className="w-full h-full object-cover" />
+                        <div className="relative group">
+                            <div className="w-20 h-20 rounded-[24px] border-[3px] border-slate-200 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] p-0.5 overflow-hidden z-10 relative">
+                                <img
+                                    src={second.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${second.user.nickname}`}
+                                    alt={second.user.nickname}
+                                    className="w-full h-full object-cover rounded-[20px]"
+                                />
                             </div>
-                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-text-secondary text-white text-[10px] font-black px-2 py-0.5 rounded-pill shadow-sm">2nd</div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-200 text-slate-600 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-white shadow-sm z-20">
+                                2
+                            </div>
                         </div>
-                        <div className="text-center w-full">
-                            <div className="font-bold text-sm text-text-primary truncate">{second.user.nickname}</div>
-                            <div className="text-xs font-black text-text-tertiary">{Math.round(second.score)}</div>
+                        <div className="text-center w-full mt-1">
+                            <div className="font-bold text-[13px] text-slate-800 truncate px-1">{second.user.nickname}</div>
+                            <div className="text-[11px] font-bold text-slate-400">{Math.round(second.score)} XP</div>
                         </div>
                     </>
                 )}
             </div>
 
-            {/* 1st Place */}
-            <div className="flex flex-col items-center gap-2 w-1/3 max-w-[120px] -mt-10 z-10">
+            {/* 1st Place - Gold */}
+            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[130px] -mt-8 order-2 z-20">
                 {first && (
                     <>
-                        <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-3xl animate-bounce">👑</div>
-                            <div className={`w-24 h-24 rounded-squircle border-4 ${isGold ? 'border-brand-orange' : 'border-brand-cyan'} overflow-hidden bg-white shadow-card`}>
-                                <img src={first.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${first.user.nickname}`} alt={first.user.nickname} className="w-full h-full object-cover" />
+                        <div className="relative group scale-110">
+                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none">
+                                <Crown className="w-8 h-8 text-amber-400 fill-amber-400 drop-shadow-sm" />
                             </div>
-                            <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 ${rankBg} text-white text-sm font-black px-3 py-1 rounded-pill shadow-lg border-2 border-white`}>1st</div>
+                            <div className="w-24 h-24 rounded-[28px] border-[3px] border-amber-300 bg-white shadow-[0_8px_24px_rgba(251,191,36,0.25)] p-0.5 overflow-hidden z-10 relative ring-4 ring-amber-50">
+                                <img
+                                    src={first.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${first.user.nickname}`}
+                                    alt={first.user.nickname}
+                                    className="w-full h-full object-cover rounded-[24px]"
+                                />
+                            </div>
+                            <div className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-amber-500 text-white text-[12px] font-black px-4 py-0.5 rounded-full border-2 border-white shadow-md z-20 flex items-center gap-1">
+                                <span>1</span>
+                            </div>
                         </div>
-                        <div className="text-center w-full mt-2">
-                            <div className="font-black text-base text-text-primary truncate">{first.user.nickname}</div>
-                            <div className={`text-sm font-black ${isGold ? 'text-brand-orange' : 'text-brand-cyan'}`}>{first.score} <span className="text-[10px] uppercase opacity-70">{metricLabel}</span></div>
+                        <div className="text-center w-full mt-3">
+                            <div className="font-black text-[15px] text-slate-900 truncate px-1">{first.user.nickname}</div>
+                            <div className="text-[13px] font-bold text-amber-500">{first.score} <span className="text-[10px] opacity-75">{metricLabel}</span></div>
                         </div>
                     </>
                 )}
             </div>
 
-            {/* 3rd Place */}
-            <div className="flex flex-col items-center gap-2 w-1/3 max-w-[100px]">
+            {/* 3rd Place - Bronze */}
+            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-3">
                 {third && (
                     <>
-                        <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft overflow-hidden bg-white`}>
-                                <img src={third.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${third.user.nickname}`} alt={third.user.nickname} className="w-full h-full object-cover" />
+                        <div className="relative group">
+                            <div className="w-20 h-20 rounded-[24px] border-[3px] border-orange-200 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] p-0.5 overflow-hidden z-10 relative">
+                                <img
+                                    src={third.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${third.user.nickname}`}
+                                    alt={third.user.nickname}
+                                    className="w-full h-full object-cover rounded-[20px]"
+                                />
                             </div>
-                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-text-tertiary text-white text-[10px] font-black px-2 py-0.5 rounded-pill shadow-sm">3rd</div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-orange-100 text-orange-700 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-white shadow-sm z-20">
+                                3
+                            </div>
                         </div>
-                        <div className="text-center w-full">
-                            <div className="font-bold text-sm text-text-primary truncate">{third.user.nickname}</div>
-                            <div className="text-xs font-black text-text-tertiary">{Math.round(third.score)}</div>
+                        <div className="text-center w-full mt-1">
+                            <div className="font-bold text-[13px] text-slate-800 truncate px-1">{third.user.nickname}</div>
+                            <div className="text-[11px] font-bold text-slate-400">{Math.round(third.score)} XP</div>
                         </div>
                     </>
                 )}
@@ -133,33 +173,38 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
     );
 };
 
-const RankingRow = ({ entry, theme, metricLabel }: { key?: React.Key; entry: LeaderboardEntry, theme: 'gold' | 'emerald', metricLabel: string }) => {
-    const isGold = theme === 'gold';
-    const activeClass = isGold
-        ? 'bg-brand-orange/5 border-brand-orange/20 shadow-soft'
-        : 'bg-brand-cyan/5 border-brand-cyan/20 shadow-soft';
-
+const RankingRow = ({ entry, metricLabel }: { entry: LeaderboardEntry, metricLabel: string }) => {
     return (
-        <div className={`flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 ${entry.isCurrentUser
-            ? `border ${activeClass} transform scale-[1.01]`
-            : 'bg-white border-transparent hover:bg-canvas-light hover:scale-[1.01] hover:shadow-sm'
+        <div className={`group flex items-center gap-4 p-3.5 rounded-[20px] transition-all duration-200 ${entry.isCurrentUser
+            ? 'bg-[#F0F9FF] border border-[#BAE6FD] shadow-sm scale-[1.01] sticky z-30 -mx-2 px-5'
+            : 'bg-transparent border border-transparent hover:bg-slate-50'
             }`}>
-            <span className={`font-black w-6 text-center text-sm text-text-tertiary`}>
+
+            <span className={`font-bold w-6 text-center text-[13px] text-slate-400 font-mono`}>
                 {entry.rank}
             </span>
 
-            <div className="w-10 h-10 rounded-squircle bg-canvas-light overflow-hidden flex-shrink-0 shadow-sm border border-transparent">
-                <img src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`} alt="Avatar" className="w-full h-full object-cover" />
+            <div className="w-10 h-10 rounded-[14px] bg-slate-100 overflow-hidden flex-shrink-0 shadow-sm border border-slate-50">
+                <img
+                    src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                />
             </div>
 
-            <div className="flex-1 min-w-0">
-                <div className={`font-bold text-sm truncate text-text-primary flex items-center gap-2`}>
-                    {entry.user.nickname} {entry.isCurrentUser && <span className="text-[9px] bg-brand-cyan text-white px-1.5 py-0.5 rounded-pill font-black tracking-wide">YOU</span>}
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+                <div className="font-bold text-[15px] truncate text-slate-700 flex items-center gap-2">
+                    {entry.user.nickname}
                 </div>
+                {entry.isCurrentUser && (
+                    <span className="text-[10px] bg-[#00B1FF] text-white px-2 py-0.5 rounded-full font-bold tracking-wide shadow-sm shadow-blue-200">
+                        YOU
+                    </span>
+                )}
             </div>
 
-            <div className={`font-black text-sm ${isGold ? 'text-brand-orange' : 'text-brand-cyan'}`}>
-                {entry.score} <span className="text-[10px] uppercase font-bold opacity-50 text-text-tertiary">{metricLabel}</span>
+            <div className="font-bold text-[15px] text-slate-900 tracking-tight">
+                {entry.score} <span className="text-[11px] font-bold text-slate-400">{metricLabel}</span>
             </div>
         </div>
     );

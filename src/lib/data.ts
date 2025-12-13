@@ -188,3 +188,55 @@ export const getContestsByRole = async (
     categorySlug: anyRole.category?.slug || "",
   }));
 };
+
+export interface SearchItem {
+  id: string;
+  title: string;
+  type: 'category' | 'contest';
+  url: string;
+}
+
+export const getAllSearchableItems = async (): Promise<SearchItem[]> => {
+  const items: SearchItem[] = [];
+
+  // 1. Categories
+  const { data: cats } = await supabase.from('categories').select('id, title, slug');
+  if (cats) {
+    cats.forEach((c: any) => items.push({
+      id: c.id,
+      title: c.title,
+      type: 'category',
+      url: `/concorsi/${c.slug}`
+    }));
+  }
+
+  // 2. Quizzes
+  const { data: quizzes } = await supabase
+    .from('quizzes')
+    .select(`
+      id, title, slug,
+      role:roles (
+        slug,
+        category:categories (slug)
+      )
+    `)
+    .eq('is_archived', false)
+    .limit(100);
+
+  if (quizzes) {
+    quizzes.forEach((q: any) => {
+      const roleSlug = q.role?.slug;
+      const catSlug = q.role?.category?.slug;
+      if (roleSlug && catSlug) {
+        items.push({
+          id: q.id,
+          title: q.title,
+          type: 'contest', // 'contest' | 'category'
+          url: `/concorsi/${catSlug}/${roleSlug}/${q.slug}`
+        });
+      }
+    });
+  }
+
+  return items;
+};

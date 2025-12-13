@@ -23,6 +23,7 @@ export interface RoleHubData {
     role: RoleData | null;
     resources: RoleResource[];
     latestQuizId: string | null; // ID of the latest official quiz to start
+    latestQuizSlug: string | null; // Slug of the latest official quiz
     history: any[]; // Simplified attempt history
     loading: boolean;
     error: string | null;
@@ -34,6 +35,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
         role: null,
         resources: [],
         latestQuizId: null,
+        latestQuizSlug: null,
         history: [],
         loading: true,
         error: null
@@ -65,7 +67,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                 // 3. Fetch Latest Official Quiz
                 const { data: quizzes } = await supabase
                     .from("quizzes")
-                    .select("id, year")
+                    .select("id, slug, year")
                     .eq("role_id", role.id)
                     .eq("is_official", true)
                     .eq("is_archived", false)
@@ -73,6 +75,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                     .limit(1);
 
                 const latestQuizId = quizzes && quizzes.length > 0 ? quizzes[0].id : null;
+                const latestQuizSlug = quizzes && quizzes.length > 0 ? quizzes[0].slug : null;
 
                 // 4. Fetch History (Attempts for this role)
                 // We need to find all quizzes for this role first (official or not) to filter attempts?
@@ -108,6 +111,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                     },
                     resources: resources || [],
                     latestQuizId,
+                    latestQuizSlug,
                     history,
                     loading: false,
                     error: null

@@ -1,18 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 
-// New Components
+// Stats Service
+import {
+    statsService,
+    calculateTrends,
+    analyzeSubjectPerformance,
+    generateRecommendations,
+    calculateReadinessLevel,
+    type AttemptWithDetails,
+    type Recommendation
+} from "@/lib/statsService";
+
+// Components
 import StatsKPIGrid from "@/components/stats/StatsKPIGrid";
 import SubjectRadarChart from "@/components/stats/SubjectRadarChart";
 import AttemptsHistoryTable from "@/components/stats/AttemptsHistoryTable";
 import ProgressLineChart from "@/components/stats/ProgressLineChart";
+import CoachingBlock from "@/components/stats/CoachingBlock";
+import GoalsBlock from "@/components/stats/GoalsBlock";
+import SubjectDetailSheet from "@/components/stats/SubjectDetailSheet";
+import GoalCreationModal from "@/components/stats/GoalCreationModal";
+import { type SubjectPerformance } from "@/lib/statsService";
 
 export default function QuizStatsPage() {
     const { quizId } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [attempts, setAttempts] = useState<any[]>([]);
+    const [attempts, setAttempts] = useState<AttemptWithDetails[]>([]);
 
     // Metrics
     const [stats, setStats] = useState({
@@ -21,6 +37,22 @@ export default function QuizStatsPage() {
         avgAccuracy: 0,
         bestScore: 0
     });
+
+    // Trends
+    const [scoreTrend, setScoreTrend] = useState<any>(null);
+    const [accuracyTrend, setAccuracyTrend] = useState<any>(null);
+    const [readiness, setReadiness] = useState<any>(null);
+
+    // Recommendations
+    const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+
+    // Goals
+    const [goal, setGoal] = useState<any>(null);
+    const [goalModalOpen, setGoalModalOpen] = useState(false);
+
+    // Subject Drill-Down
+    const [selectedSubject, setSelectedSubject] = useState<SubjectPerformance | null>(null);
+    const [subjectPerformanceData, setSubjectPerformanceData] = useState<SubjectPerformance[]>([]);
 
     const [subjectData, setSubjectData] = useState<any[]>([]);
     const [trendData, setTrendData] = useState<any[]>([]);
@@ -53,12 +85,24 @@ export default function QuizStatsPage() {
         if (error) {
             console.error(error);
         } else if (data) {
-            processData(data);
+            processData(data as AttemptWithDetails[]);
         }
+
+        // Fetch Goal (if exists)
+        const { data: goalData } = await supabase
+            .from("test_goals")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("quiz_id", quizId)
+            .eq("status", "active")
+            .single();
+
+        if (goalData) setGoal(goalData);
+
         setLoading(false);
     };
 
-    const processData = (data: any[]) => {
+    const processData = (data: AttemptWithDetails[]) => {
         setAttempts(data);
 
         // 1. KPIs
@@ -73,47 +117,107 @@ export default function QuizStatsPage() {
             return acc + ((curr.correct || 0) / curr.total_questions);
         }, 0);
 
+        const avgScore = totalTests ? totalScore / totalTests : 0;
+        const avgAccuracy = validAccuracyCount ? (totalAccuracy / validAccuracyCount) * 100 : 0;
+
         setStats({
             totalTests,
-            avgScore: totalTests ? totalScore / totalTests : 0,
-            avgAccuracy: validAccuracyCount ? (totalAccuracy / validAccuracyCount) * 100 : 0,
+            avgScore,
+            avgAccuracy,
             bestScore: maxScore
         });
 
-        // 2. Trend Data (Reverse chronological for chart)
-        const trend = [...data].reverse().map(d => ({
-            date: new Date(d.created_at).toLocaleDateString(),
-            score: d.score || 0
+        // 2. Calculate Trends
+        if (totalTests >= 3) {
+            const trends = calculateTrends(data, 7);
+            setScoreTrend(trends.scoreTrend);
+            setAccuracyTrend(trends.accuracyTrend);
+        }
+
+        // 3. Calculate Readiness
+        if (totalTests >= 5) {
+            const readinessData = calculateReadinessLevel(avgScore, avgAccuracy, totalTests);
+            setReadiness(readinessData);
+        }
+
+        // 4. Subject Analysis
+        const subjPerf = analyzeSubjectPerformance(data);
+        setSubjectPerformanceData(subjPerf);
+        const radarData = subjPerf.map(s => ({
+            subject: s.subjectName,
+            accuracy: s.accuracy,
+            total: s.totalQuestions
         }));
-        setTrendData(trend);
+        setSubjectData(radarData);
 
-        // 3. Subject Analysis
-        const subjMap: Record<string, { correct: number, total: number }> = {};
-        data.forEach(att => {
-            if (Array.isArray(att.answers)) {
-                att.answers.forEach((ans: any) => {
-                    const name = ans.subjectName || "Generale";
-                    if (!subjMap[name]) subjMap[name] = { correct: 0, total: 0 };
-                    subjMap[name].total++;
-                    if (ans.isCorrect) subjMap[name].correct++;
-                });
-            }
+        // 5. Generate Recommendations
+        const recs = generateRecommendations(data, subjPerf, quizId || '');
+        setRecommendations(recs);
+
+        // 6. Trend Data (Reverse chronological for chart) - Enhanced format
+        const trend = [...data].reverse().map(d => {
+            const acc = d.total_questions > 0 ? (d.correct / d.total_questions) * 100 : 0;
+            return {
+                id: d.id,
+                date: new Date(d.created_at).toLocaleDateString(),
+                fullDate: new Date(d.created_at),
+                score: d.score || 0,
+                accuracy: acc
+            };
         });
-
-        const subjPerf = Object.entries(subjMap).map(([name, s]) => ({
-            subject: name,
-            accuracy: (s.correct / s.total) * 100,
-            total: s.total
-        })).sort((a, b) => b.accuracy - a.accuracy); // Descending
-
-        setSubjectData(subjPerf);
+        setTrendData(trend);
     };
 
-    if (loading) return <div className="p-8 text-center animate-pulse">Caricamento statistiche...</div>;
+    const handleSetGoal = () => {
+        setGoalModalOpen(true);
+    };
+
+    const handleCreateGoal = async (goalData: { goal_type: string; target_value: number; deadline: string | null }) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from('test_goals')
+            .insert({
+                user_id: user.id,
+                quiz_id: quizId,
+                goal_type: goalData.goal_type,
+                target_value: goalData.target_value,
+                deadline: goalData.deadline,
+                status: 'active'
+            })
+            .select()
+            .single();
+
+        if (!error && data) {
+            setGoal(data);
+            setGoalModalOpen(false);
+        }
+    };
+
+    const handleDeleteGoal = async (goalId: string) => {
+        const { error } = await supabase
+            .from("test_goals")
+            .delete()
+            .eq("id", goalId);
+
+        if (!error) {
+            setGoal(null);
+        }
+    };
+
+    if (loading) return (
+        <div className="min-h-screen bg-canvas-light flex items-center justify-center">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-brand-cyan mx-auto mb-4"></div>
+                <p className="text-text-tertiary font-bold">Caricamento statistiche...</p>
+            </div>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-canvas-light text-text-primary pb-24 md:px-8 md:py-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+            <div className="max-w-7xl mx-auto space-y-8 px-4 md:px-0 pt-6 md:pt-0">
 
                 {/* Header */}
                 <div className="flex items-center gap-4">
@@ -126,38 +230,71 @@ export default function QuizStatsPage() {
                     </div>
                 </div>
 
-                {/* 1. KPIs */}
+                {/* 1. KPIs with Trends */}
                 <StatsKPIGrid
                     totalTests={stats.totalTests}
                     bestScore={stats.bestScore}
                     avgScore={stats.avgScore}
                     accuracy={stats.avgAccuracy}
+                    scoreTrend={scoreTrend}
+                    accuracyTrend={accuracyTrend}
+                    readiness={readiness}
                 />
 
-                {/* 2. Main Performance Area (Grid) */}
+                {/* 2. Coaching Block */}
+                {recommendations.length > 0 && (
+                    <CoachingBlock
+                        recommendations={recommendations}
+                        onSetGoal={handleSetGoal}
+                    />
+                )}
+
+                {/* 3. Main Performance Area (Grid) */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                    {/* Left: Radar Chart */}
-                    <div className="lg:col-span-5 bg-white p-6 rounded-card shadow-soft flex flex-col items-center">
-                        <h3 className="text-lg font-bold text-text-primary mb-6 w-full">Performance per Materia</h3>
-                        <SubjectRadarChart data={subjectData} />
+                    {/* Left: Radar Chart + Goals */}
+                    <div className="lg:col-span-5 space-y-6">
+                        <div className="bg-white p-6 rounded-card shadow-soft flex flex-col items-center">
+                            <h3 className="text-lg font-bold text-text-primary mb-6 w-full">Performance per Materia</h3>
+                            <SubjectRadarChart data={subjectData} />
 
-                        <div className="mt-8 w-full">
-                            <h4 className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-3">Dettaglio Materie</h4>
-                            <div className="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
-                                {subjectData.map(s => (
-                                    <div key={s.subject} className="flex justify-between items-center text-sm border-b border-canvas-light pb-2">
-                                        <span className="font-bold text-text-secondary truncate max-w-[150px]" title={s.subject}>{s.subject}</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-text-tertiary">({s.total} quiz)</span>
-                                            <span className={`font-black ${s.accuracy > 70 ? 'text-semantic-success' : 'text-brand-orange'}`}>
-                                                {s.accuracy.toFixed(0)}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className="mt-8 w-full">
+                                <h4 className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-3">Dettaglio Materie</h4>
+                                <div className="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
+                                    {subjectData.map((s, idx) => {
+                                        const status = s.accuracy >= 70 ? 'good' : s.accuracy >= 50 ? 'warning' : 'critical';
+                                        const statusColor = status === 'good' ? 'bg-semantic-success' : status === 'warning' ? 'bg-brand-orange' : 'bg-semantic-error';
+                                        const perfData = subjectPerformanceData[idx];
+
+                                        return (
+                                            <button
+                                                key={s.subject}
+                                                onClick={() => perfData && setSelectedSubject(perfData)}
+                                                className="w-full flex justify-between items-center text-sm border-b border-canvas-light pb-2 group cursor-pointer hover:bg-canvas-light/50 -mx-2 px-2 rounded-lg transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-2 h-2 rounded-full ${statusColor}`}></div>
+                                                    <span className="font-bold text-text-secondary truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-text-tertiary">({s.total})</span>
+                                                    <span className={`font-black ${s.accuracy > 70 ? 'text-semantic-success' : s.accuracy > 50 ? 'text-brand-orange' : 'text-semantic-error'}`}>
+                                                        {s.accuracy.toFixed(0)}%
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
+
+                        {/* Goals Block */}
+                        <GoalsBlock
+                            goal={goal}
+                            onCreateGoal={handleSetGoal}
+                            onDeleteGoal={handleDeleteGoal}
+                        />
                     </div>
 
                     {/* Right: Trend & History */}
@@ -175,13 +312,28 @@ export default function QuizStatsPage() {
                                 <h3 className="text-lg font-bold text-text-primary">Cronologia Tentativi</h3>
                                 <span className="text-[10px] font-bold bg-canvas-light text-text-tertiary px-3 py-1.5 rounded-pill uppercase tracking-wider">Ultimi 50</span>
                             </div>
-                            <AttemptsHistoryTable attempts={attempts} />
+                            <AttemptsHistoryTable attempts={attempts} quizId={quizId} />
                         </div>
 
                     </div>
                 </div>
 
             </div>
+
+            {/* Subject Detail Sheet */}
+            <SubjectDetailSheet
+                subject={selectedSubject}
+                quizId={quizId || ''}
+                onClose={() => setSelectedSubject(null)}
+            />
+
+            {/* Goal Creation Modal */}
+            <GoalCreationModal
+                isOpen={goalModalOpen}
+                quizId={quizId || ''}
+                onClose={() => setGoalModalOpen(false)}
+                onSubmit={handleCreateGoal}
+            />
         </div>
     );
 }

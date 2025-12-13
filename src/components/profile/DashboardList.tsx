@@ -47,9 +47,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
         <div className="space-y-6 mb-8">
             <div className="flex items-center justify-between px-1">
                 <h3 className="text-lg font-bold text-text-primary">La tua Dashboard</h3>
-                <button onClick={() => navigate('/')} className="text-sm font-bold text-brand-cyan hover:text-brand-cyan/80 px-4 py-2 bg-brand-cyan/10 rounded-pill transition-colors">
-                    + Nuovo
-                </button>
+
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

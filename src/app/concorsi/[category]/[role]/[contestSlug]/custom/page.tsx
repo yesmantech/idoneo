@@ -1,8 +1,10 @@
+"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchSmartQuestions, QuestionSelectionMode, SubjectConfig } from "@/lib/quiz-smart-selection";
+import { ChevronLeft, ChevronDown, Minus, Plus, Check } from "lucide-react";
 
 // Types
 type Subject = { id: string; name: string; question_count: number };
@@ -23,6 +25,9 @@ function getCorrectOption(q: any): string | null {
     return null;
 }
 
+// =============================================================================
+// CUSTOM QUIZ WIZARD PAGE - Idoneo Redesign
+// =============================================================================
 export default function CustomQuizWizardPage() {
     const { contestSlug } = useParams();
     const navigate = useNavigate();
@@ -36,13 +41,10 @@ export default function CustomQuizWizardPage() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
 
     // Configuration
-    // Map subjectID -> number of questions selected
-    // If not in map, it's 0 (not selected)
     const [subjectSelections, setSubjectSelections] = useState<Record<string, number>>({});
-
     const [selectionMode, setSelectionMode] = useState<QuestionSelectionMode>('random');
 
-    // Time Config (Hours, Minutes, Seconds)
+    // Time Config
     const [timeHours, setTimeHours] = useState(0);
     const [timeMinutes, setTimeMinutes] = useState(30);
     const [timeSeconds, setTimeSeconds] = useState(0);
@@ -64,7 +66,6 @@ export default function CustomQuizWizardPage() {
                     const { count } = await supabase.from("questions").select("*", { count: 'exact', head: true }).eq("subject_id", s.id).eq("is_archived", false);
                     return { ...s, question_count: count || 0 };
                 }));
-                // Sort by name
                 enriched.sort((a, b) => a.name.localeCompare(b.name));
                 setSubjects(enriched);
             }
@@ -78,12 +79,8 @@ export default function CustomQuizWizardPage() {
         setSubjectSelections(prev => {
             const next = { ...prev };
             if (next[id] !== undefined) {
-                // Toggle OFF
                 delete next[id];
             } else {
-                // Toggle ON -> Default to all available or reasonable max (e.g. 20)
-                // User requirement: "Use reasonable default (e.g. all questions or pre-set max)"
-                // Let's default to min(20, max)
                 next[id] = Math.min(20, max);
             }
             return next;
@@ -91,7 +88,7 @@ export default function CustomQuizWizardPage() {
     };
 
     const updateSubjectCount = (id: string, val: number, max: number) => {
-        const safeVal = Math.max(0, Math.min(val, max));
+        const safeVal = Math.max(1, Math.min(val, max));
         setSubjectSelections(prev => ({ ...prev, [id]: safeVal }));
     };
 
@@ -118,15 +115,11 @@ export default function CustomQuizWizardPage() {
 
         setGenerating(true);
         try {
-            // 1. Prepare Configs
-
-            // 1. Prepare Configs
             const configs: SubjectConfig[] = Object.entries(subjectSelections).map(([sId, count]: [string, number]) => ({
                 subjectId: sId,
                 count
             }));
 
-            // 2. Fetch Questions
             const selection = await fetchSmartQuestions(
                 (await supabase.auth.getUser()).data.user?.id || null,
                 quizId,
@@ -134,8 +127,6 @@ export default function CustomQuizWizardPage() {
                 selectionMode
             );
 
-            // 3. Create Rich Answers
-            // Note: selection might be smaller than requested if not enough questions exist (handled by smart logic)
             const { data: fullQuestions } = await supabase
                 .from("questions")
                 .select("*, subject:subjects(name)")
@@ -143,7 +134,6 @@ export default function CustomQuizWizardPage() {
 
             if (!fullQuestions || fullQuestions.length === 0) throw new Error("Nessuna domanda trovata con questi criteri.");
 
-            // Final Shuffle
             const shuffledQ = fullQuestions.sort(() => Math.random() - 0.5);
 
             const richAnswers = shuffledQ.map(q => ({
@@ -158,10 +148,8 @@ export default function CustomQuizWizardPage() {
                 options: { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d }
             }));
 
-            // 4. Calculate Duration
             const durationSeconds = noTimeLimit ? 0 : (timeHours * 3600 + timeMinutes * 60 + timeSeconds);
 
-            // 5. Save Attempt
             const { data: attempt, error } = await supabase.from("quiz_attempts").insert({
                 quiz_id: quizId,
                 user_id: (await supabase.auth.getUser()).data.user?.id!,
@@ -170,12 +158,11 @@ export default function CustomQuizWizardPage() {
                 total_questions: richAnswers.length,
                 correct: 0, wrong: 0, blank: 0,
                 started_at: new Date().toISOString(),
-                mode: 'custom', // Track attempt type
+                mode: 'custom',
             }).select().single();
 
             if (error) throw error;
 
-            // 6. Redirect to Runner
             const scoringParams = `correct=${scoring.correct}&wrong=${scoring.wrong}&blank=${scoring.blank}`;
             const timeParam = noTimeLimit ? "time=0" : `time=${Math.ceil(durationSeconds / 60)}`;
 
@@ -189,213 +176,313 @@ export default function CustomQuizWizardPage() {
         }
     };
 
+    // Mode descriptions
+    const modeDescriptions: Record<QuestionSelectionMode, string> = {
+        random: "Domande pescate a caso tra tutte quelle disponibili nelle materie selezionate.",
+        weak: "Priorità alle domande che hai sbagliato in passato.",
+        unseen: "Priorità alle domande mai affrontate prima.",
+        unanswered: "Priorità alle domande saltate in passato.",
+        hardest: "Le domande statisticamente più difficili.",
+        smart_mix: "Mix bilanciato di errori, nuove e casuali."
+    };
 
-    if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50">Caricamento...</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+        <div className="min-h-screen bg-[#F5F5F7] pb-32">
+            {/* ============================================================= */}
+            {/* TOP BAR */}
+            {/* ============================================================= */}
+            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+                <div className="flex items-center justify-between px-4 py-3">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 active:scale-95 transition-all"
+                    >
+                        <ChevronLeft className="w-5 h-5 text-slate-600" />
+                    </button>
+                    <h1 className="text-[17px] font-semibold text-slate-900">Prova Personalizzata</h1>
+                    <div className="w-10" />
+                </div>
+            </header>
 
-            {/* Header */}
-            <div className="bg-white px-4 py-3 border-b border-slate-200 sticky top-0 z-20 flex items-center justify-between shadow-sm">
-                <button onClick={() => navigate(-1)} className="text-slate-500 font-bold p-2 hover:bg-slate-100 rounded-full">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                </button>
-                <div className="font-bold text-lg">Prova Personalizzata</div>
-                <div className="w-9" />
-            </div>
-
-            <div className="flex-1 w-full max-w-md mx-auto p-4 space-y-8 pb-32">
-
-                {/* Section A: Subjects & Counts */}
-                <section className="space-y-3">
-                    <div className="flex justify-between items-center px-1">
-                        <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">SELEZIONA MATERIE</h2>
-                        <button onClick={toggleAllSubjects} className="text-indigo-600 text-xs font-bold">
+            <div className="px-5 max-w-lg mx-auto pt-6 space-y-6">
+                {/* ============================================================= */}
+                {/* SELEZIONA MATERIE */}
+                {/* ============================================================= */}
+                <section>
+                    <div className="flex justify-between items-center mb-3">
+                        <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Seleziona Materie</h2>
+                        <button
+                            onClick={toggleAllSubjects}
+                            className="text-[13px] font-semibold text-purple-500 hover:text-purple-600 transition-colors"
+                        >
                             {Object.keys(subjectSelections).length === subjects.length ? "Deseleziona tutte" : "Seleziona tutte"}
                         </button>
                     </div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden divide-y divide-slate-100">
-                        {subjects.map(s => {
+
+                    <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        {subjects.map((s, idx) => {
                             const count = subjectSelections[s.id];
                             const isSelected = count !== undefined;
 
                             return (
-                                <div key={s.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors gap-3">
-                                    <div
-                                        className="flex items-center gap-3 cursor-pointer flex-1"
-                                        onClick={() => toggleSubject(s.id, s.question_count)}
-                                    >
-                                        <div className={`w-5 h-5 min-w-[1.25rem] rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'}`}>
-                                            {isSelected && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className={`font-medium ${isSelected ? 'text-slate-900' : 'text-slate-500'}`}>{s.name}</span>
-                                            <span className="text-[10px] text-slate-400 font-bold">{s.question_count} disponibili</span>
-                                        </div>
-                                    </div>
+                                <div
+                                    key={s.id}
+                                    className={`${idx !== 0 ? 'border-t border-slate-100' : ''}`}
+                                >
+                                    <div className="p-4">
+                                        <div
+                                            className="flex items-center gap-3 cursor-pointer"
+                                            onClick={() => toggleSubject(s.id, s.question_count)}
+                                        >
+                                            {/* Radio circle */}
+                                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${isSelected
+                                                    ? 'border-purple-500 bg-purple-500'
+                                                    : 'border-slate-300'
+                                                }`}>
+                                                {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                                            </div>
 
-                                    {isSelected && (
-                                        <div className="flex items-center gap-2 self-end sm:self-auto">
-                                            <input
-                                                type="range"
-                                                min={1} max={s.question_count}
-                                                value={count}
-                                                onChange={e => updateSubjectCount(s.id, parseInt(e.target.value), s.question_count)}
-                                                className="w-24 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                                            />
-                                            <input
-                                                type="number"
-                                                min={1} max={s.question_count}
-                                                value={count}
-                                                onChange={e => updateSubjectCount(s.id, parseInt(e.target.value), s.question_count)}
-                                                className="w-14 p-1 text-center font-bold border border-slate-200 rounded-lg text-sm outline-indigo-600"
-                                            />
+                                            {/* Subject info */}
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`text-[15px] font-medium ${isSelected ? 'text-slate-900' : 'text-slate-500'}`}>
+                                                    {s.name}
+                                                </p>
+                                                <p className="text-[12px] text-slate-400">
+                                                    {s.question_count} disponibili
+                                                </p>
+                                            </div>
                                         </div>
-                                    )}
+
+                                        {/* Count controls (when selected) */}
+                                        {isSelected && (
+                                            <div className="mt-3 ml-9 flex items-center gap-3">
+                                                <input
+                                                    type="range"
+                                                    min={1}
+                                                    max={s.question_count}
+                                                    value={count}
+                                                    onChange={e => updateSubjectCount(s.id, parseInt(e.target.value), s.question_count)}
+                                                    className="flex-1 h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-purple-500"
+                                                />
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => updateSubjectCount(s.id, count - 1, s.question_count)}
+                                                        className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 active:scale-95 transition-all"
+                                                    >
+                                                        <Minus className="w-3.5 h-3.5 text-slate-500" />
+                                                    </button>
+                                                    <span className="w-10 text-center font-bold text-purple-600 text-[15px]">{count}</span>
+                                                    <button
+                                                        onClick={() => updateSubjectCount(s.id, count + 1, s.question_count)}
+                                                        className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 active:scale-95 transition-all"
+                                                    >
+                                                        <Plus className="w-3.5 h-3.5 text-slate-500" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
                 </section>
 
-                {/* Section B: Mode */}
-                <section className="space-y-3">
-                    <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest px-1">TIPO DI DOMANDE</h2>
-                    {/* ... Same as before ... */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-2">
-                        <select
-                            value={selectionMode}
-                            onChange={(e) => setSelectionMode(e.target.value as any)}
-                            className="w-full p-2 bg-transparent font-bold text-slate-900 outline-none"
-                        >
-                            <option value="random">Casuali</option>
-                            <option value="weak">Sbagliate spesso</option>
-                            <option value="unanswered">Non risposte</option>
-                            <option value="unseen">Mai viste</option>
-                            <option value="hardest">Più difficili (Globali)</option>
-                            <option value="smart_mix">Mix Intelligente</option>
-                        </select>
+                {/* ============================================================= */}
+                {/* TIPO DI DOMANDE */}
+                {/* ============================================================= */}
+                <section>
+                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Tipo di Domande</h2>
+
+                    <div className="bg-white rounded-2xl p-4 relative" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div className="flex items-center justify-between">
+                            <select
+                                value={selectionMode}
+                                onChange={(e) => setSelectionMode(e.target.value as QuestionSelectionMode)}
+                                className="w-full appearance-none bg-transparent text-[15px] font-semibold text-slate-900 outline-none cursor-pointer pr-8"
+                            >
+                                <option value="random">Casuali</option>
+                                <option value="weak">Sbagliate spesso</option>
+                                <option value="unanswered">Non risposte</option>
+                                <option value="unseen">Mai viste</option>
+                                <option value="hardest">Più difficili (Globali)</option>
+                                <option value="smart_mix">Mix Intelligente</option>
+                            </select>
+                            <ChevronDown className="w-5 h-5 text-slate-400 absolute right-4 pointer-events-none" />
+                        </div>
                     </div>
-                    <p className="text-xs text-slate-400 px-2">
-                        {selectionMode === 'random' && "Domande pescate a caso tra tutte quelle disponibili nelle materie selezionate."}
-                        {selectionMode === 'weak' && "Priorità alle domande che hai sbagliato in passato."}
-                        {selectionMode === 'unseen' && "Priorità alle domande mai affrontate prima."}
-                        {selectionMode === 'unanswered' && "Priorità alle domande saltate in passato."}
-                        {selectionMode === 'hardest' && "Le domande statisticamente più difficili."}
-                        {selectionMode === 'smart_mix' && "Mix bilanciato di errori, nuove e casuali."}
+
+                    <p className="text-[12px] text-slate-400 mt-2 px-1">
+                        {modeDescriptions[selectionMode]}
                     </p>
                 </section>
 
-                {/* Section C: Count Summary (Read Only) */}
-                <section className="space-y-3">
-                    <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest px-1">NUMERO DI QUIZ SELEZIONATI</h2>
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
-                        <div className="text-sm font-bold text-slate-400">Totale</div>
-                        <div className="text-3xl font-black text-indigo-600">
-                            {totalSelectedQuestions}
-                        </div>
+                {/* ============================================================= */}
+                {/* NUMERO DI QUIZ SELEZIONATI */}
+                {/* ============================================================= */}
+                <section>
+                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Numero di Quiz Selezionati</h2>
+
+                    <div className="bg-white rounded-2xl p-4 flex items-center justify-between" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <span className="text-[14px] font-medium text-slate-500">Totale</span>
+                        <span className="text-[28px] font-bold text-purple-500">{totalSelectedQuestions}</span>
                     </div>
                 </section>
 
-                {/* Section D: Duration */}
-                <section className="space-y-3">
-                    <div className="flex justify-between items-center px-1">
-                        <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">DURATA PROVA</h2>
+                {/* ============================================================= */}
+                {/* DURATA PROVA */}
+                {/* ============================================================= */}
+                <section>
+                    <div className="flex justify-between items-center mb-3">
+                        <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Durata Prova</h2>
+
+                        {/* Toggle Switch */}
                         <div className="flex items-center gap-2">
-                            <span className={`text-xs font-bold ${noTimeLimit ? 'text-indigo-600' : 'text-slate-400'}`}>Senza limite</span>
-                            <div
+                            <span className={`text-[12px] font-semibold ${noTimeLimit ? 'text-purple-500' : 'text-slate-400'}`}>
+                                Senza limite
+                            </span>
+                            <button
                                 onClick={() => setNoTimeLimit(!noTimeLimit)}
-                                className={`w-10 h-6 rounded-full p-1 cursor-pointer transition-colors ${noTimeLimit ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                                className={`w-11 h-6 rounded-full p-0.5 transition-colors ${noTimeLimit ? 'bg-purple-500' : 'bg-slate-300'}`}
                             >
-                                <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${noTimeLimit ? 'translate-x-4' : 'translate-x-0'}`} />
-                            </div>
+                                <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${noTimeLimit ? 'translate-x-5' : 'translate-x-0'}`} />
+                            </button>
                         </div>
                     </div>
 
-                    <div className={`bg-white rounded-2xl shadow-sm border border-slate-200 p-4 grid grid-cols-3 gap-4 text-center transition-opacity ${noTimeLimit ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Ore</div>
-                            <select value={timeHours} onChange={e => setTimeHours(parseInt(e.target.value))} className="w-full text-xl font-bold bg-slate-50 rounded-lg p-2 outline-none">
+                    <div className={`bg-white rounded-2xl p-4 grid grid-cols-3 gap-3 transition-opacity ${noTimeLimit ? 'opacity-40 pointer-events-none' : ''}`} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        {/* Ore */}
+                        <div className="text-center">
+                            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-2">Ore</p>
+                            <select
+                                value={timeHours}
+                                onChange={e => setTimeHours(parseInt(e.target.value))}
+                                className="w-full py-2 px-3 bg-slate-100 rounded-xl text-[18px] font-bold text-slate-900 text-center outline-none appearance-none cursor-pointer"
+                            >
                                 {[0, 1, 2, 3, 4].map(h => <option key={h} value={h}>{h}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Minuti</div>
-                            <select value={timeMinutes} onChange={e => setTimeMinutes(parseInt(e.target.value))} className="w-full text-xl font-bold bg-slate-50 rounded-lg p-2 outline-none">
+
+                        {/* Minuti */}
+                        <div className="text-center">
+                            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-2">Minuti</p>
+                            <select
+                                value={timeMinutes}
+                                onChange={e => setTimeMinutes(parseInt(e.target.value))}
+                                className="w-full py-2 px-3 bg-slate-100 rounded-xl text-[18px] font-bold text-slate-900 text-center outline-none appearance-none cursor-pointer"
+                            >
                                 {Array.from({ length: 60 }, (_, i) => i).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Secondi</div>
-                            <select value={timeSeconds} onChange={e => setTimeSeconds(parseInt(e.target.value))} className="w-full text-xl font-bold bg-slate-50 rounded-lg p-2 outline-none">
+
+                        {/* Secondi */}
+                        <div className="text-center">
+                            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-2">Secondi</p>
+                            <select
+                                value={timeSeconds}
+                                onChange={e => setTimeSeconds(parseInt(e.target.value))}
+                                className="w-full py-2 px-3 bg-slate-100 rounded-xl text-[18px] font-bold text-slate-900 text-center outline-none appearance-none cursor-pointer"
+                            >
                                 {Array.from({ length: 60 }, (_, i) => i).map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
                     </div>
                 </section>
 
-                {/* Section E: Scoring */}
-                <section className="space-y-3">
-                    <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest px-1">PUNTEGGIO</h2>
+                {/* ============================================================= */}
+                {/* PUNTEGGIO */}
+                {/* ============================================================= */}
+                <section>
+                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Punteggio</h2>
+
                     <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-white rounded-xl border-b-4 border-rose-500 p-3 shadow-sm flex flex-col items-center">
-                            <span className="text-[10px] uppercase font-bold text-rose-500 mb-1">Errate</span>
-                            <div className="flex items-center">
-                                <button onClick={() => setScoring(s => ({ ...s, wrong: parseFloat((s.wrong - 0.1).toFixed(1)) }))} className="text-slate-300 hover:text-rose-500 font-bold px-1 text-lg">-</button>
-                                <input
-                                    type="number"
-                                    value={scoring.wrong}
-                                    onChange={e => setScoring({ ...scoring, wrong: parseFloat(e.target.value) })}
-                                    className="w-12 text-center font-black text-slate-900 outline-none"
-                                />
-                                <button onClick={() => setScoring(s => ({ ...s, wrong: parseFloat((s.wrong + 0.1).toFixed(1)) }))} className="text-slate-300 hover:text-rose-500 font-bold px-1 text-lg">+</button>
+                        {/* Errate */}
+                        <div className="bg-white rounded-2xl p-3 text-center border-b-4 border-red-500" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                            <p className="text-[10px] font-bold text-red-500 uppercase mb-2">Errate</p>
+                            <div className="flex items-center justify-center gap-1">
+                                <button
+                                    onClick={() => setScoring(s => ({ ...s, wrong: parseFloat((s.wrong - 0.1).toFixed(1)) }))}
+                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-red-100 active:scale-95 transition-all"
+                                >
+                                    <Minus className="w-3 h-3 text-slate-500" />
+                                </button>
+                                <span className="w-10 text-[18px] font-bold text-slate-900">{scoring.wrong}</span>
+                                <button
+                                    onClick={() => setScoring(s => ({ ...s, wrong: parseFloat((s.wrong + 0.1).toFixed(1)) }))}
+                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-red-100 active:scale-95 transition-all"
+                                >
+                                    <Plus className="w-3 h-3 text-slate-500" />
+                                </button>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl border-b-4 border-amber-400 p-3 shadow-sm flex flex-col items-center">
-                            <span className="text-[10px] uppercase font-bold text-amber-500 mb-1">Saltate</span>
-                            <div className="flex items-center">
-                                <button onClick={() => setScoring(s => ({ ...s, blank: parseFloat((s.blank - 0.1).toFixed(1)) }))} className="text-slate-300 hover:text-amber-500 font-bold px-1 text-lg">-</button>
-                                <input
-                                    type="number"
-                                    value={scoring.blank}
-                                    onChange={e => setScoring({ ...scoring, blank: parseFloat(e.target.value) })}
-                                    className="w-12 text-center font-black text-slate-900 outline-none"
-                                />
-                                <button onClick={() => setScoring(s => ({ ...s, blank: parseFloat((s.blank + 0.1).toFixed(1)) }))} className="text-slate-300 hover:text-amber-500 font-bold px-1 text-lg">+</button>
+                        {/* Saltate */}
+                        <div className="bg-white rounded-2xl p-3 text-center border-b-4 border-amber-400" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                            <p className="text-[10px] font-bold text-amber-500 uppercase mb-2">Saltate</p>
+                            <div className="flex items-center justify-center gap-1">
+                                <button
+                                    onClick={() => setScoring(s => ({ ...s, blank: parseFloat((s.blank - 0.1).toFixed(1)) }))}
+                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-amber-100 active:scale-95 transition-all"
+                                >
+                                    <Minus className="w-3 h-3 text-slate-500" />
+                                </button>
+                                <span className="w-10 text-[18px] font-bold text-slate-900">{scoring.blank}</span>
+                                <button
+                                    onClick={() => setScoring(s => ({ ...s, blank: parseFloat((s.blank + 0.1).toFixed(1)) }))}
+                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-amber-100 active:scale-95 transition-all"
+                                >
+                                    <Plus className="w-3 h-3 text-slate-500" />
+                                </button>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl border-b-4 border-emerald-500 p-3 shadow-sm flex flex-col items-center">
-                            <span className="text-[10px] uppercase font-bold text-emerald-500 mb-1">Corrette</span>
-                            <div className="flex items-center">
-                                <button onClick={() => setScoring(s => ({ ...s, correct: parseFloat((s.correct - 0.1).toFixed(1)) }))} className="text-slate-300 hover:text-emerald-500 font-bold px-1 text-lg">-</button>
-                                <input
-                                    type="number"
-                                    value={scoring.correct}
-                                    onChange={e => setScoring({ ...scoring, correct: parseFloat(e.target.value) })}
-                                    className="w-12 text-center font-black text-slate-900 outline-none"
-                                />
-                                <button onClick={() => setScoring(s => ({ ...s, correct: parseFloat((s.correct + 0.1).toFixed(1)) }))} className="text-slate-300 hover:text-emerald-500 font-bold px-1 text-lg">+</button>
+                        {/* Corrette */}
+                        <div className="bg-white rounded-2xl p-3 text-center border-b-4 border-emerald-500" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                            <p className="text-[10px] font-bold text-emerald-500 uppercase mb-2">Corrette</p>
+                            <div className="flex items-center justify-center gap-1">
+                                <button
+                                    onClick={() => setScoring(s => ({ ...s, correct: parseFloat((s.correct - 0.1).toFixed(1)) }))}
+                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-emerald-100 active:scale-95 transition-all"
+                                >
+                                    <Minus className="w-3 h-3 text-slate-500" />
+                                </button>
+                                <span className="w-10 text-[18px] font-bold text-slate-900">+{scoring.correct}</span>
+                                <button
+                                    onClick={() => setScoring(s => ({ ...s, correct: parseFloat((s.correct + 0.1).toFixed(1)) }))}
+                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-emerald-100 active:scale-95 transition-all"
+                                >
+                                    <Plus className="w-3 h-3 text-slate-500" />
+                                </button>
                             </div>
                         </div>
                     </div>
                 </section>
+            </div>
 
-
-                {/* Sticky Footer */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur border-t border-slate-200 pb-safe">
-                    <div className="max-w-md mx-auto">
-                        <button
-                            onClick={handleStart}
-                            disabled={generating || totalSelectedQuestions === 0}
-                            className="w-full py-4 bg-brand-cyan text-white rounded-2xl font-bold text-lg shadow-lg shadow-brand-cyan/20 hover:bg-brand-cyan/90 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
-                        >
-                            {generating ? "Creazione in corso..." : `Avvia Prova (${totalSelectedQuestions})`}
-                        </button>
-                    </div>
+            {/* ============================================================= */}
+            {/* BOTTOM CTA */}
+            {/* ============================================================= */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-5 py-4 pb-safe z-50">
+                <div className="max-w-lg mx-auto">
+                    <button
+                        onClick={handleStart}
+                        disabled={generating || totalSelectedQuestions === 0}
+                        className={`w-full py-4 rounded-2xl font-bold text-[16px] transition-all active:scale-[0.98] ${totalSelectedQuestions > 0
+                                ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/25 hover:bg-purple-600'
+                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            }`}
+                    >
+                        {generating ? "Creazione in corso..." : `Avvia Prova (${totalSelectedQuestions})`}
+                    </button>
                 </div>
-
             </div>
         </div>
     );

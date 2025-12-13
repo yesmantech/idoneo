@@ -5,9 +5,16 @@ import { useAuth } from '@/context/AuthContext';
 
 import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/LeaderboardSelector';
 import LeaderboardView from '@/components/leaderboard/LeaderboardView';
+import LeaderboardSelectorLegacy from '@/components/leaderboard/LeaderboardSelectorLegacy';
+import LeaderboardViewLegacy from '@/components/leaderboard/LeaderboardViewLegacy';
 
 export default function UnifiedLeaderboardPage() {
     const { user } = useAuth();
+    const isAdmin = user?.email === 'alessandro.valenza22@gmail.com';
+
+    // Conditional Components
+    const SelectorComponent = isAdmin ? LeaderboardSelector : LeaderboardSelectorLegacy;
+    const ViewComponent = isAdmin ? LeaderboardView : LeaderboardViewLegacy;
 
     // Selection State
     const [selection, setSelection] = useState<'xp' | string>('xp');
@@ -30,78 +37,66 @@ export default function UnifiedLeaderboardPage() {
 
                 if (user) {
                     const active = await leaderboardService.getUserActiveQuizzes(user.id);
-                    // Map to QuizOption
-                    myQuizzes = active.map((q: any) => ({
-                        id: q.id,
-                        title: q.title,
-                        category: q.category
+                    // Map & Filter valid
+                    myQuizzes = active.map(a => ({
+                        id: a.quiz.id,
+                        title: a.quiz.title, // or short title if available
+                        slug: a.quiz.slug,
+                        category: a.quiz.category_id // approximate
                     }));
                     myQuizzes.forEach(q => myIds.add(q.id));
                 }
                 setActiveQuizzes(myQuizzes);
 
-                // B. Fetch Recent Quizzes (for "Others")
+                // B. Fetch All Quizzes for "Other" list (Limited to featured or popular?)
+                // For now, fetch top 50 and filter out active
                 const { data: allQuizzes } = await supabase
                     .from('quizzes')
-                    .select('id, title, category')
-                    .order('created_at', { ascending: false })
+                    .select('id, title, slug')
                     .limit(20);
 
                 if (allQuizzes) {
-                    // Filter out already active ones
                     const others = allQuizzes
-                        .filter(q => !myIds.has(q.id))
-                        .map(q => ({
-                            id: q.id,
-                            title: q.title,
-                            category: q.category
-                        }));
+                        .map(q => ({ id: q.id, title: q.title, slug: q.slug }))
+                        .filter(q => !myIds.has(q.id));
                     setOtherQuizzes(others);
                 }
 
-                // Auto-select most recent active quiz if coming from a quiz? 
-                // For now default to 'xp' (Gold League) as per requirements implies prominent placement
-            } catch (err) {
-                console.error("Error loading options:", err);
+            } catch (error) {
+                console.error("Error loading options", error);
             }
         }
         loadOptions();
     }, [user]);
 
-    // 2. Fetch Leaderboard Data
+    // 2. Fetch Leaderboard Data on Selection Change
     useEffect(() => {
-        async function fetchData() {
+        async function loadLeaderboard() {
             setLoading(true);
             try {
-                let result: LeaderboardEntry[] = [];
-
+                let entries: LeaderboardEntry[] = [];
                 if (selection === 'xp') {
-                    // XP League
-                    // TODO: Pass current season ID if available
-                    result = await leaderboardService.getXPLeaderboard();
+                    entries = await leaderboardService.getXPLeaderboard();
                 } else {
-                    // Concorso Skill Score
-                    result = await leaderboardService.getSkillLeaderboard(selection);
+                    entries = await leaderboardService.getSkillLeaderboard(selection);
                 }
 
                 // Mark current user
                 if (user) {
-                    result = result.map(entry => ({
-                        ...entry,
-                        isCurrentUser: entry.user.id === user.id
+                    entries = entries.map(e => ({
+                        ...e,
+                        isCurrentUser: e.user.id === user.id
                     }));
                 }
 
-                setData(result);
-            } catch (err) {
-                console.error("Error fetching leaderboard data:", err);
+                setData(entries);
+            } catch (error) {
+                console.error("Error loading leaderboard", error);
             } finally {
                 setLoading(false);
             }
         }
-
-        // Debounce slightly to avoid flicker on rapid switch? No needed for now.
-        fetchData();
+        loadLeaderboard();
     }, [selection, user]);
 
 
@@ -113,7 +108,7 @@ export default function UnifiedLeaderboardPage() {
         <div className="flex flex-col h-screen overflow-hidden bg-canvas-light text-text-primary">
             {/* Header Area */}
             <div className="flex-none p-6 pt-8 flex flex-col items-center justify-center relative z-40">
-                <LeaderboardSelector
+                <SelectorComponent
                     currentSelection={selection}
                     onSelect={setSelection}
                     activeQuizzes={activeQuizzes}
@@ -126,10 +121,10 @@ export default function UnifiedLeaderboardPage() {
                 </p>
             </div>
 
-            {/* Main Content Area */}
+            {/* Main Content Area - Card Style */}
             <div className="flex-1 overflow-hidden relative w-full max-w-2xl mx-auto px-4 lg:px-0 lg:pb-8">
                 <div className="relative h-full bg-white rounded-t-[32px] shadow-soft overflow-hidden flex flex-col border border-transparent">
-                    <LeaderboardView
+                    <ViewComponent
                         data={data}
                         loading={loading}
                         theme={theme}

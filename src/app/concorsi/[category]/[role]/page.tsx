@@ -1,12 +1,17 @@
 import React from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useRoleHubData } from "@/hooks/useRoleHubData";
+import { ChevronLeft, Trophy, Puzzle, Clock, FileText, BookOpen, ExternalLink } from "lucide-react";
 
+// =============================================================================
+// ROLE DETAIL PAGE - Idoneo Redesign
+// Structure: Top bar → Title/Description → Simulazione → Personalizzata → Log → Materials
+// =============================================================================
 export default function RolePage() {
   const { category, role } = useParams<{ category: string; role: string }>();
   const navigate = useNavigate();
 
-  const { role: roleData, resources, history, latestQuizId, loading, error } = useRoleHubData(category || "", role || "");
+  const { role: roleData, resources, history, latestQuizId, latestQuizSlug, loading, error } = useRoleHubData(category || "", role || "");
 
   const handleStartSimulation = () => {
     if (!latestQuizId) return alert("Nessun simulatore disponibile per questo ruolo.");
@@ -14,201 +19,315 @@ export default function RolePage() {
   };
 
   const handleCustomQuiz = () => {
-    if (!latestQuizId) return alert("Nessun simulatore disponibile.");
-    // TODO: Implement Custom Quiz Configuration Page
-    // For now, alerting or redirecting to a placeholder
-    alert("Configurazione Prova Personalizzata: In arrivo!");
+    if (!latestQuizSlug) return alert("Nessun simulatore disponibile.");
+    navigate(`/concorsi/${category}/${role}/${latestQuizSlug}/custom`);
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-canvas-light flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cyan"></div>
-    </div>;
+    return (
+      <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   if (error || !roleData) {
-    return <div className="min-h-screen bg-canvas-light flex items-center justify-center">
-      <div className="text-center p-8">
-        <p className="text-semantic-error font-semibold mb-4">Errore: {error || "Ruolo non trovato"}</p>
-        <Link to="/" className="text-brand-cyan font-semibold hover:text-brand-cyan/80 transition-colors">← Torna alla Home</Link>
+    return (
+      <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center px-6">
+        <div className="text-5xl mb-4">😕</div>
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Ruolo non trovato</h1>
+        <p className="text-slate-500 text-center mb-6">{error || "Questo ruolo non esiste."}</p>
+        <Link to="/" className="text-[#00B1FF] font-semibold">← Torna alla Home</Link>
       </div>
-    </div>;
+    );
   }
 
   return (
-    <div className="min-h-screen bg-canvas-light pb-20">
-      {/* Top Bar */}
-      <div className="sticky top-0 bg-white z-20 px-5 md:px-6 h-16 flex items-center shadow-soft">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-text-secondary hover:text-brand-cyan transition-colors duration-300">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <div className="ml-2 flex flex-col leading-none min-w-0">
-          <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-wider truncate">{category?.replace('-', ' ')}</span>
-          <span className="font-bold text-text-primary text-lg capitalize truncate">{roleData.title}</span>
+    <div className="min-h-screen bg-[#F5F5F7] pb-24">
+      {/* ============================================================= */}
+      {/* TOP BAR */}
+      {/* ============================================================= */}
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+        <div className="px-5 h-14 flex items-center gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6 text-slate-600" />
+          </button>
+          <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">
+            {category?.replace(/-/g, ' ')}
+          </span>
         </div>
-      </div>
+      </header>
 
-      <main className="container mx-auto px-5 md:px-6 py-8 max-w-5xl">
+      <main className="px-5 py-6 max-w-lg mx-auto">
+        {/* ============================================================= */}
+        {/* ROLE HEADER */}
+        {/* ============================================================= */}
+        <section className="mb-8">
+          <h1 className="text-[32px] font-bold text-slate-900 mb-4 leading-tight">
+            {roleData.title}
+          </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Description Card */}
+          <div
+            className="bg-white rounded-2xl p-5"
+            style={{
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+            }}
+          >
+            <p className="text-[15px] text-slate-600 leading-[1.6]">
+              {roleData.description || (
+                <span className="text-slate-400 italic">Nessuna descrizione inserita.</span>
+              )}
+            </p>
+          </div>
+        </section>
 
-          {/* LEFT COLUMN (Header + Actions + History) */}
-          <div className="lg:col-span-2 space-y-8">
+        {/* ============================================================= */}
+        {/* SIMULAZIONE UFFICIALE - Primary Action Card */}
+        {/* ============================================================= */}
+        <div
+          className="bg-white rounded-2xl p-5 mb-4"
+          style={{
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+          }}
+        >
+          <div className="flex items-start gap-4">
+            {/* Icon */}
+            <div className="w-12 h-12 rounded-xl bg-[#00B1FF]/10 flex items-center justify-center flex-shrink-0">
+              <Trophy className="w-6 h-6 text-[#00B1FF]" />
+            </div>
 
-            {/* 1. ROLE HEADER */}
-            <section className="space-y-4">
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold text-text-primary">{roleData.title}</h1>
-                {roleData.available_positions && (
-                  <span className="inline-block mt-3 bg-brand-cyan/10 text-brand-cyan px-4 py-2 rounded-pill text-sm font-bold">
-                    {roleData.available_positions}
-                  </span>
-                )}
-              </div>
-              <div className="prose prose-slate max-w-none text-text-secondary bg-white p-6 rounded-card shadow-soft">
-                {roleData.description ? (
-                  <p className="whitespace-pre-wrap">{roleData.description}</p>
-                ) : (
-                  <p className="italic text-text-tertiary">Nessuna descrizione inserita.</p>
-                )}
-              </div>
-            </section>
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-[17px] font-bold text-slate-900 mb-1">
+                Simulazione Ufficiale
+              </h3>
+              <p className="text-[14px] text-slate-500 mb-4 leading-snug">
+                Replica l'esame reale con timer e pesi ufficiali.
+              </p>
 
-            {/* 2. ACTIONS */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Simulazione */}
+              {/* Primary CTA */}
               <button
                 onClick={handleStartSimulation}
-                className="group relative overflow-hidden bg-white p-6 rounded-card shadow-soft hover:shadow-card hover:scale-[1.02] transition-all duration-300 ease-ios text-left"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#00B1FF] text-white font-semibold text-[14px] hover:bg-[#0099e6] active:scale-[0.98] transition-all"
               >
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span className="text-8xl">🏆</span>
-                </div>
-                <div className="relative z-10 w-14 h-14 bg-brand-cyan/10 rounded-squircle flex items-center justify-center text-3xl mb-4">
-                  🏆
-                </div>
-                <h3 className="text-xl font-bold text-text-primary mb-2">Simulazione Ufficiale</h3>
-                <p className="text-sm text-text-secondary mb-4">Replica l'esame reale con timer e pesi ufficiali.</p>
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-cyan text-white font-semibold text-sm rounded-pill hover:bg-brand-cyan/90 transition-colors">
-                  Avvia Simulazione →
-                </div>
+                Avvia Simulazione
+                <span className="text-white/80">→</span>
               </button>
+            </div>
+          </div>
+        </div>
 
-              {/* Personalizzata */}
+        {/* ============================================================= */}
+        {/* PROVA PERSONALIZZATA - Secondary Action Card */}
+        {/* ============================================================= */}
+        <div
+          className="bg-white rounded-2xl p-5 mb-10"
+          style={{
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+          }}
+        >
+          <div className="flex items-start gap-4">
+            {/* Icon - Purple styled like the blue trophy */}
+            <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
+              <Puzzle className="w-6 h-6 text-purple-500" />
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-[17px] font-bold text-slate-900 mb-1">
+                Prova Personalizzata
+              </h3>
+              <p className="text-[14px] text-slate-500 mb-4 leading-snug">
+                Allenati su argomenti specifici senza limiti di tempo.
+              </p>
+
+              {/* Purple CTA Button */}
               <button
                 onClick={handleCustomQuiz}
-                className="group relative overflow-hidden bg-white p-6 rounded-card shadow-soft hover:shadow-card hover:scale-[1.02] transition-all duration-300 ease-ios text-left"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-purple-500 text-white font-semibold text-[14px] hover:bg-purple-600 active:scale-[0.98] transition-all"
               >
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span className="text-8xl">🧩</span>
-                </div>
-                <div className="relative z-10 w-14 h-14 bg-brand-blue/10 rounded-squircle flex items-center justify-center text-3xl mb-4">
-                  🧩
-                </div>
-                <h3 className="text-xl font-bold text-text-primary mb-2">Prova Personalizzata</h3>
-                <p className="text-sm text-text-secondary mb-4">Allenati su argomenti specifici senza limiti di tempo.</p>
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-canvas-light text-text-primary font-semibold text-sm rounded-pill hover:bg-text-tertiary/20 transition-colors">
-                  Configura Prova →
-                </div>
+                Configura Prova
+                <span className="text-white/80">→</span>
               </button>
-            </section>
-
-            {/* 3. ATTEMPT HISTORY */}
-            <section>
-              <h3 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-                📜 Registro Esercitazioni
-              </h3>
-              <div className="bg-white rounded-card shadow-soft overflow-hidden">
-                {history.length === 0 ? (
-                  <div className="p-8 text-center text-text-secondary">
-                    Non hai ancora effettuato esercitazioni per questo ruolo.
-                  </div>
-                ) : (
-                  <div className="divide-y divide-canvas-light">
-                    {history.map((attempt) => (
-                      <div key={attempt.id} className="p-5 flex items-center justify-between hover:bg-canvas-light transition-colors duration-300">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-1 h-12 rounded-pill ${attempt.score >= 18 ? 'bg-semantic-success' : 'bg-semantic-error'}`} />
-                          <div>
-                            <p className="font-bold text-text-primary">
-                              {attempt.is_official_sim ? "Simulazione Ufficiale" : "Esercitazione"}
-                            </p>
-                            <p className="text-xs text-text-secondary">
-                              {new Date(attempt.created_at).toLocaleDateString()} alle {new Date(attempt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-text-primary">{attempt.score.toFixed(1)}</div>
-                          <Link
-                            to={`/quiz/results/${attempt.id}`}
-                            className="text-xs font-semibold text-brand-cyan hover:text-brand-cyan/80 transition-colors"
-                          >
-                            Rivedi →
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
-
+            </div>
           </div>
+        </div>
 
-          {/* RIGHT COLUMN (Tools & Sidebar) */}
-          <div className="space-y-8">
+        {/* ============================================================= */}
+        {/* REGISTRO ESERCITAZIONI */}
+        {/* ============================================================= */}
+        <section className="mb-10">
+          <h2 className="text-[15px] font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-slate-400" />
+            Registro Esercitazioni
+          </h2>
 
-            {/* 4. USEFUL RESOURCES */}
-            <section className="bg-white rounded-card p-6 shadow-soft sticky top-24">
-              <h3 className="text-xl font-bold text-text-primary mb-6 flex items-center gap-2">
-                📚 Materiali & Strumenti
-              </h3>
+          <div
+            className="bg-white rounded-2xl overflow-hidden"
+            style={{
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+            }}
+          >
+            {history.length === 0 ? (
+              /* Empty State */
+              <div className="p-6 text-center">
+                <div className="text-3xl mb-3">📋</div>
+                <p className="text-[14px] text-slate-400">
+                  Non hai ancora effettuato esercitazioni per questo ruolo.
+                </p>
+              </div>
+            ) : (
+              /* History List */
+              <div className="divide-y divide-slate-100">
+                {history.map((attempt) => (
+                  <div key={attempt.id} className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {/* Score Indicator */}
+                      <div
+                        className={`w-1.5 h-10 rounded-full ${attempt.score >= 18 ? 'bg-emerald-500' : 'bg-red-500'
+                          }`}
+                      />
+                      <div>
+                        <p className="text-[14px] font-semibold text-slate-900">
+                          {attempt.is_official_sim ? "Simulazione Ufficiale" : "Esercitazione"}
+                        </p>
+                        <p className="text-[12px] text-slate-400">
+                          {new Date(attempt.created_at).toLocaleDateString('it-IT')} · {new Date(attempt.created_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[16px] font-bold text-slate-900">
+                        {attempt.score.toFixed(1)}
+                      </div>
+                      <Link
+                        to={`/quiz/results/${attempt.id}`}
+                        className="text-[12px] font-semibold text-[#00B1FF]"
+                      >
+                        Rivedi →
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
 
-              <div className="space-y-3">
+        {/* ============================================================= */}
+        {/* MATERIALI & STRUMENTI */}
+        {/* ============================================================= */}
+        <section>
+          <h2 className="text-[15px] font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-slate-400" />
+            Materiali & Strumenti
+          </h2>
+
+          <div
+            className="bg-white rounded-2xl overflow-hidden"
+            style={{
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+            }}
+          >
+            {resources.length === 0 ? (
+              /* Empty State */
+              <div className="p-6 text-center">
+                <div className="text-3xl mb-3">📚</div>
+                <p className="text-[14px] text-slate-400">
+                  Nessuna risorsa disponibile.
+                </p>
+              </div>
+            ) : (
+              /* Resources List */
+              <div className="divide-y divide-slate-100">
                 {resources.map(res => (
                   <a
                     key={res.id}
                     href={res.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-card bg-canvas-light hover:bg-brand-cyan/10 hover:shadow-soft transition-all duration-300 group"
+                    className="p-4 flex items-center gap-3 hover:bg-slate-50 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-squircle bg-white group-hover:bg-brand-cyan/20 flex items-center justify-center text-xl shadow-soft">
-                      {res.type === 'pdf' ? '📄' : '🔗'}
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+                      {res.type === 'pdf' ? (
+                        <FileText className="w-5 h-5 text-slate-600" />
+                      ) : (
+                        <ExternalLink className="w-5 h-5 text-slate-600" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-text-primary group-hover:text-brand-cyan truncate transition-colors">{res.title}</p>
-                      <p className="text-xs text-text-secondary group-hover:text-brand-cyan transition-colors">Apri risorsa ↗</p>
+                      <p className="text-[14px] font-semibold text-slate-900 truncate">
+                        {res.title}
+                      </p>
+                      <p className="text-[12px] text-slate-400">
+                        Apri risorsa ↗
+                      </p>
                     </div>
                   </a>
                 ))}
-
-                {resources.length === 0 && (
-                  <p className="text-sm text-text-tertiary italic text-center py-4">Nessuna risorsa disponibile.</p>
-                )}
               </div>
-
-              {/* Share Bank Link (Future Feature) */}
-              {roleData.share_bank_link && (
-                <div className="mt-8 pt-6 border-t border-canvas-light">
-                  <h4 className="text-xs font-bold text-text-tertiary uppercase mb-3">Banca Dati</h4>
-                  <a
-                    href={roleData.share_bank_link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block w-full text-center py-3.5 rounded-pill bg-brand-cyan text-white font-semibold text-sm hover:bg-brand-cyan/90 transition-colors shadow-md"
-                  >
-                    Condividi / Scarica
-                  </a>
-                </div>
-              )}
-
-            </section>
+            )}
           </div>
 
-        </div>
+          {/* Share Bank Link */}
+          {roleData.share_bank_link && (
+            <a
+              href={roleData.share_bank_link}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 block w-full text-center py-3.5 rounded-2xl bg-[#00B1FF] text-white font-semibold text-[14px] hover:bg-[#0099e6] transition-colors"
+            >
+              Condividi / Scarica Banca Dati
+            </a>
+          )}
+        </section>
       </main>
+
+      {/* ============================================================= */}
+      {/* BOTTOM NAV BAR */}
+      {/* ============================================================= */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 pb-safe">
+        <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+          <Link to="/" className="flex flex-col items-center gap-1 text-slate-400">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span className="text-[10px] font-medium">Home</span>
+          </Link>
+
+          <Link to="/search" className="flex flex-col items-center gap-1 text-slate-400">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span className="text-[10px] font-medium">Cerca</span>
+          </Link>
+
+          <Link to="/quiz" className="flex flex-col items-center gap-1 text-[#00B1FF]">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-[10px] font-semibold">Quiz</span>
+          </Link>
+
+          <Link to="/stats" className="flex flex-col items-center gap-1 text-slate-400">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span className="text-[10px] font-medium">Statistiche</span>
+          </Link>
+
+          <Link to="/profile" className="flex flex-col items-center gap-1 text-slate-400">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="text-[10px] font-medium">Profilo</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }

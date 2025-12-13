@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trophy, Zap, Gem } from 'lucide-react';
 
 interface ProfileStatsCardProps {
     xp: number;
@@ -10,36 +11,36 @@ export default function ProfileStatsCard({ xp }: ProfileStatsCardProps) {
     const gems = 120;
 
     return (
-        <div className="grid grid-cols-3 gap-3 md:grid-cols-1 md:gap-4">
+        <div className="grid grid-cols-3 gap-3">
 
             {/* XP Card */}
-            <div className="bg-white rounded-card p-4 flex flex-col md:flex-row items-center gap-4 shadow-soft hover:shadow-card hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group">
-                <div className="absolute right-0 top-0 w-20 h-20 bg-brand-orange/5 rounded-bl-[40px] -mr-4 -mt-4 z-0 group-hover:scale-110 transition-transform"></div>
-                <div className="relative z-10 w-12 h-12 rounded-squircle bg-brand-orange/10 text-brand-orange flex items-center justify-center text-xl font-bold">🏆</div>
-                <div className="relative z-10 text-center md:text-left">
-                    <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-0.5">XP Totali</p>
-                    <p className="text-2xl font-black text-text-primary">{xp}</p>
+            <div className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-500" />
+                <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-2 mt-1">
+                    <Trophy className="w-4 h-4 fill-current" />
                 </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">XP Totali</p>
+                <p className="text-lg font-black text-slate-900">{xp}</p>
             </div>
 
             {/* Energy Card */}
-            <div className="bg-white rounded-card p-4 flex flex-col md:flex-row items-center gap-4 shadow-soft hover:shadow-card hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group">
-                <div className="absolute right-0 top-0 w-20 h-20 bg-semantic-error/5 rounded-bl-[40px] -mr-4 -mt-4 z-0 group-hover:scale-110 transition-transform"></div>
-                <div className="relative z-10 w-12 h-12 rounded-squircle bg-semantic-error/10 text-semantic-error flex items-center justify-center text-xl font-bold">⚡</div>
-                <div className="relative z-10 text-center md:text-left">
-                    <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-0.5">Energia</p>
-                    <p className="text-2xl font-black text-text-primary">{energy} / 5</p>
+            <div className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-red-500" />
+                <div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-2 mt-1">
+                    <Zap className="w-4 h-4 fill-current" />
                 </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Energia</p>
+                <p className="text-lg font-black text-slate-900">{energy}/5</p>
             </div>
 
             {/* Gems Card */}
-            <div className="bg-white rounded-card p-4 flex flex-col md:flex-row items-center gap-4 shadow-soft hover:shadow-card hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group">
-                <div className="absolute right-0 top-0 w-20 h-20 bg-brand-cyan/5 rounded-bl-[40px] -mr-4 -mt-4 z-0 group-hover:scale-110 transition-transform"></div>
-                <div className="relative z-10 w-12 h-12 rounded-squircle bg-brand-cyan/10 text-brand-cyan flex items-center justify-center text-xl font-bold">💎</div>
-                <div className="relative z-10 text-center md:text-left">
-                    <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-0.5">Gemme</p>
-                    <p className="text-2xl font-black text-text-primary">{gems}</p>
+            <div className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-cyan-500" />
+                <div className="w-8 h-8 rounded-full bg-cyan-50 text-cyan-500 flex items-center justify-center mb-2 mt-1">
+                    <Gem className="w-4 h-4 fill-current" />
                 </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Gemme</p>
+                <p className="text-lg font-black text-slate-900">{gems}</p>
             </div>
 
         </div>

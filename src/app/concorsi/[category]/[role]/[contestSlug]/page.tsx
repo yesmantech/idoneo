@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { getContestBySlug, type Contest } from "@/lib/data";
-
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
-import ExamHeader from "@/components/concorsi/ExamHeader";
-import RoleSimulationSection from "@/components/concorsi/RoleSimulationSection";
+import {
+  ChevronLeft, Trophy, Puzzle, Clock, Clipboard,
+  BookOpen, Share2
+} from "lucide-react";
 
 export default function ContestPage() {
   const { category, role, contestSlug } = useParams<{ category: string; role: string; contestSlug: string }>();
@@ -44,168 +45,156 @@ export default function ContestPage() {
   }, [contestSlug, user]);
 
   if (loading) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
     </div>
   );
 
   if (!contest) return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center text-center p-4">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4">
       <h1 className="text-2xl font-bold mb-4">Concorso non trovato</h1>
-      <button onClick={() => navigate(-1)} className="text-emerald-600 font-medium hover:underline">
+      <button onClick={() => navigate(-1)} className="text-[#00B1FF] font-medium hover:underline">
         ← Torna indietro
       </button>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      {/* 1. Header Section */}
-      <ExamHeader
-        title={contest.title}
-        subtitle="Preparazione completa alla prova d'esame"
-        breadcrumbs={[
-          { label: 'Home', path: '/' },
-          { label: 'Concorsi', path: `/concorsi/${category}` }, // Go back to hub
-          // We could add Role here if we had a dedicated role page, but accordion handles it usually
-          { label: contest.year ? `${contest.year}` : 'Dettaglio' }
-        ]}
-        status="open" // Mock status
-        deadline="30 GIU 2025" // Mock deadline
-        positions="1.250" // Mock positions
-      />
+    <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">
 
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+      {/* 1. TOP BAR */}
+      <div className="sticky top-0 z-30 bg-[#F8FAFC]/90 backdrop-blur-md px-4 py-4 flex items-center gap-1">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-1 -ml-2 rounded-full hover:bg-slate-200/50 transition-colors flex items-center text-slate-500"
+        >
+          <ChevronLeft className="w-6 h-6" />
+          <span className="text-[15px] font-medium uppercase tracking-wide ml-1">
+            {contest.roleSlug?.replace(/-/g, ' ') || "Indietro"}
+          </span>
+        </button>
+      </div>
 
-        <div className="space-y-8">
-          {/* Main Content Column */}
-          <div className="space-y-8">
+      <div className="px-5 space-y-6">
 
-            {/* 2. Simulation Section (Replaces Dark Hero) */}
-            <RoleSimulationSection
-              category={category || ""}
-              role={role || ""}
-              contestSlug={contestSlug || ""}
-              contestId={contest.id}
-            />
+        {/* 2. HEADER */}
+        <div>
+          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight leading-tight">
+            {contest.title}
+          </h1>
+        </div>
 
-            {/* 3. Info & Description */}
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Informazioni sul Concorso</h3>
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4 text-slate-600 leading-relaxed">
-                <p>
-                  {contest.description || "Questo pacchetto di preparazione include l'accesso completo alla banca dati ufficiale per la preparazione alla prova scritta."}
-                </p>
-                <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 text-sm">
-                  <span className="text-xl">💡</span>
-                  <div>
-                    <p className="font-bold mb-1">Nota sulla Banca Dati</p>
-                    <p>
-                      Questa simulazione utilizza la <strong>Banca Dati Ufficiale 2024</strong>. Le domande sono estratte con le stesse regole dell'esame reale.
-                    </p>
-                  </div>
-                </div>
+        {/* 3. DESCRIPTION CARD */}
+        <div className="bg-white rounded-[20px] p-5 shadow-[0_2px_15px_rgba(0,0,0,0.03)] border border-slate-100/50">
+          <p className={`${contest.description ? 'text-slate-600' : 'text-slate-400 italic'} text-[15px] leading-relaxed`}>
+            {contest.description || "Nessuna descrizione inserita."}
+          </p>
+        </div>
+
+        {/* 4. ACTIONS */}
+        <div className="space-y-4">
+
+          {/* Official Simulation Card */}
+          <div className="bg-white rounded-[24px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-slate-100 transition-transform active:scale-[0.99]">
+            <div className="flex items-start gap-4 mb-5">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-50 flex items-center justify-center flex-shrink-0">
+                <Trophy className="w-7 h-7 text-cyan-500" strokeWidth={1.5} />
               </div>
-            </div>
-
-            {/* 4. History (Mock/Placeholder) */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-slate-900">Registro Esercitazioni</h3>
-                <Link to="#" className="text-sm text-emerald-600 font-medium hover:underline">Vedi tutto</Link>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm overflow-x-auto">
-                {attempts.length > 0 ? (
-                  <table className="w-full text-left text-sm text-slate-600">
-                    <thead className="bg-slate-50 border-b border-slate-100">
-                      <tr>
-                        <th className="px-6 py-3 font-medium text-slate-500">Data</th>
-                        <th className="px-6 py-3 font-medium text-slate-500">Punteggio</th>
-                        <th className="px-6 py-3 font-medium text-slate-500">Esito</th>
-                        <th className="px-6 py-3 font-medium text-slate-500 text-right">Azione</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attempts.map((attempt) => (
-                        <tr key={attempt.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
-                          <td className="px-6 py-4 font-medium text-slate-900">
-                            {new Date(attempt.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${attempt.score >= 18 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-                              }`}>
-                              {attempt.score} / 30
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            {attempt.is_idoneo === true && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                IDONEO
-                              </span>
-                            )}
-                            {attempt.is_idoneo === false && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                NON IDONEO
-                              </span>
-                            )}
-                            {attempt.is_idoneo === null && (
-                              <span className="text-slate-400 text-xs">-</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <Link to={`/quiz/results/${attempt.id}`} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-                              Vedi Esito →
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="p-8 text-center">
-                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 grayscale opacity-50">
-                      📊
-                    </div>
-                    <p className="font-medium text-slate-900 mb-1">Nessuna esercitazione recente</p>
-                    <p className="text-sm text-slate-500">I tuoi risultati appariranno qui dopo la prima simulazione.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 5. Useful Tools (Full Width) */}
-            <div>
-              {/* Tools */}
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Strumenti Utili</h3>
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
-                  <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-left transition-colors group">
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                      📘
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-900">Guida allo Studio</div>
-                      <div className="text-xs text-slate-500">PDF Scaricabile</div>
-                    </div>
-                  </button>
-                  <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-left transition-colors group">
-                    <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-                      📤
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-900">Condividi Banca Dati</div>
-                      <div className="text-xs text-slate-500">Link condivisibile</div>
-                    </div>
-                  </button>
-                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Simulazione Ufficiale</h3>
+                <p className="text-[14px] text-slate-500 leading-snug">
+                  Replica l'esame reale con timer e pesi ufficiali.
+                </p>
               </div>
             </div>
+            <button
+              onClick={() => navigate(`/concorsi/${category}/${role}/${contestSlug}/simulazione/ufficiale/regole`)}
+              className="w-full bg-[#00B1FF] hover:bg-[#0099DD] text-white font-bold text-[16px] py-4 rounded-[18px] shadow-lg shadow-cyan-200/50 transition-all flex items-center justify-center gap-2"
+            >
+              Avvia Simulazione <span className="text-lg">→</span>
+            </button>
+          </div>
 
+          {/* Custom Test Card */}
+          <div className="bg-white rounded-[24px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-slate-100 transition-transform active:scale-[0.99]">
+            <div className="flex items-start gap-4 mb-5">
+              <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                <Puzzle className="w-7 h-7 text-purple-500" strokeWidth={1.5} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Prova Personalizzata</h3>
+                <p className="text-[14px] text-slate-500 leading-snug">
+                  Allenati su argomenti specifici senza limiti di tempo.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate(`/concorsi/${category}/${role}/${contestSlug}/custom`)}
+              className="w-full bg-[#A855F7] hover:bg-[#9333EA] text-white font-bold text-[16px] py-4 rounded-[18px] shadow-lg shadow-purple-200/50 transition-all flex items-center justify-center gap-2"
+            >
+              Configura Prova <span className="text-lg">→</span>
+            </button>
+          </div>
+
+        </div>
+
+        {/* 5. HISTORY */}
+        <div className="pt-2">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-slate-400" />
+            <h3 className="text-[17px] font-bold text-slate-900">Registro Esercitazioni</h3>
+          </div>
+
+          <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_15px_rgba(0,0,0,0.03)] overflow-hidden min-h-[160px] flex flex-col justify-center">
+            {attempts.length > 0 ? (
+              <div className="divide-y divide-slate-50">
+                {attempts.map((attempt) => (
+                  <Link
+                    key={attempt.id}
+                    to={`/quiz/results/${attempt.id}`}
+                    className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${attempt.score >= 18 ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                      <div>
+                        <div className="text-[15px] font-bold text-slate-900">
+                          {attempt.score >= 18 ? 'Idoneo' : 'Non Idoneo'}
+                        </div>
+                        <div className="text-[13px] text-slate-400">
+                          {new Date(attempt.created_at).toLocaleDateString('it-IT')} · {attempt.score}/30
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-slate-300 text-lg">›</span>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-8 text-center">
+                <div className="mb-3 opacity-60">
+                  <Clipboard className="w-8 h-8 text-[#C4B598]" strokeWidth={1.5} />
+                  {/* Using a brownish tone for clipboard placeholder like reference if possible, or slate */}
+                </div>
+                <p className="text-[14px] text-slate-400 font-medium px-4">
+                  Non hai ancora effettuato esercitazioni per questo ruolo.
+                </p>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* 6. MATERIALS HEADER */}
+        <div className="pt-2 pb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen className="w-5 h-5 text-slate-400" />
+            <h3 className="text-[17px] font-bold text-slate-900">Materiali & Strumenti</h3>
+          </div>
+          {/* Placeholder for materials content if added later */}
+          <div className="bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm opacity-50">
+            <p className="text-sm text-slate-400">Nessun materiale disponibile al momento.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   );

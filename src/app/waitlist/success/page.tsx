@@ -1,11 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { CloudMascot } from '@/components/ui/CloudMascot';
-import { Gift } from 'lucide-react';
+import { Gift, Home } from 'lucide-react';
 import ReferralModal from '@/components/referral/ReferralModal';
 
 export default function WaitlistSuccessPage() {
+    const navigate = useNavigate();
     const [showReferralModal, setShowReferralModal] = useState(false);
 
     useEffect(() => {
@@ -68,6 +69,14 @@ export default function WaitlistSuccessPage() {
             onClick={handleScreenClick}
             className="min-h-screen bg-white flex flex-col items-center justify-between p-6 text-center relative overflow-hidden font-sans"
         >
+            {/* Home Button */}
+            <button
+                onClick={() => navigate('/')}
+                className="absolute left-6 top-6 p-3 rounded-full bg-white shadow-soft text-slate-400 hover:text-[#00B1FF] hover:scale-110 transition-all duration-300 z-50 border border-slate-50"
+                aria-label="Torna alla Home"
+            >
+                <Home className="w-6 h-6" />
+            </button>
 
             {/* Top Text Content */}
             <div className="w-full max-w-sm mx-auto z-10 space-y-4 pt-10 flex-shrink-0">

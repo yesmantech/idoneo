@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import { Settings, Share2, Plus } from 'lucide-react';
 
 // Components
 import ProfileIdentityCard from '@/components/profile/ProfileIdentityCard';
 import ProfileStatsCard from '@/components/profile/ProfileStatsCard';
 import DashboardList from '@/components/profile/DashboardList';
 import BadgesBlock from '@/components/profile/BadgesBlock';
+import FriendsBlock from '@/components/profile/FriendsBlock';
 
 import { xpService } from '@/lib/xpService';
 
@@ -41,54 +43,52 @@ export default function ProfilePage() {
     );
 
     return (
-        <div className="min-h-screen bg-canvas-light pb-24 md:py-8 lg:px-8">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-2xl font-black text-text-primary mb-6 hidden md:block">Il tuo Profilo</h1>
+        <div className="min-h-screen bg-[#F5F5F7] pb-24">
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            {/* 1. HERO HEADER */}
+            <header className="bg-slate-900 h-32 relative flex justify-end p-4 pt-6">
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => alert("Condivisione in arrivo!")}
+                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:bg-white/20 active:scale-95"
+                    >
+                        <Share2 className="w-5 h-5 text-white" />
+                    </button>
+                    <button
+                        onClick={() => navigate('/profile/settings')}
+                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:bg-white/20 active:scale-95"
+                    >
+                        <Settings className="w-5 h-5 text-white" />
+                    </button>
+                </div>
+            </header>
 
-                    {/* LEFT COLUMN (Identity & Stats) */}
-                    <div className="lg:col-span-4 space-y-6">
-                        {/* 1. Identity Card */}
-                        <ProfileIdentityCard
-                            user={user}
-                            profile={profile}
-                            onSettingsClick={() => navigate('/profile/settings')}
-                            onShareClick={() => alert("Condivisione in arrivo!")}
-                        />
+            <div className="max-w-md mx-auto relative px-5">
 
-                        {/* 2. Stats */}
-                        <ProfileStatsCard xp={xp} />
+                {/* 2. OVERLAPPING IDENTITY CARD */}
+                <ProfileIdentityCard
+                    user={user}
+                    profile={profile}
+                />
 
-                        {/* 4. Badges (moved here for desktop sidebar feel) */}
-                        <div className="bg-white rounded-card shadow-soft p-6 hidden lg:block">
-                            <BadgesBlock />
-                        </div>
-                    </div>
+                <div className="space-y-6">
+                    {/* 3. STATS ROW */}
+                    <ProfileStatsCard xp={xp} />
 
-                    {/* RIGHT COLUMN (Dashboard & Activity) */}
-                    <div className="lg:col-span-8 space-y-8">
+                    {/* 4. DASHBOARD LIST */}
+                    {/* We need to pass the "wrapper" styling or modify DashboardList to NOT have internal padding if needed. 
+                        DashboardList currently has its own container. Let's inspect/adjust if needed. 
+                        Actually DashboardList uses `p-8` or `p-4` internally. We might want to clear that up 
+                        or just rely on it. Given the mockup, it should be a clean list. 
+                        The current DashboardList component returns a `div`. We'll just render it here.
+                    */}
+                    <DashboardList userId={user?.id || ''} />
 
-                        {/* 3. Dashboard (Concorsi List) */}
-                        <div className="bg-white md:rounded-card md:shadow-soft md:p-8 p-4 rounded-xl">
-                            <DashboardList userId={user?.id || ''} />
-                        </div>
+                    {/* 5. BADGES */}
+                    <BadgesBlock />
 
-                        {/* Mobile Badges (Visible only on mobile) */}
-                        <div className="lg:hidden bg-white rounded-card shadow-soft p-6 mx-0">
-                            <BadgesBlock />
-                        </div>
-
-                        {/* Recent Activity (Placeholder for now) */}
-                        <div className="bg-white md:rounded-card md:shadow-soft md:p-8 p-4 rounded-xl">
-                            <h3 className="text-lg font-bold text-text-primary mb-6">Attività Recente</h3>
-                            <div className="text-center py-10 text-text-tertiary bg-canvas-light rounded-2xl border border-dashed border-text-tertiary/20">
-                                Nessuna attività recente da mostrare.
-                            </div>
-                        </div>
-
-                    </div>
-
+                    {/* 6. FRIENDS & INVITES */}
+                    <FriendsBlock userId={user?.id || ''} />
                 </div>
             </div>
         </div>

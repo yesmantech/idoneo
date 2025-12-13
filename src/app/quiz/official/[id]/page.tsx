@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
+import { Clock, HelpCircle, Trophy, ChevronRight, AlertCircle, Play } from "lucide-react";
 
 // Helper to normalize DB answers
 function normalizeDBAnswer(val: string | null | undefined): string | null {
@@ -24,9 +25,19 @@ export default function OfficialQuizStarterPage() {
     const navigate = useNavigate();
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [starting, setStarting] = useState(false);
+    const [dontShowAgain, setDontShowAgain] = useState(false);
 
+    const [quizDetails, setQuizDetails] = useState<{
+        id: string;
+        title: string;
+        time_limit: number | null;
+        question_count: number;
+    } | null>(null);
+
+    // Initial fetch of Quiz Details only
     useEffect(() => {
-        const initializeQuiz = async () => {
+        const fetchDetails = async () => {
             if (!quizSlug) {
                 setError("Quiz non specificato");
                 setLoading(false);
@@ -41,131 +52,276 @@ export default function OfficialQuizStarterPage() {
                     return;
                 }
 
-                // 2. Fetch quiz by slug
-                const { data: quiz, error: quizError } = await supabase
-                    .from("quizzes")
-                    .select("id, title, time_limit")
-                    .eq("slug", quizSlug)
-                    .single();
+                // 2. Fetch quiz details
+                let quiz: any = null;
+                const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(quizSlug);
 
-                if (quizError || !quiz) {
-                    setError(`Quiz "${quizSlug}" non trovato`);
-                    setLoading(false);
-                    return;
+                let query = supabase
+                    .from("quizzes")
+                    .select("id, title, time_limit");
+
+                if (isUUID) query = query.eq("id", quizSlug);
+                else query = query.eq("slug", quizSlug);
+
+                const result = await query.single();
+
+                if (result.error || !result.data) {
+                    throw new Error("Quiz non trovato");
                 }
 
-                // 3. Fetch all subjects for this quiz
+                quiz = result.data;
+
+                // 3. Count available questions (estimate)
                 const { data: subjects } = await supabase
                     .from("subjects")
                     .select("id")
                     .eq("quiz_id", quiz.id)
                     .eq("is_archived", false);
 
-                if (!subjects || subjects.length === 0) {
-                    setError("Nessuna materia trovata per questo quiz");
-                    setLoading(false);
-                    return;
-                }
+                const subjectIds = subjects?.map(s => s.id) || [];
 
-                const subjectIds = subjects.map(s => s.id);
-
-                // 4. Fetch all questions for these subjects
-                const { data: questions, error: questionsError } = await supabase
+                const { count } = await supabase
                     .from("questions")
-                    .select("*, subject:subjects(name)")
+                    .select("*", { count: 'exact', head: true })
                     .in("subject_id", subjectIds)
                     .eq("is_archived", false);
 
-                if (questionsError || !questions || questions.length === 0) {
-                    setError("Nessuna domanda disponibile per questo quiz");
-                    setLoading(false);
-                    return;
+                const details = {
+                    id: quiz.id,
+                    title: quiz.title,
+                    time_limit: quiz.time_limit,
+                    question_count: count || 0
+                };
+
+                setQuizDetails(details);
+
+                // 4. Check Auto-Start Preference
+                const skipRules = localStorage.getItem("skip_official_rules");
+                if (skipRules === "true") {
+                    // Auto-start immediately if preference is set.
+                    // Await the result. If success (true), we do NOT clear loading,
+                    // keeping the spinner visible until the page unmounts/redirects.
+                    const started = await handleStart(details);
+                    if (started) {
+                        return;
+                    }
                 }
 
-                // 5. Shuffle questions
-                const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
-
-                // 6. Build rich answers array
-                const richAnswers = shuffledQuestions.map(q => ({
-                    questionId: q.id,
-                    text: q.text,
-                    subjectId: q.subject_id,
-                    subjectName: (q as any).subject?.name || "Materia",
-                    selectedOption: null,
-                    correctOption: getCorrectOption(q),
-                    isCorrect: false,
-                    isSkipped: false,
-                    explanation: q.explanation || null,
-                    options: { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d }
-                }));
-
-                // 7. Create attempt
-                const { data: attempt, error: attemptError } = await supabase
-                    .from("quiz_attempts")
-                    .insert({
-                        quiz_id: quiz.id,
-                        user_id: user.id,
-                        score: 0,
-                        answers: richAnswers,
-                        total_questions: richAnswers.length,
-                        correct: 0,
-                        wrong: 0,
-                        blank: 0,
-                        started_at: new Date().toISOString(),
-                        mode: 'official', // Track attempt type
-                    })
-                    .select()
-                    .single();
-
-                if (attemptError || !attempt) {
-                    console.error("Attempt creation error:", attemptError);
-                    setError("Errore nella creazione del tentativo");
-                    setLoading(false);
-                    return;
-                }
-
-                // 8. Redirect to quiz runner
-                const timeParam = quiz.time_limit ? `time=${quiz.time_limit}` : "time=0";
-                navigate(`/quiz/run/${attempt.id}?mode=official&${timeParam}`);
+                // If not auto-starting or it failed, show the UI
+                setLoading(false);
 
             } catch (err: any) {
-                console.error("Quiz initialization error:", err);
-                setError(err.message || "Errore durante l'inizializzazione del quiz");
+                console.error("Quiz details error:", err);
+                setError(err.message);
                 setLoading(false);
             }
         };
 
-        initializeQuiz();
+        fetchDetails();
     }, [quizSlug, navigate]);
+
+    // Accept details arg to support auto-start call
+    // Returns true if successfully started (redirecting), false otherwise
+    const handleStart = async (details = quizDetails): Promise<boolean> => {
+        if (!details) return false;
+        setStarting(true);
+        setError(null);
+
+        // Save preference if checkbox is checked
+        if (dontShowAgain) {
+            localStorage.setItem("skip_official_rules", "true");
+        }
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Utente non autenticato");
+
+            // 1. Fetch Subjects
+            const { data: subjects } = await supabase
+                .from("subjects")
+                .select("id")
+                .eq("quiz_id", details.id)
+                .eq("is_archived", false);
+
+            if (!subjects?.length) throw new Error("Nessuna materia trovata");
+            const subjectIds = subjects.map(s => s.id);
+
+            // 2. Fetch Questions
+            const { data: questions, error: questionsError } = await supabase
+                .from("questions")
+                .select("*, subject:subjects(name)")
+                .in("subject_id", subjectIds)
+                .eq("is_archived", false);
+
+            if (questionsError || !questions?.length) throw new Error("Nessuna domanda disponibile");
+
+            // 3. Shuffle & Prepare
+            const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+
+            const richAnswers = shuffledQuestions.map(q => ({
+                questionId: q.id,
+                text: q.text,
+                subjectId: q.subject_id,
+                subjectName: (q as any).subject?.name || "Materia",
+                selectedOption: null,
+                correctOption: getCorrectOption(q),
+                isCorrect: false,
+                isSkipped: false,
+                explanation: q.explanation || null,
+                options: { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d }
+            }));
+
+            // 4. Create Attempt
+            const { data: attempt, error: attemptError } = await supabase
+                .from("quiz_attempts")
+                .insert({
+                    quiz_id: details.id,
+                    user_id: user.id,
+                    score: 0,
+                    answers: richAnswers,
+                    total_questions: richAnswers.length,
+                    correct: 0,
+                    wrong: 0,
+                    blank: 0,
+                    started_at: new Date().toISOString(),
+                    mode: 'official',
+                })
+                .select()
+                .single();
+
+            if (attemptError || !attempt) throw attemptError;
+
+            // 5. Navigate
+            const timeParam = details.time_limit ? `time=${details.time_limit}` : "time=0";
+            navigate(`/quiz/run/${attempt.id}?mode=official&${timeParam}`);
+
+            // Return true to indicate successful start (loading should stick)
+            return true;
+
+        } catch (err: any) {
+            console.error("Start error:", err);
+            setError(err.message);
+            setStarting(false);
+            return false;
+        }
+    };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
-                <p className="text-slate-600 font-medium">Preparazione quiz in corso...</p>
+            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 px-4">
-                <div className="bg-red-50 border border-red-200 rounded-2xl p-6 max-w-md text-center">
-                    <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <h2 className="text-xl font-bold text-red-900 mb-2">Errore</h2>
-                    <p className="text-red-700">{error}</p>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="mt-4 px-6 py-2 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800"
-                    >
-                        Torna indietro
-                    </button>
+            <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center p-4">
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl max-w-sm text-center">
+                    <AlertCircle className="w-8 h-8 mx-auto mb-2" />
+                    <p className="font-medium">{error}</p>
+                    <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold underline">Torna indietro</button>
                 </div>
             </div>
         );
     }
 
-    return null;
+    return (
+        <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
+            {/* Top Bar */}
+            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+                <div className="px-4 h-14 flex items-center gap-3 max-w-3xl mx-auto w-full">
+                    <button onClick={() => navigate(-1)} className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full hover:bg-slate-50">
+                        <ChevronRight className="w-5 h-5 text-slate-400 rotate-180" />
+                    </button>
+                    <span className="font-semibold text-slate-900">Simulazione Ufficiale</span>
+                </div>
+            </header>
+
+            <main className="flex-1 px-5 py-8 max-w-lg mx-auto w-full flex flex-col">
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">{quizDetails?.title}</h1>
+                <p className="text-slate-500 mb-8">
+                    Questa simulazione replica le condizioni reali dell'esame ufficiale.
+                </p>
+
+                {/* Info Cards */}
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-2 mb-1">
+                            <HelpCircle className="w-4 h-4 text-[#00B1FF]" />
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">QUESITI</span>
+                        </div>
+                        <p className="text-xl font-bold text-slate-900">{quizDetails?.question_count}</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Clock className="w-4 h-4 text-[#00B1FF]" />
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">TEMPO</span>
+                        </div>
+                        <p className="text-xl font-bold text-slate-900">
+                            {quizDetails?.time_limit ? `${quizDetails.time_limit} min` : "Illimitato"}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Rules Section */}
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-6">
+                    <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-amber-500" />
+                        Regole Punteggio
+                    </h3>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <span className="text-sm font-medium text-slate-600">Risposta Corretta</span>
+                            <span className="text-sm font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md">+1.00</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <span className="text-sm font-medium text-slate-600">Risposta Errata</span>
+                            <span className="text-sm font-bold text-red-600 bg-red-100 px-2 py-1 rounded-md">-0.10</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <span className="text-sm font-medium text-slate-600">Risposta Non data</span>
+                            <span className="text-sm font-bold text-slate-600 bg-slate-200 px-2 py-1 rounded-md">0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Do Not Show Again Checkbox */}
+                <div className="flex items-center gap-3 mb-6 px-2">
+                    <div className="relative flex items-center">
+                        <input
+                            type="checkbox"
+                            id="dontShowAgain"
+                            checked={dontShowAgain}
+                            onChange={(e) => setDontShowAgain(e.target.checked)}
+                            className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-slate-300 transition-all checked:border-[#00B1FF] checked:bg-[#00B1FF]"
+                        />
+                        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100">
+                            <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+                                <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+                    <label htmlFor="dontShowAgain" className="text-sm text-slate-500 cursor-pointer select-none">
+                        Non mostrare più questa schermata
+                    </label>
+                </div>
+
+                {/* Start Button */}
+                <button
+                    onClick={() => handleStart()}
+                    disabled={starting}
+                    className="mt-auto w-full py-4 rounded-2xl bg-[#00B1FF] text-white font-bold text-lg shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                    {starting ? (
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            Avvia Simulazione <Play className="w-5 h-5 fill-current" />
+                        </>
+                    )}
+                </button>
+            </main>
+        </div>
+    );
 }

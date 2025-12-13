@@ -3,6 +3,8 @@ import { useLocation, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useSidebar } from '@/context/SidebarContext';
 import AdminSidebar from '../admin/AdminSidebar';
+import InstallPrompt from '../pwa/InstallPrompt';
+import { Home, Search, BookOpen, BarChart3, User, Trophy } from 'lucide-react';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -34,51 +36,61 @@ export default function MainLayout({ children }: MainLayoutProps) {
         }
     }
 
-
-    // Bottom Nav Items
+    // Bottom Nav Items - Updated for Idoneo
     const NAV_ITEMS = [
-        { icon: '🏠', label: 'Home', path: '/' },
-        { icon: '🏆', label: 'Classifica', path: '/leaderboard' },
-        { icon: '👤', label: 'Profilo', path: '/profile' },
+        { Icon: Home, label: 'Home', path: '/' },
+        { Icon: Search, label: 'Cerca', path: '/concorsi/tutti' },
+        { Icon: BookOpen, label: 'Quiz', path: '/quiz' },
+        { Icon: Trophy, label: 'Classifica', path: '/leaderboard' },
+        { Icon: User, label: 'Profilo', path: '/profile' },
     ];
 
     return (
-        <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
+        <div className="flex min-h-screen bg-white font-sans text-slate-900">
             {/* Sidebar (Desktop) & Drawer (Mobile) */}
             {isAdmin ? <AdminSidebar /> : <Sidebar />}
 
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-in-out">
 
-                <main className="flex-1 p-4 lg:p-8 pb-24 lg:pb-8 pt-safe mt-4 lg:mt-0 animate-in fade-in duration-500">
+                <main className="flex-1 pb-24 lg:pb-8 pt-safe animate-in fade-in duration-500">
                     {children}
                 </main>
 
-                {/* Mobile Bottom Navigation */}
+                {/* Mobile Bottom Navigation - Idoneo Style */}
                 {!isAdmin && (
-                    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-2 pb-safe z-40 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg 
+                                    border-t border-slate-100 px-2 py-2 pb-safe z-40 
+                                    flex justify-around items-center 
+                                    shadow-[0_-4px_30px_rgba(0,0,0,0.06)]">
                         {NAV_ITEMS.map(item => {
-                            const isActive = location.pathname === item.path;
+                            const isActive = location.pathname === item.path ||
+                                (item.path !== '/' && location.pathname.startsWith(item.path));
                             return (
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                    className={`flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all min-w-[60px]
+                                                ${isActive
+                                            ? 'text-[#00B1FF]'
+                                            : 'text-slate-400 hover:text-slate-600'
+                                        }`}
                                 >
-                                    <span className={`text-2xl transition-transform ${isActive ? 'scale-110' : ''}`}>{item.icon}</span>
-                                    <span className="text-[10px] font-bold uppercase tracking-wide">{item.label}</span>
+                                    <item.Icon
+                                        className={`w-6 h-6 transition-all ${isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`}
+                                        fill={isActive ? 'currentColor' : 'none'}
+                                    />
+                                    <span className={`text-[10px] font-semibold ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                                        {item.label}
+                                    </span>
                                 </Link>
                             )
                         })}
-                        <button
-                            onClick={() => setMobileOpen(true)}
-                            className="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-600"
-                        >
-                            <span className="text-2xl">☰</span>
-                            <span className="text-[10px] font-bold uppercase tracking-wide">Menu</span>
-                        </button>
                     </nav>
                 )}
+
+                {/* PWA Install Prompt */}
+                {!isAdmin && <InstallPrompt />}
             </div>
         </div>
     );

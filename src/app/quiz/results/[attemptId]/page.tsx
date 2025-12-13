@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { xpService } from "@/lib/xpService"; // Import XP Service
+import { xpService } from "@/lib/xpService";
+import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check } from "lucide-react";
+import { SuccessBadge } from "@/components/ui/SuccessBadge";
+import confetti from "canvas-confetti";
 
-// Components
-import ResultHero from "@/components/quiz/results/ResultHero";
-import ResultStats from "@/components/quiz/results/ResultStats";
-import ResultQuestionList from "@/components/quiz/results/ResultQuestionList";
-
-// Types (Mirrors of what we used in other files)
+// Types
 interface RichAnswer {
     questionId: string;
     text: string;
@@ -38,16 +36,26 @@ interface AttemptData {
     pass_threshold: number | null;
 }
 
+type TabType = 'errate' | 'corrette' | 'omesse';
+
+// Idoneo colors for confetti
+const IDONEO_CONFETTI_COLORS = ['#22C55E', '#00B1FF', '#FBBF24', '#F472B6', '#8B5CF6'];
+
+// =============================================================================
+// QUIZ RESULTS PAGE - Idoneo Redesign
+// =============================================================================
 export default function QuizResultsPage() {
     const { attemptId } = useParams<{ attemptId: string }>();
     const navigate = useNavigate();
     const [attempt, setAttempt] = useState<AttemptData | null>(null);
     const [loading, setLoading] = useState(true);
     const [processingReview, setProcessingReview] = useState(false);
+    const [activeTab, setActiveTab] = useState<TabType>('errate');
 
     // XP State
     const [xpEarned, setXpEarned] = useState<number | null>(null);
-    const xpAwardedRef = useRef(false); // Ref to prevent double-firing in Strict Mode
+    const xpAwardedRef = useRef(false);
+    const confettiFiredRef = useRef(false);
 
     useEffect(() => {
         if (!attemptId) return;
@@ -75,34 +83,86 @@ export default function QuizResultsPage() {
                 }
             }
         };
-
         awardXP();
     }, [attempt, attemptId]);
+
+    // Confetti celebration (fires once based on performance)
+    useEffect(() => {
+        if (!attempt || confettiFiredRef.current) return;
+        confettiFiredRef.current = true;
+
+        // Calculate performance percentage
+        const total = attempt.total_questions || 1;
+        const correctPercentage = (attempt.correct / total) * 100;
+
+        // Scale confetti based on performance
+        let particleCount = 50;
+        let spread = 80;
+
+        if (correctPercentage >= 80) {
+            particleCount = 150;
+            spread = 160;
+        } else if (correctPercentage >= 50) {
+            particleCount = 100;
+            spread = 120;
+        }
+
+        // Fire confetti immediately with a short delay to ensure page is rendered
+        setTimeout(() => {
+            // Center burst
+            confetti({
+                particleCount: Math.floor(particleCount / 2),
+                spread,
+                origin: { x: 0.5, y: 0.6 },
+                colors: IDONEO_CONFETTI_COLORS,
+                zIndex: 9999,
+                disableForReducedMotion: true
+            });
+
+            // Left burst
+            confetti({
+                particleCount: Math.floor(particleCount / 4),
+                angle: 60,
+                spread: spread / 2,
+                origin: { x: 0, y: 0.7 },
+                colors: IDONEO_CONFETTI_COLORS,
+                zIndex: 9999,
+                disableForReducedMotion: true
+            });
+
+            // Right burst
+            confetti({
+                particleCount: Math.floor(particleCount / 4),
+                angle: 120,
+                spread: spread / 2,
+                origin: { x: 1, y: 0.7 },
+                colors: IDONEO_CONFETTI_COLORS,
+                zIndex: 9999,
+                disableForReducedMotion: true
+            });
+        }, 300);
+    }, [attempt]);
 
     const handleRipassaErrori = async () => {
         if (!attempt || processingReview) return;
         setProcessingReview(true);
 
         try {
-            // 1. Filter for errors (Wrong + Skipped)
             const errors = attempt.answers.filter(a => !a.isCorrect);
-
             if (errors.length === 0) {
-                alert("Fantastico! Non hai commesso errori in questa sessione. Nessun ripasso necessario.");
+                alert("Fantastico! Non hai commesso errori in questa sessione.");
                 setProcessingReview(false);
                 return;
             }
 
-            // 2. Prepare new answers (RESET state)
             const newAnswers = errors.map(a => ({
                 ...a,
                 selectedOption: null,
                 isCorrect: false,
                 isSkipped: false,
-                isLocked: false // unlock for new attempt
+                isLocked: false
             }));
 
-            // 3. Create new attempt
             const { data: newAttempt, error } = await supabase
                 .from("quiz_attempts")
                 .insert({
@@ -113,20 +173,16 @@ export default function QuizResultsPage() {
                     wrong: 0,
                     blank: 0,
                     total_questions: newAnswers.length,
-                    answers: newAnswers, // The Runner will use this to determine questions!
+                    answers: newAnswers,
                     started_at: new Date().toISOString(),
-                    // finished_at is null
                 })
                 .select()
                 .single();
 
             if (error) throw error;
-
-            // 4. Navigate
             if (newAttempt) {
                 navigate(`/quiz/run/${newAttempt.id}?mode=review`);
             }
-
         } catch (e: any) {
             console.error("Error creating review:", e);
             alert("Errore nell'avvio del ripasso: " + e.message);
@@ -134,32 +190,34 @@ export default function QuizResultsPage() {
         }
     };
 
-    if (loading) return (
-        <div className="min-h-screen bg-canvas-light flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cyan"></div>
-        </div>
-    );
-
-    if (!attempt) return <div className="p-8 text-center">Risultati non trovati.</div>;
-
-    // Helper to format option text
     const getOptionText = (ans: RichAnswer, optKey: string | null) => {
         if (!optKey) return "-";
         return (ans.options as any)[optKey] || optKey;
     };
 
-    // Calculate passing
-    // If is_idoneo is present in DB, use it. Otherwise fallback to null (neutral).
-    const passed = attempt.is_idoneo;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
-    // Process lists for sub-components
+    if (!attempt) {
+        return (
+            <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center p-6">
+                <p className="text-slate-500">Risultati non trovati.</p>
+                <Link to="/" className="mt-4 text-[#00B1FF] font-semibold">← Torna alla Home</Link>
+            </div>
+        );
+    }
+
+    // Process question lists
     const wrongList = attempt.answers.filter(a => !a.isCorrect && !a.isSkipped).map(a => ({
         id: a.questionId,
         text: a.text,
         userAnswer: getOptionText(a, a.selectedOption),
         correctAnswer: getOptionText(a, a.correctOption),
-        isCorrect: false,
-        isSkipped: false
     }));
 
     const correctList = attempt.answers.filter(a => a.isCorrect).map(a => ({
@@ -167,8 +225,6 @@ export default function QuizResultsPage() {
         text: a.text,
         userAnswer: getOptionText(a, a.selectedOption),
         correctAnswer: getOptionText(a, a.correctOption),
-        isCorrect: true,
-        isSkipped: false
     }));
 
     const skippedList = attempt.answers.filter(a => a.isSkipped).map(a => ({
@@ -176,66 +232,242 @@ export default function QuizResultsPage() {
         text: a.text,
         userAnswer: "-",
         correctAnswer: getOptionText(a, a.correctOption),
-        isCorrect: false,
-        isSkipped: true
     }));
 
     const hasErrors = (wrongList.length + skippedList.length) > 0;
+    const total = attempt.total_questions || 1;
+
+    // Get filtered list based on active tab
+    const getFilteredList = () => {
+        switch (activeTab) {
+            case 'errate': return wrongList;
+            case 'corrette': return correctList;
+            case 'omesse': return skippedList;
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-canvas-light flex flex-col relative pb-32">
+        <div className="min-h-screen bg-[#F5F5F7] pb-40">
+            {/* ============================================================= */}
+            {/* COMPLETION HERO */}
+            {/* ============================================================= */}
+            <div className="bg-white pt-12 pb-8 px-6 text-center relative">
+                {/* Animated Success Badge */}
+                <div className="flex justify-center mb-5">
+                    <SuccessBadge />
+                </div>
 
-            {/* 1. Hero */}
-            <ResultHero score={attempt.score} maxScore={30} passed={passed} xpEarned={xpEarned} />
+                <h1 className="text-[26px] font-bold text-slate-900 mb-2">
+                    Quiz Completato! 🚀
+                </h1>
+                <p className="text-[15px] text-slate-500 max-w-xs mx-auto pb-4">
+                    Hai completato la simulazione. Controlla le risposte per migliorare.
+                </p>
+            </div>
 
-            {/* 2. Stats */}
-            <ResultStats
-                correct={attempt.correct}
-                wrong={attempt.wrong}
-                skipped={attempt.blank}
-            />
+            <div className="px-5 max-w-lg mx-auto">
+                {/* ============================================================= */}
+                {/* SCORE & XP CARDS ROW */}
+                {/* ============================================================= */}
+                <div className="flex gap-3 mt-4 mb-5">
+                    {/* Score Card */}
+                    <div className="flex-1 bg-white rounded-3xl p-4 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                            <Trophy className="w-4 h-4 text-amber-500" />
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Punteggio</span>
+                        </div>
+                        <div className="text-[28px] font-bold text-slate-900">
+                            {attempt.score.toFixed(2)}
+                        </div>
+                    </div>
 
-            {/* 3. Question Lists */}
-            <ResultQuestionList
-                wrong={wrongList}
-                correct={correctList}
-                skipped={skippedList}
-                attemptId={attemptId || ""}
-            />
+                    {/* XP Card */}
+                    <div className="flex-1 bg-white rounded-3xl p-4 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                            <Zap className="w-4 h-4 text-purple-500" />
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">XP Guadagnati</span>
+                        </div>
+                        <div className="text-[28px] font-bold text-purple-500">
+                            +{xpEarned ?? 0}
+                        </div>
+                    </div>
+                </div>
 
-            {/* 4. Bottom Actions (Sticky) */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/90 backdrop-blur-md border-t border-canvas-light shadow-soft z-50">
-                <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4">
+                {/* ============================================================= */}
+                {/* CORRECT / WRONG / SKIPPED SUMMARY */}
+                {/* ============================================================= */}
+                <div className="flex gap-2 mb-6">
+                    {/* Correct */}
+                    <div className="flex-1 bg-white rounded-xl p-3 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div className="text-[24px] font-bold text-emerald-500">{attempt.correct}</div>
+                        <div className="text-[11px] text-slate-500">
+                            Corrette <span className="text-emerald-500">({Math.round((attempt.correct / total) * 100)}%)</span>
+                        </div>
+                    </div>
 
-                    <button
-                        onClick={handleRipassaErrori}
-                        disabled={!hasErrors || processingReview}
-                        className={`flex-1 py-4 px-6 rounded-pill font-bold text-lg shadow-soft flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300 ease-ios ${hasErrors
-                            ? 'bg-brand-cyan text-white hover:bg-brand-cyan/90 hover:shadow-card'
-                            : 'bg-canvas-light text-text-tertiary cursor-not-allowed shadow-none'
-                            }`}
-                    >
-                        {processingReview ? (
-                            <span className="animate-pulse">Caricamento...</span>
-                        ) : hasErrors ? (
-                            <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                <span>Ripassa Errori ({wrongList.length + skippedList.length})</span>
-                            </>
-                        ) : (
-                            <span>Nessun Errore da Ripassare! 🌟</span>
-                        )}
-                    </button>
+                    {/* Wrong */}
+                    <div className="flex-1 bg-white rounded-xl p-3 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div className="text-[24px] font-bold text-red-500">{attempt.wrong}</div>
+                        <div className="text-[11px] text-slate-500">
+                            Errate <span className="text-red-500">({Math.round((attempt.wrong / total) * 100)}%)</span>
+                        </div>
+                    </div>
 
-                    <button
-                        onClick={() => navigate("/")}
-                        className="py-4 px-8 rounded-pill font-bold text-text-secondary bg-transparent hover:bg-canvas-light hover:text-text-primary transition-colors duration-300"
-                    >
-                        Non ora
-                    </button>
+                    {/* Skipped */}
+                    <div className="flex-1 bg-white rounded-xl p-3 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div className="text-[24px] font-bold text-slate-400">{attempt.blank}</div>
+                        <div className="text-[11px] text-slate-500">
+                            Omesse <span className="text-slate-400">({Math.round((attempt.blank / total) * 100)}%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* TABS - ERRATE / CORRETTE / OMESSE */}
+                {/* ============================================================= */}
+                <div className="bg-slate-200/60 p-1 rounded-xl mb-5">
+                    <div className="flex">
+                        <button
+                            onClick={() => setActiveTab('errate')}
+                            className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold transition-all ${activeTab === 'errate'
+                                ? 'bg-white text-red-500 shadow-sm'
+                                : 'text-slate-500'
+                                }`}
+                        >
+                            Errate ({wrongList.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('corrette')}
+                            className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold transition-all ${activeTab === 'corrette'
+                                ? 'bg-white text-emerald-500 shadow-sm'
+                                : 'text-slate-500'
+                                }`}
+                        >
+                            Corrette ({correctList.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('omesse')}
+                            className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold transition-all ${activeTab === 'omesse'
+                                ? 'bg-white text-slate-600 shadow-sm'
+                                : 'text-slate-500'
+                                }`}
+                        >
+                            Omesse ({skippedList.length})
+                        </button>
+                    </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* QUESTION REVIEW LIST */}
+                {/* ============================================================= */}
+                <div className="space-y-3">
+                    {getFilteredList().length === 0 ? (
+                        <div className="bg-white rounded-2xl p-8 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                            <div className="text-4xl mb-3">
+                                {activeTab === 'errate' ? '🎉' : activeTab === 'corrette' ? '📋' : '📝'}
+                            </div>
+                            <p className="text-slate-500 text-[14px]">
+                                {activeTab === 'errate'
+                                    ? 'Nessun errore! Ottimo lavoro.'
+                                    : activeTab === 'corrette'
+                                        ? 'Nessuna risposta corretta.'
+                                        : 'Nessuna risposta omessa.'}
+                            </p>
+                        </div>
+                    ) : (
+                        getFilteredList().map((q, idx) => (
+                            <Link
+                                key={q.id}
+                                to={`/quiz/explanations/${attemptId}/${q.id}`}
+                                className="block bg-white rounded-2xl p-4 transition-all hover:shadow-md active:scale-[0.99]"
+                                style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+                            >
+                                <div className="flex items-start gap-3">
+                                    {/* Status Icon */}
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeTab === 'errate'
+                                        ? 'bg-red-100'
+                                        : activeTab === 'corrette'
+                                            ? 'bg-emerald-100'
+                                            : 'bg-slate-100'
+                                        }`}>
+                                        {activeTab === 'errate' && <X className="w-4 h-4 text-red-500" />}
+                                        {activeTab === 'corrette' && <Check className="w-4 h-4 text-emerald-500" />}
+                                        {activeTab === 'omesse' && <Minus className="w-4 h-4 text-slate-400" />}
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[14px] font-medium text-slate-900 line-clamp-2 mb-2">
+                                            {q.text}
+                                        </p>
+                                        <div className="space-y-1">
+                                            <p className="text-[12px]">
+                                                <span className="text-slate-400">Hai risposto:</span>{' '}
+                                                <span className={activeTab === 'corrette' ? 'text-emerald-600' : 'text-red-500'}>
+                                                    {q.userAnswer}
+                                                </span>
+                                            </p>
+                                            <p className="text-[12px]">
+                                                <span className="text-slate-400">Corretta:</span>{' '}
+                                                <span className="text-emerald-600">{q.correctAnswer}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Chevron */}
+                                    <ChevronRight className="w-5 h-5 text-slate-300 flex-shrink-0 mt-1" />
+                                </div>
+                            </Link>
+                        ))
+                    )}
                 </div>
             </div>
 
+            {/* ============================================================= */}
+            {/* BOTTOM CTA AREA */}
+            {/* ============================================================= */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-5 py-4 pb-safe z-50">
+                <div className="max-w-lg mx-auto space-y-3">
+                    {/* Primary CTA */}
+                    {hasErrors ? (
+                        <button
+                            onClick={handleRipassaErrori}
+                            disabled={processingReview}
+                            className="w-full py-4 rounded-2xl font-bold text-[16px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/25"
+                        >
+                            {processingReview ? (
+                                <span>Caricamento...</span>
+                            ) : (
+                                <>
+                                    <RotateCcw className="w-5 h-5" />
+                                    Ripassa Errori ({wrongList.length + skippedList.length})
+                                </>
+                            )}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => navigate("/")}
+                            className="w-full py-4 rounded-2xl font-bold text-[16px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/25"
+                        >
+                            Torna alla Home
+                        </button>
+                    )}
+
+                    {/* Secondary */}
+                    {hasErrors ? (
+                        <button
+                            onClick={() => navigate("/")}
+                            className="w-full py-3 text-[15px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            Non ora
+                        </button>
+                    ) : (
+                        <p className="w-full py-2 text-[15px] font-medium text-emerald-500 text-center">
+                            Nessun Errore! 🌟
+                        </p>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

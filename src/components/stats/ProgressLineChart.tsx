@@ -1,82 +1,238 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 
 interface ProgressData {
+    id: string;
     date: string;
-    score: number; // 0-100 or 0-30
+    fullDate: Date;
+    score: number;
+    accuracy: number;
+    responseTime?: number;
 }
+
+type MetricType = 'score' | 'accuracy' | 'responseTime';
+type TimeRange = '7d' | '30d' | 'all';
 
 interface ProgressLineChartProps {
     data: ProgressData[];
+    defaultMetric?: MetricType;
+    defaultTimeRange?: TimeRange;
 }
 
-export default function ProgressLineChart({ data }: ProgressLineChartProps) {
-    if (data.length < 2) return <div className="h-48 flex items-center justify-center text-slate-400 italic text-sm">Non ci sono abbastanza dati per mostrare il grafico.</div>;
+const metricConfig = {
+    score: { label: 'Punteggio', unit: 'pt', color: '#06D6D3' },
+    accuracy: { label: 'Accuratezza', unit: '%', color: '#22C55E' },
+    responseTime: { label: 'Tempo medio', unit: 's', color: '#F59E0B' }
+};
+
+export default function ProgressLineChart({
+    data,
+    defaultMetric = 'score',
+    defaultTimeRange = 'all'
+}: ProgressLineChartProps) {
+    const [metric, setMetric] = useState<MetricType>(defaultMetric);
+    const [timeRange, setTimeRange] = useState<TimeRange>(defaultTimeRange);
+    const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+
+    // Filter data by time range
+    const filteredData = useMemo(() => {
+        if (timeRange === 'all') return data;
+
+        const now = new Date();
+        const days = timeRange === '7d' ? 7 : 30;
+        const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+        return data.filter(d => d.fullDate >= cutoff);
+    }, [data, timeRange]);
+
+    // Get metric value
+    const getValue = (d: ProgressData): number => {
+        switch (metric) {
+            case 'score': return d.score;
+            case 'accuracy': return d.accuracy;
+            case 'responseTime': return (d.responseTime || 0) / 1000; // Convert to seconds
+            default: return d.score;
+        }
+    };
+
+    if (filteredData.length < 2) {
+        return (
+            <div className="space-y-4">
+                {/* Filters */}
+                <div className="flex flex-wrap gap-2 justify-between items-center">
+                    <div className="flex gap-1">
+                        {(['score', 'accuracy'] as MetricType[]).map(m => (
+                            <button
+                                key={m}
+                                onClick={() => setMetric(m)}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                    }`}
+                            >
+                                {metricConfig[m].label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex gap-1">
+                        {(['7d', '30d', 'all'] as TimeRange[]).map(t => (
+                            <button
+                                key={t}
+                                onClick={() => setTimeRange(t)}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-text-primary text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                    }`}
+                            >
+                                {t === 'all' ? 'Tutto' : t}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="h-48 flex items-center justify-center text-slate-400 italic text-sm">
+                    Non ci sono abbastanza dati per questo periodo.
+                </div>
+            </div>
+        );
+    }
 
     // Dimensions
     const width = 600;
     const height = 200;
-    const padding = 20;
+    const padding = 30;
 
     // Scales
-    const maxScore = Math.max(...data.map(d => d.score), 10); // Min 10
-    const minScore = 0;
+    const values = filteredData.map(getValue);
+    const maxValue = Math.max(...values, 10);
+    const minValue = Math.min(...values, 0);
+    const valueRange = maxValue - minValue || 1;
 
-    // X Scale (Index based for simplicity)
     const getX = (index: number) => {
-        return padding + (index / (data.length - 1)) * (width - padding * 2);
+        return padding + (index / (filteredData.length - 1)) * (width - padding * 2);
     };
 
-    // Y Scale
-    const getY = (score: number) => {
-        return height - padding - ((score - minScore) / (maxScore - minScore)) * (height - padding * 2);
+    const getY = (value: number) => {
+        return height - padding - ((value - minValue) / valueRange) * (height - padding * 2);
     };
 
     // Path
-    const pathD = data.map((d, i) => {
+    const pathD = filteredData.map((d, i) => {
         const x = getX(i);
-        const y = getY(d.score);
+        const y = getY(getValue(d));
         return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
     }).join(' ');
 
     // Area Path
     const areaD = `${pathD} L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`;
 
+    const config = metricConfig[metric];
+
     return (
-        <div className="w-full overflow-hidden">
-            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
-                {/* Gradient Definition */}
-                <defs>
-                    <linearGradient id="gradientArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#06D6D3" stopOpacity="0.2" />
-                        <stop offset="100%" stopColor="#06D6D3" stopOpacity="0" />
-                    </linearGradient>
-                </defs>
+        <div className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2 justify-between items-center">
+                <div className="flex gap-1">
+                    {(['score', 'accuracy'] as MetricType[]).map(m => (
+                        <button
+                            key={m}
+                            onClick={() => setMetric(m)}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                }`}
+                        >
+                            {metricConfig[m].label}
+                        </button>
+                    ))}
+                </div>
+                <div className="flex gap-1">
+                    {(['7d', '30d', 'all'] as TimeRange[]).map(t => (
+                        <button
+                            key={t}
+                            onClick={() => setTimeRange(t)}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-text-primary text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                }`}
+                        >
+                            {t === 'all' ? 'Tutto' : t}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
-                {/* Y Axis Grid */}
-                {[0, 0.5, 1].map(t => {
-                    const y = getY(minScore + (maxScore - minScore) * t);
-                    return <line key={t} x1={padding} y1={y} x2={width - padding} stroke="#F3F5F7" strokeWidth="1.5" strokeDasharray="4" />;
-                })}
+            {/* Chart */}
+            <div className="w-full overflow-hidden relative">
+                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+                    {/* Gradient Definition */}
+                    <defs>
+                        <linearGradient id={`gradient-${metric}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={config.color} stopOpacity="0.2" />
+                            <stop offset="100%" stopColor={config.color} stopOpacity="0" />
+                        </linearGradient>
+                    </defs>
 
-                {/* Area */}
-                <path d={areaD} fill="url(#gradientArea)" />
+                    {/* Y Axis Grid + Labels */}
+                    {[0, 0.5, 1].map(t => {
+                        const value = minValue + valueRange * t;
+                        const y = getY(value);
+                        return (
+                            <g key={t}>
+                                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="#F3F5F7" strokeWidth="1.5" strokeDasharray="4" />
+                                <text x={padding - 8} y={y + 4} textAnchor="end" className="text-[10px] fill-text-tertiary font-medium">
+                                    {value.toFixed(0)}
+                                </text>
+                            </g>
+                        );
+                    })}
 
-                {/* Line */}
-                <path d={pathD} fill="none" stroke="#06D6D3" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Area */}
+                    <path d={areaD} fill={`url(#gradient-${metric})`} />
 
-                {/* Dots */}
-                {data.map((d, i) => (
-                    <circle
-                        key={i}
-                        cx={getX(i)}
-                        cy={getY(d.score)}
-                        r="5"
-                        className="fill-white stroke-brand-cyan stroke-[3] hover:r-7 transition-all cursor-pointer"
+                    {/* Line */}
+                    <path d={pathD} fill="none" stroke={config.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+
+                    {/* Dots */}
+                    {filteredData.map((d, i) => (
+                        <g key={i}>
+                            <circle
+                                cx={getX(i)}
+                                cy={getY(getValue(d))}
+                                r={hoveredPoint === i ? 8 : 5}
+                                fill="white"
+                                stroke={config.color}
+                                strokeWidth="3"
+                                className="cursor-pointer transition-all"
+                                onMouseEnter={() => setHoveredPoint(i)}
+                                onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                        </g>
+                    ))}
+                </svg>
+
+                {/* Tooltip */}
+                {hoveredPoint !== null && filteredData[hoveredPoint] && (
+                    <div
+                        className="absolute bg-white rounded-xl shadow-lg border border-slate-100 p-3 z-10 pointer-events-none"
+                        style={{
+                            left: `${(getX(hoveredPoint) / width) * 100}%`,
+                            top: `${(getY(getValue(filteredData[hoveredPoint])) / height) * 100 - 20}%`,
+                            transform: 'translateX(-50%)'
+                        }}
                     >
-                        <title>{d.date}: {d.score.toFixed(1)}</title>
-                    </circle>
-                ))}
-            </svg>
+                        <p className="text-xs text-text-tertiary mb-1">{filteredData[hoveredPoint].date}</p>
+                        <p className="text-sm font-bold text-text-primary">
+                            {getValue(filteredData[hoveredPoint]).toFixed(1)} {config.unit}
+                        </p>
+                        {filteredData[hoveredPoint].id && (
+                            <Link
+                                to={`/quiz/results/${filteredData[hoveredPoint].id}`}
+                                className="text-[10px] font-bold text-brand-cyan hover:underline pointer-events-auto"
+                            >
+                                Vedi dettagli →
+                            </Link>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* X Axis Labels (First and Last) */}
+            <div className="flex justify-between text-[10px] text-text-tertiary font-medium px-2">
+                <span>{filteredData[0]?.date}</span>
+                <span>{filteredData[filteredData.length - 1]?.date}</span>
+            </div>
         </div>
     );
 }
