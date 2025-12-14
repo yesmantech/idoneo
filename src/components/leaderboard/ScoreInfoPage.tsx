@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Target, Layers, Clock, FileText, CheckCircle2, AlertTriangle, Trophy, Star, Shield, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 interface ScoreInfoPageProps {
     onBack: () => void;

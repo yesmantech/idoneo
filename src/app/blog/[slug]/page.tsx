@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { BlogPost, ContentBlock } from "@/types/blog";
@@ -156,7 +156,7 @@ function ContentRenderer({ blocks }: { blocks: ContentBlock[] }) {
 // =============================================================================
 // RELATED POST CARD - TON-style
 // =============================================================================
-function RelatedPostCard({ post, formatDate }: { post: BlogPost; formatDate: (d: string | null) => string }) {
+function RelatedPostCard({ post, formatDate }: { key?: React.Key; post: BlogPost; formatDate: (d: string | null) => string }) {
     return (
         <Link
             to={`/blog/${post.slug}`}

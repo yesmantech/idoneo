@@ -173,7 +173,7 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
     );
 };
 
-const RankingRow = ({ entry, metricLabel }: { entry: LeaderboardEntry, metricLabel: string }) => {
+const RankingRow = ({ entry, metricLabel }: { key?: React.Key, entry: LeaderboardEntry, metricLabel: string }) => {
     const [expanded, setExpanded] = React.useState(false);
 
     // Only expand if breakdown exists
