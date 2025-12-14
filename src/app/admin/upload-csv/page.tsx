@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
-import { AdminLayout } from "@/components/admin";
+import { AdminLayout, AdminPageHeader } from "@/components/admin";
 
 type QuizRow = Database["public"]["Tables"]["quizzes"]["Row"];
 type SubjectRow = Database["public"]["Tables"]["subjects"]["Row"];
@@ -186,8 +186,6 @@ export default function AdminUploadCsvPage() {
 
       if (toInsert.length === 0) throw new Error("Nessuna riga valida da importare.");
 
-      // Batch insert (Supabase limit is usually huge, but let's do chunks if needed. 
-      // For simple apps, one big insert is fine up to a few thousand rows)
       const { error } = await supabase.from("questions").insert(toInsert);
       if (error) throw error;
 
@@ -202,7 +200,7 @@ export default function AdminUploadCsvPage() {
     }
   };
 
-  // Bulk Image Upload (Existing logic)
+  // Bulk Image Upload
   const handleUploadImages = async () => {
     if (!imageFiles || imageFiles.length === 0) return;
     setUploadingImages(true);
@@ -215,7 +213,6 @@ export default function AdminUploadCsvPage() {
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
         const name = normalizeImageName(file.name);
-        // FIX: upsert: true allows overwriting existing files
         const { error } = await supabase.storage.from(BUCKET).upload(name, file, { upsert: true });
         if (error) {
           console.error("Upload fail:", name, error);
@@ -254,41 +251,37 @@ export default function AdminUploadCsvPage() {
   return (
     <AdminLayout>
       <div className="mx-auto max-w-5xl">
-        <button onClick={() => navigate("/admin")} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-brand-cyan mb-6 transition-colors bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 shadow-sm w-fit hover:border-brand-cyan/20">
-          <span>←</span> Torna alla Dashboard
-        </button>
+        <AdminPageHeader
+          title="Import Massivo"
+          subtitle="Carica domande e immagini in blocco per popolare i tuoi concorsi."
+          breadcrumb={[
+            { label: 'Admin', path: '/admin' },
+            { label: 'Import CSV' }
+          ]}
+        />
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight mb-2">Import Massivo</h1>
-            <p className="text-slate-400 text-sm">Carica domande e immagini in blocco per popolare i tuoi concorsi.</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Formati Supportati</p>
-            <div className="flex gap-2">
-              <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">.CSV (UTF-8)</span>
-              <span className="px-2 py-1 rounded-md bg-sky-500/10 text-sky-400 text-[10px] font-bold border border-sky-500/20">.JPG / .PNG</span>
-            </div>
-          </div>
+        <div className="flex gap-3 mb-8">
+          <span className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">.CSV (UTF-8)</span>
+          <span className="px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 text-xs font-bold border border-sky-200">.JPG / .PNG</span>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 items-start">
 
           {/* CSV Section */}
-          <div className="bg-slate-900 border border-slate-800 rounded-[24px] p-8 shadow-sm relative overflow-hidden">
+          <div className="bg-white border border-slate-200/50 rounded-[20px] p-8 shadow-[0_4px_16px_rgba(0,0,0,0.04)] relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5">
               <span className="text-9xl grayscale">📄</span>
             </div>
-            <h2 className="text-xl font-black mb-6 text-white flex items-center gap-3 relative z-10">
-              <span className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-sm border border-emerald-500/20">1</span>
+            <h2 className="text-xl font-black mb-6 text-slate-900 flex items-center gap-3 relative z-10">
+              <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-bold">1</span>
               Domande (CSV)
             </h2>
 
             <div className="space-y-5 relative z-10">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Concorso Destinazione</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Concorso Destinazione</label>
                 <select
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan transition-all font-medium"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#00B1FF]/20 focus:border-[#00B1FF] transition-all font-medium"
                   value={selectedQuizId}
                   onChange={(e) => setSelectedQuizId(e.target.value)}
                 >
@@ -298,9 +291,9 @@ export default function AdminUploadCsvPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Materia Default (Fallback)</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Materia Default (Fallback)</label>
                 <select
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#00B1FF]/20 focus:border-[#00B1FF] transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   value={selectedSubjectId}
                   onChange={(e) => setSelectedSubjectId(e.target.value)}
                   disabled={!selectedQuizId}
@@ -308,36 +301,36 @@ export default function AdminUploadCsvPage() {
                   <option value="">-- Seleziona Materia --</option>
                   {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
-                <p className="text-[10px] text-slate-500 mt-1.5 leading-snug">
-                  Usata se la colonna <code>subject_id</code> nel CSV è vuota.
+                <p className="text-[10px] text-slate-400 mt-1.5 leading-snug">
+                  Usata se la colonna <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-600 font-mono">subject_id</code> nel CSV è vuota.
                 </p>
               </div>
 
               <div className="pt-2">
-                <label className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                   File CSV
-                  <button onClick={handleDownloadTemplate} className="text-brand-cyan hover:text-cyan-400 underline transition-colors font-medium normal-case flex items-center gap-1">
+                  <button onClick={handleDownloadTemplate} className="text-[#00B1FF] hover:text-[#0091D5] underline transition-colors font-medium normal-case flex items-center gap-1">
                     <span>⬇️</span> Scarica Template
                   </button>
                 </label>
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-800 border-dashed rounded-2xl cursor-pointer bg-slate-950 hover:bg-slate-950/80 transition-all group hover:border-slate-700">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-all group hover:border-slate-300">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <p className="mb-2 text-2xl group-hover:scale-110 transition-transform">📂</p>
-                    <p className="mb-1 text-sm text-slate-400 font-medium"><span className="font-bold text-slate-200">Clicca per caricare</span> o trascina</p>
-                    <p className="text-xs text-slate-500">CSV delimitato da virgola o punto e virgola</p>
+                    <p className="mb-1 text-sm text-slate-500 font-medium"><span className="font-bold text-slate-700">Clicca per caricare</span> o trascina</p>
+                    <p className="text-xs text-slate-400">CSV delimitato da virgola o punto e virgola</p>
                   </div>
                   <input type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
                 </label>
                 {csvFile && (
-                  <div className="mt-2 flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-lg border border-emerald-500/20">
+                  <div className="mt-2 flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200">
                     <span>✅ File selezionato:</span>
-                    <span className="text-emerald-300">{csvFile.name}</span>
+                    <span className="text-emerald-700">{csvFile.name}</span>
                   </div>
                 )}
               </div>
 
               {importMsg && (
-                <div className={`text-xs p-3 rounded-xl border font-medium flex items-start gap-2 ${importMsg.type === 'error' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+                <div className={`text-xs p-3 rounded-xl border font-medium flex items-start gap-2 ${importMsg.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
                   <span>{importMsg.type === 'error' ? '⚠️' : '🎉'}</span>
                   {importMsg.text}
                 </div>
@@ -345,21 +338,21 @@ export default function AdminUploadCsvPage() {
 
               {/* Preview */}
               {parsedPreview.length > 0 && (
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-hidden">
-                  <p className="font-bold text-xs text-slate-500 uppercase tracking-wider mb-3">Anteprima (Prime 5 righe)</p>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-hidden">
+                  <p className="font-bold text-xs text-slate-400 uppercase tracking-wider mb-3">Anteprima (Prime 5 righe)</p>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs bg-slate-900 rounded-lg overflow-hidden shadow-sm">
-                      <thead className="bg-slate-950 text-slate-400 font-bold border-b border-slate-800">
+                    <table className="w-full text-left text-xs bg-white rounded-lg overflow-hidden shadow-sm border border-slate-100">
+                      <thead className="bg-slate-50 text-slate-400 font-bold border-b border-slate-100">
                         <tr>
                           <th className="p-2">Domanda</th>
-                          <th className="p-2 w-16 text-center text-emerald-500">Risp</th>
+                          <th className="p-2 w-16 text-center text-emerald-600">Risp</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800">
+                      <tbody className="divide-y divide-slate-100">
                         {parsedPreview.map((r, i) => (
-                          <tr key={i} className="group hover:bg-slate-800 transition-colors">
-                            <td className="p-2 truncate max-w-[150px] text-slate-300 font-medium">{r.question_text}</td>
-                            <td className="p-2 font-mono text-center font-bold text-emerald-400 bg-emerald-500/5">{r.correct_option}</td>
+                          <tr key={i} className="group hover:bg-slate-50 transition-colors">
+                            <td className="p-2 truncate max-w-[150px] text-slate-700 font-medium">{r.question_text}</td>
+                            <td className="p-2 font-mono text-center font-bold text-emerald-600 bg-emerald-50">{r.correct_option}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -371,7 +364,7 @@ export default function AdminUploadCsvPage() {
               <button
                 onClick={handleImport}
                 disabled={importing || !csvFile || !selectedQuizId}
-                className="w-full py-4 bg-emerald-500 text-slate-900 text-sm font-black rounded-xl hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 bg-emerald-500 text-white text-sm font-black rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
               >
                 {importing ? (
                   <>
@@ -383,41 +376,41 @@ export default function AdminUploadCsvPage() {
           </div>
 
           {/* Images Section */}
-          <div className="bg-slate-900 border border-slate-800 rounded-[24px] p-8 shadow-sm relative overflow-hidden">
+          <div className="bg-white border border-slate-200/50 rounded-[20px] p-8 shadow-[0_4px_16px_rgba(0,0,0,0.04)] relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5">
               <span className="text-9xl grayscale">🖼️</span>
             </div>
-            <h2 className="text-xl font-black mb-6 text-white flex items-center gap-3 relative z-10">
-              <span className="w-8 h-8 rounded-full bg-sky-500/10 text-sky-500 flex items-center justify-center text-sm border border-sky-500/20">2</span>
+            <h2 className="text-xl font-black mb-6 text-slate-900 flex items-center gap-3 relative z-10">
+              <span className="w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-sm font-bold">2</span>
               Immagini (Bulk)
             </h2>
 
             <div className="space-y-5 relative z-10">
-              <div className="bg-sky-500/10 p-4 rounded-xl border border-sky-500/20">
-                <p className="text-xs text-sky-300 font-medium leading-relaxed">
-                  Carica tutte le immagini citate nel CSV (colonna <code className="bg-slate-950 px-1 py-0.5 rounded border border-sky-500/30 font-mono text-sky-200">image_name</code>).
+              <div className="bg-sky-50 p-4 rounded-xl border border-sky-200">
+                <p className="text-xs text-sky-700 font-medium leading-relaxed">
+                  Carica tutte le immagini citate nel CSV (colonna <code className="bg-white px-1 py-0.5 rounded border border-sky-200 font-mono text-sky-600">image_name</code>).
                   I nomi file verranno normalizzati automaticamente (es. &quot;Fig 1.jpg&quot; &rarr; &quot;fig_1.jpg&quot;).
                 </p>
               </div>
 
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-800 border-dashed rounded-2xl cursor-pointer bg-slate-950 hover:bg-slate-950/80 transition-all group hover:border-slate-700">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-all group hover:border-slate-300">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <p className="mb-2 text-2xl group-hover:scale-110 transition-transform">🌇</p>
-                  <p className="mb-1 text-sm text-slate-400 font-medium"><span className="font-bold text-slate-200">Seleziona immagini</span> (multiplo)</p>
-                  <p className="text-xs text-slate-500">JPG, PNG supportati</p>
+                  <p className="mb-1 text-sm text-slate-500 font-medium"><span className="font-bold text-slate-700">Seleziona immagini</span> (multiplo)</p>
+                  <p className="text-xs text-slate-400">JPG, PNG supportati</p>
                 </div>
                 <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => setImageFiles(e.target.files)} />
               </label>
 
               {imageFiles && imageFiles.length > 0 && (
-                <div className="mt-2 flex items-center gap-2 text-xs font-bold text-sky-400 bg-sky-500/10 px-3 py-2 rounded-lg border border-sky-500/20">
+                <div className="mt-2 flex items-center gap-2 text-xs font-bold text-sky-600 bg-sky-50 px-3 py-2 rounded-lg border border-sky-200">
                   <span>📸 Selezionate:</span>
-                  <span className="text-sky-300">{imageFiles.length} immagini</span>
+                  <span className="text-sky-700">{imageFiles.length} immagini</span>
                 </div>
               )}
 
               {imageMsg && (
-                <div className={`text-xs p-3 rounded-xl border font-medium flex items-start gap-2 ${imageMsg.type === 'error' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+                <div className={`text-xs p-3 rounded-xl border font-medium flex items-start gap-2 ${imageMsg.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
                   <span>{imageMsg.type === 'error' ? '⚠️' : '✅'}</span>
                   {imageMsg.text}
                 </div>
@@ -426,7 +419,7 @@ export default function AdminUploadCsvPage() {
               <button
                 onClick={handleUploadImages}
                 disabled={uploadingImages || !imageFiles}
-                className="w-full py-4 bg-sky-500 text-slate-900 text-sm font-black rounded-xl hover:bg-sky-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 bg-sky-500 text-white text-sm font-black rounded-xl hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-sky-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
               >
                 {uploadingImages ? (
                   <>

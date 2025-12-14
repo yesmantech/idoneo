@@ -61,11 +61,11 @@ export default function AdminPageHeader({
             <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-black text-white tracking-tight">{title}</h1>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">{title}</h1>
                         {statusBadge}
                     </div>
                     {subtitle && (
-                        <p className="text-slate-500 mt-1 text-base">{subtitle}</p>
+                        <p className="text-slate-500 mt-1 text-[15px]">{subtitle}</p>
                     )}
                 </div>
 
@@ -76,8 +76,8 @@ export default function AdminPageHeader({
                     <button
                         onClick={action.onClick}
                         className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:-translate-y-0.5 ${action.variant === 'secondary'
-                            ? 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
-                            : 'bg-brand-cyan text-slate-900 border border-brand-cyan hover:bg-cyan-400 box-shadow-[0_0_20px_rgba(6,214,211,0.3)]'
+                            ? 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
+                            : 'bg-[#00B1FF] text-white border border-[#00B1FF] hover:bg-[#0091D5] shadow-[0_4px_12px_rgba(0,177,255,0.3)]'
                             }`}
                     >
                         {action.icon && <span>{action.icon}</span>}

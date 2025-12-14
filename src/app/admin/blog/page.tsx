@@ -106,8 +106,8 @@ export default function AdminBlogListPage() {
             label: 'Titolo',
             render: (post: BlogPost) => (
                 <div>
-                    <div className="font-medium text-white">{post.title}</div>
-                    <div className="text-xs text-slate-500 font-mono">/blog/{post.slug}</div>
+                    <div className="font-semibold text-slate-900">{post.title}</div>
+                    <div className="text-xs text-slate-400 font-mono">/blog/{post.slug}</div>
                 </div>
             )
         },
@@ -215,34 +215,34 @@ export default function AdminBlogListPage() {
             <div className="flex gap-4 mb-6">
                 <button
                     onClick={() => navigate('/admin/blog/categorie')}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-sm transition-colors"
+                    className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm font-medium transition-colors shadow-sm"
                 >
                     Gestisci Categorie
                 </button>
                 <button
                     onClick={() => navigate('/admin/blog/tag')}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-sm transition-colors"
+                    className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm font-medium transition-colors shadow-sm"
                 >
                     Gestisci Tag
                 </button>
             </div>
 
             {/* FILTERS */}
-            <div className="mb-6 p-4 bg-slate-900/50 border border-slate-800 rounded-xl flex flex-col md:flex-row gap-4">
+            <div className="mb-6 p-4 bg-white border border-slate-200/50 rounded-[20px] flex flex-col md:flex-row gap-4 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
                 <div className="flex-1">
                     <input
                         type="text"
                         placeholder="Cerca per titolo..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
                     />
                 </div>
 
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as BlogPostStatus | 'all')}
-                    className="px-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
                 >
                     <option value="all">Tutti gli stati</option>
                     <option value="draft">Bozze</option>
@@ -254,7 +254,7 @@ export default function AdminBlogListPage() {
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="px-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
                 >
                     <option value="all">Tutte le categorie</option>
                     {categories.map(cat => (

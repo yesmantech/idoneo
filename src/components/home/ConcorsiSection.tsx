@@ -159,55 +159,54 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
     if (!contests || contests.length === 0) return null;
 
     return (
-        <div style={{ marginTop: '24px' }}> {/* Top margin from previous element */}
-
-            {/* Header Row: 32pt height */}
+        <div>
+            {/* Header Row - Compact shuffle.com style */}
             <div
                 className="flex justify-between items-center"
                 style={{
-                    height: '32px',
+                    minHeight: '40px',
                     paddingLeft: '16px',
                     paddingRight: '16px',
                     marginBottom: '12px'
                 }}
             >
-                <div className="flex items-center gap-3 h-full">
-                    {/* Icon from Screenshot: Squircle with Sparkles */}
-                    <div className="w-10 h-10 rounded-[14px] bg-[#E0F2FE] flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-[#00B1FF]" fill="#00B1FF" />
+                <div className="flex items-center gap-2.5 h-full">
+                    {/* Compact Icon */}
+                    <div className="w-9 h-9 rounded-[12px] bg-[#E0F2FE] flex items-center justify-center">
+                        <Sparkles className="w-4.5 h-4.5 text-[#00B1FF]" fill="#00B1FF" />
                     </div>
-                    <h2 className="text-[19px] font-bold text-slate-900 leading-none pt-0.5">
+                    <h2 className="text-[17px] font-bold text-slate-900 leading-none">
                         {title}
                     </h2>
                 </div>
 
-                {/* Navigation Buttons */}
+                {/* Navigation Buttons - Compact */}
                 <div className="flex gap-2">
                     <button
                         onClick={() => scroll('left')}
-                        className="w-8 h-8 rounded-full bg-slate-100/50 border border-slate-200 hover:bg-white flex items-center justify-center transition-all shadow-sm"
+                        className="w-9 h-9 rounded-full bg-white/80 border border-slate-200 hover:bg-white flex items-center justify-center transition-all"
                     >
-                        <ChevronRight className="w-4 h-4 text-slate-600 rotate-180" />
+                        <ChevronRight className="w-4 h-4 text-slate-500 rotate-180" />
                     </button>
                     <button
                         onClick={() => scroll('right')}
-                        className="w-8 h-8 rounded-full bg-slate-100/50 border border-slate-200 hover:bg-white flex items-center justify-center transition-all shadow-sm"
+                        className="w-9 h-9 rounded-full bg-white/80 border border-slate-200 hover:bg-white flex items-center justify-center transition-all"
                     >
-                        <ChevronRight className="w-4 h-4 text-slate-600" />
+                        <ChevronRight className="w-4 h-4 text-slate-500" />
                     </button>
                 </div>
             </div>
 
-            {/* Carousel Container */}
+            {/* Carousel Container - Tight shuffle.com style */}
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide py-3 -my-3" // Neg margins to allow shadow peek
+                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide py-2 -my-2"
                 style={{
-                    height: '240px', // Slightly larger for shadow safety, content is 190
+                    height: '220px',
                     gap: '12px',
-                    paddingLeft: '32px',
+                    paddingLeft: '16px',
                     paddingRight: '16px',
-                    alignItems: 'flex-start' // Ensure alignment
+                    alignItems: 'flex-start'
                 }}
             >
                 {contests.map((contest, idx) => (

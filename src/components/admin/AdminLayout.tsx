@@ -35,31 +35,33 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }, [navigate]);
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 flex font-sans">
+        <div className="min-h-screen bg-[#F4F6F9] text-slate-900 flex font-sans">
             {/* Sidebar */}
             <AdminSidebar />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-h-screen">
                 {/* Top Bar */}
-                <header className="h-16 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10 backdrop-blur-md">
-                    <div className="text-sm text-slate-500 font-medium">
+                <header className="h-16 bg-white border-b border-slate-200/50 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
+                    <div className="text-sm text-slate-400 font-medium">
                         {/* Breadcrumb or search could go here */}
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Notifications placeholder */}
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                            🔔
+                        {/* Notifications */}
+                        <button className="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
                         </button>
 
                         {/* User menu */}
-                        <button className="flex items-center gap-3 px-2 py-1.5 rounded-full hover:bg-slate-800 hover:shadow-sm transition-all border border-transparent hover:border-slate-700/50">
-                            <div className="w-8 h-8 bg-slate-800 rounded-squircle flex items-center justify-center text-xs font-bold text-slate-300">
+                        <button className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-100 transition-all">
+                            <div className="w-8 h-8 bg-gradient-to-br from-[#00B1FF] to-[#0091D5] rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm">
                                 A
                             </div>
-                            <span className="text-sm font-semibold text-slate-300">Admin</span>
-                            <span className="text-slate-500 text-xs">▾</span>
+                            <span className="text-sm font-semibold text-slate-700">Admin</span>
+                            <span className="text-slate-400 text-xs">▾</span>
                         </button>
                     </div>
                 </header>

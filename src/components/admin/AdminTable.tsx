@@ -57,13 +57,13 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
                     e.stopPropagation();
                     setOpen(!open);
                 }}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             >
                 ⋮
             </button>
 
             {open && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     {actions.map((action, idx) => (
                         <button
                             key={idx}
@@ -73,8 +73,8 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
                                 action.onClick();
                             }}
                             className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${action.variant === 'destructive'
-                                ? 'text-rose-400 hover:bg-rose-950/20'
-                                : 'text-slate-300 hover:bg-slate-800'
+                                ? 'text-rose-500 hover:bg-rose-50'
+                                : 'text-slate-700 hover:bg-slate-50'
                                 }`}
                         >
                             {action.icon && <span>{action.icon}</span>}
@@ -93,9 +93,9 @@ function TableSkeleton({ columns }: { columns: number }) {
     return (
         <div className="animate-pulse">
             {[1, 2, 3, 4, 5].map(row => (
-                <div key={row} className="flex gap-4 px-4 py-3 border-b border-slate-800/50">
+                <div key={row} className="flex gap-4 px-4 py-3 border-b border-slate-100">
                     {Array.from({ length: columns }).map((_, col) => (
-                        <div key={col} className="flex-1 h-4 bg-slate-800 rounded" />
+                        <div key={col} className="flex-1 h-4 bg-slate-100 rounded" />
                     ))}
                 </div>
             ))}
@@ -116,7 +116,7 @@ export default function AdminTable<T>({
 }: AdminTableProps<T>) {
     if (loading) {
         return (
-            <div className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
+            <div className="rounded-[20px] border border-slate-200/50 bg-white overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
                 <TableSkeleton columns={columns.length} />
             </div>
         );
@@ -124,23 +124,23 @@ export default function AdminTable<T>({
 
     if (data.length === 0 && emptyState) {
         return (
-            <div className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
+            <div className="rounded-[20px] border border-slate-200/50 bg-white overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
                 {emptyState}
             </div>
         );
     }
 
     return (
-        <div className="rounded-[24px] border border-slate-800 bg-slate-900 overflow-hidden shadow-sm">
+        <div className="rounded-[20px] border border-slate-200/50 bg-white overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     {/* Header */}
-                    <thead className="bg-slate-950/50 border-b border-slate-800">
+                    <thead className="bg-slate-50/50 border-b border-slate-100">
                         <tr>
                             {columns.map(col => (
                                 <th
                                     key={col.key}
-                                    className={`py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest ${col.align === 'center' ? 'text-center' :
+                                    className={`py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-widest ${col.align === 'center' ? 'text-center' :
                                         col.align === 'right' ? 'text-right' : 'text-left'
                                         }`}
                                     style={{ width: col.width }}
@@ -155,20 +155,20 @@ export default function AdminTable<T>({
                     </thead>
 
                     {/* Body */}
-                    <tbody className="divide-y divide-slate-800">
+                    <tbody className="divide-y divide-slate-100">
                         {data.map((item, rowIndex) => (
                             <tr
                                 key={rowKey(item)}
                                 onClick={() => onRowClick?.(item)}
                                 className={`transition-all duration-200 group ${onRowClick
-                                    ? 'cursor-pointer hover:bg-slate-800'
-                                    : 'hover:bg-slate-800/50'
+                                    ? 'cursor-pointer hover:bg-slate-50'
+                                    : 'hover:bg-slate-50/50'
                                     }`}
                             >
                                 {columns.map(col => (
                                     <td
                                         key={col.key}
-                                        className={`py-4 px-6 text-slate-300 font-medium ${col.align === 'center' ? 'text-center' :
+                                        className={`py-4 px-6 text-slate-700 font-medium ${col.align === 'center' ? 'text-center' :
                                             col.align === 'right' ? 'text-right' : 'text-left'
                                             }`}
                                     >

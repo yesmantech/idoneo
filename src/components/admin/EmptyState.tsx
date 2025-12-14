@@ -28,7 +28,7 @@ export default function EmptyState({
             </div>
 
             {/* Title */}
-            <h3 className="text-lg font-semibold text-slate-300 mb-2">
+            <h3 className="text-lg font-semibold text-slate-700 mb-2">
                 {title}
             </h3>
 
@@ -43,7 +43,7 @@ export default function EmptyState({
             {action && (
                 <button
                     onClick={action.onClick}
-                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-lg shadow-lg shadow-emerald-500/20 transition-all"
+                    className="px-5 py-2.5 bg-[#00B1FF] hover:bg-[#0091D5] text-white font-medium rounded-xl shadow-lg shadow-[#00B1FF]/20 transition-all"
                 >
                     {action.label}
                 </button>
