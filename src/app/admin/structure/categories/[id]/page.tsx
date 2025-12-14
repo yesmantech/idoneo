@@ -19,6 +19,7 @@ export default function AdminCategoryEditPage() {
     const [availableSeats, setAvailableSeats] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [title, setTitle] = useState<string>("");
+    const [subtitle, setSubtitle] = useState<string>("");
 
     // Files
     const [homeFile, setHomeFile] = useState<File | null>(null);
@@ -43,6 +44,7 @@ export default function AdminCategoryEditPage() {
             setAvailableSeats(data.available_seats?.toString() || "");
             setDescription(data.description || "");
             setTitle(data.title || "");
+            setSubtitle(data.subtitle || "");
         }
         setLoading(false);
     };
@@ -74,6 +76,7 @@ export default function AdminCategoryEditPage() {
 
             const { error } = await supabase.from("categories").update({
                 title: title || null,
+                subtitle: subtitle || null,
                 home_banner_url: homeUrl,
                 inner_banner_url: innerUrl,
                 is_new: isNew,
@@ -145,6 +148,19 @@ export default function AdminCategoryEditPage() {
                             placeholder="es. Guardia di Finanza"
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all text-lg font-medium"
                         />
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-slate-500 mb-2">
+                                Sottotitolo (opzionale)
+                            </label>
+                            <input
+                                type="text"
+                                value={subtitle}
+                                onChange={e => setSubtitle(e.target.value)}
+                                placeholder="es. Concorso pubblico 2024 - 150 posti"
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all"
+                            />
+                            <p className="text-xs text-slate-400 mt-1.5">Mostrato sotto il titolo nella card della homepage</p>
+                        </div>
                     </div>
 
                     {/* Settings Panel - Badge "Nuovo" */}

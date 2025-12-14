@@ -5,6 +5,7 @@ export interface Category {
   id: string;
   slug: string;
   title: string;
+  subtitle?: string;
   description: string;
   home_banner_url?: string;
   inner_banner_url?: string;
@@ -48,6 +49,7 @@ export const getCategories = async (): Promise<Category[]> => {
     id: c.id,
     slug: c.slug,
     title: c.title,
+    subtitle: c.subtitle || undefined,
     description: c.description || "",
     home_banner_url: c.home_banner_url || undefined,
     inner_banner_url: c.inner_banner_url || undefined,

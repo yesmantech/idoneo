@@ -134,27 +134,39 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                     >
                         {contest.title}
                     </h3>
-                </div>
-
-                {/* Footer: Year & Seats */}
-                <div className="flex items-center justify-between">
-                    <span
-                        className="text-slate-400 font-semibold"
-                        style={{ fontSize: '10px' }}
-                    >
-                        {contest.year || '2024'}
-                    </span>
-
-                    {/* Show seats badge only if available_seats is set */}
-                    {postiDisponibili && (
-                        <div className="flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
-                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
-                            <span className="text-emerald-600 font-bold" style={{ fontSize: '9px' }}>
-                                {postiDisponibili} posti
-                            </span>
-                        </div>
+                    {contest.subtitle && (
+                        <p
+                            className="text-slate-500 line-clamp-1 mt-0.5"
+                            style={{ fontSize: '10px' }}
+                        >
+                            {contest.subtitle}
+                        </p>
                     )}
                 </div>
+
+                {/* Footer: Year & Seats - only show if we have data */}
+                {(contest.year || postiDisponibili) && (
+                    <div className="flex items-center justify-between">
+                        {contest.year && (
+                            <span
+                                className="text-slate-400 font-semibold"
+                                style={{ fontSize: '10px' }}
+                            >
+                                {contest.year}
+                            </span>
+                        )}
+
+                        {/* Show seats badge only if available_seats is set */}
+                        {postiDisponibili && (
+                            <div className="flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
+                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
+                                <span className="text-emerald-600 font-bold" style={{ fontSize: '9px' }}>
+                                    {postiDisponibili} posti
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </Link>
     );

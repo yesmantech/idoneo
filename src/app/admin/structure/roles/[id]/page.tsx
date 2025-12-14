@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { AdminLayout } from "@/components/admin";
+import { ArrowLeft, FileText, Users, Link2, BookOpen, Plus, Trash2, Save, Loader2, ExternalLink } from "lucide-react";
 
 export default function AdminRoleEditPage() {
     const { id } = useParams<{ id: string }>();
@@ -21,7 +22,7 @@ export default function AdminRoleEditPage() {
     // New Resource Form
     const [newResTitle, setNewResTitle] = useState("");
     const [newResUrl, setNewResUrl] = useState("");
-    const [newResType, setNewResType] = useState("link"); // link, pdf
+    const [newResType, setNewResType] = useState("link");
 
     useEffect(() => {
         if (id) loadData();
@@ -29,7 +30,6 @@ export default function AdminRoleEditPage() {
 
     const loadData = async () => {
         setLoading(true);
-        // Load Role
         const { data: roleData, error: roleError } = await supabase.from("roles").select("*").eq("id", id).single();
         if (roleError) {
             alert("Errore ruolo: " + roleError.message);
@@ -41,15 +41,13 @@ export default function AdminRoleEditPage() {
         setPositions(roleData.available_positions || "");
         setShareLink(roleData.share_bank_link || "");
 
-        // Load Resources
-        const { data: resData, error: resError } = await supabase
+        const { data: resData } = await supabase
             .from("role_resources")
             .select("*")
             .eq("role_id", id)
             .order("created_at", { ascending: true });
 
         if (resData) setResources(resData);
-
         setLoading(false);
     };
 
@@ -100,121 +98,190 @@ export default function AdminRoleEditPage() {
         }
     };
 
-    if (loading) return <AdminLayout><div className="p-8">Caricamento...</div></AdminLayout>;
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-[#00B1FF] animate-spin" />
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout>
-            <div className="max-w-4xl mx-auto pb-20">
-                <div className="flex items-center gap-4 mb-8">
-                    <button onClick={() => navigate("/admin/structure")} className="text-slate-400 hover:text-white">
-                        ← Indietro
-                    </button>
-                    <h1 className="text-2xl font-bold text-white">Gestione Ruolo: {role.title}</h1>
-                </div>
+            <div className="min-h-screen bg-[#F5F5F7] py-8 px-6">
+                <div className="max-w-4xl mx-auto">
+                    {/* Header */}
+                    <div className="flex items-center gap-4 mb-8">
+                        <button
+                            onClick={() => navigate("/admin/structure")}
+                            className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-300 transition-all"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-900">{role.title}</h1>
+                            <p className="text-sm text-slate-500">Modifica informazioni e risorse del ruolo</p>
+                        </div>
+                    </div>
 
-                <div className="space-y-8">
+                    <div className="space-y-6">
 
-                    {/* 1. Metadata Metadata */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-sky-400">📝 Metadata Principali</h3>
-                            <button onClick={handleSaveRole} disabled={saving} className="bg-sky-600 hover:bg-sky-500 text-white text-xs px-4 py-2 rounded font-bold">
-                                {saving ? "Saving..." : "Salva Info"}
-                            </button>
+                        {/* Description Panel */}
+                        <div className="bg-white rounded-[20px] border border-slate-200 p-6 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
+                                    <FileText className="w-5 h-5 text-sky-500" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900">Descrizione</h3>
+                                    <p className="text-xs text-slate-500">Testo introduttivo del ruolo</p>
+                                </div>
+                            </div>
+                            <textarea
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                placeholder="Descrivi brevemente questo ruolo e cosa comporta..."
+                                rows={4}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all resize-none"
+                            />
                         </div>
 
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 mb-1">Descrizione (Intro)</label>
-                                <textarea
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                    className="w-full h-32 bg-slate-950 border border-slate-700 rounded p-3 text-slate-200 text-sm focus:border-sky-500 outline-none"
-                                    placeholder="Descrivi brevemente questo ruolo e cosa comporta..."
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
+                        {/* Positions & Share Link */}
+                        <div className="bg-white rounded-[20px] border border-slate-200 p-6 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Positions */}
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">Posti Disponibili</label>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                                            <Users className="w-4 h-4 text-emerald-500" />
+                                        </div>
+                                        <label className="font-medium text-slate-700">Posti Disponibili</label>
+                                    </div>
                                     <input
                                         type="text"
                                         value={positions}
                                         onChange={e => setPositions(e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 text-sm"
                                         placeholder="es. 1250 posti"
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all"
                                     />
                                 </div>
+
+                                {/* Share Link */}
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">Link Condivisione Banca Dati</label>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+                                            <Link2 className="w-4 h-4 text-violet-500" />
+                                        </div>
+                                        <label className="font-medium text-slate-700">Link Banca Dati</label>
+                                    </div>
                                     <input
                                         type="text"
                                         value={shareLink}
                                         onChange={e => setShareLink(e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 text-sm"
                                         placeholder="https://..."
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all"
                                     />
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* 2. Resources */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <h3 className="text-lg font-bold text-amber-400 mb-6">📚 Risorse Utili</h3>
+                        {/* Save Button */}
+                        <button
+                            onClick={handleSaveRole}
+                            disabled={saving}
+                            className="w-full py-4 rounded-2xl bg-[#00B1FF] text-white font-bold text-lg shadow-lg shadow-blue-500/20 hover:bg-[#00a0e6] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                        >
+                            {saving ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <>
+                                    <Save className="w-5 h-5" />
+                                    Salva Informazioni
+                                </>
+                            )}
+                        </button>
 
-                        {/* List */}
-                        <div className="space-y-2 mb-6">
-                            {resources.length === 0 && <p className="text-slate-500 text-sm italic">Nessuna risorsa aggiunta.</p>}
-                            {resources.map(res => (
-                                <div key={res.id} className="flex items-center gap-3 bg-slate-950 p-3 rounded border border-slate-800">
-                                    <div className="w-8 h-8 rounded bg-slate-800 flex items-center justify-center text-lg">
-                                        {res.type === 'pdf' ? '📄' : '🔗'}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-sm text-slate-200">{res.title}</p>
-                                        <p className="text-xs text-slate-500 truncate">{res.url}</p>
-                                    </div>
-                                    <button onClick={() => handleDeleteResource(res.id)} className="text-red-500 hover:bg-red-900/20 p-2 rounded">
-                                        🗑️
-                                    </button>
+                        {/* Resources Panel */}
+                        <div className="bg-white rounded-[20px] border border-slate-200 p-6 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                                    <BookOpen className="w-5 h-5 text-amber-500" />
                                 </div>
-                            ))}
-                        </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900">Risorse Utili</h3>
+                                    <p className="text-xs text-slate-500">Link e documenti per prepararsi</p>
+                                </div>
+                            </div>
 
-                        {/* Add New */}
-                        <div className="bg-slate-950/50 p-4 rounded-lg border border-slate-800">
-                            <h4 className="text-xs font-bold text-slate-400 mb-3 uppercase">Aggiungi Nuova Risorsa</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                                <input
-                                    className="bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white"
-                                    placeholder="Titolo (es. Bando PDF)"
-                                    value={newResTitle}
-                                    onChange={e => setNewResTitle(e.target.value)}
-                                />
-                                <div className="flex gap-2">
+                            {/* Resources List */}
+                            <div className="space-y-3 mb-6">
+                                {resources.length === 0 && (
+                                    <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                        <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                                        <p className="text-slate-400 text-sm">Nessuna risorsa aggiunta</p>
+                                    </div>
+                                )}
+                                {resources.map(res => (
+                                    <div key={res.id} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100 group">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${res.type === 'pdf' ? 'bg-red-50' : 'bg-blue-50'}`}>
+                                            {res.type === 'pdf' ? (
+                                                <FileText className="w-5 h-5 text-red-500" />
+                                            ) : (
+                                                <ExternalLink className="w-5 h-5 text-blue-500" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-slate-900">{res.title}</p>
+                                            <p className="text-xs text-slate-400 truncate">{res.url}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteResource(res.id)}
+                                            className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Add New Resource */}
+                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Aggiungi Nuova Risorsa</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <input
+                                        className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all"
+                                        placeholder="Titolo"
+                                        value={newResTitle}
+                                        onChange={e => setNewResTitle(e.target.value)}
+                                    />
                                     <select
-                                        className="bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white w-24"
+                                        className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all"
                                         value={newResType}
                                         onChange={e => setNewResType(e.target.value)}
                                     >
-                                        <option value="link">Link</option>
-                                        <option value="pdf">PDF</option>
+                                        <option value="link">🔗 Link</option>
+                                        <option value="pdf">📄 PDF</option>
                                     </select>
                                     <input
-                                        className="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white"
+                                        className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all"
                                         placeholder="URL"
                                         value={newResUrl}
                                         onChange={e => setNewResUrl(e.target.value)}
                                     />
+                                    <button
+                                        onClick={handleAddResource}
+                                        className="px-4 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold flex items-center justify-center gap-2 transition-all"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Aggiungi
+                                    </button>
                                 </div>
-                                <button onClick={handleAddResource} className="bg-amber-600 hover:bg-amber-500 text-white font-bold rounded p-2 text-sm">
-                                    Aggiungi +
-                                </button>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
         </AdminLayout>

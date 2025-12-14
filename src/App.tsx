@@ -147,6 +147,7 @@ export default function App() {
                                     <Route path="/admin/questions/:id" element={<AdminQuestionEditPage />} />
                                     <Route path="/admin/images" element={<AdminImagesPage />} />
                                     <Route path="/admin/upload-csv" element={<AdminUploadCsvPage />} />
+                                    <Route path="/admin/rules" element={<AdminRulesPage />} />
                                     <Route path="/admin/stats" element={<StatsPage />} />
                                     <Route path="/admin/leaderboard" element={<AdminLeaderboardPage />} />
                                     <Route path="/admin/users" element={<AdminUsersPage />} />

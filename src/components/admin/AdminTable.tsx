@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 // ================== TYPES ==================
 
@@ -35,35 +36,70 @@ interface RowActionsMenuProps {
 
 function RowActionsMenu({ actions }: RowActionsMenuProps) {
     const [open, setOpen] = React.useState(false);
+    const [menuPosition, setMenuPosition] = React.useState({ top: 0, left: 0, openUpward: false });
+    const buttonRef = React.useRef<HTMLButtonElement>(null);
     const menuRef = React.useRef<HTMLDivElement>(null);
 
-    // Close on outside click
+    // Close on outside click or scroll
     React.useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+            const target = e.target as Node;
+            const isInsideButton = buttonRef.current?.contains(target);
+            const isInsideMenu = menuRef.current?.contains(target);
+
+            if (!isInsideButton && !isInsideMenu) {
                 setOpen(false);
             }
         };
+        const handleScroll = () => setOpen(false);
+
         if (open) {
-            document.addEventListener('mousedown', handleClickOutside);
+            // Use setTimeout to avoid immediate close on the same click
+            setTimeout(() => {
+                document.addEventListener('mousedown', handleClickOutside);
+            }, 0);
+            document.addEventListener('scroll', handleScroll, true);
         }
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('scroll', handleScroll, true);
+        };
     }, [open]);
 
+    // Calculate position when opening
+    const handleOpen = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!open && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            const menuHeight = (actions.length * 44) + 12;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const openUpward = spaceBelow < menuHeight;
+
+            setMenuPosition({
+                top: openUpward ? rect.top - menuHeight : rect.bottom + 4,
+                left: rect.right - 192,
+                openUpward
+            });
+        }
+        setOpen(!open);
+    };
+
     return (
-        <div className="relative" ref={menuRef}>
+        <>
             <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setOpen(!open);
-                }}
+                ref={buttonRef}
+                onClick={handleOpen}
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             >
                 ⋮
             </button>
 
-            {open && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {open && ReactDOM.createPortal(
+                <div
+                    ref={menuRef}
+                    className="fixed w-48 bg-white border border-slate-200 rounded-xl shadow-2xl z-[9999] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                    style={{ top: menuPosition.top, left: menuPosition.left }}
+                >
                     {actions.map((action, idx) => (
                         <button
                             key={idx}
@@ -72,18 +108,19 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
                                 setOpen(false);
                                 action.onClick();
                             }}
-                            className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${action.variant === 'destructive'
+                            className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${action.variant === 'destructive'
                                 ? 'text-rose-500 hover:bg-rose-50'
                                 : 'text-slate-700 hover:bg-slate-50'
                                 }`}
                         >
-                            {action.icon && <span>{action.icon}</span>}
-                            <span>{action.label}</span>
+                            {action.icon && <span className="text-base">{action.icon}</span>}
+                            <span className="font-medium">{action.label}</span>
                         </button>
                     ))}
-                </div>
+                </div>,
+                document.body
             )}
-        </div>
+        </>
     );
 }
 
@@ -131,8 +168,8 @@ export default function AdminTable<T>({
     }
 
     return (
-        <div className="rounded-[20px] border border-slate-200/50 bg-white overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-            <div className="overflow-x-auto">
+        <div className="rounded-[20px] border border-slate-200/50 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+            <div className="overflow-x-auto overflow-y-visible">
                 <table className="w-full text-left text-sm">
                     {/* Header */}
                     <thead className="bg-slate-50/50 border-b border-slate-100">
