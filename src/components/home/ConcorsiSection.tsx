@@ -63,46 +63,60 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                 borderRadius: '20px',
             }}
         >
-            {/* 1. HERO AREA - 55% height (~104px) with DYNAMIC GRADIENT */}
+            {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
             <div
-                className={`relative overflow-hidden bg-gradient-to-br ${gradient} flex items-center justify-center`}
-                style={{ height: '55%', width: '100%' }}
+                className="relative overflow-hidden flex items-center justify-center"
+                style={{ aspectRatio: '2 / 1', width: '100%' }}
             >
-                {/* Light reflection top-down */}
-                <div
-                    className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, transparent 70%)' }}
-                />
+                {/* Show uploaded banner image if available */}
+                {contest.home_banner_url ? (
+                    <img
+                        src={contest.home_banner_url}
+                        alt={contest.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                ) : (
+                    <>
+                        {/* Fallback: Gradient background */}
+                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
 
-                {/* Inner Glow behind icon */}
-                <div
-                    className="absolute"
-                    style={{
-                        width: '80px', height: '80px',
-                        background: `radial-gradient(circle, ${glow} 0%, transparent 70%)`,
-                        filter: 'blur(12px)',
-                    }}
-                />
+                        {/* Light reflection top-down */}
+                        <div
+                            className="absolute inset-0"
+                            style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, transparent 70%)' }}
+                        />
 
-                {/* Glassmorphic Icon Container */}
-                <div
-                    className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
-                    style={{
-                        width: '56px',
-                        height: '56px',
-                        borderRadius: '16px',
-                        background: 'rgba(255,255,255,0.25)',
-                        backdropFilter: 'blur(8px)',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
-                        border: '1px solid rgba(255,255,255,0.2)'
-                    }}
-                >
-                    <Icon className="text-white w-7 h-7" strokeWidth={1.5} />
-                </div>
+                        {/* Inner Glow behind icon */}
+                        <div
+                            className="absolute"
+                            style={{
+                                width: '80px', height: '80px',
+                                background: `radial-gradient(circle, ${glow} 0%, transparent 70%)`,
+                                filter: 'blur(12px)',
+                            }}
+                        />
+
+                        {/* Glassmorphic Icon Container */}
+                        <div
+                            className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
+                            style={{
+                                width: '56px',
+                                height: '56px',
+                                borderRadius: '16px',
+                                background: 'rgba(255,255,255,0.25)',
+                                backdropFilter: 'blur(8px)',
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
+                                border: '1px solid rgba(255,255,255,0.2)'
+                            }}
+                        >
+                            <Icon className="text-white w-7 h-7" strokeWidth={1.5} />
+                        </div>
+                    </>
+                )}
 
                 {/* Badge if new */}
                 {contest.is_new && (
-                    <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur text-[#00B1FF] text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
+                    <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur text-[#00B1FF] text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm z-10">
                         NUOVO
                     </div>
                 )}
@@ -160,13 +174,11 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
 
     return (
         <div>
-            {/* Header Row - Compact shuffle.com style */}
+            {/* Header Row - Aligned with search bar (px-4 = 16px) */}
             <div
-                className="flex justify-between items-center"
+                className="flex justify-between items-center px-4"
                 style={{
                     minHeight: '40px',
-                    paddingLeft: '16px',
-                    paddingRight: '16px',
                     marginBottom: '12px'
                 }}
             >
@@ -197,18 +209,18 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
                 </div>
             </div>
 
-            {/* Carousel Container - Tight shuffle.com style */}
+            {/* Carousel Container - Aligned with search bar */}
             <div
                 ref={scrollRef}
                 className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide py-2 -my-2"
                 style={{
                     height: '220px',
                     gap: '12px',
-                    paddingLeft: '16px',
-                    paddingRight: '16px',
                     alignItems: 'flex-start'
                 }}
             >
+                {/* Left spacer to align with search bar px-4 */}
+                <div className="w-4 flex-shrink-0" style={{ minWidth: '16px' }} />
                 {contests.map((contest, idx) => (
                     <div key={idx} className="snap-start flex-shrink-0">
                         <ConcorsoCard contest={contest} index={idx} />
