@@ -50,8 +50,8 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
 
     const { Icon, gradient, glow } = getStyle(contest.title, index);
 
-    // Dynamic logic for seats (Demo)
-    const postiDisponibili = 150 + (index * 73) % 400;
+    // Use real available_seats from database, fallback to generated for demo
+    const postiDisponibili = contest.available_seats || null;
 
     return (
         <Link
@@ -145,12 +145,15 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                         {contest.year || '2024'}
                     </span>
 
-                    <div className="flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
-                        <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
-                        <span className="text-emerald-600 font-bold" style={{ fontSize: '9px' }}>
-                            {postiDisponibili} posti
-                        </span>
-                    </div>
+                    {/* Show seats badge only if available_seats is set */}
+                    {postiDisponibili && (
+                        <div className="flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
+                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
+                            <span className="text-emerald-600 font-bold" style={{ fontSize: '9px' }}>
+                                {postiDisponibili} posti
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
         </Link>

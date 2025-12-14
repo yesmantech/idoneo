@@ -118,7 +118,7 @@ export default function App() {
                                 <Route path="/concorsi/:category/:role/:contestSlug/custom" element={<CustomQuizWizardPage />} />
 
                                 {/* Quiz Engine (Wrapped) */}
-                                <Route path="/quiz/:id/official" element={<MainLayout><OfficialQuizStarterPage /></MainLayout>} />
+                                <Route path="/quiz/:id/official" element={<OfficialQuizStarterPage />} />
                                 <Route path="/quiz/:quizId/practice" element={<MainLayout><PracticeStartPage /></MainLayout>} />
                                 <Route path="/quiz/:quizId/review" element={<MainLayout><ReviewPage /></MainLayout>} />
                                 <Route path="/quiz/run/:attemptId" element={<QuizRunnerPage />} />

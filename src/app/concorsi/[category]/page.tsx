@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useConcorsoData } from '@/hooks/useConcorsoData';
-import { ChevronLeft, ChevronRight, Shield } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Shield, Info } from 'lucide-react';
 
 // =============================================================================
 // CONCORSO CATEGORY PAGE - Idoneo Redesign
@@ -38,53 +38,50 @@ export default function ConcorsoHubPage() {
 
   return (
     <div className="min-h-screen bg-white pb-20">
-      {/* ============================================================= */}
-      {/* TOP BAR - Back arrow */}
-      {/* ============================================================= */}
-      <header className="sticky top-0 z-50 bg-white">
-        <div className="px-5 h-14 flex items-center">
+      <main className="px-5 max-w-lg mx-auto pt-4">
+        {/* ============================================================= */}
+        {/* BACK BUTTON + LOGO CONTAINER */}
+        {/* ============================================================= */}
+        <div className="relative mb-4">
+          {/* Back button - positioned left */}
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-slate-600" />
           </button>
-        </div>
-      </header>
 
-      <main className="px-5 max-w-lg mx-auto">
-        {/* ============================================================= */}
-        {/* LOGO CONTAINER - Centered */}
-        {/* ============================================================= */}
-        <div className="flex justify-center mb-8">
-          <div
-            className="w-24 h-24 rounded-3xl bg-white flex items-center justify-center overflow-hidden"
-            style={{
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
-            }}
-          >
-            {categoryData.inner_banner_url ? (
-              <img
-                src={categoryData.inner_banner_url}
-                alt={categoryData.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#00B1FF] to-[#0099e6] flex items-center justify-center">
-                <Shield className="w-12 h-12 text-white" />
-              </div>
-            )}
+          {/* Logo - centered */}
+          <div className="flex justify-center">
+            <div
+              className="w-24 h-24 rounded-3xl bg-white flex items-center justify-center overflow-hidden"
+              style={{
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
+              }}
+            >
+              {categoryData.inner_banner_url ? (
+                <img
+                  src={categoryData.inner_banner_url}
+                  alt={categoryData.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#00B1FF] to-[#0099e6] flex items-center justify-center">
+                  <Shield className="w-12 h-12 text-white" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* ============================================================= */}
         {/* TITLE & SUBTITLE */}
         {/* ============================================================= */}
-        <div className="text-center mb-10">
-          <p className="text-[14px] text-slate-500 mb-2">
+        <div className="text-center mb-6">
+          <p className="text-[13px] text-slate-500 mb-1">
             Preparazione per la prova scritta di preselezione
           </p>
-          <h1 className="text-[28px] font-bold text-slate-900 leading-tight">
+          <h1 className="text-[26px] font-bold text-slate-900 leading-tight">
             {categoryData.title}
           </h1>
         </div>
@@ -92,21 +89,21 @@ export default function ConcorsoHubPage() {
         {/* ============================================================= */}
         {/* INFORMATION BLOCK */}
         {/* ============================================================= */}
-        <section className="mb-10">
-          <h2 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-4">
-            Informazioni
-          </h2>
-          <div
-            className="bg-slate-50 rounded-2xl p-5"
-          >
-            <p className="text-[15px] text-slate-700 leading-[1.6]">
-              {categoryData.description ||
-                `Il concorso ${categoryData.title} offre diverse opportunità di carriera nelle forze dell'ordine. 
-                Preparati con simulazioni ufficiali, quiz personalizzati e materiale di studio aggiornato.`
-              }
-            </p>
-          </div>
-        </section>
+        {categoryData.description && (
+          <section className="mb-10">
+            <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 rounded-full bg-[#00B1FF]/10 flex items-center justify-center">
+                  <Info className="w-3.5 h-3.5 text-[#00B1FF]" />
+                </div>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Info</span>
+              </div>
+              <p className="text-[13px] text-slate-600 leading-[1.6]">
+                {categoryData.description}
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* ============================================================= */}
         {/* AVAILABLE COMPETITIONS LIST */}

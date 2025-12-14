@@ -10,6 +10,7 @@ export interface Category {
   inner_banner_url?: string;
   is_new?: boolean;
   year?: number | string;
+  available_seats?: number;
 }
 
 // ... (Role and Contest types restored)
@@ -52,6 +53,7 @@ export const getCategories = async (): Promise<Category[]> => {
     inner_banner_url: c.inner_banner_url || undefined,
     is_new: c.is_new || false,
     year: c.year || undefined,
+    available_seats: c.available_seats || undefined,
   }));
 };
 
