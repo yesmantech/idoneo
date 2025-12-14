@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { computeSkillScore } from "./leaderboardAlgorithm";
+import { computePreparationScore } from "./leaderboardAlgorithm";
 
 export interface LeaderboardEntry {
     rank: number;
@@ -10,15 +10,30 @@ export interface LeaderboardEntry {
     };
     score: number;
     isCurrentUser?: boolean;
+    // New breakdown fields (optional as they might not persist for XP)
+    breakdown?: {
+        volume: number;
+        accuracy: number;
+        recency: number;
+        coverage: number;
+        reliability: number;
+    };
 }
 
 export const leaderboardService = {
     // 0. Update User Score (Calculate & Save)
     async updateUserScore(userId: string, quizId: string) {
-        // 1. Fetch all attempts for this user & quiz
+        // 1. Fetch all attempts for this user & quiz AND Quiz Details (Bank Size)
         const { data: attempts, error } = await supabase
             .from("quiz_attempts")
-            .select("answers, created_at, started_at")
+            .select(`
+                answers, 
+                created_at, 
+                started_at,
+                quiz:quizzes (
+                    total_questions
+                )
+            `)
             .eq("user_id", userId)
             .eq("quiz_id", quizId);
 
@@ -27,31 +42,55 @@ export const leaderboardService = {
             throw new Error(`Fetch Attempts Failed: ${error?.message}`);
         }
 
+        // Determine Bank Size
+        // If multiple attempts, they point to same quiz, so just take first.
+        const firstQuiz = (attempts as any)[0]?.quiz;
+        const bankSize = Array.isArray(firstQuiz) ? firstQuiz[0]?.total_questions : firstQuiz?.total_questions;
+        const safeBankSize = bankSize || 1000; // Default if missing
+
         // 2. Unpack answers to pure array
-        let allAnswers: any[] = [];
+        let allAnswers: { isCorrect: boolean; questionId: string; timestamp: number }[] = [];
+
         attempts.forEach(att => {
             if (Array.isArray(att.answers)) {
                 att.answers.forEach((ans: any) => {
-                    allAnswers.push({
-                        isCorrect: ans.isCorrect,
-                        timestamp: new Date(att.created_at || att.started_at),
-                        isOfficial: true
-                    });
+                    // Normalize question ID
+                    const qId = ans.questionId || ans.question_id || ans.id;
+                    const ts = new Date(att.created_at || att.started_at).getTime();
+
+                    if (qId) {
+                        allAnswers.push({
+                            isCorrect: !!ans.isCorrect,
+                            questionId: String(qId),
+                            timestamp: ts
+                        });
+                    }
                 });
             }
         });
 
         // 3. Run Algorithm
-        const result = computeSkillScore(allAnswers);
+        const result = computePreparationScore({
+            answers: allAnswers,
+            bankSize: safeBankSize
+        });
 
         // 4. Upsert to concorso_leaderboard
         const payload = {
             user_id: userId,
             quiz_id: quizId,
             score: result.score,
-            accuracy_weighted: result.accuracyWeighted,
-            volume_factor: result.volumeFactor,
-            trend_factor: result.trendMultiplier,
+
+            // New Breakdown Columns
+            accuracy_weighted: result.accuracyScore, // reusing existing column name if possible, or mapping
+            volume_factor: result.volumeScore,       // reusing existing column name
+            // New columns from migration
+            recency_score: result.recencyScore,
+            coverage_score: result.coverageScore,
+            reliability: result.reliability,
+            unique_questions: result.uniqueQuestions,
+            total_answers: result.totalAnswers,
+
             last_calculated_at: new Date().toISOString()
         };
 
@@ -70,7 +109,15 @@ export const leaderboardService = {
         // Fetch from the materialized table
         const { data: rankings, error } = await supabase
             .from('concorso_leaderboard')
-            .select('user_id, score')
+            .select(`
+                user_id, 
+                score,
+                volume_factor,
+                accuracy_weighted,
+                recency_score,
+                coverage_score,
+                reliability
+            `)
             .eq('quiz_id', quizId)
             .order('score', { ascending: false })
             .limit(limit);
@@ -101,7 +148,14 @@ export const leaderboardService = {
                     avatarUrl: profile?.avatar_url
                 },
                 score: Number(row.score),
-                isCurrentUser: false // To be refined with AuthContext
+                isCurrentUser: false,
+                breakdown: {
+                    volume: row.volume_factor,
+                    accuracy: row.accuracy_weighted,
+                    recency: row.recency_score || 0,
+                    coverage: row.coverage_score || 0,
+                    reliability: row.reliability || 0
+                }
             };
         });
     },
@@ -186,7 +240,8 @@ export const leaderboardService = {
                     title, 
                     year, 
                     category,
-                    slug
+                    slug,
+                    role:roles(title)
                 )
             `)
             .eq("user_id", userId)

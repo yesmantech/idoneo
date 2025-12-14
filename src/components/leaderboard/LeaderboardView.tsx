@@ -174,38 +174,76 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
 };
 
 const RankingRow = ({ entry, metricLabel }: { entry: LeaderboardEntry, metricLabel: string }) => {
+    const [expanded, setExpanded] = React.useState(false);
+
+    // Only expand if breakdown exists
+    const hasBreakdown = !!entry.breakdown;
+
     return (
-        <div className={`group flex items-center gap-4 p-3.5 rounded-[20px] transition-all duration-200 ${entry.isCurrentUser
-            ? 'bg-[#F0F9FF] border border-[#BAE6FD] shadow-sm scale-[1.01] sticky z-30 -mx-2 px-5'
-            : 'bg-transparent border border-transparent hover:bg-slate-50'
-            }`}>
+        <div
+            onClick={() => hasBreakdown && setExpanded(!expanded)}
+            className={`group flex flex-col p-3.5 rounded-[20px] transition-all duration-200 cursor-pointer ${entry.isCurrentUser
+                ? 'bg-[#F0F9FF] border border-[#BAE6FD] shadow-sm scale-[1.01] sticky z-30 -mx-2 px-5'
+                : 'bg-transparent border border-transparent hover:bg-slate-50'
+                }`}>
 
-            <span className={`font-bold w-6 text-center text-[13px] text-slate-400 font-mono`}>
-                {entry.rank}
-            </span>
+            <div className="flex items-center gap-4 w-full">
+                <span className={`font-bold w-6 text-center text-[13px] text-slate-400 font-mono`}>
+                    {entry.rank}
+                </span>
 
-            <div className="w-10 h-10 rounded-[14px] bg-slate-100 overflow-hidden flex-shrink-0 shadow-sm border border-slate-50">
-                <img
-                    src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                />
-            </div>
-
-            <div className="flex-1 min-w-0 flex items-center gap-2">
-                <div className="font-bold text-[15px] truncate text-slate-700 flex items-center gap-2">
-                    {entry.user.nickname}
+                <div className="w-10 h-10 rounded-[14px] bg-slate-100 overflow-hidden flex-shrink-0 shadow-sm border border-slate-50">
+                    <img
+                        src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                    />
                 </div>
-                {entry.isCurrentUser && (
-                    <span className="text-[10px] bg-[#00B1FF] text-white px-2 py-0.5 rounded-full font-bold tracking-wide shadow-sm shadow-blue-200">
-                        YOU
-                    </span>
-                )}
+
+                <div className="flex-1 min-w-0 flex items-center gap-2">
+                    <div className="font-bold text-[15px] truncate text-slate-700 flex items-center gap-2">
+                        {entry.user.nickname}
+                    </div>
+                    {entry.isCurrentUser && (
+                        <span className="text-[10px] bg-[#00B1FF] text-white px-2 py-0.5 rounded-full font-bold tracking-wide shadow-sm shadow-blue-200">
+                            YOU
+                        </span>
+                    )}
+                </div>
+
+                <div className="font-bold text-[15px] text-slate-900 tracking-tight text-right">
+                    <div>{entry.score} <span className="text-[11px] font-bold text-slate-400">{metricLabel}</span></div>
+                </div>
             </div>
 
-            <div className="font-bold text-[15px] text-slate-900 tracking-tight">
-                {entry.score} <span className="text-[11px] font-bold text-slate-400">{metricLabel}</span>
-            </div>
+            {/* Breakdown Panel */}
+            {expanded && entry.breakdown && (
+                <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-4 gap-2 text-center animate-in slide-in-from-top-1">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Volume</span>
+                        <span className="text-xs font-bold text-slate-700">{Math.round(entry.breakdown.volume * 100)}%</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Accur.</span>
+                        <span className="text-xs font-bold text-slate-700">{Math.round(entry.breakdown.accuracy * 100)}%</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Recent</span>
+                        <span className="text-xs font-bold text-slate-700">{Math.round(entry.breakdown.recency * 100)}%</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Cover</span>
+                        <span className="text-xs font-bold text-slate-700">{Math.round(entry.breakdown.coverage * 100)}%</span>
+                    </div>
+
+                    {/* Reliability Warning */}
+                    {entry.breakdown.reliability < 1 && (
+                        <div className="col-span-4 mt-2 text-[10px] text-amber-500 bg-amber-50 p-1.5 rounded-lg text-center font-medium">
+                            ⚠️ Low Reliability (Need more unique questions)
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

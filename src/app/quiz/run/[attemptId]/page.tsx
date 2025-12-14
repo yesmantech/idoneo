@@ -5,6 +5,7 @@ import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom"
 import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
 import { statsService } from "@/lib/statsService";
+import { leaderboardService } from "@/lib/leaderboardService";
 import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 // Types
@@ -293,6 +294,9 @@ export default function QuizRunnerPage() {
                         correct,
                         total: finalAnswers.length
                     });
+
+                    // 3. Update Leaderboard
+                    await leaderboardService.updateUserScore(user.id, currentAttempt.quiz_id);
                 }
             }
         } catch (err) {

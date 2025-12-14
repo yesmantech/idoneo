@@ -44,7 +44,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // Bottom Nav Items - Updated for Idoneo
     const NAV_ITEMS = [
         { Icon: Home, label: 'Home', path: '/' },
-        { Icon: Search, label: 'Cerca', path: '/concorsi/tutti' },
         { Icon: Newspaper, label: 'Blog', path: '/blog' },
         { Icon: Trophy, label: 'Classifica', path: '/leaderboard' },
         { Icon: User, label: 'Profilo', path: '/profile' },

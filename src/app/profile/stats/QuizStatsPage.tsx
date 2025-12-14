@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
+import { ChevronLeft } from 'lucide-react';
+
+// Info System
+import InfoModal from '@/components/leaderboard/InfoModal';
+import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';
 
 // Stats Service
 import {
@@ -10,7 +15,8 @@ import {
     generateRecommendations,
     calculateReadinessLevel,
     type AttemptWithDetails,
-    type Recommendation
+    type Recommendation,
+    type SubjectPerformance
 } from "@/lib/statsService";
 
 // Components
@@ -22,7 +28,6 @@ import CoachingBlock from "@/components/stats/CoachingBlock";
 import GoalsBlock from "@/components/stats/GoalsBlock";
 import SubjectDetailSheet from "@/components/stats/SubjectDetailSheet";
 import GoalCreationModal from "@/components/stats/GoalCreationModal";
-import { type SubjectPerformance } from "@/lib/statsService";
 
 export default function QuizStatsPage() {
     const { quizId } = useParams();
@@ -30,18 +35,23 @@ export default function QuizStatsPage() {
     const [loading, setLoading] = useState(true);
     const [attempts, setAttempts] = useState<AttemptWithDetails[]>([]);
 
+    // Info System State
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showInfoPage, setShowInfoPage] = useState(false);
+
+    // Trends & Readiness
+    const [scoreTrend, setScoreTrend] = useState<any>(null);
+    const [accuracyTrend, setAccuracyTrend] = useState<any>(null);
+    const [readiness, setReadiness] = useState<any>(null);
+
     // Metrics
     const [stats, setStats] = useState({
         totalTests: 0,
         avgScore: 0,
         avgAccuracy: 0,
-        bestScore: 0
+        bestScore: 0,
+        maxPossibleScore: 100 // Default fallback
     });
-
-    // Trends
-    const [scoreTrend, setScoreTrend] = useState<any>(null);
-    const [accuracyTrend, setAccuracyTrend] = useState<any>(null);
-    const [readiness, setReadiness] = useState<any>(null);
 
     // Recommendations
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -70,9 +80,36 @@ export default function QuizStatsPage() {
             return;
         }
 
-        // Fetch Quiz Title
-        const { data: quizData } = await supabase.from('quizzes').select('title').eq('id', quizId).single();
-        if (quizData) setQuizTitle(quizData.title);
+        // Fetch Quiz Data (Title + Scoring Rules for Max Score setup)
+        const { data: quizData } = await supabase
+            .from('quizzes')
+            .select('title, total_questions, points_correct, rule_id')
+            .eq('id', quizId)
+            .single();
+
+        let maxCalc = 0; // Initialize to 0 to detect if we found valid config
+
+        if (quizData) {
+            setQuizTitle(quizData.title);
+
+            // 1. Check for Simulation Rule (Priority)
+            if (quizData.rule_id) {
+                const { data: rule } = await supabase
+                    .from('simulation_rules')
+                    .select('total_questions, points_correct')
+                    .eq('id', quizData.rule_id)
+                    .single();
+
+                if (rule && rule.total_questions && rule.points_correct) {
+                    maxCalc = rule.total_questions * rule.points_correct;
+                }
+            }
+
+            // 2. Fallback to Quiz attributes if no rule or rule fetch failed
+            if (maxCalc === 0 && quizData.total_questions && quizData.points_correct) {
+                maxCalc = quizData.total_questions * quizData.points_correct;
+            }
+        }
 
         // Fetch Attempts
         const { data, error } = await supabase
@@ -82,10 +119,25 @@ export default function QuizStatsPage() {
             .eq("quiz_id", quizId)
             .order("created_at", { ascending: false });
 
+        // 3. Dynamic Calculation: Prioritize Rule -> Actual Attempts -> Metadata
+        // If we found a rule, maxCalc is already set correctly.
+        // If NO rule, we prefer the "proven" questions count from actual attempts over static metadata (which might be default/wrong).
+        if (!quizData?.rule_id && data && data.length > 0) {
+            const maxQuestionsInAttempts = Math.max(...data.map(d => d.total_questions || 0));
+            if (maxQuestionsInAttempts > 0) {
+                // Use points_correct from quiz, default to 1 if missing
+                const pointsPerQuestion = quizData?.points_correct || 1;
+                maxCalc = maxQuestionsInAttempts * pointsPerQuestion;
+            }
+        }
+
+        // 4. Final Fallback if everything fails (no rule, no attempts, no valid metadata)
+        if (maxCalc === 0) maxCalc = 100;
+
         if (error) {
             console.error(error);
         } else if (data) {
-            processData(data as AttemptWithDetails[]);
+            processData(data as AttemptWithDetails[], maxCalc);
         }
 
         // Fetch Goal (if exists)
@@ -102,7 +154,7 @@ export default function QuizStatsPage() {
         setLoading(false);
     };
 
-    const processData = (data: AttemptWithDetails[]) => {
+    const processData = (data: AttemptWithDetails[], maxPossible: number) => {
         setAttempts(data);
 
         // 1. KPIs
@@ -124,7 +176,8 @@ export default function QuizStatsPage() {
             totalTests,
             avgScore,
             avgAccuracy,
-            bestScore: maxScore
+            bestScore: maxScore,
+            maxPossibleScore: maxPossible
         });
 
         // 2. Calculate Trends
@@ -219,14 +272,18 @@ export default function QuizStatsPage() {
         <div className="min-h-screen bg-canvas-light text-text-primary pb-24 md:px-8 md:py-8">
             <div className="max-w-7xl mx-auto space-y-8 px-4 md:px-0 pt-6 md:pt-0">
 
+
                 {/* Header */}
-                <div className="flex items-center gap-4">
-                    <button onClick={() => navigate("/profile")} className="p-3 bg-white rounded-squircle shadow-soft hover:shadow-card hover:scale-105 transition-all text-text-secondary">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                <div className="flex items-center gap-4 relative">
+                    <button
+                        onClick={() => navigate("/profile")}
+                        className="p-3 bg-white rounded-full shadow-soft hover:shadow-card hover:scale-105 transition-all text-slate-400 hover:text-slate-900 border border-transparent hover:border-slate-100"
+                    >
+                        <ChevronLeft className="w-6 h-6" />
                     </button>
-                    <div>
+                    <div className="flex-1 text-center pr-12"> {/* Balance the back button spacing */}
                         <h1 className="text-2xl font-black text-text-primary leading-tight">{quizTitle}</h1>
-                        <p className="text-sm font-bold text-text-tertiary uppercase tracking-wider">Statistiche Dettagliate</p>
+                        <p className="text-xs font-bold text-text-tertiary uppercase tracking-wider mt-0.5">Statistiche Dettagliate</p>
                     </div>
                 </div>
 
@@ -236,9 +293,11 @@ export default function QuizStatsPage() {
                     bestScore={stats.bestScore}
                     avgScore={stats.avgScore}
                     accuracy={stats.avgAccuracy}
+                    maxPossibleScore={stats.maxPossibleScore}
                     scoreTrend={scoreTrend}
                     accuracyTrend={accuracyTrend}
                     readiness={readiness}
+                    onOpenInfo={() => setShowInfoModal(true)}
                 />
 
                 {/* 2. Coaching Block */}

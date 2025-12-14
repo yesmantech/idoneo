@@ -114,7 +114,9 @@ export default function LeaderboardSelectorLegacy({
 
                         {/* 3. Other Concorsi */}
                         <div className="p-2">
-                            <div className="px-3 py-2 text-[10px] uppercase font-bold text-text-tertiary tracking-widest">Tutti i Concorsi</div>
+                            <div className="px-3 py-2 text-[10px] uppercase font-bold text-text-tertiary tracking-widest">
+                                Tutti i Concorsi ({otherQuizzes.length})
+                            </div>
                             {otherQuizzes.length === 0 && <div className="px-4 py-2 text-xs text-text-tertiary font-medium">Nessun altro concorso</div>}
                             {otherQuizzes.map(q => (
                                 <OptionRow

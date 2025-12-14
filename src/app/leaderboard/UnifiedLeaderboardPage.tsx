@@ -13,7 +13,8 @@ export default function UnifiedLeaderboardPage() {
     const isAdmin = user?.email === 'alessandro.valenza22@gmail.com';
 
     // Conditional Components
-    const SelectorComponent = isAdmin ? LeaderboardSelector : LeaderboardSelectorLegacy;
+    // FORCE MODERN SELECTOR for consistency and debugging
+    const SelectorComponent = LeaderboardSelector;
     const ViewComponent = isAdmin ? LeaderboardView : LeaderboardViewLegacy;
 
     // Selection State
@@ -33,36 +34,44 @@ export default function UnifiedLeaderboardPage() {
             try {
                 // A. Active Quizzes (If User Logged In)
                 let myQuizzes: QuizOption[] = [];
-                const myIds = new Set<string>();
+                let myIds = new Set<string>();
 
                 if (user) {
                     const active = await leaderboardService.getUserActiveQuizzes(user.id);
-                    // Map & Filter valid
-                    myQuizzes = active.map(a => ({
-                        id: a.quiz.id,
-                        title: a.quiz.title, // or short title if available
-                        slug: a.quiz.slug,
-                        category: a.quiz.category_id // approximate
+                    // FIX: 'active' array contains items where properties are spread, so use 'a.id', not 'a.quiz.id'
+                    myQuizzes = active.map((a: any) => ({
+                        id: a.id,
+                        title: a.title,
+                        slug: a.slug,
+                        category: a.category_id,
+                        roleTitle: a.role?.title // Role is nested in the quiz object
                     }));
-                    myQuizzes.forEach(q => myIds.add(q.id));
+                    myIds = new Set(myQuizzes.map(q => q.id));
+                    setActiveQuizzes(myQuizzes);
                 }
-                setActiveQuizzes(myQuizzes);
 
-                // B. Fetch All Quizzes for "Other" list (Limited to featured or popular?)
-                // For now, fetch top 50 and filter out active
-                const { data: allQuizzes } = await supabase
+                // B. Fetch All Quizzes for "Other" list
+                const { data: allQuizzes, error: quizError } = await supabase
                     .from('quizzes')
-                    .select('id, title, slug')
-                    .limit(20);
+                    .select('id, title, slug, role_id, role:roles(title)')
+                    .not('role_id', 'is', null) // Only those with a role
+                    .order('title', { ascending: true })
+                    .limit(100);
 
                 if (allQuizzes) {
                     const others = allQuizzes
-                        .map(q => ({ id: q.id, title: q.title, slug: q.slug }))
+                        .map(q => ({
+                            id: q.id,
+                            title: q.title,
+                            slug: (q as any).slug || 'no-slug',
+                            roleTitle: (q as any).role?.title
+                        }))
                         .filter(q => !myIds.has(q.id));
+
                     setOtherQuizzes(others);
                 }
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Error loading options", error);
             }
         }
@@ -100,14 +109,51 @@ export default function UnifiedLeaderboardPage() {
     }, [selection, user]);
 
 
+
     // Computed Props
     const isXP = selection === 'xp';
     const theme = isXP ? 'gold' : 'emerald';
 
+    // State for Info System
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showInfoPage, setShowInfoPage] = useState(false);
+    const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
+
+    // Auto-Onboarding Check
+    useEffect(() => {
+        const hasSeen = localStorage.getItem('idoneo_leaderboard_onboarding');
+        if (!hasSeen) {
+            // Default to showing XP info first since it's the default view
+            setInfoType('xp');
+            // Small delay for smooth entrance
+            setTimeout(() => setShowInfoModal(true), 500);
+        }
+    }, []);
+
+    const handleCloseModal = () => {
+        setShowInfoModal(false);
+        localStorage.setItem('idoneo_leaderboard_onboarding', 'true');
+    };
+
+    const handleOpenInfo = () => {
+        setInfoType(isXP ? 'xp' : 'prep');
+        setShowInfoModal(true);
+    };
+
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-canvas-light text-text-primary">
+
             {/* Header Area */}
             <div className="flex-none p-6 pt-8 flex flex-col items-center justify-center relative z-40">
+
+                {/* Info Icon - Top Right */}
+                <button
+                    onClick={handleOpenInfo}
+                    className="absolute top-8 right-6 p-2 rounded-full bg-white/50 hover:bg-white text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                    <Info className="w-6 h-6" />
+                </button>
+
                 <SelectorComponent
                     currentSelection={selection}
                     onSelect={setSelection}
@@ -116,7 +162,7 @@ export default function UnifiedLeaderboardPage() {
                 />
 
                 {/* Subtitle / Context */}
-                <p className="mt-3 text-sm text-text-tertiary font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-2">
+                <p className="mt-3 text-sm text-text-tertiary font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-2 flex items-center gap-2">
                     {isXP ? 'Classifica Settimanale' : 'Classifica Concorso'}
                 </p>
             </div>
@@ -133,6 +179,31 @@ export default function UnifiedLeaderboardPage() {
                     />
                 </div>
             </div>
+
+            {/* Info System Overlays */}
+            <InfoModal
+                isOpen={showInfoModal}
+                onClose={handleCloseModal}
+                type={infoType}
+                onMoreInfo={() => {
+                    setShowInfoModal(false);
+                    setShowInfoPage(true);
+                    localStorage.setItem('idoneo_leaderboard_onboarding', 'true');
+                }}
+            />
+
+            {showInfoPage && (
+                <ScoreInfoPage
+                    onBack={() => setShowInfoPage(false)}
+                    initialTab={infoType}
+                />
+            )}
+
         </div>
     );
 }
+
+// Import icons at top
+import { Info } from 'lucide-react';
+import InfoModal from '@/components/leaderboard/InfoModal';
+import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';

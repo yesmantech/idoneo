@@ -1,136 +1,146 @@
 // src/lib/leaderboardAlgorithm.ts
 
-/**
- * IDONEO Skill Algorithm Implementation
- * 
- * Target: Calculate a 0-100 score representing candidate strength.
- * Factors: Weighted Accuracy (Time & Type), Volume, Trend.
- */
-
-// Types based on likely DB structure
-interface AnswerPoint {
-    isCorrect: boolean;
-    timestamp: Date; // For Decay
-    isOfficial: boolean; // For Type Weight
+export interface ScoreInput {
+    // Basic Answer Data
+    answers: {
+        isCorrect: boolean;
+        questionId: string;
+        timestamp: number; // Unix Time
+    }[];
+    // Context
+    bankSize: number;
 }
 
-interface ScoreResult {
+export interface ScoreResult {
     score: number; // 0-100
-    accuracyWeighted: number;
-    volumeFactor: number;
-    trendMultiplier: number;
+
+    // Breakdown (0-1)
+    volumeScore: number;
+    accuracyScore: number;
+    recencyScore: number;
+    coverageScore: number;
+    reliability: number;
+
+    // Derived Stats
+    uniqueQuestions: number;
+    totalAnswers: number;
 }
 
-// Parameters
-const DECAY_TAU_DAYS = 21; // Time decay constant
-const VOLUME_K = 300; // Question volume scale
-const OFFICIAL_BONUS = 1.25; // 25% bonus for official sims
-const CUSTOM_WEIGHT = 1.0;
+// 1.1 Helper: Clamp
+function clamp(x: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, x));
+}
 
-/**
- * Core Function: Compute Score for a set of answers
- */
-export function computeSkillScore(answers: AnswerPoint[]): ScoreResult {
-    if (!answers.length) {
-        return { score: 0, accuracyWeighted: 0, volumeFactor: 0, trendMultiplier: 1 };
+// 3. Core Function
+export function computePreparationScore(input: ScoreInput): ScoreResult {
+    const { answers, bankSize } = input;
+    const now = Date.now();
+
+    // Aggregates
+    const totalAnswers = answers.length;
+    if (totalAnswers === 0) {
+        return {
+            score: 0,
+            volumeScore: 0,
+            accuracyScore: 0,
+            recencyScore: 0,
+            coverageScore: 0,
+            reliability: 0,
+            uniqueQuestions: 0,
+            totalAnswers: 0
+        };
     }
 
-    const now = new Date().getTime();
+    // Unique Questions & Last Attempt
+    const uniqueIds = new Set(answers.map(a => a.questionId));
+    const uniqueQuestions = uniqueIds.size;
 
-    // 1. Calculate Weights and Weighted Correct Mass
-    let weightedTotal = 0;
+    let lastAttemptAt = 0;
+    answers.forEach(a => {
+        if (a.timestamp > lastAttemptAt) lastAttemptAt = a.timestamp;
+    });
+
+    // 1.2 Volume Score (0-1)
+    // Reward many unique questions with diminishing returns
+    // V_ref = 0.6 * bank_size
+    const safeBankSize = bankSize > 0 ? bankSize : 1000; // Fallback
+    const vRef = 0.6 * safeBankSize;
+    const volumeRaw = uniqueQuestions / vRef;
+    const volumeScore = clamp(1 - Math.exp(-volumeRaw), 0, 1);
+
+    // 1.3 Time-weighted accuracy score (0-1)
+    // Use exponential time decay: tau_days = 30
+    const TAU_DAYS = 30;
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
     let weightedCorrect = 0;
+    let weightedTotal = 0;
 
-    const processedPoints = answers.map(a => {
-        // Time Decay
-        const ageMs = now - a.timestamp.getTime();
-        const ageDays = ageMs / (1000 * 60 * 60 * 24);
-        const timeWeight = Math.exp(-ageDays / DECAY_TAU_DAYS);
+    answers.forEach(a => {
+        const ageMs = now - a.timestamp;
+        const ageDays = ageMs / MS_PER_DAY;
+        // w_i = exp(- age_days_i / tau_days)
+        // If future date, clamp age to 0
+        const w = Math.exp(-Math.max(0, ageDays) / TAU_DAYS);
 
-        // Type Weight
-        const typeWeight = a.isOfficial ? OFFICIAL_BONUS : CUSTOM_WEIGHT;
-
-        // Combined Weight
-        const w = timeWeight * typeWeight;
-
-        // Accumulate
         weightedTotal += w;
         if (a.isCorrect) {
             weightedCorrect += w;
         }
-
-        return { ...a, weight: w };
     });
 
-    // 2. Weighted Accuracy
-    // Avoid division by zero
-    const accuracyWeighted = weightedTotal > 0.001 ? (weightedCorrect / weightedTotal) : 0;
+    const accuracyScore = weightedTotal > 0.0001
+        ? clamp(weightedCorrect / weightedTotal, 0, 1)
+        : 0;
 
-    // 3. Volume Factor (Diminishing Returns)
-    // Q_eff = WeightedTotal
-    // Factor = 1 - exp(-Q_eff / K)
-    const volumeFactor = 1 - Math.exp(-weightedTotal / VOLUME_K);
+    // 1.4 Recency score (0-1)
+    // Penalize users who haven’t practiced recently
+    // R_max = 30
+    const R_MAX = 30;
+    const daysSinceLast = (now - lastAttemptAt) / MS_PER_DAY;
+    const recencyScore = 1 - clamp(Math.max(0, daysSinceLast) / R_MAX, 0, 1);
 
-    // 4. Trend / Progress Factor
-    // Compare Recent vs Old.
-    // Definition of 'Recent': Last 30% of weighted mass? Or last 14 days?
-    // Prompt suggests: "Recent window (e.g. last 14 days)"
+    // 1.5 Coverage / diversity score (0-1)
+    // Combine coverage of bank and diversity (avoid farming same questions)
+    const coverageRaw = clamp(uniqueQuestions / safeBankSize, 0, 1);
+    const diversityRaw = clamp(uniqueQuestions / totalAnswers, 0, 1);
+    const coverageScore = 0.5 * coverageRaw + 0.5 * diversityRaw;
 
-    // Let's sort by date descending first
-    const sortedPoints = [...processedPoints].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    // 1.6 Reliability gate (0-1)
+    // Avoid giving very high scores with too few unique questions
+    const MIN_UNIQUE = 50;
+    const MAX_UNIQUE = 300;
 
-    // Split into Recent / Old based on time (14 days)
-    const RECENT_DAYS = 14;
-    const cutoffTime = now - (RECENT_DAYS * 24 * 60 * 60 * 1000);
-
-    let recentMass = 0;
-    let recentCorrect = 0;
-    let oldMass = 0;
-    let oldCorrect = 0;
-
-    sortedPoints.forEach(p => {
-        if (p.timestamp.getTime() > cutoffTime) {
-            recentMass += p.weight;
-            if (p.isCorrect) recentCorrect += p.weight;
-        } else {
-            oldMass += p.weight;
-            if (p.isCorrect) oldCorrect += p.weight;
-        }
-    });
-
-    // If no old data, trend is neutral (1.0). If no recent data, same.
-    let trendMultiplier = 1.0;
-
-    if (recentMass > 1 && oldMass > 1) {
-        const accRecent = recentCorrect / recentMass;
-        const accOld = oldCorrect / oldMass;
-        const delta = accRecent - accOld;
-
-        // Clamp(1 + 0.5 * Delta, 0.8, 1.1)
-        let multi = 1 + 0.5 * delta;
-        if (multi < 0.8) multi = 0.8;
-        if (multi > 1.1) multi = 1.1;
-        trendMultiplier = multi;
+    let reliability = 0;
+    if (uniqueQuestions <= MIN_UNIQUE) {
+        reliability = 0;
+        // Note: Providing 0 reliability below 50 means score is 0. 
+        // User spec: (unique - 50) / 250. If unique < 50, this is negative. 
+        // Clamp will set it to 0. Correct.
+    } else {
+        const relCalc = (uniqueQuestions - MIN_UNIQUE) / (MAX_UNIQUE - MIN_UNIQUE);
+        reliability = clamp(relCalc, 0, 1);
     }
 
-    // 5. Final Calculation
-    const baseScore = 100 * accuracyWeighted * volumeFactor;
-    let finalScore = baseScore * trendMultiplier;
+    // 1.7 Final score S ∈ [0,100]
+    // Weights: Volume 0.45, Accuracy 0.30, Recency 0.15, Coverage 0.10
+    const baseScore01 =
+        0.45 * volumeScore
+        + 0.30 * accuracyScore
+        + 0.15 * recencyScore
+        + 0.10 * coverageScore;
 
-    // 6. Safeguard for very low activity
-    // "If Q_eff < 50 ... Score = Score * (Q_eff / 50)^0.5"
-    if (weightedTotal < 50) {
-        finalScore = finalScore * Math.pow(weightedTotal / 50, 0.5);
-    }
-
-    // Clamp 0-100
-    if (finalScore > 100) finalScore = 100;
-    if (finalScore < 0) finalScore = 0;
+    const finalScore01 = baseScore01 * reliability;
+    const S = Math.round(100 * clamp(finalScore01, 0, 1));
 
     return {
-        score: Math.round(finalScore * 100) / 100, // Round to 2 decimals
-        accuracyWeighted: Math.round(accuracyWeighted * 10000) / 10000,
-        volumeFactor: Math.round(volumeFactor * 10000) / 10000,
-        trendMultiplier: Math.round(trendMultiplier * 10000) / 10000
+        score: S,
+        volumeScore,
+        accuracyScore,
+        recencyScore,
+        coverageScore,
+        reliability,
+        uniqueQuestions,
+        totalAnswers
     };
 }
