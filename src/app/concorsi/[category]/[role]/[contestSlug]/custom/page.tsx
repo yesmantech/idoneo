@@ -128,12 +128,38 @@ export default function CustomQuizWizardPage() {
                 selectionMode
             );
 
-            const { data: fullQuestions } = await supabase
-                .from("questions")
-                .select("*, subject:subjects(name)")
-                .in("id", selection.map(s => s.questionId));
+            console.log("[CustomQuiz] configs:", configs);
+            console.log("[CustomQuiz] selection result:", selection.length);
 
-            if (!fullQuestions || fullQuestions.length === 0) throw new Error("Nessuna domanda trovata con questi criteri.");
+            if (!selection || selection.length === 0) {
+                throw new Error(`Nessuna domanda trovata. Configs: ${JSON.stringify(configs)}, Mode: ${selectionMode}`);
+            }
+
+            // Batch fetch for large selections (Supabase .in() has limits)
+            const BATCH_SIZE = 500;
+            const questionIds = selection.map(s => s.questionId);
+            let fullQuestions: any[] = [];
+
+            for (let i = 0; i < questionIds.length; i += BATCH_SIZE) {
+                const batchIds = questionIds.slice(i, i + BATCH_SIZE);
+                const { data: batchData, error: batchError } = await supabase
+                    .from("questions")
+                    .select("*, subject:subjects(name)")
+                    .in("id", batchIds);
+
+                if (batchError) {
+                    console.error("[CustomQuiz] Batch fetch error:", batchError);
+                    throw new Error(`Errore nel recupero domande: ${batchError.message}`);
+                }
+
+                if (batchData) {
+                    fullQuestions = [...fullQuestions, ...batchData];
+                }
+            }
+
+            console.log("[CustomQuiz] fullQuestions fetched:", fullQuestions.length);
+
+            if (fullQuestions.length === 0) throw new Error("Nessuna domanda trovata con questi criteri.");
 
             const shuffledQ = fullQuestions.sort(() => Math.random() - 0.5);
 
