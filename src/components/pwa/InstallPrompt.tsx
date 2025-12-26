@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Download, X } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 export default function InstallPrompt() {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -7,6 +8,9 @@ export default function InstallPrompt() {
     const [isIOS, setIsIOS] = useState(false);
 
     useEffect(() => {
+        // Don't show install prompt in native app - it's already installed!
+        if (Capacitor.isNativePlatform()) return;
+
         // Check for iOS
         const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
         setIsIOS(isIosDevice);

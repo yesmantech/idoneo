@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
 
 interface ReferralStats {
     referralCode: string;
@@ -67,7 +69,7 @@ export function useReferral() {
                         : 'In lista';
 
             const referralCode = profile.referral_code || '';
-            const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://idoneo.ai';
+            const baseUrl = 'https://idoneo.ai';
 
             setStats({
                 referralCode,
@@ -110,12 +112,29 @@ export function useReferral() {
     };
 
     const nativeShare = async () => {
-        if (navigator.share) {
+        const title = 'Idoneo - Preparati al concorso';
+        const text = '🎓 Sto preparando il mio prossimo concorso con Idoneo! Iscriviti anche tu alla waitlist:';
+        const url = stats.referralLink;
+
+        if (Capacitor.isNativePlatform()) {
+            try {
+                await Share.share({
+                    title,
+                    text,
+                    url,
+                    dialogTitle: 'Invita amici su Idoneo',
+                });
+                return true;
+            } catch (err) {
+                console.error('Error sharing', err);
+                return false;
+            }
+        } else if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'Idoneo - Preparati al concorso',
-                    text: '🎓 Sto preparando il mio prossimo concorso con Idoneo! Iscriviti anche tu alla waitlist:',
-                    url: stats.referralLink,
+                    title,
+                    text,
+                    url,
                 });
                 return true;
             } catch {

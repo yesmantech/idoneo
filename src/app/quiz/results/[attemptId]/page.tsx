@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
-import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check } from "lucide-react";
+import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen } from "lucide-react";
 import { SuccessBadge } from "@/components/ui/SuccessBadge";
 import confetti from "canvas-confetti";
 
@@ -34,7 +34,7 @@ interface AttemptData {
     answers: RichAnswer[];
     is_idoneo: boolean | null;
     pass_threshold: number | null;
-    xp_awarded?: boolean; // Added
+    xp_awarded?: boolean;
 }
 
 type TabType = 'errate' | 'corrette' | 'omesse';
@@ -43,7 +43,7 @@ type TabType = 'errate' | 'corrette' | 'omesse';
 const IDONEO_CONFETTI_COLORS = ['#22C55E', '#00B1FF', '#FBBF24', '#F472B6', '#8B5CF6'];
 
 // =============================================================================
-// QUIZ RESULTS PAGE - Idoneo Redesign
+// QUIZ RESULTS PAGE - Desktop/Tablet Optimized
 // =============================================================================
 export default function QuizResultsPage() {
     const { attemptId } = useParams<{ attemptId: string }>();
@@ -78,19 +78,14 @@ export default function QuizResultsPage() {
         const awardXP = async () => {
             if (attempt && attempt.user_id && attemptId && !xpAwardedRef.current) {
                 xpAwardedRef.current = true;
-
-                // 1. If already awarded (by Runner), display the score
                 if (attempt.xp_awarded) {
                     setXpEarned(attempt.correct || 0);
                     return;
                 }
-
-                // 2. Otherwise try to award it now
                 const earned = await xpService.awardXpForAttempt(attemptId, attempt.user_id);
                 if (earned > 0) {
                     setXpEarned(earned);
                 } else if (earned === 0 && attempt.correct > 0) {
-                    // Fallback: If service returns 0 (maybe race condition), use correct count
                     setXpEarned(attempt.correct);
                 }
             }
@@ -98,16 +93,14 @@ export default function QuizResultsPage() {
         awardXP();
     }, [attempt, attemptId]);
 
-    // Confetti celebration (fires once based on performance)
+    // Confetti celebration
     useEffect(() => {
         if (!attempt || confettiFiredRef.current) return;
         confettiFiredRef.current = true;
 
-        // Calculate performance percentage
         const total = attempt.total_questions || 1;
         const correctPercentage = (attempt.correct / total) * 100;
 
-        // Scale confetti based on performance
         let particleCount = 50;
         let spread = 80;
 
@@ -119,9 +112,7 @@ export default function QuizResultsPage() {
             spread = 120;
         }
 
-        // Fire confetti immediately with a short delay to ensure page is rendered
         setTimeout(() => {
-            // Center burst
             confetti({
                 particleCount: Math.floor(particleCount / 2),
                 spread,
@@ -130,8 +121,6 @@ export default function QuizResultsPage() {
                 zIndex: 9999,
                 disableForReducedMotion: true
             });
-
-            // Left burst
             confetti({
                 particleCount: Math.floor(particleCount / 4),
                 angle: 60,
@@ -141,8 +130,6 @@ export default function QuizResultsPage() {
                 zIndex: 9999,
                 disableForReducedMotion: true
             });
-
-            // Right burst
             confetti({
                 particleCount: Math.floor(particleCount / 4),
                 angle: 120,
@@ -228,6 +215,7 @@ export default function QuizResultsPage() {
     const wrongList = attempt.answers.filter(a => !a.isCorrect && !a.isSkipped).map(a => ({
         id: a.questionId,
         text: a.text,
+        subject: a.subjectName,
         userAnswer: getOptionText(a, a.selectedOption),
         correctAnswer: getOptionText(a, a.correctOption),
     }));
@@ -235,6 +223,7 @@ export default function QuizResultsPage() {
     const correctList = attempt.answers.filter(a => a.isCorrect).map(a => ({
         id: a.questionId,
         text: a.text,
+        subject: a.subjectName,
         userAnswer: getOptionText(a, a.selectedOption),
         correctAnswer: getOptionText(a, a.correctOption),
     }));
@@ -242,14 +231,15 @@ export default function QuizResultsPage() {
     const skippedList = attempt.answers.filter(a => a.isSkipped).map(a => ({
         id: a.questionId,
         text: a.text,
+        subject: a.subjectName,
         userAnswer: "-",
         correctAnswer: getOptionText(a, a.correctOption),
     }));
 
     const hasErrors = (wrongList.length + skippedList.length) > 0;
     const total = attempt.total_questions || 1;
+    const percentage = Math.round((attempt.correct / total) * 100);
 
-    // Get filtered list based on active tab
     const getFilteredList = () => {
         switch (activeTab) {
             case 'errate': return wrongList;
@@ -259,188 +249,267 @@ export default function QuizResultsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] pb-40">
+        <div className="min-h-screen bg-[#F5F5F7] pb-32 lg:pb-8">
             {/* ============================================================= */}
-            {/* COMPLETION HERO */}
+            {/* COMPLETION HERO - Responsive */}
             {/* ============================================================= */}
-            <div className="bg-white pt-12 pb-8 px-6 text-center relative">
-                {/* Animated Success Badge */}
-                <div className="flex justify-center mb-5">
-                    <SuccessBadge />
-                </div>
+            <div className="bg-white pt-8 lg:pt-12 pb-6 lg:pb-8 px-6 text-center relative pt-safe">
+                <div className="max-w-4xl mx-auto">
+                    {/* Success Badge */}
+                    <div className="flex justify-center mb-4 lg:mb-6">
+                        <SuccessBadge />
+                    </div>
 
-                <h1 className="text-[26px] font-bold text-slate-900 mb-2">
-                    Quiz Completato! 🚀
-                </h1>
-                <p className="text-[15px] text-slate-500 max-w-xs mx-auto pb-4">
-                    Hai completato la simulazione. Controlla le risposte per migliorare.
-                </p>
+                    <h1 className="text-2xl lg:text-4xl font-bold text-slate-900 mb-2">
+                        Quiz Completato! 🚀
+                    </h1>
+                    <p className="text-sm lg:text-base text-slate-500 max-w-md mx-auto">
+                        Hai completato la simulazione. Controlla le risposte per migliorare.
+                    </p>
+                </div>
             </div>
 
-            <div className="px-5 max-w-lg mx-auto">
+            <div className="px-4 lg:px-8 max-w-6xl mx-auto">
                 {/* ============================================================= */}
-                {/* SCORE & XP CARDS ROW */}
+                {/* STATS GRID - Desktop: 4 columns, Tablet: 2x2, Mobile: 2+3 */}
                 {/* ============================================================= */}
-                <div className="flex gap-3 mt-4 mb-5">
-                    {/* Score Card */}
-                    <div className="flex-1 bg-white rounded-3xl p-4 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                        <div className="flex items-center justify-center gap-2 mb-2">
-                            <Trophy className="w-4 h-4 text-amber-500" />
-                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Punteggio</span>
-                        </div>
-                        <div className="text-[28px] font-bold text-slate-900">
-                            {attempt.score.toFixed(2)}
-                        </div>
-                    </div>
-
-                    {/* XP Card */}
-                    <div className="flex-1 bg-white rounded-3xl p-4 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                        <div className="flex items-center justify-center gap-2 mb-2">
-                            <Zap className="w-4 h-4 text-purple-500" />
-                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">XP Guadagnati</span>
-                        </div>
-                        <div className="text-[28px] font-bold text-purple-500">
-                            +{xpEarned ?? 0}
-                        </div>
-                    </div>
-                </div>
-
-                {/* ============================================================= */}
-                {/* CORRECT / WRONG / SKIPPED SUMMARY */}
-                {/* ============================================================= */}
-                <div className="flex gap-2 mb-6">
-                    {/* Correct */}
-                    <div className="flex-1 bg-white rounded-xl p-3 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                        <div className="text-[24px] font-bold text-emerald-500">{attempt.correct}</div>
-                        <div className="text-[11px] text-slate-500">
-                            Corrette <span className="text-emerald-500">({Math.round((attempt.correct / total) * 100)}%)</span>
-                        </div>
-                    </div>
-
-                    {/* Wrong */}
-                    <div className="flex-1 bg-white rounded-xl p-3 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                        <div className="text-[24px] font-bold text-red-500">{attempt.wrong}</div>
-                        <div className="text-[11px] text-slate-500">
-                            Errate <span className="text-red-500">({Math.round((attempt.wrong / total) * 100)}%)</span>
-                        </div>
-                    </div>
-
-                    {/* Skipped */}
-                    <div className="flex-1 bg-white rounded-xl p-3 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                        <div className="text-[24px] font-bold text-slate-400">{attempt.blank}</div>
-                        <div className="text-[11px] text-slate-500">
-                            Omesse <span className="text-slate-400">({Math.round((attempt.blank / total) * 100)}%)</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ============================================================= */}
-                {/* TABS - ERRATE / CORRETTE / OMESSE */}
-                {/* ============================================================= */}
-                <div className="bg-slate-200/60 p-1 rounded-xl mb-5">
-                    <div className="flex">
-                        <button
-                            onClick={() => setActiveTab('errate')}
-                            className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold transition-all ${activeTab === 'errate'
-                                ? 'bg-white text-red-500 shadow-sm'
-                                : 'text-slate-500'
-                                }`}
-                        >
-                            Errate ({wrongList.length})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('corrette')}
-                            className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold transition-all ${activeTab === 'corrette'
-                                ? 'bg-white text-emerald-500 shadow-sm'
-                                : 'text-slate-500'
-                                }`}
-                        >
-                            Corrette ({correctList.length})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('omesse')}
-                            className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold transition-all ${activeTab === 'omesse'
-                                ? 'bg-white text-slate-600 shadow-sm'
-                                : 'text-slate-500'
-                                }`}
-                        >
-                            Omesse ({skippedList.length})
-                        </button>
-                    </div>
-                </div>
-
-                {/* ============================================================= */}
-                {/* QUESTION REVIEW LIST */}
-                {/* ============================================================= */}
-                <div className="space-y-3">
-                    {getFilteredList().length === 0 ? (
-                        <div className="bg-white rounded-2xl p-8 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                            <div className="text-4xl mb-3">
-                                {activeTab === 'errate' ? '🎉' : activeTab === 'corrette' ? '📋' : '📝'}
+                <div className="mt-6 lg:mt-8">
+                    {/* Main Stats Row */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4">
+                        {/* Score Card */}
+                        <div className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                                <Trophy className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" />
+                                <span className="text-[10px] lg:text-xs font-semibold text-slate-400 uppercase tracking-wider">Punteggio</span>
                             </div>
-                            <p className="text-slate-500 text-[14px]">
-                                {activeTab === 'errate'
-                                    ? 'Nessun errore! Ottimo lavoro.'
-                                    : activeTab === 'corrette'
-                                        ? 'Nessuna risposta corretta.'
-                                        : 'Nessuna risposta omessa.'}
-                            </p>
+                            <div className="text-2xl lg:text-4xl font-bold text-slate-900">
+                                {attempt.score.toFixed(2)}
+                            </div>
                         </div>
-                    ) : (
-                        getFilteredList().map((q, idx) => (
-                            <Link
-                                key={q.id}
-                                to={`/quiz/explanations/${attemptId}/${q.id}`}
-                                className="block bg-white rounded-2xl p-4 transition-all hover:shadow-md active:scale-[0.99]"
-                                style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
-                            >
-                                <div className="flex items-start gap-3">
-                                    {/* Status Icon */}
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeTab === 'errate'
-                                        ? 'bg-red-100'
-                                        : activeTab === 'corrette'
-                                            ? 'bg-emerald-100'
-                                            : 'bg-slate-100'
-                                        }`}>
-                                        {activeTab === 'errate' && <X className="w-4 h-4 text-red-500" />}
-                                        {activeTab === 'corrette' && <Check className="w-4 h-4 text-emerald-500" />}
-                                        {activeTab === 'omesse' && <Minus className="w-4 h-4 text-slate-400" />}
-                                    </div>
 
-                                    {/* Content */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[14px] font-medium text-slate-900 line-clamp-2 mb-2">
-                                            {q.text}
-                                        </p>
-                                        <div className="space-y-1">
-                                            <p className="text-[12px]">
-                                                <span className="text-slate-400">Hai risposto:</span>{' '}
-                                                <span className={activeTab === 'corrette' ? 'text-emerald-600' : 'text-red-500'}>
-                                                    {q.userAnswer}
-                                                </span>
-                                            </p>
-                                            <p className="text-[12px]">
-                                                <span className="text-slate-400">Corretta:</span>{' '}
-                                                <span className="text-emerald-600">{q.correctAnswer}</span>
-                                            </p>
-                                        </div>
-                                    </div>
+                        {/* XP Card */}
+                        <div className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                                <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-purple-500" />
+                                <span className="text-[10px] lg:text-xs font-semibold text-slate-400 uppercase tracking-wider">XP Guadagnati</span>
+                            </div>
+                            <div className="text-2xl lg:text-4xl font-bold text-purple-500">
+                                +{xpEarned ?? 0}
+                            </div>
+                        </div>
 
-                                    {/* Chevron */}
-                                    <ChevronRight className="w-5 h-5 text-slate-300 flex-shrink-0 mt-1" />
+                        {/* Accuracy Card - Desktop Only */}
+                        <div className="hidden lg:block bg-white rounded-3xl p-6 text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                                <Target className="w-5 h-5 text-emerald-500" />
+                                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precisione</span>
+                            </div>
+                            <div className="text-4xl font-bold text-emerald-500">
+                                {percentage}%
+                            </div>
+                        </div>
+
+                        {/* Questions Card - Desktop Only */}
+                        <div className="hidden lg:block bg-white rounded-3xl p-6 text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                                <BookOpen className="w-5 h-5 text-sky-500" />
+                                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Domande</span>
+                            </div>
+                            <div className="text-4xl font-bold text-sky-500">
+                                {total}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Correct / Wrong / Skipped Summary */}
+                    <div className="grid grid-cols-3 gap-2 lg:gap-4">
+                        {/* Correct */}
+                        <div className="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
+                            <div className="text-xl lg:text-3xl font-bold text-emerald-500">{attempt.correct}</div>
+                            <div className="text-[10px] lg:text-sm text-slate-500">
+                                Corrette <span className="text-emerald-500">({Math.round((attempt.correct / total) * 100)}%)</span>
+                            </div>
+                        </div>
+
+                        {/* Wrong */}
+                        <div className="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
+                            <div className="text-xl lg:text-3xl font-bold text-red-500">{attempt.wrong}</div>
+                            <div className="text-[10px] lg:text-sm text-slate-500">
+                                Errate <span className="text-red-500">({Math.round((attempt.wrong / total) * 100)}%)</span>
+                            </div>
+                        </div>
+
+                        {/* Skipped */}
+                        <div className="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
+                            <div className="text-xl lg:text-3xl font-bold text-slate-400">{attempt.blank}</div>
+                            <div className="text-[10px] lg:text-sm text-slate-500">
+                                Omesse <span className="text-slate-400">({Math.round((attempt.blank / total) * 100)}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* TABS + CONTENT - Two Column Layout on Desktop */}
+                {/* ============================================================= */}
+                <div className="mt-6 lg:mt-8 lg:grid lg:grid-cols-[280px_1fr] lg:gap-6">
+                    {/* Left Sidebar - Tabs + CTA (Desktop) */}
+                    <div className="lg:space-y-4">
+                        {/* Tabs */}
+                        <div className="bg-slate-200/60 p-1 rounded-xl mb-4 lg:mb-0 lg:bg-white lg:rounded-2xl lg:p-3 lg:shadow-sm">
+                            <div className="flex lg:flex-col lg:gap-1">
+                                <button
+                                    onClick={() => setActiveTab('errate')}
+                                    className={`flex-1 lg:w-full py-2.5 lg:py-3 lg:px-4 rounded-lg lg:rounded-xl text-[13px] lg:text-sm font-semibold transition-all lg:text-left lg:flex lg:items-center lg:justify-between ${activeTab === 'errate'
+                                        ? 'bg-white text-red-500 shadow-sm lg:bg-red-50 lg:shadow-none'
+                                        : 'text-slate-500 lg:hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <span className="lg:flex lg:items-center lg:gap-2">
+                                        <X className="hidden lg:block w-4 h-4" />
+                                        Errate
+                                    </span>
+                                    <span className="lg:bg-red-100 lg:text-red-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
+                                        {wrongList.length}
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('corrette')}
+                                    className={`flex-1 lg:w-full py-2.5 lg:py-3 lg:px-4 rounded-lg lg:rounded-xl text-[13px] lg:text-sm font-semibold transition-all lg:text-left lg:flex lg:items-center lg:justify-between ${activeTab === 'corrette'
+                                        ? 'bg-white text-emerald-500 shadow-sm lg:bg-emerald-50 lg:shadow-none'
+                                        : 'text-slate-500 lg:hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <span className="lg:flex lg:items-center lg:gap-2">
+                                        <Check className="hidden lg:block w-4 h-4" />
+                                        Corrette
+                                    </span>
+                                    <span className="lg:bg-emerald-100 lg:text-emerald-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
+                                        {correctList.length}
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('omesse')}
+                                    className={`flex-1 lg:w-full py-2.5 lg:py-3 lg:px-4 rounded-lg lg:rounded-xl text-[13px] lg:text-sm font-semibold transition-all lg:text-left lg:flex lg:items-center lg:justify-between ${activeTab === 'omesse'
+                                        ? 'bg-white text-slate-600 shadow-sm lg:bg-slate-100 lg:shadow-none'
+                                        : 'text-slate-500 lg:hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <span className="lg:flex lg:items-center lg:gap-2">
+                                        <Minus className="hidden lg:block w-4 h-4" />
+                                        Omesse
+                                    </span>
+                                    <span className="lg:bg-slate-200 lg:text-slate-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
+                                        {skippedList.length}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* CTA Buttons - Desktop Sidebar */}
+                        <div className="hidden lg:block space-y-3">
+                            {hasErrors ? (
+                                <button
+                                    onClick={handleRipassaErrori}
+                                    disabled={processingReview}
+                                    className="w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/25 hover:shadow-xl hover:-translate-y-0.5"
+                                >
+                                    {processingReview ? (
+                                        <span>Caricamento...</span>
+                                    ) : (
+                                        <>
+                                            <RotateCcw className="w-5 h-5" />
+                                            Ripassa Errori ({wrongList.length + skippedList.length})
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="bg-emerald-50 rounded-2xl p-4 text-center border border-emerald-100">
+                                    <div className="text-2xl mb-1">🌟</div>
+                                    <p className="text-emerald-600 font-semibold text-sm">Nessun Errore!</p>
                                 </div>
-                            </Link>
-                        ))
-                    )}
+                            )}
+                            <button
+                                onClick={() => navigate("/")}
+                                className="w-full py-3 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors bg-white rounded-xl shadow-sm hover:shadow"
+                            >
+                                Torna alla Home
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Right Content - Questions List */}
+                    <div className="lg:min-h-[400px]">
+                        {getFilteredList().length === 0 ? (
+                            <div className="bg-white rounded-2xl lg:rounded-3xl p-8 lg:p-12 text-center shadow-sm">
+                                <div className="text-5xl lg:text-6xl mb-4">
+                                    {activeTab === 'errate' ? '🎉' : activeTab === 'corrette' ? '📋' : '📝'}
+                                </div>
+                                <p className="text-slate-500 text-sm lg:text-base">
+                                    {activeTab === 'errate'
+                                        ? 'Nessun errore! Ottimo lavoro.'
+                                        : activeTab === 'corrette'
+                                            ? 'Nessuna risposta corretta.'
+                                            : 'Nessuna risposta omessa.'}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-3 lg:gap-4 lg:grid-cols-2 xl:grid-cols-2">
+                                {getFilteredList().map((q) => (
+                                    <Link
+                                        key={q.id}
+                                        to={`/quiz/explanations/${attemptId}/${q.id}`}
+                                        className="block bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-5 transition-all hover:shadow-lg hover:-translate-y-0.5 shadow-sm group"
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            {/* Status Icon */}
+                                            <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 ${activeTab === 'errate'
+                                                ? 'bg-red-100'
+                                                : activeTab === 'corrette'
+                                                    ? 'bg-emerald-100'
+                                                    : 'bg-slate-100'
+                                                }`}>
+                                                {activeTab === 'errate' && <X className="w-5 h-5 lg:w-6 lg:h-6 text-red-500" />}
+                                                {activeTab === 'corrette' && <Check className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-500" />}
+                                                {activeTab === 'omesse' && <Minus className="w-5 h-5 lg:w-6 lg:h-6 text-slate-400" />}
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="flex-1 min-w-0">
+                                                {q.subject && (
+                                                    <span className="inline-block text-[10px] lg:text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">
+                                                        {q.subject}
+                                                    </span>
+                                                )}
+                                                <p className="text-sm lg:text-base font-medium text-slate-900 line-clamp-2 mb-2 lg:mb-3 group-hover:text-[#00B1FF] transition-colors">
+                                                    {q.text}
+                                                </p>
+                                                <div className="flex flex-wrap gap-2 lg:gap-3 text-[11px] lg:text-xs">
+                                                    <span className={`px-2 py-1 rounded-md ${activeTab === 'corrette' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                                                        Risposta: {q.userAnswer}
+                                                    </span>
+                                                    <span className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600">
+                                                        Corretta: {q.correctAnswer}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Chevron */}
+                                            <ChevronRight className="w-5 h-5 text-slate-300 flex-shrink-0 group-hover:text-[#00B1FF] transition-colors" />
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
             {/* ============================================================= */}
-            {/* BOTTOM CTA AREA */}
+            {/* BOTTOM CTA - Mobile Only */}
             {/* ============================================================= */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-5 py-4 pb-safe z-50">
-                <div className="max-w-lg mx-auto space-y-3">
-                    {/* Primary CTA */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-5 py-3 pb-safe z-50">
+                <div className="max-w-lg mx-auto space-y-2">
                     {hasErrors ? (
                         <button
                             onClick={handleRipassaErrori}
@@ -465,18 +534,13 @@ export default function QuizResultsPage() {
                         </button>
                     )}
 
-                    {/* Secondary */}
-                    {hasErrors ? (
+                    {hasErrors && (
                         <button
                             onClick={() => navigate("/")}
                             className="w-full py-3 text-[15px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
                         >
                             Non ora
                         </button>
-                    ) : (
-                        <p className="w-full py-2 text-[15px] font-medium text-emerald-500 text-center">
-                            Nessun Errore! 🌟
-                        </p>
                     )}
                 </div>
             </div>

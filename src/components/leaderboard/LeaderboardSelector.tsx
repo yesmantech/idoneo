@@ -72,7 +72,7 @@ export default function LeaderboardSelector({
             {/* Trigger Pill */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-3 px-5 py-3 bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.05)] 
+                className={`flex items-center gap-3 px-5 py-3 bg-white rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] 
                            border transition-all duration-300 active:scale-[0.98]
                            ${isOpen
                         ? 'border-[#00B1FF]/30 ring-4 ring-[#00B1FF]/10'

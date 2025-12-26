@@ -37,36 +37,32 @@ const MENU_ITEMS: NavItem[] = [
         children: [
             { label: 'Articoli', path: '/admin/blog' },
             { label: 'Categorie', path: '/admin/blog/categorie' },
+            { label: 'Tag', path: '/admin/blog/tag' },
         ],
     },
     {
         icon: Trophy,
         label: 'Concorsi',
-        path: '/admin/concorsi',
+        path: '/admin/structure',
         children: [
-            { label: 'Lista', path: '/admin/concorsi' },
             { label: 'Struttura', path: '/admin/structure' },
+            { label: 'Quiz', path: '/admin/quiz' },
         ],
     },
     {
         icon: FileQuestion,
-        label: 'Quiz',
-        path: '/admin/quiz',
+        label: 'Domande',
+        path: '/admin/questions',
         children: [
-            { label: 'Domande', path: '/admin/questions' },
-            { label: 'Materie', path: '/admin/quiz' },
-            { label: 'Regole', path: '/admin/rules' },
+            { label: 'Lista', path: '/admin/questions' },
+            { label: 'Import CSV', path: '/admin/upload-csv' },
+            { label: 'Immagini', path: '/admin/images' },
         ],
     },
     {
         icon: Users,
         label: 'Utenti',
-        path: '/admin/utenti',
-    },
-    {
-        icon: Settings,
-        label: 'Impostazioni',
-        path: '/admin/impostazioni',
+        path: '/admin/users',
     },
 ];
 

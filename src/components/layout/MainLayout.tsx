@@ -5,6 +5,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import AdminSidebar from '../admin/AdminSidebar';
 import InstallPrompt from '../pwa/InstallPrompt';
 import { Home, Search, BookOpen, BarChart3, User, Trophy, Newspaper } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -49,48 +50,87 @@ export default function MainLayout({ children }: MainLayoutProps) {
         { Icon: User, label: 'Profilo', path: '/profile' },
     ];
 
+    // Check if running as native app
+    const isNativeApp = Capacitor.isNativePlatform();
+
+    // Check if on pages where bottom nav should be hidden (blog, concorsi, quiz)
+    const hideBottomNav = location.pathname.startsWith('/blog') ||
+        location.pathname.startsWith('/concorsi') ||
+        location.pathname.startsWith('/quiz') ||
+        location.pathname === '/profile/settings';
+
+    // Pages that handle their own safe area in their headers
+    const hasOwnSafeArea = location.pathname === '/' ||
+        location.pathname.startsWith('/blog') ||
+        location.pathname.startsWith('/concorsi') ||
+        location.pathname.startsWith('/quiz') ||
+        location.pathname.startsWith('/profile') ||
+        location.pathname.startsWith('/leaderboard');
+
+    // Check if we're on the home page for the fixed top bar color
+    const isHomePage = location.pathname === '/';
+
     return (
-        <div className="flex min-h-screen bg-white font-sans text-slate-900">
+        <div className="flex min-h-screen bg-[#F5F5F7] font-sans text-slate-900">
+            {/* Fixed top safe area cover to prevent overscroll showing empty area */}
+            {isNativeApp && !isAdmin && (
+                <div
+                    className="fixed top-0 left-0 right-0 z-[100]"
+                    style={{
+                        height: 'env(safe-area-inset-top, 0px)',
+                        backgroundColor: '#F5F5F7'
+                    }}
+                />
+            )}
+
             {/* Sidebar (Desktop) & Drawer (Mobile) */}
             {isAdmin ? <AdminSidebar /> : <Sidebar />}
 
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-in-out">
 
-                <main className="flex-1 pb-24 lg:pb-8 pt-safe animate-in fade-in duration-500">
+                <main
+                    className={`flex-1 ${hideBottomNav ? 'pb-8' : 'pb-28'} lg:pb-8 animate-in fade-in duration-500`}
+                    style={isNativeApp && !isAdmin && !hasOwnSafeArea ? { paddingTop: 'env(safe-area-inset-top, 0px)' } : undefined}
+                >
                     {children}
                 </main>
 
-                {/* Mobile Bottom Navigation - Idoneo Style */}
-                {!isAdmin && (
-                    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg 
-                                    border-t border-slate-100 px-2 py-2 pb-safe z-40 
-                                    flex justify-around items-center 
-                                    shadow-[0_-4px_30px_rgba(0,0,0,0.06)]">
-                        {NAV_ITEMS.map(item => {
-                            const isActive = location.pathname === item.path ||
-                                (item.path !== '/' && location.pathname.startsWith(item.path));
-                            return (
-                                <Link
-                                    key={item.path}
-                                    to={item.path}
-                                    className={`flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all min-w-[60px]
-                                                ${isActive
-                                            ? 'text-[#00B1FF]'
-                                            : 'text-slate-400 hover:text-slate-600'
-                                        }`}
-                                >
-                                    <item.Icon
-                                        className={`w-6 h-6 transition-all ${isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`}
-                                        fill={isActive ? 'currentColor' : 'none'}
-                                    />
-                                    <span className={`text-[10px] font-semibold ${isActive ? 'opacity-100' : 'opacity-70'}`}>
-                                        {item.label}
-                                    </span>
-                                </Link>
-                            )
-                        })}
-                    </nav>
+                {/* Mobile Bottom Navigation - Floating Pill Style (hidden on blog and concorsi) */}
+                {!isAdmin && !hideBottomNav && (
+                    <div
+                        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-4"
+                        style={{ paddingBottom: isNativeApp ? 'max(12px, env(safe-area-inset-bottom, 12px))' : '12px' }}
+                    >
+                        <div className="flex items-center gap-3">
+                            {/* Nav Pill */}
+                            <nav className="flex-1 bg-slate-100/90 backdrop-blur-xl rounded-full px-2 py-2 flex justify-around items-center shadow-lg shadow-slate-900/5">
+                                {NAV_ITEMS.map(item => {
+                                    const isActive = location.pathname === item.path ||
+                                        (item.path !== '/' && location.pathname.startsWith(item.path));
+                                    return (
+                                        <Link
+                                            key={item.path}
+                                            to={item.path}
+                                            className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full transition-all
+                                                        ${isActive
+                                                    ? 'bg-white shadow-sm'
+                                                    : ''
+                                                }`}
+                                        >
+                                            <item.Icon
+                                                className={`w-5 h-5 transition-all ${isActive ? 'text-slate-900' : 'text-slate-500'}`}
+                                                strokeWidth={isActive ? 2.5 : 1.5}
+                                            />
+                                            <span className={`text-[10px] font-semibold ${isActive ? 'text-slate-900' : 'text-slate-500'}`}>
+                                                {item.label}
+                                            </span>
+                                        </Link>
+                                    )
+                                })}
+                            </nav>
+                        </div>
+                    </div>
                 )}
 
                 {/* PWA Install Prompt */}

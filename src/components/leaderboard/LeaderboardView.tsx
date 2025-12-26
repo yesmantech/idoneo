@@ -8,11 +8,15 @@ interface LeaderboardViewProps {
     theme: 'gold' | 'emerald';
     metricLabel: string;
     emptyMessage?: string;
+    currentUserEntry?: LeaderboardEntry | null;
 }
 
-export default function LeaderboardView({ data, loading, theme, metricLabel, emptyMessage }: LeaderboardViewProps) {
+export default function LeaderboardView({ data, loading, theme, metricLabel, emptyMessage, currentUserEntry }: LeaderboardViewProps) {
     const top3 = data.slice(0, 3);
     const list = data.slice(3);
+
+    const isUserInTopList = data.some(e => e.isCurrentUser);
+    const showStickyUser = !!currentUserEntry && !isUserInTopList;
 
     const isGold = theme === 'gold';
 
@@ -53,18 +57,9 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
     return (
         <div className="flex flex-col h-full bg-white">
 
-            {/* Meta Header */}
-            <div className="text-center py-6 border-b border-slate-50 bg-gradient-to-b from-white to-slate-50/50">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100/50 rounded-full border border-slate-200/50">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        {data.length} Partecipanti
-                    </span>
-                </div>
-            </div>
 
-            <div className="flex-1 overflow-y-auto scrollbar-hide relative">
-                <div className="px-4 pb-20 pt-6">
+            <div className="flex-1 overflow-y-auto scrollbar-hide relative bg-white">
+                <div className="px-4 pb-20 pt-4">
                     {/* PODIUM */}
                     <div className="mb-8">
                         <Podium top3={top3} metricLabel={metricLabel} />
@@ -84,6 +79,21 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
                     </div>
                 </div>
             </div>
+
+            {/* STICKY USER ROW */}
+            {showStickyUser && currentUserEntry && (
+                <div className="flex-none p-4 pb-6 bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] z-50">
+                    <div className="max-w-3xl mx-auto">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center opacity-70">
+                            La tua posizione attuale
+                        </div>
+                        <RankingRow
+                            entry={currentUserEntry}
+                            metricLabel={metricLabel}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -94,13 +104,13 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
     const [first, second, third] = top3;
 
     return (
-        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[190px] px-2">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] px-2 pt-16 overflow-visible">
             {/* 2nd Place - Silver */}
             <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-1">
                 {second && (
                     <>
                         <div className="relative group">
-                            <div className="w-20 h-20 rounded-[24px] border-[3px] border-slate-200 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] p-0.5 overflow-hidden z-10 relative">
+                            <div className="w-20 h-20 rounded-[28px] border-[3px] border-slate-200 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] p-0.5 overflow-hidden z-10 relative">
                                 <img
                                     src={second.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${second.user.nickname}`}
                                     alt={second.user.nickname}
@@ -120,14 +130,14 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
             </div>
 
             {/* 1st Place - Gold */}
-            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[130px] -mt-8 order-2 z-20">
+            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[130px] -mt-14 order-2 z-20 overflow-visible">
                 {first && (
                     <>
                         <div className="relative group scale-110">
-                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none">
-                                <Crown className="w-8 h-8 text-amber-400 fill-amber-400 drop-shadow-sm" />
+                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-none z-50">
+                                <Crown className="w-10 h-10 text-amber-400 fill-amber-400 drop-shadow-md animate-bounce-subtle" />
                             </div>
-                            <div className="w-24 h-24 rounded-[28px] border-[3px] border-amber-300 bg-white shadow-[0_8px_24px_rgba(251,191,36,0.25)] p-0.5 overflow-hidden z-10 relative ring-4 ring-amber-50">
+                            <div className="w-24 h-24 rounded-[32px] border-[3px] border-amber-300 bg-white shadow-[0_8px_24px_rgba(251,191,36,0.25)] p-0.5 overflow-hidden z-10 relative ring-4 ring-amber-50">
                                 <img
                                     src={first.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${first.user.nickname}`}
                                     alt={first.user.nickname}
@@ -151,7 +161,7 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
                 {third && (
                     <>
                         <div className="relative group">
-                            <div className="w-20 h-20 rounded-[24px] border-[3px] border-orange-200 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] p-0.5 overflow-hidden z-10 relative">
+                            <div className="w-20 h-20 rounded-[28px] border-[3px] border-orange-200 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] p-0.5 overflow-hidden z-10 relative">
                                 <img
                                     src={third.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${third.user.nickname}`}
                                     alt={third.user.nickname}
@@ -182,7 +192,7 @@ const RankingRow = ({ entry, metricLabel }: { key?: React.Key, entry: Leaderboar
     return (
         <div
             onClick={() => hasBreakdown && setExpanded(!expanded)}
-            className={`group flex flex-col p-3.5 rounded-[20px] transition-all duration-200 cursor-pointer ${entry.isCurrentUser
+            className={`group flex flex-col p-3.5 rounded-[24px] transition-all duration-200 cursor-pointer ${entry.isCurrentUser
                 ? 'bg-[#F0F9FF] border border-[#BAE6FD] shadow-sm scale-[1.01] sticky z-30 -mx-2 px-5'
                 : 'bg-transparent border border-transparent hover:bg-slate-50'
                 }`}>
@@ -192,7 +202,7 @@ const RankingRow = ({ entry, metricLabel }: { key?: React.Key, entry: Leaderboar
                     {entry.rank}
                 </span>
 
-                <div className="w-10 h-10 rounded-[14px] bg-slate-100 overflow-hidden flex-shrink-0 shadow-sm border border-slate-50">
+                <div className="w-10 h-10 rounded-[16px] bg-slate-100 overflow-hidden flex-shrink-0 shadow-sm border border-slate-50">
                     <img
                         src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`}
                         alt="Avatar"

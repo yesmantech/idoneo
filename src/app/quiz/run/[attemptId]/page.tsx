@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
 import { statsService } from "@/lib/statsService";
 import { leaderboardService } from "@/lib/leaderboardService";
+import { badgeService } from "@/lib/badgeService";
 import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 // Types
@@ -53,13 +54,32 @@ export default function QuizRunnerPage() {
     const [showSettings, setShowSettings] = useState(false);
     const [drawerExpanded, setDrawerExpanded] = useState(false);
 
-    // Modes
-    const [instantCheck, setInstantCheck] = useState(false);
-    const [autoNext, setAutoNext] = useState(false);
+    // Modes - Load from localStorage for persistence
+    const [instantCheck, setInstantCheck] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('quiz_instant_check') === 'true';
+        }
+        return false;
+    });
+    const [autoNext, setAutoNext] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('quiz_auto_next') === 'true';
+        }
+        return false;
+    });
     const [quizConfig, setQuizConfig] = useState<{
         useCustomPassThreshold: boolean;
         minCorrectForPass: number | null;
     } | null>(null);
+
+    // Persist settings to localStorage
+    useEffect(() => {
+        localStorage.setItem('quiz_instant_check', String(instantCheck));
+    }, [instantCheck]);
+
+    useEffect(() => {
+        localStorage.setItem('quiz_auto_next', String(autoNext));
+    }, [autoNext]);
 
     // Ref to hold latest answers
     const answeringRef = useRef<RichAnswer[]>([]);
@@ -297,6 +317,9 @@ export default function QuizRunnerPage() {
 
                     // 3. Update Leaderboard
                     await leaderboardService.updateUserScore(user.id, currentAttempt.quiz_id);
+
+                    // 4. Check & Award Badges
+                    await badgeService.checkAndAwardBadges(user.id);
                 }
             }
         } catch (err) {
@@ -341,7 +364,7 @@ export default function QuizRunnerPage() {
             {/* ============================================================= */}
             {/* TOP BAR */}
             {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+            <header className="sticky top-0 z-50 bg-white border-b border-slate-100 pt-safe">
                 <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
                     {/* Left: Close */}
                     <Link
@@ -399,7 +422,7 @@ export default function QuizRunnerPage() {
             {/* ============================================================= */}
             {/* QUESTION CONTENT */}
             {/* ============================================================= */}
-            <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-48">
+            <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-36">
                 {/* Question Meta */}
                 <div className="mb-3">
                     <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-wider">
@@ -544,7 +567,7 @@ export default function QuizRunnerPage() {
 
                 {/* Collapsible Question Pills */}
                 <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-60' : 'max-h-14'
+                    className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[40vh] overflow-y-auto' : 'max-h-14 overflow-hidden'
                         }`}
                 >
                     <div className="px-4 py-3 border-b border-slate-50">

@@ -259,6 +259,11 @@ body {
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
   --safe-area-right: env(safe-area-inset-right, 0px);
+  /* Short-form aliases for JS hook */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 /* Utility classes for safe area padding */
@@ -316,4 +321,20 @@ body {
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
   }
+}
+
+@keyframes bounce-subtle {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }

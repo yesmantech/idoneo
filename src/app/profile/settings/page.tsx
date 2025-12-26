@@ -111,11 +111,11 @@ export default function ProfileSettingsPage() {
         <div className="min-h-screen bg-[#F5F5F7] pb-28">
 
             {/* Header */}
-            <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-100">
-                <div className="flex items-center justify-between px-4 py-4 max-w-md mx-auto">
+            <header className="sticky top-0 z-20 bg-[#F5F5F7]/80 backdrop-blur-md pt-safe">
+                <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
                     <button
                         onClick={() => navigate('/profile')}
-                        className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all hover:bg-slate-200 active:scale-95"
+                        className="w-10 h-10 rounded-full bg-slate-100/50 flex items-center justify-center transition-all hover:bg-slate-200 active:scale-95 border border-slate-200/50 shadow-sm"
                     >
                         <ArrowLeft className="w-5 h-5 text-slate-600" />
                     </button>

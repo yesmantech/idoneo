@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import HomePage from './app/page';
 import LoginPage from './app/login/page';
@@ -63,6 +63,9 @@ import QuizStatsPage from './app/profile/stats/QuizStatsPage';
 import MainLayout from './components/layout/MainLayout';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
+// Native app initialization
+import { initializeNativeApp } from './lib/nativeConfig';
+
 // Loading fallback for lazy-loaded components
 const AdminLoading = () => (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -74,6 +77,11 @@ const AdminLoading = () => (
 );
 
 export default function App() {
+    // Initialize native app features on mount
+    useEffect(() => {
+        initializeNativeApp();
+    }, []);
+
     return (
         <BrowserRouter>
             <ErrorBoundary>

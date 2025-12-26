@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabaseClient';
-import { Settings, Share2, Plus } from 'lucide-react';
+import { Settings, Share2, Trophy, Zap, Target } from 'lucide-react';
 
 // Components
 import ProfileIdentityCard from '@/components/profile/ProfileIdentityCard';
@@ -49,52 +48,43 @@ export default function ProfilePage() {
             {/* Animated Background Decorations */}
             <ProfileBackgroundDecor />
 
-            {/* 1. HERO HEADER */}
-            {/* 1. MINIMAL HEADER */}
-            <header className="relative pt-safe bg-transparent flex justify-end items-start p-4">
-                {/* Actions */}
-                <div className="flex gap-3 mt-2">
-                    <button
-                        onClick={() => alert("Condivisione in arrivo!")}
-                        className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-md border border-slate-200/50 flex items-center justify-center transition-all hover:bg-white active:scale-95 shadow-sm"
-                    >
-                        <Share2 className="w-5 h-5 text-slate-700" />
-                    </button>
-                    <button
-                        onClick={() => navigate('/profile/settings')}
-                        className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-md border border-slate-200/50 flex items-center justify-center transition-all hover:bg-white active:scale-95 shadow-sm"
-                    >
-                        <Settings className="w-5 h-5 text-slate-700" />
-                    </button>
-                </div>
-            </header>
+            {/* Safe area spacer */}
+            <div className="pt-safe" />
 
-            <div className="max-w-md mx-auto relative px-5">
+            {/* Main Content - Desktop: Two Column Layout */}
+            <div className="max-w-6xl mx-auto relative px-4 lg:px-6">
+                <div className="lg:grid lg:grid-cols-[340px_1fr] lg:gap-8">
 
-                {/* 2. OVERLAPPING IDENTITY CARD */}
-                <ProfileIdentityCard
-                    user={user}
-                    profile={profile}
-                />
+                    {/* Left Column: Identity + Stats */}
+                    <div className="lg:sticky lg:top-6 lg:self-start space-y-6">
+                        {/* Identity Card */}
+                        <ProfileIdentityCard
+                            user={user}
+                            profile={profile}
+                        />
 
-                <div className="space-y-6">
-                    {/* 3. STATS ROW */}
-                    <ProfileStatsCard xp={xp} />
+                        {/* Stats Row */}
+                        <ProfileStatsCard xp={xp} />
 
-                    {/* 4. DASHBOARD LIST */}
-                    {/* We need to pass the "wrapper" styling or modify DashboardList to NOT have internal padding if needed. 
-                        DashboardList currently has its own container. Let's inspect/adjust if needed. 
-                        Actually DashboardList uses `p-8` or `p-4` internally. We might want to clear that up 
-                        or just rely on it. Given the mockup, it should be a clean list. 
-                        The current DashboardList component returns a `div`. We'll just render it here.
-                    */}
-                    <DashboardList userId={user?.id || ''} />
+                        {/* Badges - Desktop Only in Left Column */}
+                        <div className="hidden lg:block">
+                            <BadgesBlock />
+                        </div>
+                    </div>
 
-                    {/* 5. BADGES */}
-                    <BadgesBlock />
+                    {/* Right Column: Dashboard + More */}
+                    <div className="space-y-6 mt-6 lg:mt-0">
+                        {/* Dashboard List */}
+                        <DashboardList userId={user?.id || ''} />
 
-                    {/* 6. FRIENDS & INVITES */}
-                    <FriendsBlock userId={user?.id || ''} />
+                        {/* Friends Block */}
+                        <FriendsBlock userId={user?.id || ''} />
+
+                        {/* Badges - Mobile Only */}
+                        <div className="lg:hidden">
+                            <BadgesBlock />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

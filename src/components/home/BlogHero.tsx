@@ -142,7 +142,7 @@ export default function BlogHero() {
     const secondaryPosts = posts.slice(1, 3);
 
     return (
-        <section className="px-4 py-6 md:py-10">
+        <section className="px-4 py-6 md:py-10 pt-safe">
             <div className="max-w-7xl mx-auto">
                 {/* Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">

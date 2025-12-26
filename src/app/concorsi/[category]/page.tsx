@@ -38,7 +38,7 @@ export default function ConcorsoHubPage() {
 
   return (
     <div className="min-h-screen bg-white pb-20">
-      <main className="px-5 max-w-lg mx-auto pt-4">
+      <main className="px-5 max-w-lg mx-auto pt-4 pt-safe">
         {/* ============================================================= */}
         {/* BACK BUTTON + LOGO CONTAINER */}
         {/* ============================================================= */}

@@ -14,15 +14,15 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
     return (
         <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
             {/* Header */}
-            <div className="flex-none px-4 py-4 flex items-center justify-between border-b border-slate-50 bg-white/80 backdrop-blur-md sticky top-0 z-10">
+            <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-slate-50 bg-white/90 backdrop-blur-md sticky top-0 z-10">
                 <button
                     onClick={onBack}
-                    className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-700"
+                    className="p-3 -ml-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
                 >
                     <ArrowLeft className="w-6 h-6" />
                 </button>
-                <h1 className="font-bold text-lg text-slate-900">Come funziona</h1>
-                <div className="w-10" /> {/* Spacer */}
+                <h1 className="font-black text-lg text-slate-900">Come funziona</h1>
+                <div className="w-12" /> {/* Spacer for centering title */}
             </div>
 
             {/* Content Container */}

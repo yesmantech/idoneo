@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Category } from "@/lib/data";
-import { ChevronRight, CheckCircle2, Shield, Building2, Heart, Briefcase, GraduationCap, Scale, Sparkles } from "lucide-react";
+import { ChevronRight, ChevronLeft, CheckCircle2, Shield, Building2, Heart, Briefcase, GraduationCap, Scale, Sparkles } from "lucide-react";
 
 interface ConcorsoCardProps {
     contest: Category;
@@ -9,12 +9,9 @@ interface ConcorsoCardProps {
 }
 
 // =============================================================================
-// CONCORSO CARD (Rich Aesthetics)
+// CONCORSO CARD (Responsive)
 // =============================================================================
 export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
-    // -------------------------------------------------------------------------
-    // DYNAMIC STYLING LOGIC (Restored)
-    // -------------------------------------------------------------------------
     const getStyle = (title: string, idx: number) => {
         const lower = title.toLowerCase();
 
@@ -49,18 +46,15 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
     };
 
     const { Icon, gradient, glow } = getStyle(contest.title, index);
-
-    // Use real available_seats from database, fallback to generated for demo
     const postiDisponibili = contest.available_seats || null;
 
     return (
         <Link
             to={`/concorsi/${contest.slug}`}
-            className="group relative bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col overflow-hidden"
+            className="group relative bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col overflow-hidden rounded-[20px] lg:rounded-[24px]"
             style={{
-                width: 'calc((100vw - 32px) * 0.48)', // ~170px on 390 (Narrower as requested)
-                height: '190px',
-                borderRadius: '20px',
+                width: 'clamp(160px, calc((100vw - 32px) * 0.48), 280px)',
+                height: 'clamp(190px, 22vh, 260px)',
             }}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
@@ -68,7 +62,6 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                 className="relative overflow-hidden flex items-center justify-center"
                 style={{ aspectRatio: '2 / 1', width: '100%' }}
             >
-                {/* Show uploaded banner image if available */}
                 {contest.home_banner_url ? (
                     <img
                         src={contest.home_banner_url}
@@ -77,16 +70,11 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                     />
                 ) : (
                     <>
-                        {/* Fallback: Gradient background */}
                         <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
-
-                        {/* Light reflection top-down */}
                         <div
                             className="absolute inset-0"
                             style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, transparent 70%)' }}
                         />
-
-                        {/* Inner Glow behind icon */}
                         <div
                             className="absolute"
                             style={{
@@ -95,8 +83,6 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                                 filter: 'blur(12px)',
                             }}
                         />
-
-                        {/* Glassmorphic Icon Container */}
                         <div
                             className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
                             style={{
@@ -114,7 +100,6 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                     </>
                 )}
 
-                {/* Badge if new */}
                 {contest.is_new && (
                     <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur text-[#00B1FF] text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm z-10">
                         NUOVO
@@ -123,44 +108,29 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
             </div>
 
             {/* 2. TEXT AREA */}
-            <div
-                className="flex flex-col justify-between bg-white relative z-10"
-                style={{ padding: '12px', flex: 1 }}
-            >
+            <div className="flex flex-col justify-between bg-white relative z-10 p-3 lg:p-4 flex-1">
                 <div>
-                    <h3
-                        className="font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#00B1FF] transition-colors"
-                        style={{ fontSize: '13px' }}
-                    >
+                    <h3 className="font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#00B1FF] transition-colors text-[13px] lg:text-[15px]">
                         {contest.title}
                     </h3>
                     {contest.subtitle && (
-                        <p
-                            className="text-slate-500 line-clamp-1 mt-0.5"
-                            style={{ fontSize: '10px' }}
-                        >
+                        <p className="text-slate-500 line-clamp-1 mt-0.5 text-[10px] lg:text-[12px]">
                             {contest.subtitle}
                         </p>
                     )}
                 </div>
 
-                {/* Footer: Year & Seats - only show if we have data */}
                 {(contest.year || postiDisponibili) && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mt-2">
                         {contest.year && (
-                            <span
-                                className="text-slate-400 font-semibold"
-                                style={{ fontSize: '10px' }}
-                            >
+                            <span className="text-slate-400 font-semibold text-[10px] lg:text-[11px]">
                                 {contest.year}
                             </span>
                         )}
-
-                        {/* Show seats badge only if available_seats is set */}
                         {postiDisponibili && (
                             <div className="flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
                                 <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
-                                <span className="text-emerald-600 font-bold" style={{ fontSize: '9px' }}>
+                                <span className="text-emerald-600 font-bold text-[9px] lg:text-[10px]">
                                     {postiDisponibili} posti
                                 </span>
                             </div>
@@ -173,14 +143,14 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
 }
 
 // =============================================================================
-// CAROUSEL SECTION
+// CAROUSEL SECTION (Desktop: Grid / Mobile: Carousel)
 // =============================================================================
 export default function ConcorsiSection({ title, contests }: { title: string; contests: Category[] }) {
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
         if (scrollRef.current) {
-            const amount = direction === 'left' ? -200 : 200;
+            const amount = direction === 'left' ? -300 : 300;
             scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
         }
     };
@@ -188,61 +158,50 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
     if (!contests || contests.length === 0) return null;
 
     return (
-        <div>
-            {/* Header Row - Aligned with search bar (px-4 = 16px) */}
-            <div
-                className="flex justify-between items-center px-4"
-                style={{
-                    minHeight: '40px',
-                    marginBottom: '12px'
-                }}
-            >
-                <div className="flex items-center gap-2.5 h-full">
-                    {/* Compact Icon */}
-                    <div className="w-9 h-9 rounded-[12px] bg-[#E0F2FE] flex items-center justify-center">
-                        <Sparkles className="w-4.5 h-4.5 text-[#00B1FF]" fill="#00B1FF" />
+        <div className="max-w-7xl lg:mx-auto">
+            {/* Header Row */}
+            <div className="flex justify-between items-center px-4 lg:px-8 mb-4 lg:mb-6">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-[12px] bg-[#E0F2FE] flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-[#00B1FF]" fill="#00B1FF" />
                     </div>
-                    <h2 className="text-[17px] font-bold text-slate-900 leading-none">
+                    <h2 className="text-[17px] lg:text-xl font-bold text-slate-900 leading-none">
                         {title}
                     </h2>
                 </div>
 
-                {/* Navigation Buttons - Compact */}
+                {/* Navigation Buttons */}
                 <div className="flex gap-2">
                     <button
                         onClick={() => scroll('left')}
-                        className="w-9 h-9 rounded-full bg-white/80 border border-slate-200 hover:bg-white flex items-center justify-center transition-all"
+                        className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
                     >
-                        <ChevronRight className="w-4 h-4 text-slate-500 rotate-180" />
+                        <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5 text-slate-500" />
                     </button>
                     <button
                         onClick={() => scroll('right')}
-                        className="w-9 h-9 rounded-full bg-white/80 border border-slate-200 hover:bg-white flex items-center justify-center transition-all"
+                        className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
                     >
-                        <ChevronRight className="w-4 h-4 text-slate-500" />
+                        <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 text-slate-500" />
                     </button>
                 </div>
             </div>
 
-            {/* Carousel Container - Aligned with search bar */}
+            {/* Carousel Container */}
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide py-2 -my-2"
-                style={{
-                    height: '220px',
-                    gap: '12px',
-                    alignItems: 'flex-start'
-                }}
+                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide py-2 -my-2 gap-3 lg:gap-4"
+                style={{ alignItems: 'flex-start' }}
             >
-                {/* Left spacer to align with search bar px-4 */}
-                <div className="w-4 flex-shrink-0" style={{ minWidth: '16px' }} />
+                {/* Left spacer */}
+                <div className="w-4 lg:w-8 flex-shrink-0" />
                 {contests.map((contest, idx) => (
                     <div key={idx} className="snap-start flex-shrink-0">
                         <ConcorsoCard contest={contest} index={idx} />
                     </div>
                 ))}
-                {/* Spacer for end padding */}
-                <div className="w-4 flex-shrink-0" />
+                {/* Right spacer */}
+                <div className="w-4 lg:w-8 flex-shrink-0" />
             </div>
         </div>
     );

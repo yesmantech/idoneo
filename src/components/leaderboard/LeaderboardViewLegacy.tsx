@@ -42,14 +42,7 @@ export default function LeaderboardViewLegacy({ data, loading, theme, metricLabe
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            {/* Stats Header */}
-            <div className="text-center mb-12 mt-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-canvas-light rounded-pill text-[10px] font-bold text-text-tertiary uppercase tracking-widest">
-                    <span>👥 {data.length} Partecipanti</span>
-                    <span>•</span>
-                    <span className={accentColor}>{metricLabel}</span>
-                </div>
-            </div>
+            {/* Removed redundant Stats Header as it's now in UnifiedLeaderboardPage */}
 
             {/* Podium */}
             <Podium top3={top3} theme={theme} metricLabel={metricLabel} />
@@ -74,7 +67,7 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
     const rankBg = isGold ? 'bg-brand-orange' : 'bg-brand-cyan';
 
     return (
-        <div className="flex items-end justify-center gap-4 mb-4 min-h-[170px] pb-6 px-4">
+        <div className="flex items-end justify-center gap-4 mb-4 min-h-[220px] pb-6 px-4 pt-24 overflow-visible">
             {/* 2nd Place */}
             <div className="flex flex-col items-center gap-2 w-1/3 max-w-[100px]">
                 {second && (

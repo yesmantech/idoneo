@@ -3,6 +3,8 @@ import { Users, Gift, UserPlus, Search, Check, X } from 'lucide-react';
 import ReferralModal from '@/components/referral/ReferralModal';
 import AddFriendModal from './AddFriendModal';
 import { friendService, FriendProfile } from '@/lib/friendService';
+import { useReferral } from '@/hooks/useReferral';
+import { Capacitor } from '@capacitor/core';
 
 interface FriendsBlockProps {
     userId: string;
@@ -13,9 +15,16 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
     const [pendingReceived, setPendingReceived] = useState<FriendProfile[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Referral Logic (Pre-loading for modal)
+    useReferral();
+
     // Modals
     const [showReferralModal, setShowReferralModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+
+    const handleInvite = () => {
+        setShowReferralModal(true);
+    };
 
     const refreshData = async () => {
         if (!userId) return;
@@ -61,7 +70,7 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                     </button>
                     {friends.length > 0 && (
                         <button
-                            onClick={() => setShowReferralModal(true)}
+                            onClick={handleInvite}
                             className="text-sm font-bold text-[#00B1FF] hover:text-[#0099e6] transition-colors"
                         >
                             Invita
@@ -137,7 +146,7 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                             Cerca
                         </button>
                         <button
-                            onClick={() => setShowReferralModal(true)}
+                            onClick={handleInvite}
                             className="px-5 py-2.5 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all text-sm"
                         >
                             <Gift className="w-4 h-4" />

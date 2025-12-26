@@ -225,6 +225,104 @@ export const leaderboardService = {
         }));
     },
 
+    // 2b. Get User's Total Participnats Count for a quiz
+    async getParticipantsCount(quizId: string): Promise<number> {
+        const { count, error } = await supabase
+            .from('concorso_leaderboard')
+            .select('*', { count: 'exact', head: true })
+            .eq('quiz_id', quizId);
+
+        if (error) return 0;
+        return count || 0;
+    },
+
+    async getXPParticipantsCount(): Promise<number> {
+        const { count, error } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .not('total_xp', 'is', null);
+
+        if (error) return 0;
+        return count || 0;
+    },
+
+    // 2c. Get Specific User Rank
+    async getUserSkillRank(userId: string, quizId: string): Promise<LeaderboardEntry | null> {
+        // Fetch user's score first
+        const { data: userRow, error: scoreError } = await supabase
+            .from('concorso_leaderboard')
+            .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+            .eq('user_id', userId)
+            .eq('quiz_id', quizId)
+            .maybeSingle();
+
+        if (scoreError || !userRow) return null;
+
+        // Count how many have higher score
+        const { count: higherCount, error: rankError } = await supabase
+            .from('concorso_leaderboard')
+            .select('*', { count: 'exact', head: true })
+            .eq('quiz_id', quizId)
+            .gt('score', userRow.score);
+
+        if (rankError) return null;
+
+        // Get Profile
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, nickname, avatar_url')
+            .eq('id', userId)
+            .single();
+
+        return {
+            rank: (higherCount || 0) + 1,
+            user: {
+                id: userId,
+                nickname: profile?.nickname || 'Io',
+                avatarUrl: profile?.avatar_url
+            },
+            score: Number(userRow.score),
+            isCurrentUser: true,
+            breakdown: {
+                volume: userRow.volume_factor,
+                accuracy: userRow.accuracy_weighted,
+                recency: userRow.recency_score || 0,
+                coverage: userRow.coverage_score || 0,
+                reliability: userRow.reliability || 0
+            }
+        };
+    },
+
+    async getUserXPRank(userId: string): Promise<LeaderboardEntry | null> {
+        // Fetch user's total_xp
+        const { data: profileRow, error: scoreError } = await supabase
+            .from('profiles')
+            .select('total_xp, nickname, avatar_url')
+            .eq('id', userId)
+            .single();
+
+        if (scoreError || !profileRow || profileRow.total_xp === null) return null;
+
+        // Count how many have higher XP
+        const { count: higherCount, error: rankError } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .gt('total_xp', profileRow.total_xp);
+
+        if (rankError) return null;
+
+        return {
+            rank: (higherCount || 0) + 1,
+            user: {
+                id: userId,
+                nickname: profileRow.nickname || 'Io',
+                avatarUrl: profileRow.avatar_url
+            },
+            score: profileRow.total_xp,
+            isCurrentUser: true
+        };
+    },
+
     // 3. Get User's Active Quizzes (for "My Concorsi" selector)
     async getUserActiveQuizzes(userId: string) {
         // Fetch attempts with quiz details

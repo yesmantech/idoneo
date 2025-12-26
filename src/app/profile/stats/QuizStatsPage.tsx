@@ -269,22 +269,23 @@ export default function QuizStatsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-canvas-light text-text-primary pb-24 md:px-8 md:py-8">
-            <div className="max-w-7xl mx-auto space-y-8 px-4 md:px-0 pt-6 md:pt-0">
+        <div className="min-h-screen bg-[#F5F5F7] text-text-primary pb-24 relative overflow-hidden">
+            <div className="max-w-7xl mx-auto space-y-6 px-4 md:px-8 pt-safe">
 
 
                 {/* Header */}
-                <div className="flex items-center gap-4 relative">
+                <div className="flex items-center justify-between gap-4 py-4">
                     <button
                         onClick={() => navigate("/profile")}
                         className="p-3 bg-white rounded-full shadow-soft hover:shadow-card hover:scale-105 transition-all text-slate-400 hover:text-slate-900 border border-transparent hover:border-slate-100"
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
-                    <div className="flex-1 text-center pr-12"> {/* Balance the back button spacing */}
-                        <h1 className="text-2xl font-black text-text-primary leading-tight">{quizTitle}</h1>
-                        <p className="text-xs font-bold text-text-tertiary uppercase tracking-wider mt-0.5">Statistiche Dettagliate</p>
+                    <div className="flex-1 text-center">
+                        <h1 className="text-xl font-black text-text-primary leading-tight line-clamp-1">{quizTitle}</h1>
+                        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mt-0.5">Statistiche Dettagliate</p>
                     </div>
+                    <div className="w-12" /> {/* Layout balancer */}
                 </div>
 
                 {/* 1. KPIs with Trends */}

@@ -2,19 +2,19 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
+import { Home, User, Trophy, Newspaper, Shield, Heart, Briefcase, X, LogIn } from 'lucide-react';
 
-// Reusing the items logic - we could export this from Sidebar or config
 const MENU_ITEMS = [
-    { icon: '🏠', label: 'Home', path: '/' },
-    { icon: '👤', label: 'Profilo', path: '/profile' },
-    { icon: '🏆', label: 'Classifica', path: '/leaderboard' },
-    { icon: '📰', label: 'Blog & News', path: '/blog' },
+    { icon: Home, label: 'Home', path: '/' },
+    { icon: User, label: 'Profilo', path: '/profile' },
+    { icon: Trophy, label: 'Classifica', path: '/leaderboard' },
+    { icon: Newspaper, label: 'Blog & News', path: '/blog' },
 ];
 
 const SECONDARY_ITEMS = [
-    { icon: '👮', label: 'Forze Armate', path: '/concorsi/forze-armate' },
-    { icon: '🏥', label: 'Sanità', path: '/concorsi/sanita' },
-    { icon: '💼', label: 'Amministrativi', path: '/concorsi/amministrativi' },
+    { icon: Shield, label: 'Forze Armate', path: '/concorsi/forze-armate' },
+    { icon: Heart, label: 'Sanità', path: '/concorsi/sanita' },
+    { icon: Briefcase, label: 'Amministrativi', path: '/concorsi/amministrativi' },
 ];
 
 export default function MobileDrawer() {
@@ -28,27 +28,27 @@ export default function MobileDrawer() {
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
                 onClick={() => setMobileOpen(false)}
             />
 
             {/* Drawer */}
             <div
-                className="fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 lg:hidden shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col border-r border-slate-100"
+                className="fixed top-0 left-0 bottom-0 w-[300px] bg-[#F5F5F7] z-50 lg:hidden shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-canvas-light">
-                    <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-                        <div className="w-9 h-9 bg-brand-cyan rounded-squircle flex items-center justify-center text-white font-black text-lg shadow-soft">
+                <div className="flex items-center justify-between p-5 border-b border-slate-200/50 bg-white">
+                    <Link to="/" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#00B1FF] to-[#0091D5] rounded-[14px] flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#00B1FF]/20">
                             I
                         </div>
-                        <span className="text-text-primary font-black text-xl tracking-tight">IDONEO</span>
+                        <span className="text-slate-900 font-black text-xl tracking-tight">IDONEO</span>
                     </Link>
                     <button
                         onClick={() => setMobileOpen(false)}
-                        className="p-2 -mr-2 text-text-tertiary hover:text-text-primary hover:bg-canvas-light rounded-full transition-colors"
+                        className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 
@@ -58,20 +58,22 @@ export default function MobileDrawer() {
                     <div className="space-y-1">
                         {MENU_ITEMS.map((item) => {
                             const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+                            const Icon = item.icon;
                             return (
                                 <Link
                                     key={item.path}
                                     to={item.path}
                                     onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center gap-3 px-3 py-3.5 rounded-xl transition-all ${isActive
-                                        ? 'bg-canvas-light text-brand-cyan font-bold shadow-sm'
-                                        : 'text-text-secondary font-medium hover:text-text-primary hover:bg-canvas-light'
+                                    className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${isActive
+                                        ? 'bg-white text-slate-900 font-bold shadow-sm'
+                                        : 'text-slate-500 font-medium hover:text-slate-700 hover:bg-white/60'
                                         }`}
                                 >
-                                    <span className="text-xl">{item.icon}</span>
+                                    {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#00B1FF] rounded-full" />}
+                                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#00B1FF]' : 'text-slate-400'}`} />
                                     <span>{item.label}</span>
                                     {isActive && (
-                                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-cyan shadow-[0_0_8px_rgba(6,214,211,0.5)]" />
+                                        <div className="ml-auto w-2 h-2 rounded-full bg-[#00B1FF] shadow-[0_0_8px_rgba(0,177,255,0.5)]" />
                                     )}
                                 </Link>
                             );
@@ -80,51 +82,52 @@ export default function MobileDrawer() {
 
                     {/* Categories */}
                     <div>
-                        <h3 className="px-3 text-xs font-bold text-text-tertiary uppercase tracking-widest mb-3">Categorie</h3>
+                        <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Categorie</h3>
                         <div className="space-y-1">
                             {SECONDARY_ITEMS.map((item) => {
                                 const isActive = location.pathname === item.path;
+                                const Icon = item.icon;
                                 return (
                                     <Link
                                         key={item.path}
                                         to={item.path}
                                         onClick={() => setMobileOpen(false)}
-                                        className={`flex items-center gap-3 px-3 py-3.5 rounded-xl transition-all ${isActive
-                                            ? 'bg-canvas-light text-brand-cyan font-bold'
-                                            : 'text-text-secondary font-medium hover:text-text-primary hover:bg-canvas-light'
+                                        className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${isActive
+                                            ? 'bg-white text-slate-900 font-bold shadow-sm'
+                                            : 'text-slate-500 font-medium hover:text-slate-700 hover:bg-white/60'
                                             }`}
                                     >
-                                        <span className="text-lg">{item.icon}</span>
+                                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#00B1FF] rounded-full" />}
+                                        <Icon className={`w-5 h-5 ${isActive ? 'text-[#00B1FF]' : 'text-slate-400'}`} />
                                         <span>{item.label}</span>
                                     </Link>
                                 );
                             })}
                         </div>
                     </div>
-
                 </div>
 
                 {/* Footer / User */}
-                <div className="p-4 border-t border-canvas-light bg-white">
+                <div className="p-4 border-t border-slate-200/50 bg-white">
                     <Link
                         to={user ? "/profile" : "/login"}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-canvas-light transition-all group border border-transparent hover:border-canvas-light"
+                        className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all group"
                     >
                         {user && profile?.avatar_url ? (
-                            <div className="w-10 h-10 rounded-squircle bg-canvas-light flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-brand-cyan/20 transition-all shadow-sm">
+                            <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-[#00B1FF]/20 transition-all shadow-sm">
                                 <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                             </div>
                         ) : (
-                            <div className="w-10 h-10 rounded-squircle bg-canvas-light flex items-center justify-center text-lg text-text-tertiary group-hover:bg-white group-hover:text-brand-cyan ring-2 ring-transparent group-hover:ring-brand-cyan/20 transition-all shadow-sm">
-                                {user ? '👤' : '🔑'}
+                            <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#00B1FF]/10 group-hover:text-[#00B1FF] ring-2 ring-transparent group-hover:ring-[#00B1FF]/20 transition-all shadow-sm">
+                                {user ? <User className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
                             </div>
                         )}
                         <div className="min-w-0">
-                            <p className="text-sm font-bold text-text-primary truncate max-w-[160px] group-hover:text-brand-cyan transition-colors">
+                            <p className="text-sm font-bold text-slate-900 truncate max-w-[180px] group-hover:text-[#00B1FF] transition-colors">
                                 {user ? (profile?.nickname || user.email?.split('@')[0]) : 'Accedi'}
                             </p>
-                            <p className="text-xs text-text-tertiary group-hover:text-text-secondary transition-colors">
+                            <p className="text-xs text-slate-400 group-hover:text-slate-500 transition-colors">
                                 {user ? 'Visualizza profilo' : 'Per salvare i progressi'}
                             </p>
                         </div>

@@ -227,9 +227,9 @@ export default function OfficialQuizStarterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
+        <div className="min-h-screen bg-[#F5F5F7] pb-20">
             {/* Top Bar */}
-            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+            <header className="sticky top-0 z-50 bg-white border-b border-slate-100 pt-safe">
                 <div className="px-4 h-14 flex items-center gap-3 max-w-3xl mx-auto w-full">
                     <button onClick={() => navigate(-1)} className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full hover:bg-slate-50">
                         <ChevronRight className="w-5 h-5 text-slate-400 rotate-180" />
@@ -238,7 +238,7 @@ export default function OfficialQuizStarterPage() {
                 </div>
             </header>
 
-            <main className="flex-1 px-5 py-8 max-w-lg mx-auto w-full flex flex-col">
+            <main className="px-5 py-6 max-w-lg mx-auto w-full">
                 <h1 className="text-2xl font-bold text-slate-900 mb-2">{quizDetails?.title}</h1>
                 <p className="text-slate-500 mb-8">
                     Questa simulazione replica le condizioni reali dell'esame ufficiale.
@@ -287,7 +287,7 @@ export default function OfficialQuizStarterPage() {
                 </div>
 
                 {/* Do Not Show Again Checkbox */}
-                <div className="flex items-center gap-3 mb-6 px-2">
+                <div className="flex items-center gap-3 px-2">
                     <div className="relative flex items-center">
                         <input
                             type="checkbox"
@@ -306,22 +306,26 @@ export default function OfficialQuizStarterPage() {
                         Non mostrare più questa schermata
                     </label>
                 </div>
-
-                {/* Start Button */}
-                <button
-                    onClick={() => handleStart()}
-                    disabled={starting}
-                    className="mt-auto w-full py-4 rounded-2xl bg-[#00B1FF] text-white font-bold text-lg shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                    {starting ? (
-                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                        <>
-                            Avvia Simulazione <Play className="w-5 h-5 fill-current" />
-                        </>
-                    )}
-                </button>
             </main>
+
+            {/* Fixed Bottom Start Button */}
+            <div className="fixed bottom-0 left-0 right-0 py-3 px-4 bg-white/95 backdrop-blur-lg border-t border-slate-100" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+                <div className="max-w-lg mx-auto">
+                    <button
+                        onClick={() => handleStart()}
+                        disabled={starting}
+                        className="w-full py-4 rounded-2xl bg-[#00B1FF] text-white font-bold text-lg shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                        {starting ? (
+                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                Avvia Simulazione <Play className="w-5 h-5 fill-current" />
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

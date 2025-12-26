@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { RotateCcw, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { RotateCcw, Eye, ChevronDown, ChevronUp, Check, X, AlertTriangle, ChevronRight } from 'lucide-react';
 
 interface Attempt {
     id: string;
@@ -27,24 +27,93 @@ type ResultFilter = 'all' | 'pass' | 'near' | 'fail';
 function getAttemptTypeDisplay(mode?: string | null) {
     switch (mode) {
         case 'custom':
-            return { label: 'Personalizzata', className: 'bg-brand-cyan/10 text-brand-cyan' };
+            return { label: 'Personalizzata', className: 'bg-purple-100 text-purple-600' };
         case 'official':
-            return { label: 'Esame', className: 'bg-brand-blue/10 text-brand-blue' };
+            return { label: 'Esame', className: 'bg-blue-100 text-blue-600' };
         case 'simulation':
-            return { label: 'Simulazione', className: 'bg-brand-purple/10 text-brand-purple' };
+            return { label: 'Simulazione', className: 'bg-sky-100 text-sky-600' };
         default:
-            return { label: 'Simulazione', className: 'bg-canvas-light text-text-secondary' };
+            return { label: 'Simulazione', className: 'bg-slate-100 text-slate-500' };
     }
 }
 
-function getResultStatus(accuracy: number): { label: string; status: 'pass' | 'near' | 'fail'; className: string } {
+function getResultStatus(accuracy: number): {
+    label: string;
+    status: 'pass' | 'near' | 'fail';
+    icon: typeof Check;
+    bgColor: string;
+    textColor: string;
+    progressColor: string;
+} {
     if (accuracy >= 60) {
-        return { label: 'Idoneo', status: 'pass', className: 'bg-semantic-success/10 text-semantic-success' };
+        return {
+            label: 'Idoneo',
+            status: 'pass',
+            icon: Check,
+            bgColor: 'bg-emerald-50',
+            textColor: 'text-emerald-600',
+            progressColor: '#10B981'
+        };
     } else if (accuracy >= 50) {
-        return { label: 'Quasi', status: 'near', className: 'bg-brand-orange/10 text-brand-orange' };
+        return {
+            label: 'Quasi',
+            status: 'near',
+            icon: AlertTriangle,
+            bgColor: 'bg-amber-50',
+            textColor: 'text-amber-600',
+            progressColor: '#F59E0B'
+        };
     } else {
-        return { label: 'Non idoneo', status: 'fail', className: 'bg-semantic-error/10 text-semantic-error' };
+        return {
+            label: 'Non idoneo',
+            status: 'fail',
+            icon: X,
+            bgColor: 'bg-red-50',
+            textColor: 'text-red-600',
+            progressColor: '#EF4444'
+        };
     }
+}
+
+// Circular progress component
+function CircularProgress({ percentage, color, size = 44 }: { percentage: number; color: string; size?: number }) {
+    const strokeWidth = 3;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = radius * 2 * Math.PI;
+    const offset = circumference - (percentage / 100) * circumference;
+
+    return (
+        <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+            <svg width={size} height={size} className="transform -rotate-90">
+                {/* Background circle */}
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={strokeWidth}
+                    className="text-slate-100"
+                />
+                {/* Progress circle */}
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={strokeWidth}
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    className="transition-all duration-500"
+                />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-slate-700">{percentage.toFixed(0)}%</span>
+            </div>
+        </div>
+    );
 }
 
 export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }: AttemptsHistoryTableProps) {
@@ -77,14 +146,14 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
         if (onRepeatTest) {
             onRepeatTest(attempt);
         } else if (quizId) {
-            // Default: navigate to official mode
             navigate(`/quiz/${quizId}/official`);
         }
     };
 
     if (attempts.length === 0) {
         return (
-            <div className="text-center py-8 text-slate-400">
+            <div className="text-center py-12 text-slate-400">
+                <div className="text-4xl mb-3">📝</div>
                 Nessuna attività recente.
             </div>
         );
@@ -97,11 +166,11 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
             {/* Filter Toggle */}
             <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 text-xs font-bold text-text-secondary hover:text-text-primary transition-colors"
+                className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
             >
                 Filtri
                 {hasActiveFilters && (
-                    <span className="w-2 h-2 rounded-full bg-brand-cyan"></span>
+                    <span className="w-2 h-2 rounded-full bg-[#00B1FF]"></span>
                 )}
                 {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
@@ -110,7 +179,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
             {showFilters && (
                 <div className="flex flex-wrap gap-4 pb-2">
                     <div className="flex gap-1">
-                        <span className="text-[10px] font-bold text-text-tertiary uppercase mr-2 self-center">Tipo:</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase mr-2 self-center">Tipo:</span>
                         {[
                             { value: 'all', label: 'Tutti' },
                             { value: 'official', label: 'Esame' },
@@ -119,7 +188,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                             <button
                                 key={f.value}
                                 onClick={() => setTypeFilter(f.value as FilterType)}
-                                className={`px-3 py-1 text-xs font-bold rounded-pill transition-all ${typeFilter === f.value ? 'bg-brand-cyan text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${typeFilter === f.value ? 'bg-[#00B1FF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                     }`}
                             >
                                 {f.label}
@@ -127,7 +196,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                         ))}
                     </div>
                     <div className="flex gap-1">
-                        <span className="text-[10px] font-bold text-text-tertiary uppercase mr-2 self-center">Risultato:</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase mr-2 self-center">Risultato:</span>
                         {[
                             { value: 'all', label: 'Tutti' },
                             { value: 'pass', label: 'Idoneo' },
@@ -137,7 +206,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                             <button
                                 key={f.value}
                                 onClick={() => setResultFilter(f.value as ResultFilter)}
-                                className={`px-3 py-1 text-xs font-bold rounded-pill transition-all ${resultFilter === f.value ? 'bg-text-primary text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${resultFilter === f.value ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                     }`}
                             >
                                 {f.label}
@@ -149,81 +218,73 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
 
             {/* Results Count */}
             {hasActiveFilters && (
-                <p className="text-xs text-text-tertiary">
+                <p className="text-xs text-slate-400">
                     {filteredAttempts.length} risultat{filteredAttempts.length === 1 ? 'o' : 'i'} trovat{filteredAttempts.length === 1 ? 'o' : 'i'}
                 </p>
             )}
 
-            {/* Table */}
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest border-b border-canvas-light">
-                            <th className="py-4 pl-4 text-left">Data</th>
-                            <th className="py-4 text-left">Tipo</th>
-                            <th className="py-4 text-left">Voto</th>
-                            <th className="py-4 text-left">Risultato</th>
-                            <th className="py-4 text-right pr-4">Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-sm text-text-secondary">
-                        {filteredAttempts.map(att => {
-                            const accuracy = att.total_questions > 0 ? (att.correct / att.total_questions) * 100 : 0;
-                            const resultStatus = getResultStatus(accuracy);
-                            const typeDisplay = getAttemptTypeDisplay(att.mode);
+            {/* Card-based List */}
+            <div className="space-y-3">
+                {filteredAttempts.map(att => {
+                    const accuracy = att.total_questions > 0 ? (att.correct / att.total_questions) * 100 : 0;
+                    const resultStatus = getResultStatus(accuracy);
+                    const typeDisplay = getAttemptTypeDisplay(att.mode);
+                    const ResultIcon = resultStatus.icon;
 
-                            return (
-                                <tr key={att.id} className="border-b border-canvas-light hover:bg-canvas-light/50 transition-colors group">
-                                    <td className="py-4 pl-4">
-                                        <div className="font-medium text-text-primary">
-                                            {new Date(att.created_at).toLocaleDateString()}
-                                        </div>
-                                        <div className="text-text-tertiary text-xs">
-                                            {new Date(att.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </div>
-                                    </td>
-                                    <td className="py-4">
-                                        <span className={`px-2.5 py-1 rounded-pill text-[10px] font-bold uppercase tracking-wide ${typeDisplay.className}`}>
+                    return (
+                        <Link
+                            key={att.id}
+                            to={`/quiz/results/${att.id}`}
+                            className="block bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] border border-slate-100 group"
+                        >
+                            <div className="flex items-center gap-4">
+                                {/* Circular Progress */}
+                                <CircularProgress
+                                    percentage={accuracy}
+                                    color={resultStatus.progressColor}
+                                />
+
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    {/* Date & Type */}
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <span className="text-sm font-bold text-slate-900">
+                                            {new Date(att.created_at).toLocaleDateString('it-IT', {
+                                                day: '2-digit',
+                                                month: 'short',
+                                                year: 'numeric'
+                                            })}
+                                        </span>
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${typeDisplay.className}`}>
                                             {typeDisplay.label}
                                         </span>
-                                    </td>
-                                    <td className="py-4 font-bold text-text-primary">
-                                        {att.score?.toFixed(1) || '0.0'}
-                                    </td>
-                                    <td className="py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-xs font-bold ${resultStatus.className}`}>
-                                            {accuracy.toFixed(0)}% · {resultStatus.label}
-                                        </span>
-                                    </td>
-                                    <td className="py-4 pr-4">
-                                        <div className="flex items-center justify-end gap-2">
-                                            {/* Repeat Test Button */}
-                                            <button
-                                                onClick={() => handleRepeatTest(att)}
-                                                className="p-2 rounded-lg hover:bg-canvas-light text-text-tertiary hover:text-brand-cyan transition-all opacity-0 group-hover:opacity-100"
-                                                title="Ripeti questo test"
-                                            >
-                                                <RotateCcw className="w-4 h-4" />
-                                            </button>
-                                            {/* View Details */}
-                                            <Link
-                                                to={`/quiz/results/${att.id}`}
-                                                className="p-2 rounded-lg hover:bg-brand-cyan/5 text-text-secondary hover:text-brand-cyan transition-all flex items-center gap-1"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                                <span className="text-xs font-bold hidden sm:inline">Dettagli</span>
-                                            </Link>
+                                    </div>
+
+                                    {/* Result Badge */}
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg ${resultStatus.bgColor}`}>
+                                            <ResultIcon className={`w-3.5 h-3.5 ${resultStatus.textColor}`} />
+                                            <span className={`text-xs font-bold ${resultStatus.textColor}`}>
+                                                {resultStatus.label}
+                                            </span>
                                         </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                                        <span className="text-[11px] text-slate-400">
+                                            {att.correct}/{att.total_questions} • Voto: {att.score?.toFixed(1) || '0.0'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Chevron */}
+                                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#00B1FF] transition-colors flex-shrink-0" />
+                            </div>
+                        </Link>
+                    );
+                })}
             </div>
 
             {filteredAttempts.length === 0 && (
-                <div className="text-center py-8 text-slate-400">
+                <div className="text-center py-12 text-slate-400">
+                    <div className="text-4xl mb-3">🔍</div>
                     Nessun tentativo corrisponde ai filtri selezionati.
                 </div>
             )}

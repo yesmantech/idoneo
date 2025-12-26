@@ -2,18 +2,68 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { useAuth } from '@/context/AuthContext';
+import { Info, Trophy, Zap, Clock } from 'lucide-react';
 
 import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/LeaderboardSelector';
 import LeaderboardView from '@/components/leaderboard/LeaderboardView';
-import LeaderboardSelectorLegacy from '@/components/leaderboard/LeaderboardSelectorLegacy';
 import LeaderboardViewLegacy from '@/components/leaderboard/LeaderboardViewLegacy';
+import InfoModal from '@/components/leaderboard/InfoModal';
+import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';
+
+function LeagueCountdown() {
+    const [timeLeft, setTimeLeft] = useState('--g --o --m');
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const now = new Date();
+            // Calculate next Monday at 00:00
+            const nextMonday = new Date();
+            const daysUntilMonday = (1 + 7 - now.getDay()) % 7;
+            const targetDate = daysUntilMonday === 0 ? 7 : daysUntilMonday; // If today is Monday, target next Monday
+            nextMonday.setDate(now.getDate() + targetDate);
+            nextMonday.setHours(0, 0, 0, 0);
+
+            const diff = nextMonday.getTime() - now.getTime();
+
+            if (diff <= 0) {
+                setTimeLeft('Resetting...');
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+
+            const pad = (n: number) => n.toString().padStart(2, '0');
+
+            if (days > 0) {
+                setTimeLeft(`${days}g ${pad(hours)}o ${pad(minutes)}m`);
+            } else {
+                setTimeLeft(`${pad(hours)}o ${pad(minutes)}m`);
+            }
+        };
+
+        calculateTimeLeft();
+        const timer = setInterval(calculateTimeLeft, 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-[14px] border border-amber-100 shadow-sm transition-all duration-300">
+            <Clock className="w-3 h-3 text-amber-500" />
+            <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide whitespace-nowrap">
+                {timeLeft}
+            </span>
+        </div>
+    );
+}
 
 export default function UnifiedLeaderboardPage() {
+
     const { user } = useAuth();
-    const isAdmin = user?.email === 'alessandro.valenza22@gmail.com';
+    const isAdmin = user?.email === 'alessandro.valenza22@gmail.com' || user?.email === 'alessandro.valenza22@icloud.com';
 
     // Conditional Components
-    // FORCE MODERN SELECTOR for consistency and debugging
     const SelectorComponent = LeaderboardSelector;
     const ViewComponent = isAdmin ? LeaderboardView : LeaderboardViewLegacy;
 
@@ -26,35 +76,34 @@ export default function UnifiedLeaderboardPage() {
 
     // Data State
     const [data, setData] = useState<LeaderboardEntry[]>([]);
+    const [userEntry, setUserEntry] = useState<LeaderboardEntry | null>(null);
+    const [participantsCount, setParticipantsCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
     // 1. Fetch Options (Active & Others)
     useEffect(() => {
         async function loadOptions() {
             try {
-                // A. Active Quizzes (If User Logged In)
                 let myQuizzes: QuizOption[] = [];
                 let myIds = new Set<string>();
 
                 if (user) {
                     const active = await leaderboardService.getUserActiveQuizzes(user.id);
-                    // FIX: 'active' array contains items where properties are spread, so use 'a.id', not 'a.quiz.id'
                     myQuizzes = active.map((a: any) => ({
                         id: a.id,
                         title: a.title,
                         slug: a.slug,
                         category: a.category_id,
-                        roleTitle: a.role?.title // Role is nested in the quiz object
+                        roleTitle: a.role?.title
                     }));
                     myIds = new Set(myQuizzes.map(q => q.id));
                     setActiveQuizzes(myQuizzes);
                 }
 
-                // B. Fetch All Quizzes for "Other" list
-                const { data: allQuizzes, error: quizError } = await supabase
+                const { data: allQuizzes } = await supabase
                     .from('quizzes')
                     .select('id, title, slug, role_id, role:roles(title)')
-                    .not('role_id', 'is', null) // Only those with a role
+                    .not('role_id', 'is', null)
                     .order('title', { ascending: true })
                     .limit(100);
 
@@ -70,7 +119,6 @@ export default function UnifiedLeaderboardPage() {
 
                     setOtherQuizzes(others);
                 }
-
             } catch (error: any) {
                 console.error("Error loading options", error);
             }
@@ -84,13 +132,29 @@ export default function UnifiedLeaderboardPage() {
             setLoading(true);
             try {
                 let entries: LeaderboardEntry[] = [];
+                let pCount = 0;
+                let personalEntry: LeaderboardEntry | null = null;
+
                 if (selection === 'xp') {
-                    entries = await leaderboardService.getXPLeaderboard();
+                    const [topEntries, total, myRank] = await Promise.all([
+                        leaderboardService.getXPLeaderboard(),
+                        leaderboardService.getXPParticipantsCount(),
+                        user ? leaderboardService.getUserXPRank(user.id) : null
+                    ]);
+                    entries = topEntries;
+                    pCount = total;
+                    personalEntry = myRank;
                 } else {
-                    entries = await leaderboardService.getSkillLeaderboard(selection);
+                    const [topEntries, total, myRank] = await Promise.all([
+                        leaderboardService.getSkillLeaderboard(selection),
+                        leaderboardService.getParticipantsCount(selection),
+                        user ? leaderboardService.getUserSkillRank(user.id, selection) : null
+                    ]);
+                    entries = topEntries;
+                    pCount = total;
+                    personalEntry = myRank;
                 }
 
-                // Mark current user
                 if (user) {
                     entries = entries.map(e => ({
                         ...e,
@@ -99,6 +163,8 @@ export default function UnifiedLeaderboardPage() {
                 }
 
                 setData(entries);
+                setParticipantsCount(pCount);
+                setUserEntry(personalEntry);
             } catch (error) {
                 console.error("Error loading leaderboard", error);
             } finally {
@@ -107,8 +173,6 @@ export default function UnifiedLeaderboardPage() {
         }
         loadLeaderboard();
     }, [selection, user]);
-
-
 
     // Computed Props
     const isXP = selection === 'xp';
@@ -123,9 +187,7 @@ export default function UnifiedLeaderboardPage() {
     useEffect(() => {
         const hasSeen = localStorage.getItem('idoneo_leaderboard_onboarding');
         if (!hasSeen) {
-            // Default to showing XP info first since it's the default view
             setInfoType('xp');
-            // Small delay for smooth entrance
             setTimeout(() => setShowInfoModal(true), 500);
         }
     }, []);
@@ -141,42 +203,104 @@ export default function UnifiedLeaderboardPage() {
     };
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden bg-canvas-light text-text-primary">
+        <div className="flex flex-col h-full overflow-hidden bg-[#F5F5F7] text-slate-900">
 
-            {/* Header Area */}
-            <div className="flex-none p-6 pt-8 flex flex-col items-center justify-center relative z-40">
+            {/* Header Area - Desktop Optimized */}
+            <div className="flex-none p-4 lg:p-8 pt-safe relative z-40">
+                <div className="max-w-5xl mx-auto px-2">
+                    {/* Desktop Header Row */}
+                    <div className="hidden lg:flex items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                <Trophy className="w-8 h-8 text-amber-500" />
+                                Classifica
+                            </h1>
+                            <p className="text-slate-500 mt-1">Competi con gli altri studenti e scala la classifica</p>
+                        </div>
+                        <button
+                            onClick={handleOpenInfo}
+                            className="p-3 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors shadow-sm border border-slate-200"
+                        >
+                            <Info className="w-5 h-5" />
+                        </button>
+                    </div>
 
-                {/* Info Icon - Top Right */}
-                <button
-                    onClick={handleOpenInfo}
-                    className="absolute top-8 right-6 p-2 rounded-full bg-white/50 hover:bg-white text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                    <Info className="w-6 h-6" />
-                </button>
+                    {/* Mobile Header Row */}
+                    <div className="lg:hidden flex items-center justify-between mb-6">
+                        <div className="w-10" /> {/* Spacer for centering selector */}
+                        <SelectorComponent
+                            currentSelection={selection}
+                            onSelect={setSelection}
+                            activeQuizzes={activeQuizzes}
+                            otherQuizzes={otherQuizzes}
+                        />
+                        <button
+                            onClick={handleOpenInfo}
+                            className="p-2 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            <Info className="w-6 h-6" />
+                        </button>
+                    </div>
 
-                <SelectorComponent
-                    currentSelection={selection}
-                    onSelect={setSelection}
-                    activeQuizzes={activeQuizzes}
-                    otherQuizzes={otherQuizzes}
-                />
+                    {/* Desktop Selector - Centered */}
+                    <div className="hidden lg:flex flex-col items-center justify-center">
+                        <SelectorComponent
+                            currentSelection={selection}
+                            onSelect={setSelection}
+                            activeQuizzes={activeQuizzes}
+                            otherQuizzes={otherQuizzes}
+                        />
+                    </div>
 
-                {/* Subtitle / Context */}
-                <p className="mt-3 text-sm text-text-tertiary font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-2 flex items-center gap-2">
-                    {isXP ? 'Classifica Settimanale' : 'Classifica Concorso'}
-                </p>
+                </div>
             </div>
 
-            {/* Main Content Area - Card Style */}
-            <div className="flex-1 overflow-hidden relative w-full max-w-2xl mx-auto px-4 lg:px-0 lg:pb-8">
-                <div className="relative h-full bg-white rounded-t-[32px] shadow-soft overflow-hidden flex flex-col border border-transparent">
-                    <ViewComponent
-                        data={data}
-                        loading={loading}
-                        theme={theme}
-                        metricLabel={isXP ? 'XP' : 'Punti'}
-                        emptyMessage={isXP ? "Nessun giocatore in questa lega ancora." : "Nessuno ha completato questa simulazione."}
-                    />
+            {/* Main Content Area - Responsive Card */}
+            <div className="flex-1 overflow-hidden relative w-full max-w-5xl mx-auto px-4 lg:px-8 pb-4 lg:pb-8">
+                <div className="relative h-full bg-white rounded-t-[32px] lg:rounded-[32px] shadow-lg flex flex-col border border-slate-200/50 overflow-hidden pb-safe">
+                    {/* Status Area: Subtitle + Participants + Timer */}
+                    {!loading && data.length > 0 && (
+                        <div className="flex-none flex flex-col items-center justify-center pt-4 pb-3 px-4 border-b border-slate-50/50 bg-white space-y-2">
+                            {/* Subtitle Inside Card */}
+                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                                {isXP ? (
+                                    <>
+                                        <Zap className="w-3.5 h-3.5 text-purple-500" />
+                                        Classifica Settimanale
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trophy className="w-3.5 h-3.5 text-emerald-500" />
+                                        Classifica Concorso
+                                    </>
+                                )}
+                            </p>
+
+                            <div className="flex items-center gap-2.5">
+                                {/* Participants Badge */}
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-[14px] border border-slate-100 shadow-sm transition-all hover:bg-slate-100">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse"></span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide whitespace-nowrap">
+                                        {participantsCount} {participantsCount === 1 ? 'Partecipante' : 'Partecipanti'}
+                                    </span>
+                                </div>
+
+                                {/* League Timer (Only for XP/Gold League) */}
+                                {isXP && <LeagueCountdown />}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex-1 overflow-visible">
+                        <ViewComponent
+                            data={data}
+                            currentUserEntry={userEntry}
+                            loading={loading}
+                            theme={theme}
+                            metricLabel={isXP ? 'XP' : 'Punti'}
+                            emptyMessage={isXP ? "Nessun giocatore in questa lega ancora." : "Nessuno ha completato questa simulazione."}
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -202,8 +326,3 @@ export default function UnifiedLeaderboardPage() {
         </div>
     );
 }
-
-// Import icons at top
-import { Info } from 'lucide-react';
-import InfoModal from '@/components/leaderboard/InfoModal';
-import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';
