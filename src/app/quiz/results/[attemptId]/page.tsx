@@ -253,7 +253,7 @@ export default function QuizResultsPage() {
             {/* ============================================================= */}
             {/* COMPLETION HERO - Responsive */}
             {/* ============================================================= */}
-            <div className="bg-white pt-8 lg:pt-12 pb-6 lg:pb-8 px-6 text-center relative pt-safe">
+            <div className="bg-white pt-4 lg:pt-8 pb-6 lg:pb-8 px-6 text-center relative pt-safe">
                 <div className="max-w-4xl mx-auto">
                     {/* Success Badge */}
                     <div className="flex justify-center mb-4 lg:mb-6">

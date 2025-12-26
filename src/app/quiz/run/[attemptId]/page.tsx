@@ -567,7 +567,7 @@ export default function QuizRunnerPage() {
 
                 {/* Collapsible Question Pills */}
                 <div
-                    className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[40vh] overflow-y-auto' : 'max-h-14 overflow-hidden'
+                    className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[50vh] overflow-y-auto' : 'max-h-14 overflow-hidden'
                         }`}
                 >
                     <div className="px-4 py-3 border-b border-slate-50">
@@ -603,35 +603,50 @@ export default function QuizRunnerPage() {
                     </div>
                 </div>
 
-                {/* Navigation Buttons */}
+                {/* Navigation Buttons - Show Termina when drawer expanded */}
                 <div className="px-4 py-3 flex gap-3 max-w-3xl mx-auto">
-                    <button
-                        onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
-                        disabled={currentIndex === 0}
-                        className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
-                            ? 'bg-slate-100 text-slate-300'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'
-                            }`}
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                        Precedente
-                    </button>
-
-                    {currentIndex === answering.length - 1 ? (
+                    {drawerExpanded ? (
                         <button
-                            onClick={() => setShowTerminateConfirm(true)}
-                            className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all"
+                            onClick={() => {
+                                setDrawerExpanded(false);
+                                setShowTerminateConfirm(true);
+                            }}
+                            className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
+                            <X className="w-4 h-4" />
                             Termina Quiz
                         </button>
                     ) : (
-                        <button
-                            onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
-                            className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                        >
-                            Successiva
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
+                        <>
+                            <button
+                                onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
+                                disabled={currentIndex === 0}
+                                className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
+                                    ? 'bg-slate-100 text-slate-300'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'
+                                    }`}
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                                Precedente
+                            </button>
+
+                            {currentIndex === answering.length - 1 ? (
+                                <button
+                                    onClick={() => setShowTerminateConfirm(true)}
+                                    className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all"
+                                >
+                                    Termina Quiz
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
+                                    className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                >
+                                    Successiva
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
