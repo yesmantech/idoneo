@@ -4,8 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
-import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen } from "lucide-react";
+import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen, AlertCircle } from "lucide-react";
 import { SuccessBadge } from "@/components/ui/SuccessBadge";
+import { FailBadge } from "@/components/ui/FailBadge";
+import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 
 // Types
@@ -96,9 +98,15 @@ export default function QuizResultsPage() {
     // Confetti celebration
     useEffect(() => {
         if (!attempt || confettiFiredRef.current) return;
-        confettiFiredRef.current = true;
 
         const total = attempt.total_questions || 1;
+        const passed = attempt.is_idoneo !== null
+            ? attempt.is_idoneo
+            : attempt.correct >= Math.floor(total / 2) + 1;
+
+        if (!passed) return; // No confetti for fail
+
+        confettiFiredRef.current = true;
         const correctPercentage = (attempt.correct / total) * 100;
 
         let particleCount = 50;
@@ -238,6 +246,10 @@ export default function QuizResultsPage() {
 
     const hasErrors = (wrongList.length + skippedList.length) > 0;
     const total = attempt.total_questions || 1;
+    const passed = attempt.is_idoneo !== null
+        ? attempt.is_idoneo
+        : attempt.correct >= Math.floor(total / 2) + 1;
+
     const percentage = Math.round((attempt.correct / total) * 100);
 
     const getFilteredList = () => {
@@ -253,18 +265,26 @@ export default function QuizResultsPage() {
             {/* ============================================================= */}
             {/* COMPLETION HERO - Responsive */}
             {/* ============================================================= */}
-            <div className="bg-white pt-4 lg:pt-8 pb-6 lg:pb-8 px-6 text-center relative pt-safe">
+            <div
+                className="bg-white pb-6 lg:pb-8 px-6 text-center relative"
+                style={{ paddingTop: 'calc(env(safe-area-inset-top) + 2.5rem)' }}
+            >
                 <div className="max-w-4xl mx-auto">
-                    {/* Success Badge */}
+                    {/* Status Badge */}
                     <div className="flex justify-center mb-4 lg:mb-6">
-                        <SuccessBadge />
+                        {passed ? <SuccessBadge /> : <FailBadge />}
                     </div>
 
-                    <h1 className="text-2xl lg:text-4xl font-bold text-slate-900 mb-2">
-                        Quiz Completato! 🚀
+                    <h1 className={cn(
+                        "text-2xl lg:text-4xl font-bold mb-2",
+                        passed ? "text-slate-900" : "text-red-600"
+                    )}>
+                        {passed ? "Quiz Completato! 🚀" : "Non Idoneo ❌"}
                     </h1>
                     <p className="text-sm lg:text-base text-slate-500 max-w-md mx-auto">
-                        Hai completato la simulazione. Controlla le risposte per migliorare.
+                        {passed
+                            ? "Hai completato la simulazione con successo. Ottimo lavoro!"
+                            : "Non hai raggiunto il punteggio minimo. Continua a studiare!"}
                     </p>
                 </div>
             </div>
