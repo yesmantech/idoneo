@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchSmartQuestions, QuestionSelectionMode, SubjectConfig } from "@/lib/quiz-smart-selection";
 import { ChevronLeft, ChevronDown, Minus, Plus, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Types
 type Subject = { id: string; name: string; question_count: number };
@@ -244,8 +245,8 @@ export default function CustomQuizWizardPage() {
                                         >
                                             {/* Radio circle */}
                                             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${isSelected
-                                                    ? 'border-purple-500 bg-purple-500'
-                                                    : 'border-slate-300'
+                                                ? 'border-purple-500 bg-purple-500'
+                                                : 'border-slate-300'
                                                 }`}>
                                                 {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
                                             </div>
@@ -401,68 +402,61 @@ export default function CustomQuizWizardPage() {
                 {/* PUNTEGGIO */}
                 {/* ============================================================= */}
                 <section>
-                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Punteggio</h2>
+                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">Punteggio</h2>
 
                     <div className="grid grid-cols-3 gap-3">
-                        {/* Errate */}
-                        <div className="bg-white rounded-2xl p-3 text-center border-b-4 border-red-500" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                            <p className="text-[10px] font-bold text-red-500 uppercase mb-2">Errate</p>
-                            <div className="flex items-center justify-center gap-1">
-                                <button
-                                    onClick={() => setScoring(s => ({ ...s, wrong: parseFloat((s.wrong - 0.1).toFixed(1)) }))}
-                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-red-100 active:scale-95 transition-all"
-                                >
-                                    <Minus className="w-3 h-3 text-slate-500" />
-                                </button>
-                                <span className="w-10 text-[18px] font-bold text-slate-900">{scoring.wrong}</span>
-                                <button
-                                    onClick={() => setScoring(s => ({ ...s, wrong: parseFloat((s.wrong + 0.1).toFixed(1)) }))}
-                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-red-100 active:scale-95 transition-all"
-                                >
-                                    <Plus className="w-3 h-3 text-slate-500" />
-                                </button>
-                            </div>
-                        </div>
+                        {[
+                            { label: 'Errate', key: 'wrong', color: 'red', value: scoring.wrong },
+                            { label: 'Saltate', key: 'blank', color: 'amber', value: scoring.blank },
+                            { label: 'Corrette', key: 'correct', color: 'emerald', value: scoring.correct }
+                        ].map((item) => (
+                            <div
+                                key={item.key}
+                                className="bg-white rounded-[24px] p-3 flex flex-col items-center gap-3 active:scale-[0.98] transition-transform"
+                                style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.04)' }}
+                            >
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${item.color === 'red' ? 'text-red-500' :
+                                    item.color === 'amber' ? 'text-amber-500' : 'text-emerald-500'
+                                    }`}>
+                                    {item.label}
+                                </span>
 
-                        {/* Saltate */}
-                        <div className="bg-white rounded-2xl p-3 text-center border-b-4 border-amber-400" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                            <p className="text-[10px] font-bold text-amber-500 uppercase mb-2">Saltate</p>
-                            <div className="flex items-center justify-center gap-1">
-                                <button
-                                    onClick={() => setScoring(s => ({ ...s, blank: parseFloat((s.blank - 0.1).toFixed(1)) }))}
-                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-amber-100 active:scale-95 transition-all"
-                                >
-                                    <Minus className="w-3 h-3 text-slate-500" />
-                                </button>
-                                <span className="w-10 text-[18px] font-bold text-slate-900">{scoring.blank}</span>
-                                <button
-                                    onClick={() => setScoring(s => ({ ...s, blank: parseFloat((s.blank + 0.1).toFixed(1)) }))}
-                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-amber-100 active:scale-95 transition-all"
-                                >
-                                    <Plus className="w-3 h-3 text-slate-500" />
-                                </button>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => setScoring(s => ({ ...s, [item.key]: parseFloat(((s as any)[item.key] - 0.1).toFixed(1)) }))}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${item.color === 'red' ? 'bg-red-50 text-red-500 hover:bg-red-100' :
+                                            item.color === 'amber' ? 'bg-amber-50 text-amber-500 hover:bg-amber-100' :
+                                                'bg-emerald-50 text-emerald-500 hover:bg-emerald-100'
+                                            }`}
+                                    >
+                                        <Minus className="w-3.5 h-3.5" strokeWidth={3} />
+                                    </button>
+                                    <div className="w-8 text-center relative h-5">
+                                        <AnimatePresence mode="wait">
+                                            <motion.span
+                                                key={item.value}
+                                                initial={{ y: 5, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                exit={{ y: -5, opacity: 0 }}
+                                                transition={{ duration: 0.15 }}
+                                                className="absolute inset-0 flex items-center justify-center text-[15px] font-bold text-slate-900"
+                                            >
+                                                {item.key === 'correct' ? `+${item.value}` : item.value}
+                                            </motion.span>
+                                        </AnimatePresence>
+                                    </div>
+                                    <button
+                                        onClick={() => setScoring(s => ({ ...s, [item.key]: parseFloat(((s as any)[item.key] + 0.1).toFixed(1)) }))}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${item.color === 'red' ? 'bg-red-50 text-red-500 hover:bg-red-100' :
+                                            item.color === 'amber' ? 'bg-amber-50 text-amber-500 hover:bg-amber-100' :
+                                                'bg-emerald-50 text-emerald-500 hover:bg-emerald-100'
+                                            }`}
+                                    >
+                                        <Plus className="w-3.5 h-3.5" strokeWidth={3} />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-
-                        {/* Corrette */}
-                        <div className="bg-white rounded-2xl p-3 text-center border-b-4 border-emerald-500" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                            <p className="text-[10px] font-bold text-emerald-500 uppercase mb-2">Corrette</p>
-                            <div className="flex items-center justify-center gap-1">
-                                <button
-                                    onClick={() => setScoring(s => ({ ...s, correct: parseFloat((s.correct - 0.1).toFixed(1)) }))}
-                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-emerald-100 active:scale-95 transition-all"
-                                >
-                                    <Minus className="w-3 h-3 text-slate-500" />
-                                </button>
-                                <span className="w-10 text-[18px] font-bold text-slate-900">+{scoring.correct}</span>
-                                <button
-                                    onClick={() => setScoring(s => ({ ...s, correct: parseFloat((s.correct + 0.1).toFixed(1)) }))}
-                                    className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center hover:bg-emerald-100 active:scale-95 transition-all"
-                                >
-                                    <Plus className="w-3 h-3 text-slate-500" />
-                                </button>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </section>
             </div>
@@ -476,8 +470,8 @@ export default function CustomQuizWizardPage() {
                         onClick={handleStart}
                         disabled={generating || totalSelectedQuestions === 0}
                         className={`w-full py-4 rounded-2xl font-bold text-[16px] transition-all active:scale-[0.98] ${totalSelectedQuestions > 0
-                                ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/25 hover:bg-purple-600'
-                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/25 hover:bg-purple-600'
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                             }`}
                     >
                         {generating ? "Creazione in corso..." : `Avvia Prova (${totalSelectedQuestions})`}

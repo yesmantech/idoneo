@@ -29,7 +29,6 @@ export async function fetchSmartQuestions(
     const { data: allQuestions } = await supabase
         .from("questions")
         .select("id, subject_id")
-        .eq("quiz_id", quizId)
         .in("subject_id", subjectIds)
         .eq("is_archived", false);
 
