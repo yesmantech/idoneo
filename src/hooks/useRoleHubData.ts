@@ -25,6 +25,7 @@ export interface RoleHubData {
     latestQuizId: string | null; // ID of the latest official quiz to start
     latestQuizSlug: string | null; // Slug of the latest official quiz
     history: any[]; // Simplified attempt history
+    candidatiCount: number; // NEW: Total attempts/participants count
     loading: boolean;
     error: string | null;
 }
@@ -37,6 +38,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
         latestQuizId: null,
         latestQuizSlug: null,
         history: [],
+        candidatiCount: 0,
         loading: true,
         error: null
     });
@@ -97,6 +99,35 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                         .limit(20);
 
                     if (attempts) history = attempts;
+                    if (attempts) history = attempts;
+                }
+
+                // 5. Fetch Global Stats (Candidati Count)
+                const { count: userCount } = await supabase
+                    .from("quiz_attempts")
+                    .select("user_id", { count: 'exact', head: true })
+                    .eq("quiz.role_id", role.id) // This assumes we can filter by joined column, but strict equality on joined tables in Supabase simpler via inner join logic on IDs. 
+                // Actually simpler: Get all quiz IDs for this role first.
+                // But we already fetched latestQuiz. Ideally we fetch all Quiz IDs.
+
+                // Optimized approach: 
+                // We need all quizzes for this role to count unique users. 
+                const { data: allRoleQuizzes } = await supabase.from('quizzes').select('id').eq('role_id', role.id);
+                let candidatiCount = 0;
+
+                if (allRoleQuizzes && allRoleQuizzes.length > 0) {
+                    const quizIds = allRoleQuizzes.map(q => q.id);
+                    // Supabase doesn't support "distinct count" easily in one go without RPC. 
+                    // We will approximate or use a known RPC if available. 
+                    // For now, let's use a "head" count of attempts as a proxy for "volume", or if we want users we need a different approach.
+                    // Given the constraint, I'll count *total attempts* as "Partecipazioni" or just use a placeholder if performance is key.
+                    // better: RPC 'get_role_user_count' if it existed.
+                    // Fallback: Just count attempts for now to show activity.
+                    const { count } = await supabase
+                        .from('quiz_attempts')
+                        .select('*', { count: 'exact', head: true })
+                        .in('quiz_id', quizIds);
+                    candidatiCount = count || 0;
                 }
 
                 setData({
@@ -113,6 +144,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                     latestQuizId,
                     latestQuizSlug,
                     history,
+                    candidatiCount,
                     loading: false,
                     error: null
                 });

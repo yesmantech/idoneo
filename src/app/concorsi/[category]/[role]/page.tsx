@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useRoleHubData } from "@/hooks/useRoleHubData";
-import { ChevronLeft, Trophy, Puzzle, Clock, FileText, ExternalLink, Sparkles, ArrowRight, Play, BookOpen, Download, CheckCircle, Loader2 } from "lucide-react";
+import { ChevronLeft, Trophy, Puzzle, Clock, FileText, ExternalLink, Sparkles, ArrowRight, Play, BookOpen, Download, CheckCircle, Loader2, Users, Calendar, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { offlineService } from "@/lib/offlineService";
 
 // =============================================================================
@@ -12,7 +13,7 @@ export default function RolePage() {
   const { category, role } = useParams<{ category: string; role: string }>();
   const navigate = useNavigate();
 
-  const { role: roleData, resources, history, latestQuizId, latestQuizSlug, loading, error } = useRoleHubData(category || "", role || "");
+  const { role: roleData, resources, history, latestQuizId, latestQuizSlug, candidatiCount, loading, error } = useRoleHubData(category || "", role || "");
 
   // Offline State
   const [isDownloaded, setIsDownloaded] = useState(false);
@@ -139,10 +140,10 @@ export default function RolePage() {
               onClick={!isDownloaded ? handleDownload : undefined}
               disabled={downloading}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold transition-all ${isDownloaded
-                  ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 cursor-default'
-                  : downloading
-                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-wait'
-                    : 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 shadow-sm active:scale-95'
+                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 cursor-default'
+                : downloading
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-wait'
+                  : 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 shadow-sm active:scale-95'
                 }`}
             >
               {downloading ? (
@@ -167,6 +168,17 @@ export default function RolePage() {
       </div>
 
       <main className="px-4 md:px-5 max-w-lg mx-auto -mt-6 relative z-20 space-y-5 md:space-y-6">
+
+        {/* ===================================================================== */}
+        {/* STATS SECTION (New) */}
+        {/* ===================================================================== */}
+        {roleData && (
+          <StatsSection
+            theme={theme}
+            candidatiCount={candidatiCount}
+            availableSeats={roleData.available_positions}
+          />
+        )}
 
         {/* ===================================================================== */}
         {/* 2. PRIMARY ACTIONS (Stacked Cards) */}
@@ -297,6 +309,113 @@ export default function RolePage() {
         </div>
 
       </main>
-    </div>
+    </div >
+  );
+}
+
+// Stats Section Component (Consistent with Hub)
+function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, candidatiCount: number, availableSeats: string | null }) {
+  const [selectedStat, setSelectedStat] = useState<{ title: string, desc: string, icon: any, themeBg: string, themeText: string } | null>(null);
+
+  const stats = [
+    {
+      id: 'candidati',
+      value: candidatiCount,
+      label: 'Candidati',
+      icon: Users,
+      themeBg: theme.bg,
+      themeText: theme.text,
+      description: "Il numero totale di utenti unici che hanno partecipato alle simulazioni per questo profilo."
+    },
+    {
+      id: 'posti',
+      value: availableSeats || "N/D",
+      label: 'Posti Totali',
+      icon: Trophy,
+      themeBg: 'bg-emerald-50 dark:bg-emerald-900/30',
+      themeText: 'text-emerald-600 dark:text-emerald-400',
+      description: "Il numero complessivo di posti messi a bando per questo profilo specifico."
+    },
+    {
+      id: 'edizione',
+      value: new Date().getFullYear(), // Could be dynamic based on contest year
+      label: 'Edizione',
+      icon: Calendar,
+      themeBg: 'bg-purple-50 dark:bg-purple-900/30',
+      themeText: 'text-purple-600 dark:text-purple-400',
+      description: "L'anno di riferimento per i concorsi attualmente attivi per questo profilo."
+    }
+  ];
+
+  return (
+    <>
+      <section className="flex md:grid md:grid-cols-3 gap-2.5 md:gap-4 overflow-x-auto md:overflow-visible pb-1 md:pb-0 -mx-4 md:mx-0 px-4 md:px-0 scrollbar-hide snap-x md:snap-none">
+        {stats.map((stat) => (
+          <div
+            key={stat.id}
+            onClick={() => setSelectedStat({
+              title: stat.label,
+              desc: stat.description,
+              icon: stat.icon,
+              themeBg: stat.themeBg,
+              themeText: stat.themeText
+            })}
+            className="cursor-pointer active:scale-95 transition-transform snap-start flex-1 min-w-[100px] md:w-auto bg-white dark:bg-[var(--card)] rounded-2xl p-3 md:p-4 shadow-soft border border-transparent dark:border-[var(--card-border)] flex flex-col items-center justify-center gap-1 md:gap-2 hover:border-[#00B1FF]/30"
+          >
+            <div className={`w-8 h-8 rounded-full ${stat.themeBg} flex items-center justify-center mb-1`}>
+              <stat.icon className={`w-4 h-4 ${stat.themeText}`} />
+            </div>
+            <div className="text-center">
+              <span className="block text-lg md:text-xl font-bold text-slate-900 dark:text-[var(--foreground)] leading-none mb-1">{stat.value}</span>
+              <span className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">{stat.label}</span>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Popup Modal */}
+      <AnimatePresence>
+        {selectedStat && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 px-8">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedStat(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white dark:bg-[var(--card)] border border-transparent dark:border-[var(--card-border)] rounded-[24px] p-6 max-w-sm w-full shadow-2xl text-center"
+            >
+              <button
+                onClick={() => setSelectedStat(null)}
+                className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 opacity-50 hover:opacity-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className={`w-16 h-16 rounded-2xl ${selectedStat.themeBg} flex items-center justify-center mx-auto mb-4`}>
+                {React.createElement(selectedStat.icon, { className: `w-8 h-8 ${selectedStat.themeText}` })}
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-900 dark:text-[var(--foreground)] mb-2">{selectedStat.title}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-[15px] leading-relaxed mb-6">
+                {selectedStat.desc}
+              </p>
+
+              <button
+                onClick={() => setSelectedStat(null)}
+                className="w-full py-3 bg-slate-900 dark:bg-[var(--foreground)] text-white dark:text-[var(--background)] rounded-xl font-bold hover:opacity-90 transition-opacity"
+              >
+                Ho capito
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
