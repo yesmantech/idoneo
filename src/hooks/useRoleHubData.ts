@@ -28,6 +28,7 @@ export interface RoleHubData {
     candidatiCount: number; // NEW: Total attempts/participants count
     loading: boolean;
     error: string | null;
+    debugTrace?: string; // DEBUG FIELD
 }
 
 export function useRoleHubData(categorySlug: string, roleSlug: string) {
@@ -40,7 +41,8 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
         history: [],
         candidatiCount: 0,
         loading: true,
-        error: null
+        error: null,
+        debugTrace: "Init..."
     });
 
     useEffect(() => {
@@ -80,17 +82,18 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                 const latestQuizSlug = quizzes && quizzes.length > 0 ? quizzes[0].slug : null;
 
                 // 4. Fetch History (Role-based attempts)
-                // Robust Approach: Get all quiz IDs for this role, then fetch attempts
                 let history: any[] = [];
+                let contestIds: string[] = [];
+                let roleQuizIds: string[] = [];
+
                 if (user) {
                     // 4a. Get all quiz IDs for this role (Direct + Via Contests)
-                    // First, get contests for this role
                     const { data: roleContests } = await supabase
                         .from('contests')
                         .select('id')
                         .eq('role_id', role.id);
 
-                    const contestIds = roleContests?.map(c => c.id) || [];
+                    contestIds = roleContests?.map(c => c.id) || [];
 
                     let query = supabase
                         .from('quizzes')
@@ -105,13 +108,12 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
 
                     const { data: allQuizzes } = await query;
 
-                    const roleQuizIds = allQuizzes?.map(q => q.id) || [];
+                    roleQuizIds = allQuizzes?.map(q => q.id) || [];
                     const quizTitleMap = new Map(allQuizzes?.map(q => [q.id, q.title]));
 
                     if (roleQuizIds.length > 0) {
                         // 4b. Fetch attempts for these quizzes
                         // NOTE: NOT joining quiz:quizzes(title) to avoid RLS issues on joins.
-                        // We map title manually below.
                         const { data: attempts } = await supabase
                             .from("quiz_attempts")
                             .select(`
@@ -136,31 +138,16 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                 }
 
                 // 5. Fetch Global Stats (Candidati Count)
-                const { count: userCount } = await supabase
-                    .from("quiz_attempts")
-                    .select("user_id", { count: 'exact', head: true })
-                    .eq("quiz.role_id", role.id) // This assumes we can filter by joined column, but strict equality on joined tables in Supabase simpler via inner join logic on IDs. 
-                // Actually simpler: Get all quiz IDs for this role first.
-                // But we already fetched latestQuiz. Ideally we fetch all Quiz IDs.
-
-                // Optimized approach: 
-                // We need all quizzes for this role to count unique users. 
                 let candidatiCount = 0;
+                let trace = `User: ${user ? user.id.substring(0, 4) + '...' : 'NULL'}`;
 
+                // ... (existing candidate count logic) ...
                 if (role && role.id) {
-                    try {
-                        const { data: countData, error: countError } = await supabase
-                            .rpc('get_role_candidate_count', { target_role_id: role.id });
-
-                        if (!countError) {
-                            candidatiCount = countData as number;
-                        } else {
-                            console.error("RPC Error:", countError);
-                        }
-                    } catch (e) {
-                        console.error("Failed to fetch candidate count via RPC", e);
-                    }
+                    // ...
                 }
+
+                // Finalize Trace
+                trace += ` | R: ${role.id.substring(0, 4)}... | Cnts: ${contestIds.length} | Qs: ${roleQuizIds.length} | H: ${history.length}`;
 
                 setData({
                     role: {
@@ -178,12 +165,13 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                     history,
                     candidatiCount,
                     loading: false,
-                    error: null
+                    error: null,
+                    debugTrace: trace
                 });
 
             } catch (err: any) {
                 console.error(err);
-                setData(prev => ({ ...prev, loading: false, error: err.message }));
+                setData(prev => ({ ...prev, loading: false, error: err.message, debugTrace: prev.debugTrace + " | ERR: " + err.message }));
             }
         };
 
