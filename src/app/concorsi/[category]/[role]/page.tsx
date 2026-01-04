@@ -4,6 +4,7 @@ import { useRoleHubData } from "@/hooks/useRoleHubData";
 import { ChevronLeft, Trophy, Puzzle, Clock, FileText, ExternalLink, Sparkles, ArrowRight, Play, BookOpen, Download, CheckCircle, Loader2, Users, Calendar, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { offlineService } from "@/lib/offlineService";
+import ReadinessCard from "@/components/role/ReadinessCard";
 
 // =============================================================================
 // ROLE DETAIL PAGE - Tier S Redesign
@@ -143,6 +144,13 @@ export default function RolePage() {
       </div>
 
       <main className="px-4 md:px-5 max-w-lg mx-auto -mt-6 relative z-20 space-y-5 md:space-y-6">
+
+        {/* ===================================================================== */}
+        {/* READINESS CARD (New Tier S) */}
+        {/* ===================================================================== */}
+        {roleData && history.length > 0 && (
+          <ReadinessCard history={history} theme={theme} />
+        )}
 
         {/* ===================================================================== */}
         {/* STATS SECTION (New) */}
