@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, TrendingUp, AlertTriangle, X, Info, CheckCircle2 } from 'lucide-react';
+import { Trophy, TrendingUp, AlertTriangle, X, Info, CheckCircle2, BarChart3 } from 'lucide-react';
 import { calculateReadinessLevel } from '@/lib/statsService';
 
 interface ReadinessCardProps {
@@ -266,6 +266,24 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
                                     ))}
                                 </div>
                             )}
+
+                            {/* Link to Scoring Explanation */}
+                            <a
+                                href="/come-funziona/punteggi"
+                                className="mt-4 flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-[#00B1FF]/10 to-emerald-500/10 hover:from-[#00B1FF]/20 hover:to-emerald-500/20 transition-colors group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-[#00B1FF]/20 flex items-center justify-center">
+                                        <BarChart3 className="w-4 h-4 text-[#00B1FF]" />
+                                    </div>
+                                    <span className="text-[13px] font-bold text-slate-700 dark:text-slate-200">
+                                        Scopri come calcoliamo i punteggi
+                                    </span>
+                                </div>
+                                <svg className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
 
                             <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <p className="text-[12px] text-slate-400 text-center">

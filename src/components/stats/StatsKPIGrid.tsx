@@ -424,7 +424,10 @@ function StatsCard({
     onInfo: () => void
 }) {
     return (
-        <div className="bg-[var(--card)] p-4 rounded-[24px] shadow-soft border border-[var(--card-border)] hover:shadow-card transition-all duration-300 group flex flex-col justify-between h-[150px] relative overflow-hidden">
+        <div
+            onClick={onInfo}
+            className="bg-[var(--card)] p-4 rounded-[24px] shadow-soft border border-[var(--card-border)] hover:shadow-card transition-all duration-300 group flex flex-col justify-between h-[150px] relative overflow-hidden cursor-pointer active:scale-95"
+        >
             {/* Top Row */}
             <div className="flex justify-between items-start z-10 relative">
                 <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${iconBg} transition-transform group-hover:scale-110 duration-300`}>

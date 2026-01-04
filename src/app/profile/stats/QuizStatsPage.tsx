@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import TierSLoader from "@/components/ui/TierSLoader";
 import { supabase } from "@/lib/supabaseClient";
 import { ChevronLeft } from 'lucide-react';
 
@@ -80,86 +81,86 @@ export default function QuizStatsPage() {
             return;
         }
 
-        // Fetch Quiz Data (Title + Scoring Rules for Max Score setup)
-        const { data: quizData } = await supabase
-            .from('quizzes')
-            .select('title, total_questions, points_correct, rule_id')
-            .eq('id', quizId)
-            .single();
+        try {
+            // Fetch Quiz, Attempts, and Goal in parallel
+            const [quizRes, attemptsRes, goalRes] = await Promise.all([
+                supabase
+                    .from('quizzes')
+                    .select('title, total_questions, points_correct, rule_id')
+                    .eq('id', quizId)
+                    .single(),
+                supabase
+                    .from("quiz_attempts")
+                    .select(`*, quiz:quizzes(title), mode`)
+                    .eq("user_id", user.id)
+                    .eq("quiz_id", quizId)
+                    .order("created_at", { ascending: false }),
+                supabase
+                    .from("test_goals")
+                    .select("*")
+                    .eq("user_id", user.id)
+                    .eq("quiz_id", quizId)
+                    .eq("status", "active")
+                    .maybeSingle()
+            ]);
 
-        let maxCalc = 0; // Initialize to 0 to detect if we found valid config
+            const quizData = quizRes.data;
+            const data = attemptsRes.data;
+            const error = attemptsRes.error;
+            const goalData = goalRes.data;
 
-        if (quizData) {
-            setQuizTitle(quizData.title);
+            let maxCalc = 0;
 
-            // 1. Check for Simulation Rule (Priority)
-            if (quizData.rule_id) {
-                const { data: rule } = await supabase
-                    .from('simulation_rules')
-                    .select('total_questions, points_correct')
-                    .eq('id', quizData.rule_id)
-                    .single();
+            if (quizData) {
+                setQuizTitle(quizData.title);
 
-                if (rule && rule.total_questions && rule.points_correct) {
-                    maxCalc = rule.total_questions * rule.points_correct;
+                if (quizData.rule_id) {
+                    const { data: rule } = await supabase
+                        .from('simulation_rules')
+                        .select('total_questions, points_correct')
+                        .eq('id', quizData.rule_id)
+                        .single();
+
+                    if (rule && rule.total_questions && rule.points_correct) {
+                        maxCalc = rule.total_questions * rule.points_correct;
+                    }
+                }
+
+                if (maxCalc === 0 && quizData.total_questions && quizData.points_correct) {
+                    maxCalc = quizData.total_questions * quizData.points_correct;
                 }
             }
 
-            // 2. Fallback to Quiz attributes if no rule or rule fetch failed
-            if (maxCalc === 0 && quizData.total_questions && quizData.points_correct) {
-                maxCalc = quizData.total_questions * quizData.points_correct;
+            if (!quizData?.rule_id && data && data.length > 0) {
+                const maxQuestionsInAttempts = Math.max(...data.map(d => d.total_questions || 0));
+                if (maxQuestionsInAttempts > 0) {
+                    const pointsPerQuestion = quizData?.points_correct || 1;
+                    maxCalc = maxQuestionsInAttempts * pointsPerQuestion;
+                }
             }
-        }
 
-        // Fetch Attempts
-        const { data, error } = await supabase
-            .from("quiz_attempts")
-            .select(`*, quiz:quizzes(title), mode`)
-            .eq("user_id", user.id)
-            .eq("quiz_id", quizId)
-            .order("created_at", { ascending: false });
+            if (maxCalc === 0) maxCalc = 100;
 
-        // 3. Dynamic Calculation: Prioritize Rule -> Actual Attempts -> Metadata
-        // If we found a rule, maxCalc is already set correctly.
-        // If NO rule, we prefer the "proven" questions count from actual attempts over static metadata (which might be default/wrong).
-        if (!quizData?.rule_id && data && data.length > 0) {
-            const maxQuestionsInAttempts = Math.max(...data.map(d => d.total_questions || 0));
-            if (maxQuestionsInAttempts > 0) {
-                // Use points_correct from quiz, default to 1 if missing
-                const pointsPerQuestion = quizData?.points_correct || 1;
-                maxCalc = maxQuestionsInAttempts * pointsPerQuestion;
+            if (error) {
+                console.error(error);
+            } else if (data) {
+                const { data: leaderboardData } = await supabase
+                    .from('concorso_leaderboard')
+                    .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+                    .eq('user_id', user.id)
+                    .eq('quiz_id', quizId)
+                    .maybeSingle();
+
+                processData(data as AttemptWithDetails[], maxCalc, leaderboardData);
             }
+
+            if (goalData) setGoal(goalData);
+
+        } catch (err) {
+            console.error("Error loading stats:", err);
+        } finally {
+            setLoading(false);
         }
-
-        // 4. Final Fallback if everything fails (no rule, no attempts, no valid metadata)
-        if (maxCalc === 0) maxCalc = 100;
-
-        if (error) {
-            console.error(error);
-        } else if (data) {
-            // 5. Fetch Official Leaderboard Data (The "True" Preparation Level)
-            const { data: leaderboardData } = await supabase
-                .from('concorso_leaderboard')
-                .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
-                .eq('user_id', user.id)
-                .eq('quiz_id', quizId)
-                .single();
-
-            processData(data as AttemptWithDetails[], maxCalc, leaderboardData);
-        }
-
-        // Fetch Goal (if exists)
-        const { data: goalData } = await supabase
-            .from("test_goals")
-            .select("*")
-            .eq("user_id", user.id)
-            .eq("quiz_id", quizId)
-            .eq("status", "active")
-            .single();
-
-        if (goalData) setGoal(goalData);
-
-        setLoading(false);
     };
 
     const processData = (data: AttemptWithDetails[], maxPossible: number, leaderboardData?: any) => {
@@ -268,12 +269,7 @@ export default function QuizStatsPage() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-canvas-light flex items-center justify-center">
-            <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-brand-cyan mx-auto mb-4"></div>
-                <p className="text-text-tertiary font-bold">Caricamento statistiche...</p>
-            </div>
-        </div>
+        <TierSLoader message="Analisi performance in corso..." />
     );
 
     return (
