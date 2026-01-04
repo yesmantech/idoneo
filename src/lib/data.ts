@@ -196,7 +196,7 @@ export const getContestsByRole = async (
 export interface SearchItem {
   id: string;
   title: string;
-  type: 'category' | 'contest';
+  type: 'category' | 'contest' | 'role';
   url: string;
 }
 
@@ -214,7 +214,29 @@ export const getAllSearchableItems = async (): Promise<SearchItem[]> => {
     }));
   }
 
-  // 2. Quizzes
+  // 2. Roles (NEW - Fix for navigation mismatch)
+  const { data: roles } = await supabase
+    .from('roles')
+    .select(`
+      id, title, slug,
+      category:categories(slug)
+    `);
+
+  if (roles) {
+    roles.forEach((r: any) => {
+      const catSlug = r.category?.slug;
+      if (catSlug) {
+        items.push({
+          id: r.id,
+          title: r.title,
+          type: 'role',
+          url: `/concorsi/${catSlug}/${r.slug}`
+        });
+      }
+    });
+  }
+
+  // 3. Quizzes
   const { data: quizzes } = await supabase
     .from('quizzes')
     .select(`
@@ -235,7 +257,7 @@ export const getAllSearchableItems = async (): Promise<SearchItem[]> => {
         items.push({
           id: q.id,
           title: q.title,
-          type: 'contest', // 'contest' | 'category'
+          type: 'contest',
           url: `/concorsi/${catSlug}/${roleSlug}/${q.slug}`
         });
       }

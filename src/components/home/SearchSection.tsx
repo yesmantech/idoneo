@@ -22,7 +22,7 @@ export default function SearchSection({ items = [] }: SearchSectionProps) {
 
     // Filter states
     const [showFilters, setShowFilters] = useState(false);
-    const [activeType, setActiveType] = useState<'all' | 'contest' | 'category'>('all');
+    const [activeType, setActiveType] = useState<'all' | 'contest' | 'category' | 'role'>('all');
     const [activeEntity, setActiveEntity] = useState<string | null>(null);
 
     const entities = [
@@ -202,7 +202,7 @@ export default function SearchSection({ items = [] }: SearchSectionProps) {
                                         <div className="p-4 space-y-4">
                                             {/* Type Filters */}
                                             <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl w-fit">
-                                                {(['all', 'contest', 'category'] as const).map((type) => (
+                                                {(['all', 'contest', 'role', 'category'] as const).map((type) => (
                                                     <button
                                                         key={type}
                                                         onClick={() => { setActiveType(type); hapticSelection(); }}
@@ -213,7 +213,7 @@ export default function SearchSection({ items = [] }: SearchSectionProps) {
                                                                 : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                                                         )}
                                                     >
-                                                        {type === 'all' ? 'Tutti' : type === 'contest' ? 'Concorsi' : 'Categorie'}
+                                                        {type === 'all' ? 'Tutti' : type === 'contest' ? 'Concorsi' : type === 'role' ? 'Profili' : 'Categorie'}
                                                     </button>
                                                 ))}
                                             </div>
@@ -287,7 +287,7 @@ export default function SearchSection({ items = [] }: SearchSectionProps) {
                                                     </div>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">
-                                                            {item.type === 'category' ? 'Categoria' : 'Concorso'}
+                                                            {item.type === 'category' ? 'Categoria' : item.type === 'role' ? 'Profilo' : 'Concorso'}
                                                         </span>
                                                         {selectedIndex === idx && (
                                                             <span className="hidden lg:inline text-[10px] text-[#00B1FF] font-bold animate-pulse">
