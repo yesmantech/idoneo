@@ -21,29 +21,33 @@ export default function RolePage() {
   const [progress, setProgress] = useState(0);
 
   // Check offline status on mount
+  // Auto-Cache on mount
   useEffect(() => {
-    if (latestQuizId) {
-      offlineService.isQuizDownloaded(latestQuizId).then(setIsDownloaded);
-    }
+    const initAutoCache = async () => {
+      if (latestQuizId && !isDownloaded && !downloading) {
+        try {
+          const alreadyCached = await offlineService.isQuizDownloaded(latestQuizId);
+          setIsDownloaded(alreadyCached);
+
+          if (!alreadyCached) {
+            setDownloading(true);
+            console.log(`[AutoCache] Starting download for ${latestQuizId}...`);
+            await offlineService.downloadQuiz(latestQuizId, (p) => setProgress(p));
+            setIsDownloaded(true);
+            console.log(`[AutoCache] Completed.`);
+          }
+        } catch (err) {
+          console.error("[AutoCache] Failed:", err);
+        } finally {
+          setDownloading(false);
+        }
+      }
+    };
+
+    initAutoCache();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latestQuizId]);
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!latestQuizId) return;
-
-    setDownloading(true);
-    setProgress(0);
-    try {
-      await offlineService.downloadQuiz(latestQuizId, (p) => setProgress(p));
-      setIsDownloaded(true);
-      alert("Banca dati scaricata con successo! Ora puoi esercitarti offline.");
-    } catch (err) {
-      console.error(err);
-      alert("Errore download. Riprova più tardi.");
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   // Helper for dynamic gradients based on category (Consistent with Hub)
   const getCategoryTheme = (cat: string) => {
