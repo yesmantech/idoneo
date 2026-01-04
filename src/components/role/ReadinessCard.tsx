@@ -15,31 +15,37 @@ export default function ReadinessCard({ history, theme }: ReadinessCardProps) {
 
         const totalTests = history.length;
         const totalScore = history.reduce((acc, curr) => acc + (curr.score || 0), 0);
-        // Calculate accuracy roughly if not present, assuming 100 questions or relying on future fix
-        // For now, we will use score normalized to 100 if accuracy missing, or score/30 * 100
-        // Wait, history items have 'score' (usually /30 or /100 depending on quiz).
-        // Let's assume normalized score behavior from statsService logic or just pass best guess.
 
         const avgScore = totalTests ? totalScore / totalTests : 0;
 
         // Mock accuracy if missing (history from role hub is simplified)
-        // ideally we fetch full stats, but for now we approximate readiness via score
-        // normalizing score 0-30 to 0-100
         const normalizedAvg = (avgScore / 30) * 100;
 
         return calculateReadinessLevel(normalizedAvg, normalizedAvg, totalTests);
     }, [history]);
 
     if (!stats) {
+        // Empty State (Tier S)
         return (
-            <div className="bg-white dark:bg-[var(--card)] p-6 rounded-[32px] shadow-soft border border-[var(--card-border)] flex items-center justify-between opacity-80">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <Trophy className="w-6 h-6 text-slate-400" />
+            <div className="group relative bg-white dark:bg-[var(--card)] p-6 rounded-[32px] shadow-soft border border-[var(--card-border)] overflow-hidden min-h-[140px] flex items-center">
+                <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl ${theme.gradient} opacity-[0.05] rounded-bl-[100px] pointer-events-none`} />
+
+                <div className="flex items-center justify-between relative z-10 w-full">
+                    <div className="flex-1 pr-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500">
+                                Da iniziare
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-black text-slate-900 dark:text-[var(--foreground)] mb-1 leading-tight">
+                            Analisi in attesa...
+                        </h3>
+                        <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-snug">
+                            Completa almeno 3 simulazioni per sbloccare il calcolo del livello di preparazione.
+                        </p>
                     </div>
-                    <div>
-                        <h3 className="font-bold text-slate-900 dark:text-[var(--foreground)]">Livello di preparazione</h3>
-                        <p className="text-sm text-slate-500">Fai almeno 3 simulazioni per sbloccare.</p>
+                    <div className="relative w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                        <Trophy className="w-6 h-6 text-slate-300 dark:text-slate-600" />
                     </div>
                 </div>
             </div>
@@ -48,7 +54,6 @@ export default function ReadinessCard({ history, theme }: ReadinessCardProps) {
 
     const { level, label, color } = stats;
 
-    // Theme colors mapping
     const colorMap = {
         'semantic-success': { stroke: '#10B981', bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400' },
         'brand-orange': { stroke: '#F59E0B', bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-400' },
@@ -58,7 +63,6 @@ export default function ReadinessCard({ history, theme }: ReadinessCardProps) {
     const currentTheme = colorMap[color as keyof typeof colorMap] || colorMap['brand-orange'];
 
     // Determine score for circle (0-100)
-    // Map level to percentage for visual: Low=30, Med=60, High=90
     const percentage = level === 'high' ? 92 : level === 'medium' ? 65 : 35;
 
     return (

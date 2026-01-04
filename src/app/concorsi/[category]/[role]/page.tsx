@@ -148,7 +148,7 @@ export default function RolePage() {
         {/* ===================================================================== */}
         {/* READINESS CARD (New Tier S) */}
         {/* ===================================================================== */}
-        {roleData && history.length > 0 && (
+        {roleData && (
           <ReadinessCard history={history} theme={theme} />
         )}
 
