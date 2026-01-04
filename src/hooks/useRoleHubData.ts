@@ -83,13 +83,29 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                 // Robust Approach: Get all quiz IDs for this role, then fetch attempts
                 let history: any[] = [];
                 if (user) {
-                    // 4a. Get all quiz IDs for this role
-                    const { data: roleQuizzes } = await supabase
-                        .from('quizzes')
+                    // 4a. Get all quiz IDs for this role (Direct + Via Contests)
+                    // First, get contests for this role
+                    const { data: roleContests } = await supabase
+                        .from('contests')
                         .select('id')
                         .eq('role_id', role.id);
 
-                    const roleQuizIds = roleQuizzes?.map(q => q.id) || [];
+                    const contestIds = roleContests?.map(c => c.id) || [];
+
+                    let query = supabase
+                        .from('quizzes')
+                        .select('id');
+
+                    if (contestIds.length > 0) {
+                        // Match role_id OR contest_id
+                        query = query.or(`role_id.eq.${role.id},contest_id.in.(${contestIds.join(',')})`);
+                    } else {
+                        query = query.eq('role_id', role.id);
+                    }
+
+                    const { data: allQuizzes } = await query;
+
+                    const roleQuizIds = allQuizzes?.map(q => q.id) || [];
 
                     if (roleQuizIds.length > 0) {
                         // 4b. Fetch attempts for these quizzes
