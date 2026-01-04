@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useConcorsoData } from '@/hooks/useConcorsoData';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Shield, Sparkles, X, ChevronRight, Stethoscope, Briefcase, Scale, Gavel, GraduationCap, Car } from 'lucide-react';
+import TierSLoader from '@/components/ui/TierSLoader';
 
 // =============================================================================
 // CONCORSO HUB PAGE - Tier S Redesign
@@ -14,11 +15,7 @@ export default function ConcorsoHubPage() {
   const { category: categoryData, roles, candidatiCount, loading, error } = useConcorsoData(category || '');
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <TierSLoader message="Caricamento concorso..." />;
   }
 
   if (error || !categoryData) {

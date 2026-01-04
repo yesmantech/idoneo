@@ -113,7 +113,7 @@ export default function SearchSection({ items = [] }: SearchSectionProps) {
     }, [isOpen]);
 
     return (
-        <div className="w-full" ref={wrapperRef}>
+        <div className="w-full" ref={wrapperRef} data-onboarding="search">
             {/* Initial Input (Triggers Modal) */}
             <div
                 onClick={() => { setIsOpen(true); hapticLight(); }}

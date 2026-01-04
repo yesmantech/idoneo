@@ -137,7 +137,15 @@ export default function QuizStatsPage() {
         if (error) {
             console.error(error);
         } else if (data) {
-            processData(data as AttemptWithDetails[], maxCalc);
+            // 5. Fetch Official Leaderboard Data (The "True" Preparation Level)
+            const { data: leaderboardData } = await supabase
+                .from('concorso_leaderboard')
+                .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+                .eq('user_id', user.id)
+                .eq('quiz_id', quizId)
+                .single();
+
+            processData(data as AttemptWithDetails[], maxCalc, leaderboardData);
         }
 
         // Fetch Goal (if exists)
@@ -154,7 +162,7 @@ export default function QuizStatsPage() {
         setLoading(false);
     };
 
-    const processData = (data: AttemptWithDetails[], maxPossible: number) => {
+    const processData = (data: AttemptWithDetails[], maxPossible: number, leaderboardData?: any) => {
         setAttempts(data);
 
         // 1. KPIs
@@ -187,9 +195,9 @@ export default function QuizStatsPage() {
             setAccuracyTrend(trends.accuracyTrend);
         }
 
-        // 3. Calculate Readiness
-        if (totalTests >= 5) {
-            const readinessData = calculateReadinessLevel(avgScore, avgAccuracy, totalTests);
+        // 3. Calculate Readiness (Prioritize official leaderboard score if available)
+        if (totalTests >= 1) { // Show it even with 1 test if we have leaderboard data
+            const readinessData = calculateReadinessLevel(avgScore, avgAccuracy, totalTests, leaderboardData);
             setReadiness(readinessData);
         }
 

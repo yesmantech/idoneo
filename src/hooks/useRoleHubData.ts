@@ -26,9 +26,9 @@ export interface RoleHubData {
     latestQuizSlug: string | null; // Slug of the latest official quiz
     history: any[]; // Simplified attempt history
     candidatiCount: number; // NEW: Total attempts/participants count
+    leaderboardData?: any; // NEW: Detailed scoring factors from concorso_leaderboard
     loading: boolean;
     error: string | null;
-    debugTrace?: string; // DEBUG FIELD
 }
 
 export function useRoleHubData(categorySlug: string, roleSlug: string) {
@@ -41,20 +41,14 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
         history: [],
         candidatiCount: 0,
         loading: true,
-        error: null,
-        debugTrace: "Init..."
+        error: null
     });
 
     useEffect(() => {
         if (!roleSlug) return;
 
         const load = async () => {
-            let trace = `User: ${user ? user.id.substring(0, 4) + '...' : 'NULL'}`;
             try {
-                // Check Session explicitly
-                const { data: { session } } = await supabase.auth.getSession();
-                trace += ` | Sess: ${!!session}`;
-
                 // 1. Fetch Role
                 const { data: role, error: roleError } = await supabase
                     .from("roles")
@@ -125,16 +119,15 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                                 id, 
                                 score, 
                                 created_at, 
-                                quiz_id
+                                quiz_id,
+                                correct,
+                                total_questions,
+                                mode
                             `) // Removed invalid column 'is_official_sim' (use quiz properties or joins if needed, but for now we just show title)
                             .eq("user_id", user.id)
                             .in("quiz_id", roleQuizIds)
                             .order("created_at", { ascending: false })
                             .limit(20);
-
-                        if (attemptsError) {
-                            trace += ` | AtmpErr: ${attemptsError.code || attemptsError.message}`;
-                        }
 
                         if (attempts) {
                             history = attempts.map(a => ({
@@ -145,52 +138,60 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                             }));
                         }
                     }
-                }
+                    // 5. Fetch Official Leaderboard Data (The "True" Preparation Level)
+                    let leaderboardData: any = null;
+                    if (user && latestQuizId) {
+                        const { data: lb } = await supabase
+                            .from('concorso_leaderboard')
+                            .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+                            .eq('user_id', user.id)
+                            .eq('quiz_id', latestQuizId)
+                            .single();
 
-                // 5. Fetch Global Stats (Candidati Count)
-                let candidatiCount = 0;
-
-                if (role && role.id) {
-                    try {
-                        const { data: countData, error: countError } = await supabase
-                            .rpc('get_role_candidate_count', { target_role_id: role.id });
-
-                        if (!countError) {
-                            candidatiCount = countData as number;
-                        } else {
-                            console.error("RPC Error:", countError);
-                        }
-                    } catch (e) {
-                        console.error("Failed to fetch candidate count via RPC", e);
+                        if (lb) leaderboardData = lb;
                     }
+
+                    // 6. Fetch Global Stats (Candidati Count)
+                    let candidatiCount = 0;
+
+                    if (role && role.id) {
+                        try {
+                            const { data: countData, error: countError } = await supabase
+                                .rpc('get_role_candidate_count', { target_role_id: role.id });
+
+                            if (!countError) {
+                                candidatiCount = countData as number;
+                            } else {
+                                console.error("RPC Error:", countError);
+                            }
+                        } catch (e) {
+                            console.error("Failed to fetch candidate count via RPC", e);
+                        }
+                    }
+
+                    setData({
+                        role: {
+                            id: role.id,
+                            title: role.title,
+                            slug: role.slug,
+                            description: role.description || "",
+                            available_positions: role.available_positions || "",
+                            share_bank_link: role.share_bank_link || "",
+                            category_slug: categorySlug
+                        },
+                        resources: resources || [],
+                        latestQuizId,
+                        latestQuizSlug,
+                        history,
+                        candidatiCount,
+                        leaderboardData,
+                        loading: false,
+                        error: null
+                    });
                 }
-
-                // Finalize Trace
-                trace += ` | R: ${role.id.substring(0, 4)}... | Cnts: ${contestIds.length} | Qs: ${roleQuizIds.length} | H: ${history.length}`;
-
-                setData({
-                    role: {
-                        id: role.id,
-                        title: role.title,
-                        slug: role.slug,
-                        description: role.description || "",
-                        available_positions: role.available_positions || "",
-                        share_bank_link: role.share_bank_link || "",
-                        category_slug: categorySlug
-                    },
-                    resources: resources || [],
-                    latestQuizId,
-                    latestQuizSlug,
-                    history,
-                    candidatiCount,
-                    loading: false,
-                    error: null,
-                    debugTrace: trace
-                });
-
             } catch (err: any) {
                 console.error(err);
-                setData(prev => ({ ...prev, loading: false, error: err.message, debugTrace: trace + " | ERR: " + err.message }));
+                setData(prev => ({ ...prev, loading: false, error: err.message }));
             }
         };
 

@@ -8,6 +8,9 @@ import { statsService } from "@/lib/statsService";
 import { leaderboardService } from "@/lib/leaderboardService";
 import { badgeService } from "@/lib/badgeService";
 import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
+import { useOnboarding } from "@/context/OnboardingProvider";
+import TierSLoader from "@/components/ui/TierSLoader";
+import { AnimatePresence } from "framer-motion";
 import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check, Flag, AlertTriangle } from "lucide-react";
 
 // Types
@@ -51,7 +54,9 @@ export default function QuizRunnerPage() {
     const [answering, setAnswering] = useState<RichAnswer[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [finished, setFinished] = useState(false);
-    const [showTerminateConfirm, setShowTerminateConfirm] = useState(false);
+    const [isSaving, setIsSaving] = useState(false); // Tier S loader state
+    const [showExitConfirm, setShowExitConfirm] = useState(false); // X button exit
+    const [showTerminateConfirm, setShowTerminateConfirm] = useState(false); // Termina Quiz button
     const [showSettings, setShowSettings] = useState(false);
     const [drawerExpanded, setDrawerExpanded] = useState(false);
 
@@ -95,6 +100,16 @@ export default function QuizRunnerPage() {
     useEffect(() => {
         answeringRef.current = answering;
     }, [answering]);
+
+    // Onboarding for Quiz Runner
+    const { startOnboarding, hasCompletedContext } = useOnboarding();
+
+    useEffect(() => {
+        if (!loading && answering.length > 0 && !hasCompletedContext('quiz')) {
+            const timer = setTimeout(() => startOnboarding('quiz'), 800);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, answering.length, hasCompletedContext, startOnboarding]);
 
     // Load attempt data
     useEffect(() => {
@@ -361,6 +376,7 @@ export default function QuizRunnerPage() {
     const handleFinish = async () => {
         if (finished || !quizAttemptId) return;
         setFinished(true);
+        setIsSaving(true); // Show Tier S Loader
 
         let finalAnswersSource = answeringRef.current.length > 0 ? answeringRef.current : answering;
         const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
@@ -503,11 +519,7 @@ export default function QuizRunnerPage() {
     };
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center transition-colors">
-                <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
+        return <TierSLoader message="Caricamento quiz..." />;
     }
 
     const currentQ = answering[currentIndex];
@@ -517,477 +529,529 @@ export default function QuizRunnerPage() {
     const normalizedCorrect = normalizeDBAnswer(currentQ.correctOption);
 
     return (
-        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col transition-colors duration-500">
-            {/* ============================================================= */}
-            {/* TOP BAR */}
-            {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
-                <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
-                    {/* Left: Close */}
-                    <Link
-                        to="/"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                    >
-                        <X className="w-5 h-5 text-[var(--foreground)] opacity-50" />
-                    </Link>
-
-                    {/* Center: Timer & Progress */}
-                    <div className="flex flex-col items-center">
-                        <span className={`font-mono font-bold text-xl ${getTimerColor()}`}>
-                            {formatTime(remainingSeconds)}
-                        </span>
-                        <span className="text-[10px] text-[var(--foreground)] opacity-40 font-semibold uppercase tracking-wider">
-                            Domanda {currentIndex + 1}/{answering.length}
-                        </span>
-                    </div>
-
-                    {/* Right: Mode Toggle + Settings */}
-                    <div className="flex items-center gap-2">
-                        {/* Mode Toggle */}
-                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-0.5">
-                            <button
-                                onClick={() => setInstantCheck(!instantCheck)}
-                                className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${instantCheck
-                                    ? 'bg-white dark:bg-slate-700 text-[#00B1FF] shadow-sm'
-                                    : 'text-slate-500 dark:text-slate-400'
-                                    }`}
-                            >
-                                Check
-                            </button>
-                            <button
-                                onClick={() => setAutoNext(!autoNext)}
-                                className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${autoNext
-                                    ? 'bg-white dark:bg-slate-700 text-[#00B1FF] shadow-sm'
-                                    : 'text-slate-500 dark:text-slate-400'
-                                    }`}
-                            >
-                                Auto
-                            </button>
-                        </div>
-
-                        {/* Settings */}
-                        <button
-                            onClick={() => setShowSettings(true)}
-                            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        >
-                            <Settings className="w-5 h-5 text-[var(--foreground)] opacity-30" />
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            {/* ============================================================= */}
-            {/* QUESTION CONTENT */}
-            {/* ============================================================= */}
-            <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-36">
-                {/* Question Meta */}
-                <div className="mb-3">
-                    <span className="text-[12px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">
-                        {currentIndex + 1} / {answering.length} • {currentQ.subjectName}
-                    </span>
-                </div>
-
-                {/* Question Text */}
-                <h2 className="text-[20px] font-bold text-[var(--foreground)] leading-[1.4] mb-8">
-                    {currentQ.text}
-                </h2>
-
-                {/* Lock indicator */}
-                {isLocked && (
-                    <div className="mb-4 flex items-center gap-2 text-[12px] font-semibold text-amber-600">
-                        <span>🔒</span> Risposta bloccata
-                    </div>
+        <>
+            {/* Tier S Loader */}
+            <AnimatePresence>
+                {isSaving && (
+                    <TierSLoader
+                        message="Salvataggio in corso..."
+                        submessage="Attendi qualche secondo"
+                    />
                 )}
+            </AnimatePresence>
 
-                {/* Answer Options */}
-                <div className="space-y-3">
-                    {['a', 'b', 'c', 'd'].map(optKey => {
-                        const optText = (currentQ.options as any)[optKey];
-                        if (!optText) return null;
-
-                        const isSelected = currentQ.selectedOption === optKey;
-                        const isCorrectAnswer = optKey === normalizedCorrect;
-                        const isDisabled = isLocked;
-
-                        // Determine styling
-                        let cardStyle = "bg-[var(--card)] border-[var(--card-border)]";
-                        let badgeStyle = "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400";
-                        let textStyle = "text-[var(--foreground)] opacity-80";
-
-                        if (isLocked) {
-                            if (isCorrectAnswer) {
-                                cardStyle = "bg-emerald-50 border-emerald-500";
-                                badgeStyle = "bg-emerald-500 text-white";
-                                textStyle = "text-emerald-700";
-                            } else if (isSelected) {
-                                cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500";
-                                badgeStyle = "bg-red-500 text-white";
-                                textStyle = "text-red-700 dark:text-red-400";
-                            } else {
-                                cardStyle = "bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 opacity-50";
-                            }
-                        } else if (isSelected) {
-                            cardStyle = "bg-[#00B1FF]/5 border-[#00B1FF]";
-                            badgeStyle = "bg-[#00B1FF] text-white";
-                            textStyle = "text-[#00B1FF]";
-                        }
-
-                        return (
-                            <button
-                                key={optKey}
-                                onClick={() => !isDisabled && handleSelect(optKey)}
-                                disabled={isDisabled}
-                                className={`w-full p-4 rounded-2xl border-2 flex items-start gap-4 text-left transition-all duration-200 ${cardStyle} ${!isDisabled ? 'hover:shadow-md active:scale-[0.99]' : ''
-                                    }`}
-                            >
-                                {/* Letter Badge */}
-                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[13px] font-bold flex-shrink-0 ${badgeStyle}`}>
-                                    {optKey.toUpperCase()}
-                                </span>
-
-                                {/* Answer Text */}
-                                <span className={`text-[15px] leading-relaxed flex-1 ${textStyle}`}>
-                                    {optText}
-                                </span>
-
-                                {/* Feedback icon */}
-                                {isLocked && isCorrectAnswer && (
-                                    <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                                )}
-                                {isLocked && isSelected && !isCorrectAnswer && (
-                                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* Explanation */}
-                {isLocked && instantCheck && currentQ.explanation && (
-                    <div className="mt-6 bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-5 shadow-sm">
-                        <h4 className="text-[12px] font-bold text-[#00B1FF] uppercase tracking-wider mb-2">
-                            Spiegazione
-                        </h4>
-                        <p className="text-[14px] text-[var(--foreground)] opacity-70 leading-relaxed">
-                            {currentQ.explanation}
-                        </p>
-                    </div>
-                )}
-            </main>
-
-            {/* ============================================================= */}
-            {/* BOTTOM NAVIGATOR */}
-            {/* ============================================================= */}
-            <div className="fixed bottom-0 left-0 right-0 bg-[var(--card)] border-t border-[var(--card-border)] pb-safe z-40 transition-colors">
-                {/* Raised Tab / Drawer Handle */}
-                <div className="relative flex justify-center">
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2">
-                        {/* Rounded trapezoid tab */}
-                        <div className="relative w-28 h-8">
-                            {/* SVG: Rounded top corners, angled sides, flat bottom */}
-                            <svg
-                                className="absolute inset-0 w-full h-full"
-                                viewBox="0 0 112 32"
-                                fill="none"
-                                style={{ filter: 'drop-shadow(0 -2px 8px rgba(0,0,0,0.1))' }}
-                            >
-                                {/* Outer white shape */}
-                                <path
-                                    d="M10 32 L18 8 C20 3 24 0 30 0 L82 0 C88 0 92 3 94 8 L102 32 Z"
-                                    fill="var(--card)"
-                                />
-                            </svg>
-                            {/* Inner cyan button */}
-                            <button
-                                onClick={() => setDrawerExpanded(!drawerExpanded)}
-                                className="absolute left-1/2 -translate-x-1/2 top-2 w-16 h-5 rounded-md bg-gradient-to-b from-[#00B1FF] to-[#0095dd] flex items-center justify-center active:scale-95 transition-transform"
-                                style={{
-                                    boxShadow: '0 2px 4px rgba(0,177,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
-                                }}
-                            >
-                                <svg
-                                    width="14"
-                                    height="8"
-                                    viewBox="0 0 14 8"
-                                    fill="none"
-                                    className={`text-white transition-transform duration-200 ${drawerExpanded ? 'rotate-180' : ''}`}
-                                >
-                                    <path d="M1.5 6.5L7 1.5L12.5 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Border line */}
-                <div className="h-px bg-slate-100 dark:bg-slate-800" />
-
-                {/* Collapsible Question Pills */}
-                <div
-                    className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[50vh] overflow-y-auto' : 'max-h-20 overflow-hidden'
-                        }`}
-                >
-                    <div className="px-4 py-1 border-b border-slate-50 dark:border-slate-800">
-                        <div className={`flex gap-2 py-2 max-w-3xl mx-auto ${drawerExpanded
-                            ? 'flex-wrap justify-center px-1'
-                            : 'overflow-x-auto scrollbar-hide pl-1'
-                            }`}>
-                            {answering.map((ans, idx) => {
-                                const isActive = idx === currentIndex;
-                                const hasAnswer = ans.selectedOption !== null;
-
-                                let buttonClass = "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-200"; // Default: Unanswered (Grey)
-
-                                if (isActive) {
-                                    // Current: Blue Outline ("corners only")
-                                    buttonClass = "bg-white dark:bg-slate-900 text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm scale-110 z-10";
-                                } else if (hasAnswer) {
-                                    // Answered: Solid Blue
-                                    buttonClass = "bg-[#00B1FF] text-white shadow-sm";
-                                }
-
-                                return (
-                                    <button
-                                        key={idx}
-                                        id={`question-nav-${idx}`}
-                                        onClick={() => setCurrentIndex(idx)}
-                                        className={`w-9 h-9 rounded-squircle flex-shrink-0 font-semibold text-[13px] transition-all flex items-center justify-center ${buttonClass}`}
-                                    >
-                                        {idx + 1}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation Buttons - Show Termina when drawer expanded */}
-                <div className="px-4 py-3 flex gap-3 max-w-3xl mx-auto">
-                    {drawerExpanded ? (
+            <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col transition-colors duration-500">
+                {/* ============================================================= */}
+                {/* TOP BAR */}
+                {/* ============================================================= */}
+                <header className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
+                    <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
+                        {/* Left: Close */}
                         <button
-                            onClick={() => {
-                                setDrawerExpanded(false);
-                                setShowTerminateConfirm(true);
-                            }}
-                            className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            onClick={() => setShowExitConfirm(true)}
+                            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                         >
-                            <X className="w-4 h-4" />
-                            Termina Quiz
+                            <X className="w-5 h-5 text-[var(--foreground)] opacity-50" />
                         </button>
-                    ) : (
-                        <>
-                            <button
-                                onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
-                                disabled={currentIndex === 0}
-                                className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
-                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98]'
-                                    }`}
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                                Precedente
-                            </button>
 
-                            {currentIndex === answering.length - 1 ? (
-                                <button
-                                    onClick={() => setShowTerminateConfirm(true)}
-                                    className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all"
-                                >
-                                    Termina Quiz
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
-                                    className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                                >
-                                    Successiva
-                                    <ChevronRight className="w-5 h-5" />
-                                </button>
-                            )}
-                        </>
-                    )}
-                </div>
-            </div>
+                        {/* Center: Timer & Progress */}
+                        <div data-onboarding="timer" className="flex flex-col items-center">
+                            <span className={`font-mono font-bold text-xl ${getTimerColor()}`}>
+                                {formatTime(remainingSeconds)}
+                            </span>
+                            <span className="text-[10px] text-[var(--foreground)] opacity-40 font-semibold uppercase tracking-wider">
+                                Domanda {currentIndex + 1}/{answering.length}
+                            </span>
+                        </div>
 
-            {/* ============================================================= */}
-            {/* SETTINGS MODAL */}
-            {/* ============================================================= */}
-            {showSettings && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
-                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 animate-in slide-in-from-bottom duration-300">
-                        <h3 className="text-lg font-bold text-[var(--foreground)] mb-6">Impostazioni</h3>
-
-                        <div className="space-y-4">
-                            {/* Instant Check */}
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="font-semibold text-[var(--foreground)]">Verifica Istantanea</p>
-                                    <p className="text-[13px] text-[var(--foreground)] opacity-50">Mostra risposta corretta subito</p>
-                                </div>
+                        {/* Right: Mode Toggle + Settings */}
+                        <div className="flex items-center gap-2">
+                            {/* Mode Toggle */}
+                            <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-0.5">
                                 <button
                                     onClick={() => setInstantCheck(!instantCheck)}
-                                    className={`w-12 h-7 rounded-full transition-colors ${instantCheck ? 'bg-[#00B1FF]' : 'bg-slate-200'}`}
-                                >
-                                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${instantCheck ? 'translate-x-6' : 'translate-x-1'}`} />
-                                </button>
-                            </div>
-
-                            {/* Auto Next */}
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="font-semibold text-[var(--foreground)]">Auto Successiva</p>
-                                    <p className="text-[13px] text-[var(--foreground)] opacity-50">Passa alla domanda successiva</p>
-                                </div>
-                                <button
-                                    onClick={() => setAutoNext(!autoNext)}
-                                    className={`w-12 h-7 rounded-full transition-colors ${autoNext ? 'bg-[#00B1FF]' : 'bg-slate-200 dark:bg-slate-700'}`}
-                                >
-                                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${autoNext ? 'translate-x-6' : 'translate-x-1'}`} />
-                                </button>
-                            </div>
-
-                            {/* Report Button */}
-                            <div className="pt-4 border-t border-[var(--card-border)]">
-                                <button
-                                    onClick={() => setShowReportModal(true)}
-                                    className="w-full py-3 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                                >
-                                    <Flag className="w-4 h-4" />
-                                    Segnala un errore
-                                </button>
-                            </div>
-
-
-                        </div>
-
-                        <button
-                            onClick={() => setShowSettings(false)}
-                            className="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold rounded-xl"
-                        >
-                            Chiudi
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* ============================================================= */}
-            {/* REPORT MODAL */}
-            {/* ============================================================= */}
-            {showReportModal && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowReportModal(false)} />
-                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
-                            </div>
-                            <h3 className="text-lg font-bold text-[var(--foreground)]">Segnala Errore</h3>
-                        </div>
-
-                        <p className="text-sm text-[var(--foreground)] opacity-60 mb-4">
-                            Aiutaci a migliorare. Qual è il problema con questa domanda?
-                        </p>
-
-                        <div className="space-y-3 mb-6">
-                            {[
-                                "Risposta errata",
-                                "Domanda malformata",
-                                "Typos o errori grammaticali",
-                                "Altro"
-                            ].map((r) => (
-                                <button
-                                    key={r}
-                                    onClick={() => setReportReason(r)}
-                                    className={`w-full p-3 rounded-xl text-left text-sm font-medium transition-all ${reportReason === r
-                                        ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 border border-amber-200 dark:border-amber-800'
-                                        : 'bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'
+                                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${instantCheck
+                                        ? 'bg-white dark:bg-slate-700 text-[#00B1FF] shadow-sm'
+                                        : 'text-slate-500 dark:text-slate-400'
                                         }`}
                                 >
-                                    {r}
+                                    Check
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => setAutoNext(!autoNext)}
+                                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${autoNext
+                                        ? 'bg-white dark:bg-slate-700 text-[#00B1FF] shadow-sm'
+                                        : 'text-slate-500 dark:text-slate-400'
+                                        }`}
+                                >
+                                    Auto
+                                </button>
+                            </div>
+
+                            {/* Settings */}
+                            <button
+                                data-onboarding="settings"
+                                onClick={() => setShowSettings(true)}
+                                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <Settings className="w-5 h-5 text-[var(--foreground)] opacity-30" />
+                            </button>
                         </div>
-
-                        <textarea
-                            value={reportDescription}
-                            onChange={(e) => setReportDescription(e.target.value)}
-                            placeholder="Dettagli aggiuntivi (opzionale)..."
-                            className="w-full mb-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none text-sm text-[var(--foreground)] focus:ring-2 focus:ring-amber-500 min-h-[80px]"
-                        />
-
-                        <button
-                            onClick={handleReport}
-                            disabled={isReporting || !reportReason}
-                            className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
-                        >
-                            {isReporting ? "Invio..." : "Invia Segnalazione"}
-                        </button>
-
-                        <button
-                            onClick={() => setShowReportModal(false)}
-                            className="w-full mt-3 py-3 text-[var(--foreground)] opacity-50 font-medium text-sm"
-                        >
-                            Annulla
-                        </button>
                     </div>
-                </div>
-            )}
+                </header>
 
-            {/* ============================================================= */}
-            {/* REPORT SUCCESS MODAL */}
-            {/* ============================================================= */}
-            {showReportSuccess && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowReportSuccess(false)} />
-                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
-                        <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4">
-                            <Check className="w-8 h-8 text-emerald-500" />
+                {/* ============================================================= */}
+                {/* QUESTION CONTENT */}
+                {/* ============================================================= */}
+                <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-36">
+                    {/* Question Meta */}
+                    <div className="mb-3">
+                        <span className="text-[12px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">
+                            {currentIndex + 1} / {answering.length} • {currentQ.subjectName}
+                        </span>
+                    </div>
+
+                    {/* Question Text */}
+                    <h2 className="text-[20px] font-bold text-[var(--foreground)] leading-[1.4] mb-8">
+                        {currentQ.text}
+                    </h2>
+
+                    {/* Lock indicator */}
+                    {isLocked && (
+                        <div className="mb-4 flex items-center gap-2 text-[12px] font-semibold text-amber-600">
+                            <span>🔒</span> Risposta bloccata
                         </div>
-                        <h3 className="text-xl font-black text-[var(--foreground)] mb-2">Segnalazione Inviata</h3>
-                        <p className="text-slate-500 dark:text-slate-400 mb-6">
-                            Grazie per il tuo contributo! Analizzeremo la tua segnalazione al più presto.
-                        </p>
-                        <button
-                            onClick={() => setShowReportSuccess(false)}
-                            className="w-full py-3.5 bg-[#00B1FF] hover:bg-[#0095dd] text-white font-bold rounded-xl transition-colors shadow-lg shadow-[#00B1FF]/20"
-                        >
-                            Chiudi
-                        </button>
+                    )}
+
+                    {/* Answer Options */}
+                    <div className="space-y-3">
+                        {['a', 'b', 'c', 'd'].map(optKey => {
+                            const optText = (currentQ.options as any)[optKey];
+                            if (!optText) return null;
+
+                            const isSelected = currentQ.selectedOption === optKey;
+                            const isCorrectAnswer = optKey === normalizedCorrect;
+                            const isDisabled = isLocked;
+
+                            // Determine styling
+                            let cardStyle = "bg-[var(--card)] border-[var(--card-border)]";
+                            let badgeStyle = "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400";
+                            let textStyle = "text-[var(--foreground)] opacity-80";
+
+                            if (isLocked) {
+                                if (isCorrectAnswer) {
+                                    cardStyle = "bg-emerald-50 border-emerald-500";
+                                    badgeStyle = "bg-emerald-500 text-white";
+                                    textStyle = "text-emerald-700";
+                                } else if (isSelected) {
+                                    cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500";
+                                    badgeStyle = "bg-red-500 text-white";
+                                    textStyle = "text-red-700 dark:text-red-400";
+                                } else {
+                                    cardStyle = "bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 opacity-50";
+                                }
+                            } else if (isSelected) {
+                                cardStyle = "bg-[#00B1FF]/5 border-[#00B1FF]";
+                                badgeStyle = "bg-[#00B1FF] text-white";
+                                textStyle = "text-[#00B1FF]";
+                            }
+
+                            return (
+                                <button
+                                    key={optKey}
+                                    onClick={() => !isDisabled && handleSelect(optKey)}
+                                    disabled={isDisabled}
+                                    className={`w-full p-4 rounded-2xl border-2 flex items-start gap-4 text-left transition-all duration-200 ${cardStyle} ${!isDisabled ? 'hover:shadow-md active:scale-[0.99]' : ''
+                                        }`}
+                                >
+                                    {/* Letter Badge */}
+                                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[13px] font-bold flex-shrink-0 ${badgeStyle}`}>
+                                        {optKey.toUpperCase()}
+                                    </span>
+
+                                    {/* Answer Text */}
+                                    <span className={`text-[15px] leading-relaxed flex-1 ${textStyle}`}>
+                                        {optText}
+                                    </span>
+
+                                    {/* Feedback icon */}
+                                    {isLocked && isCorrectAnswer && (
+                                        <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                    )}
+                                    {isLocked && isSelected && !isCorrectAnswer && (
+                                        <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Explanation */}
+                    {isLocked && instantCheck && currentQ.explanation && (
+                        <div className="mt-6 bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-5 shadow-sm">
+                            <h4 className="text-[12px] font-bold text-[#00B1FF] uppercase tracking-wider mb-2">
+                                Spiegazione
+                            </h4>
+                            <p className="text-[14px] text-[var(--foreground)] opacity-70 leading-relaxed">
+                                {currentQ.explanation}
+                            </p>
+                        </div>
+                    )}
+                </main>
+
+                {/* ============================================================= */}
+                {/* BOTTOM NAVIGATOR */}
+                {/* ============================================================= */}
+                <div className="fixed bottom-0 left-0 right-0 bg-[var(--card)] border-t border-[var(--card-border)] pb-safe z-40 transition-colors">
+                    {/* Raised Tab / Drawer Handle */}
+                    <div className="relative flex justify-center">
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+                            {/* Rounded trapezoid tab */}
+                            <div className="relative w-28 h-8">
+                                {/* SVG: Rounded top corners, angled sides, flat bottom */}
+                                <svg
+                                    className="absolute inset-0 w-full h-full"
+                                    viewBox="0 0 112 32"
+                                    fill="none"
+                                    style={{ filter: 'drop-shadow(0 -2px 8px rgba(0,0,0,0.1))' }}
+                                >
+                                    {/* Outer white shape */}
+                                    <path
+                                        d="M10 32 L18 8 C20 3 24 0 30 0 L82 0 C88 0 92 3 94 8 L102 32 Z"
+                                        fill="var(--card)"
+                                    />
+                                </svg>
+                                {/* Inner cyan button */}
+                                <button
+                                    onClick={() => setDrawerExpanded(!drawerExpanded)}
+                                    className="absolute left-1/2 -translate-x-1/2 top-2 w-16 h-5 rounded-md bg-gradient-to-b from-[#00B1FF] to-[#0095dd] flex items-center justify-center active:scale-95 transition-transform"
+                                    style={{
+                                        boxShadow: '0 2px 4px rgba(0,177,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
+                                    }}
+                                >
+                                    <svg
+                                        width="14"
+                                        height="8"
+                                        viewBox="0 0 14 8"
+                                        fill="none"
+                                        className={`text-white transition-transform duration-200 ${drawerExpanded ? 'rotate-180' : ''}`}
+                                    >
+                                        <path d="M1.5 6.5L7 1.5L12.5 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Border line */}
+                    <div className="h-px bg-slate-100 dark:bg-slate-800" />
+
+                    {/* Collapsible Question Pills */}
+                    <div
+                        data-onboarding="navigation"
+                        className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[50vh] overflow-y-auto' : 'max-h-20 overflow-hidden'
+                            }`}
+                    >
+                        <div className="px-4 py-1 border-b border-slate-50 dark:border-slate-800">
+                            <div className={`flex gap-2 py-2 max-w-3xl mx-auto ${drawerExpanded
+                                ? 'flex-wrap justify-center px-1'
+                                : 'overflow-x-auto scrollbar-hide pl-1'
+                                }`}>
+                                {answering.map((ans, idx) => {
+                                    const isActive = idx === currentIndex;
+                                    const hasAnswer = ans.selectedOption !== null;
+
+                                    let buttonClass = "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-200"; // Default: Unanswered (Grey)
+
+                                    if (isActive) {
+                                        // Current: Blue Outline ("corners only")
+                                        buttonClass = "bg-white dark:bg-slate-900 text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm scale-110 z-10";
+                                    } else if (hasAnswer) {
+                                        // Answered: Solid Blue
+                                        buttonClass = "bg-[#00B1FF] text-white shadow-sm";
+                                    }
+
+                                    return (
+                                        <button
+                                            key={idx}
+                                            id={`question-nav-${idx}`}
+                                            onClick={() => setCurrentIndex(idx)}
+                                            className={`w-9 h-9 rounded-squircle flex-shrink-0 font-semibold text-[13px] transition-all flex items-center justify-center ${buttonClass}`}
+                                        >
+                                            {idx + 1}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Navigation Buttons - Show Termina when drawer expanded */}
+                    <div className="px-4 py-3 flex gap-3 max-w-3xl mx-auto">
+                        {drawerExpanded ? (
+                            <button
+                                onClick={() => {
+                                    setDrawerExpanded(false);
+                                    setShowTerminateConfirm(true);
+                                }}
+                                className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            >
+                                <X className="w-4 h-4" />
+                                Termina Quiz
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
+                                    disabled={currentIndex === 0}
+                                    className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
+                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98]'
+                                        }`}
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                    Precedente
+                                </button>
+
+                                {currentIndex === answering.length - 1 ? (
+                                    <button
+                                        onClick={() => setShowTerminateConfirm(true)}
+                                        className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all"
+                                    >
+                                        Termina Quiz
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
+                                        className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Successiva
+                                        <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
-            )}
 
-            {/* ============================================================= */}
-            {/* TERMINATE CONFIRMATION */}
-            {/* ============================================================= */}
-            {showTerminateConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTerminateConfirm(false)} />
-                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
-                        <h3 className="text-lg font-bold text-[var(--foreground)] text-center mb-2">
-                            Terminare il quiz?
-                        </h3>
-                        <p className="text-[var(--foreground)] opacity-50 text-center text-[14px] mb-6">
-                            Verranno salvate tutte le risposte date finora.
-                        </p>
+                {/* ============================================================= */}
+                {/* SETTINGS MODAL */}
+                {/* ============================================================= */}
+                {showSettings && (
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
+                        <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 animate-in slide-in-from-bottom duration-300">
+                            <h3 className="text-lg font-bold text-[var(--foreground)] mb-6">Impostazioni</h3>
 
-                        <button
-                            onClick={handleFinish}
-                            className="w-full py-3.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors"
-                        >
-                            Termina Quiz
-                        </button>
+                            <div className="space-y-4">
+                                {/* Instant Check */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-semibold text-[var(--foreground)]">Verifica Istantanea</p>
+                                        <p className="text-[13px] text-[var(--foreground)] opacity-50">Mostra risposta corretta subito</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setInstantCheck(!instantCheck)}
+                                        className={`w-12 h-7 rounded-full transition-colors ${instantCheck ? 'bg-[#00B1FF]' : 'bg-slate-200'}`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${instantCheck ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
 
-                        <button
-                            onClick={() => setShowTerminateConfirm(false)}
-                            className="w-full mt-3 py-3 text-[var(--foreground)] opacity-50 font-medium"
-                        >
-                            Continua
-                        </button>
+                                {/* Auto Next */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-semibold text-[var(--foreground)]">Auto Successiva</p>
+                                        <p className="text-[13px] text-[var(--foreground)] opacity-50">Passa alla domanda successiva</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setAutoNext(!autoNext)}
+                                        className={`w-12 h-7 rounded-full transition-colors ${autoNext ? 'bg-[#00B1FF]' : 'bg-slate-200 dark:bg-slate-700'}`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${autoNext ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
+
+                                {/* Report Button */}
+                                <div className="pt-4 border-t border-[var(--card-border)]">
+                                    <button
+                                        onClick={() => setShowReportModal(true)}
+                                        className="w-full py-3 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        <Flag className="w-4 h-4" />
+                                        Segnala un errore
+                                    </button>
+                                </div>
+
+
+                            </div>
+
+                            <button
+                                onClick={() => setShowSettings(false)}
+                                className="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold rounded-xl"
+                            >
+                                Chiudi
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+
+                {/* ============================================================= */}
+                {/* REPORT MODAL */}
+                {/* ============================================================= */}
+                {showReportModal && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowReportModal(false)} />
+                        <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                    <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+                                </div>
+                                <h3 className="text-lg font-bold text-[var(--foreground)]">Segnala Errore</h3>
+                            </div>
+
+                            <p className="text-sm text-[var(--foreground)] opacity-60 mb-4">
+                                Aiutaci a migliorare. Qual è il problema con questa domanda?
+                            </p>
+
+                            <div className="space-y-3 mb-6">
+                                {[
+                                    "Risposta errata",
+                                    "Domanda malformata",
+                                    "Typos o errori grammaticali",
+                                    "Altro"
+                                ].map((r) => (
+                                    <button
+                                        key={r}
+                                        onClick={() => setReportReason(r)}
+                                        className={`w-full p-3 rounded-xl text-left text-sm font-medium transition-all ${reportReason === r
+                                            ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 border border-amber-200 dark:border-amber-800'
+                                            : 'bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'
+                                            }`}
+                                    >
+                                        {r}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <textarea
+                                value={reportDescription}
+                                onChange={(e) => setReportDescription(e.target.value)}
+                                placeholder="Dettagli aggiuntivi (opzionale)..."
+                                className="w-full mb-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none text-sm text-[var(--foreground)] focus:ring-2 focus:ring-amber-500 min-h-[80px]"
+                            />
+
+                            <button
+                                onClick={handleReport}
+                                disabled={isReporting || !reportReason}
+                                className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
+                            >
+                                {isReporting ? "Invio..." : "Invia Segnalazione"}
+                            </button>
+
+                            <button
+                                onClick={() => setShowReportModal(false)}
+                                className="w-full mt-3 py-3 text-[var(--foreground)] opacity-50 font-medium text-sm"
+                            >
+                                Annulla
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============================================================= */}
+                {/* REPORT SUCCESS MODAL */}
+                {/* ============================================================= */}
+                {showReportSuccess && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowReportSuccess(false)} />
+                        <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
+                            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4">
+                                <Check className="w-8 h-8 text-emerald-500" />
+                            </div>
+                            <h3 className="text-xl font-black text-[var(--foreground)] mb-2">Segnalazione Inviata</h3>
+                            <p className="text-slate-500 dark:text-slate-400 mb-6">
+                                Grazie per il tuo contributo! Analizzeremo la tua segnalazione al più presto.
+                            </p>
+                            <button
+                                onClick={() => setShowReportSuccess(false)}
+                                className="w-full py-3.5 bg-[#00B1FF] hover:bg-[#0095dd] text-white font-bold rounded-xl transition-colors shadow-lg shadow-[#00B1FF]/20"
+                            >
+                                Chiudi
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============================================================= */}
+                {/* EXIT CONFIRMATION (X Button) */}
+                {/* ============================================================= */}
+                {showExitConfirm && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowExitConfirm(false)} />
+                        <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                            <h3 className="text-lg font-bold text-[var(--foreground)] text-center mb-2">
+                                Vuoi abbandonare il quiz?
+                            </h3>
+                            <p className="text-[var(--foreground)] opacity-50 text-center text-[14px] mb-6">
+                                Se esci senza salvare, tutte le risposte andranno perse e il tentativo non verrà registrato.
+                            </p>
+
+                            <button
+                                onClick={handleFinish}
+                                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors"
+                            >
+                                Salva e Termina
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/')}
+                                className="w-full mt-3 py-3 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 font-semibold rounded-xl hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors"
+                            >
+                                Esci senza salvare
+                            </button>
+
+                            <button
+                                onClick={() => setShowExitConfirm(false)}
+                                className="w-full mt-3 py-3 text-[var(--foreground)] opacity-50 font-medium"
+                            >
+                                Continua il quiz
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============================================================= */}
+                {/* TERMINATE CONFIRMATION (Termina Quiz Button) */}
+                {/* ============================================================= */}
+                {showTerminateConfirm && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTerminateConfirm(false)} />
+                        <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                            <h3 className="text-lg font-bold text-[var(--foreground)] text-center mb-2">
+                                Terminare il quiz?
+                            </h3>
+                            <p className="text-[var(--foreground)] opacity-50 text-center text-[14px] mb-6">
+                                Verranno salvate tutte le risposte date finora.
+                            </p>
+
+                            <button
+                                onClick={handleFinish}
+                                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors"
+                            >
+                                Termina e Salva
+                            </button>
+
+                            <button
+                                onClick={() => setShowTerminateConfirm(false)}
+                                className="w-full mt-3 py-3 text-[var(--foreground)] opacity-50 font-medium"
+                            >
+                                Continua
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     );
 }

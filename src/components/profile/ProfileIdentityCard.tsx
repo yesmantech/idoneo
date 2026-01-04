@@ -8,7 +8,6 @@ interface ProfileIdentityCardProps {
     user: User | null;
     profile: any;
     xp?: number;
-    score?: number;
 }
 
 interface MetricDesc {
@@ -18,7 +17,7 @@ interface MetricDesc {
     color: string;
 }
 
-export default function ProfileIdentityCard({ user, profile, xp = 0, score = 0 }: ProfileIdentityCardProps) {
+export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileIdentityCardProps) {
     const navigate = useNavigate();
     const [explanation, setExplanation] = useState<MetricDesc | null>(null);
 
@@ -33,8 +32,8 @@ export default function ProfileIdentityCard({ user, profile, xp = 0, score = 0 }
             color: "bg-amber-50 text-amber-500"
         },
         score: {
-            title: "Punteggio di Idoneità",
-            description: "La percentuale di risposte corrette rispetto alla banca dati completa del concorso.",
+            title: "Energia",
+            description: "L'energia necessaria per affrontare i quiz. Come utente Premium, la tua energia è infinita!",
             icon: <Zap className="w-5 h-5 text-emerald-500" fill="currentColor" />,
             color: "bg-emerald-50 text-emerald-500"
         },
@@ -130,11 +129,11 @@ export default function ProfileIdentityCard({ user, profile, xp = 0, score = 0 }
                                 className="flex-1 flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
                                 onClick={() => setExplanation(metrics.score)}
                             >
-                                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-800/50 dark:to-emerald-900/30 flex items-center justify-center mb-1.5 ring-1 ring-emerald-200/50 dark:ring-emerald-700/50">
+                                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-800/50 dark:to-emerald-900/30 flex items-center justify-center mb-1.5 ring-1 ring-emerald-200/50 dark:ring-emerald-700/50 relative">
                                     <Zap className="w-5 h-5 text-emerald-500" fill="currentColor" />
                                 </div>
-                                <span className="text-xl font-black text-[var(--foreground)] tracking-tight">{score}</span>
-                                <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider">Punti</span>
+                                <span className="text-2xl font-black text-[var(--foreground)] tracking-tight leading-none mb-1">∞</span>
+                                <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider">Energia</span>
                             </div>
 
                             <div className="w-px h-14 bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-600 to-transparent"></div>

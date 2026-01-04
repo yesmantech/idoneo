@@ -7,24 +7,27 @@ import { calculateReadinessLevel } from '@/lib/statsService';
 interface ReadinessCardProps {
     history: any[];
     theme: any;
+    leaderboardData?: any;
 }
 
-export default function ReadinessCard({ history, theme }: ReadinessCardProps) {
+export default function ReadinessCard({ history, theme, leaderboardData }: ReadinessCardProps) {
     const [showModal, setShowModal] = useState(false);
 
     const stats = useMemo(() => {
+        // Even with < 3 tests, if we have leaderboard data, we show it
+        if (leaderboardData && leaderboardData.score !== undefined) {
+            return calculateReadinessLevel(0, 0, history.length, leaderboardData);
+        }
+
         if (!history || history.length < 3) return null;
 
         const totalTests = history.length;
         const totalScore = history.reduce((acc, curr) => acc + (curr.score || 0), 0);
-
         const avgScore = totalTests ? totalScore / totalTests : 0;
-
-        // Mock accuracy if missing (history from role hub is simplified)
         const normalizedAvg = (avgScore / 30) * 100;
 
         return calculateReadinessLevel(normalizedAvg, normalizedAvg, totalTests);
-    }, [history]);
+    }, [history, leaderboardData]);
 
     if (!stats) {
         // Empty State (Tier S) - Also Clickable now to explain what to do
@@ -125,7 +128,7 @@ export default function ReadinessCard({ history, theme }: ReadinessCardProps) {
                             />
                             <motion.circle
                                 initial={{ strokeDasharray: 200, strokeDashoffset: 200 }}
-                                animate={{ strokeDashoffset: 200 - (percentage / 100) * 200 }}
+                                animate={{ strokeDashoffset: 200 - ((stats.score !== undefined ? stats.score : percentage) / 100) * 200 }}
                                 transition={{ duration: 1.5, ease: "easeOut" }}
                                 cx="40"
                                 cy="40"
@@ -137,11 +140,19 @@ export default function ReadinessCard({ history, theme }: ReadinessCardProps) {
                             />
                         </svg>
 
-                        {/* Icon in Center */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            {level === 'high' ? <Trophy className={`w-6 h-6 ${currentTheme.text}`} /> :
-                                level === 'medium' ? <TrendingUp className={`w-6 h-6 ${currentTheme.text}`} /> :
-                                    <AlertTriangle className={`w-6 h-6 ${currentTheme.text}`} />}
+                        {/* Icon/Score in Center */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            {stats.score !== undefined ? (
+                                <span className={`text-lg font-black ${currentTheme.text}`}>
+                                    {Math.round(stats.score)}
+                                </span>
+                            ) : (
+                                <>
+                                    {level === 'high' ? <Trophy className={`w-6 h-6 ${currentTheme.text}`} /> :
+                                        level === 'medium' ? <TrendingUp className={`w-6 h-6 ${currentTheme.text}`} /> :
+                                            <AlertTriangle className={`w-6 h-6 ${currentTheme.text}`} />}
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -180,7 +191,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
 
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 opacity-70 hover:opacity-100 transition-colors z-10"
+                            className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 opacity-70 hover:opacity-100 transition-colors z-50"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -201,7 +212,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
                                     </div>
                                     <div>
                                         <h4 className="text-[14px] font-bold text-slate-900 dark:text-slate-200">Pronto</h4>
-                                        <p className="text-[12px] text-slate-500 dark:text-slate-400">Media superiore a 27/30.</p>
+                                        <p className="text-[12px] text-slate-500 dark:text-slate-400">Media superiore a 90/100.</p>
                                     </div>
                                     {stats?.level === 'high' && <CheckCircle2 className="w-5 h-5 text-emerald-500 ml-auto" />}
                                 </div>
@@ -212,7 +223,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
                                     </div>
                                     <div>
                                         <h4 className="text-[14px] font-bold text-slate-900 dark:text-slate-200">A buon punto</h4>
-                                        <p className="text-[12px] text-slate-500 dark:text-slate-400">Media tra 21/30 e 27/30.</p>
+                                        <p className="text-[12px] text-slate-500 dark:text-slate-400">Media tra 70/100 e 90/100.</p>
                                     </div>
                                     {stats?.level === 'medium' && <CheckCircle2 className="w-5 h-5 text-amber-500 ml-auto" />}
                                 </div>
@@ -223,11 +234,38 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
                                     </div>
                                     <div>
                                         <h4 className="text-[14px] font-bold text-slate-900 dark:text-slate-200">Da migliorare</h4>
-                                        <p className="text-[12px] text-slate-500 dark:text-slate-400">Media inferiore a 21/30.</p>
+                                        <p className="text-[12px] text-slate-500 dark:text-slate-400">Media inferiore a 70/100.</p>
                                     </div>
                                     {stats?.level === 'low' && <CheckCircle2 className="w-5 h-5 text-red-500 ml-auto" />}
                                 </div>
                             </div>
+
+                            {/* Detailed Breakdown */}
+                            {stats?.breakdown && (
+                                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Analisi Dettagliata</h4>
+                                    {[
+                                        { label: 'Accuratezza', value: stats.breakdown.accuracy, color: 'bg-emerald-500' },
+                                        { label: 'Volume (Risposte Corrette)', value: stats.breakdown.volume, color: 'bg-blue-500' },
+                                        { label: 'Copertura Banca Dati', value: stats.breakdown.coverage, color: 'bg-purple-500' },
+                                        { label: 'Costanza (Reliability)', value: stats.breakdown.reliability, color: 'bg-amber-500' },
+                                    ].map((factor) => (
+                                        <div key={factor.label} className="space-y-1.5">
+                                            <div className="flex justify-between text-xs font-bold">
+                                                <span className="text-slate-600 dark:text-slate-300">{factor.label}</span>
+                                                <span className="text-slate-900 dark:text-slate-100">{Math.round(factor.value)}%</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${factor.value}%` }}
+                                                    className={`h-full ${factor.color}`}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
                             <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <p className="text-[12px] text-slate-400 text-center">

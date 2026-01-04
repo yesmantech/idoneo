@@ -4,7 +4,10 @@ import { useRoleHubData } from "@/hooks/useRoleHubData";
 import { ChevronLeft, Trophy, Puzzle, Clock, FileText, ExternalLink, Sparkles, ArrowRight, Play, BookOpen, Download, CheckCircle, Loader2, Users, Calendar, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { offlineService } from "@/lib/offlineService";
+import { useOnboarding } from "@/context/OnboardingProvider";
+import TierSLoader from "@/components/ui/TierSLoader";
 import ReadinessCard from "@/components/role/ReadinessCard";
+import AttemptCard from "@/components/stats/AttemptCard";
 
 // =============================================================================
 // ROLE DETAIL PAGE - Tier S Redesign
@@ -14,12 +17,23 @@ export default function RolePage() {
   const { category, role } = useParams<{ category: string; role: string }>();
   const navigate = useNavigate();
 
-  const { role: roleData, resources, history, latestQuizId, latestQuizSlug, candidatiCount, loading, error } = useRoleHubData(category || "", role || "");
+  const { role: roleData, resources, history, latestQuizId, latestQuizSlug, candidatiCount, leaderboardData, loading, error } = useRoleHubData(category || "", role || "");
 
   // Offline State
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  // Onboarding
+  const { startOnboarding, hasCompletedContext } = useOnboarding();
+
+  // Auto-start rolepage onboarding
+  useEffect(() => {
+    if (!loading && roleData && !hasCompletedContext('rolepage')) {
+      const timer = setTimeout(() => startOnboarding('rolepage'), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, roleData, hasCompletedContext, startOnboarding]);
 
   // Check offline status on mount
   // Auto-Cache on mount
@@ -91,11 +105,7 @@ export default function RolePage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <TierSLoader message="Caricamento ruolo..." />;
   }
 
   if (error || !roleData) {
@@ -149,7 +159,9 @@ export default function RolePage() {
         {/* READINESS CARD (New Tier S) */}
         {/* ===================================================================== */}
         {roleData && (
-          <ReadinessCard history={history} theme={theme} />
+          <div data-onboarding="readiness">
+            <ReadinessCard history={history} theme={theme} leaderboardData={leaderboardData} />
+          </div>
         )}
 
         {/* ===================================================================== */}
@@ -168,7 +180,7 @@ export default function RolePage() {
         {/* ===================================================================== */}
 
         {/* OFFICIAL SIMULATION */}
-        <div onClick={handleStartSimulation} className="group relative bg-white dark:bg-[var(--card)] rounded-[32px] p-6 shadow-soft cursor-pointer hover:scale-[1.02] transition-all duration-300 overflow-hidden active:scale-[0.98] border border-transparent dark:border-[var(--card-border)]">
+        <div data-onboarding="start-quiz" onClick={handleStartSimulation} className="group relative bg-white dark:bg-[var(--card)] rounded-[32px] p-6 shadow-soft cursor-pointer hover:scale-[1.02] transition-all duration-300 overflow-hidden active:scale-[0.98] border border-transparent dark:border-[var(--card-border)]">
           {/* Decorator */}
           <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${theme.gradient} opacity-10 dark:opacity-20 rounded-bl-[100px] transition-transform group-hover:scale-110`} />
 
@@ -195,7 +207,7 @@ export default function RolePage() {
         </div>
 
         {/* CUSTOM PRACTICE */}
-        <div onClick={handleCustomQuiz} className="group relative bg-white dark:bg-[var(--card)] rounded-[32px] p-6 shadow-soft cursor-pointer hover:scale-[1.02] transition-all duration-300 overflow-hidden active:scale-[0.98] border border-transparent dark:border-[var(--card-border)]">
+        <div data-onboarding="custom-quiz" onClick={handleCustomQuiz} className="group relative bg-white dark:bg-[var(--card)] rounded-[32px] p-6 shadow-soft cursor-pointer hover:scale-[1.02] transition-all duration-300 overflow-hidden active:scale-[0.98] border border-transparent dark:border-[var(--card-border)]">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-400 to-fuchsia-500 opacity-5 dark:opacity-10 rounded-bl-[100px]" />
 
           <div className="relative z-10 flex items-center gap-5">
@@ -219,30 +231,25 @@ export default function RolePage() {
         {/* ===================================================================== */}
 
         {/* HISTORY SECTION */}
-        <div className="space-y-3">
+        <div data-onboarding="history" className="space-y-3">
           <h3 className="text-[13px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2">
             Le tue attività
           </h3>
           <div className="bg-white dark:bg-[var(--card)] rounded-[24px] overflow-hidden shadow-sm border border-slate-100/50 dark:border-slate-800">
             {history.length > 0 ? (
               <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                {history.slice(0, 3).map((attempt) => (
-                  <Link key={attempt.id} to={`/quiz/results/${attempt.id}`} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${attempt.score >= 18 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
-                        <span className="text-[13px] font-bold">{attempt.score.toFixed(0)}</span>
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-semibold text-slate-900 dark:text-[var(--foreground)]">
-                          {attempt.is_official_sim ? "Simulazione" : "Pratica"}
-                        </p>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                          {new Date(attempt.created_at).toLocaleDateString('it-IT')}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronLeft className="w-4 h-4 text-slate-300 dark:text-slate-600 rotate-180" />
-                  </Link>
+                {history.slice(0, 3).map((attempt: any) => (
+                  <AttemptCard
+                    key={attempt.id}
+                    attempt={{
+                      id: attempt.id,
+                      created_at: attempt.created_at,
+                      score: attempt.score,
+                      total_questions: attempt.total_questions,
+                      correct: attempt.correct,
+                      mode: attempt.mode
+                    }}
+                  />
                 ))}
                 <Link to="#" className="block p-3 text-center text-[13px] font-medium text-[#00B1FF] bg-slate-50/50 dark:bg-slate-800/30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                   Vedi tutta la cronologia

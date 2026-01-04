@@ -265,24 +265,81 @@ export function generateRecommendations(
 // Readiness Level
 // ============================================
 
+export interface ReadinessDetail {
+    level: 'low' | 'medium' | 'high';
+    label: string;
+    color: string;
+    score?: number;
+    breakdown?: {
+        accuracy: number;
+        volume: number;
+        coverage: number;
+        reliability: number;
+        recency: number;
+    }
+}
+
 export function calculateReadinessLevel(
     avgScore: number,
     avgAccuracy: number,
-    attemptCount: number
-): { level: 'low' | 'medium' | 'high'; label: string; color: string } {
-    // Simple heuristic based on score, accuracy, and practice volume
-    const scoreWeight = avgScore >= 70 ? 2 : avgScore >= 50 ? 1 : 0;
-    const accuracyWeight = avgAccuracy >= 75 ? 2 : avgAccuracy >= 60 ? 1 : 0;
+    attemptCount: number,
+    leaderboardData?: any
+): ReadinessDetail {
+    // If we have official leaderboard data, use it!
+    if (leaderboardData && leaderboardData.score !== undefined) {
+        const score = leaderboardData.score;
+        let level: 'low' | 'medium' | 'high' = 'low';
+        let label = 'Da migliorare';
+        let color = 'semantic-error';
+
+        if (score >= 85) {
+            level = 'high';
+            label = 'Pronto';
+            color = 'semantic-success';
+        } else if (score >= 50) {
+            level = 'medium';
+            label = 'A buon punto';
+            color = 'brand-orange';
+        }
+
+        return {
+            level,
+            label,
+            color,
+            score,
+            breakdown: {
+                accuracy: leaderboardData.accuracy_weighted || 0,
+                volume: (leaderboardData.volume_factor || 0) * 100,
+                coverage: (leaderboardData.coverage_score || 0) * 100,
+                reliability: (leaderboardData.reliability || 0) * 100,
+                recency: (leaderboardData.recency_score || 0) * 100
+            }
+        };
+    }
+
+    // Heuristic fallback if leaderboard not yet calculated
+    const scoreWeight = avgScore >= 90 ? 2 : avgScore >= 70 ? 1 : 0;
+    const accuracyWeight = avgAccuracy >= 90 ? 2 : avgAccuracy >= 70 ? 1 : 0;
     const volumeWeight = attemptCount >= 10 ? 2 : attemptCount >= 5 ? 1 : 0;
 
     const total = scoreWeight + accuracyWeight + volumeWeight;
+    const scoreEstimate = Math.min((total / 6) * 100, 100);
 
     if (total >= 5) {
-        return { level: 'high', label: 'Pronto', color: 'semantic-success' };
+        return {
+            level: 'high', label: 'Pronto', color: 'semantic-success', score: scoreEstimate,
+            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: 100 }
+        };
     } else if (total >= 3) {
-        return { level: 'medium', label: 'In progresso', color: 'brand-orange' };
+        return {
+            level: 'medium', label: 'In progresso', color: 'brand-orange', score: scoreEstimate,
+            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: 100 }
+        };
     } else {
-        return { level: 'low', label: 'Da migliorare', color: 'semantic-error' };
+        return {
+            level: 'low', label: 'Da migliorare', color: 'semantic-error', score: scoreEstimate,
+            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: 100 }
+        };
     }
 }
 

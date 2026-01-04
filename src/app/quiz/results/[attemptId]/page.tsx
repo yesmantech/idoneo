@@ -5,6 +5,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
 import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
+import TierSLoader from "@/components/ui/TierSLoader";
 import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen, AlertCircle } from "lucide-react";
 import { SuccessBadge } from "@/components/ui/SuccessBadge";
 import { FailBadge } from "@/components/ui/FailBadge";
@@ -244,11 +245,7 @@ export default function QuizResultsPage() {
     };
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center transition-colors">
-                <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
+        return <TierSLoader message="Caricamento risultati..." />;
     }
 
     if (!attempt) {

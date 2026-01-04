@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Share2, Trophy, Zap, Target } from 'lucide-react';
+import { useOnboarding } from '@/context/OnboardingProvider';
+import TierSLoader from '@/components/ui/TierSLoader';
 
 // Components
 import ProfileIdentityCard from '@/components/profile/ProfileIdentityCard';
@@ -18,7 +20,9 @@ export default function ProfilePage() {
 
     // XP & Score State
     const [xp, setXP] = useState(0);
-    const [score, setScore] = useState(0);
+
+    // Onboarding
+    const { startOnboarding, hasCompletedContext } = useOnboarding();
 
     useEffect(() => {
         if (!loading && !user) {
@@ -31,27 +35,21 @@ export default function ProfilePage() {
             // Fetch XP
             const stats = await xpService.getUserXp(user.id);
             setXP(stats.totalXp);
-
-            // Fetch Score (Take the first active quiz score)
-            try {
-                const { leaderboardService } = await import('@/lib/leaderboardService');
-                const quizzes = await leaderboardService.getUserActiveQuizzes(user.id);
-                if (quizzes.length > 0) {
-                    setScore(quizzes[0].accuracy);
-                }
-            } catch (e) {
-                console.error(e);
-            }
         }
         fetchData();
     }, [user, loading, navigate]);
 
+    // Auto-start profile onboarding
+    useEffect(() => {
+        if (!loading && profile && !hasCompletedContext('profile')) {
+            const timer = setTimeout(() => startOnboarding('profile'), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, profile, hasCompletedContext, startOnboarding]);
+
     // Loading State
     if (loading || !profile) return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-emerald-500 mb-4"></div>
-            <p className="text-[var(--foreground)] opacity-50 font-bold">Caricamento profilo...</p>
-        </div>
+        <TierSLoader message="Caricamento profilo..." />
     );
 
     return (
@@ -70,12 +68,13 @@ export default function ProfilePage() {
                     {/* Left Column: Identity + Stats (all in one card now) */}
                     <div className="lg:sticky lg:top-8 lg:self-start space-y-6">
                         {/* Identity Card with integrated stats */}
-                        <ProfileIdentityCard
-                            user={user}
-                            profile={profile}
-                            xp={xp}
-                            score={score}
-                        />
+                        <div data-onboarding="stats">
+                            <ProfileIdentityCard
+                                user={user}
+                                profile={profile}
+                                xp={xp}
+                            />
+                        </div>
 
                         {/* Badges - Desktop Only in Left Column */}
                         <div className="hidden lg:block">

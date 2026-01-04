@@ -77,8 +77,21 @@ export async function fetchSmartQuestions(
             selectedForSubject = fillPool(skippedIds, allIds, config.count);
         }
         else if (mode === "hardest") {
-            // Mock: shuffle for now (would need question_stats table)
-            selectedForSubject = shuffleArray(allIds).slice(0, config.count);
+            // Query question_stats for difficulty ranking
+            const { data: hardestData } = await supabase
+                .from("question_stats")
+                .select("question_id")
+                .in("question_id", allIds)
+                .order("difficulty_index", { ascending: false })
+                .limit(config.count);
+
+            if (hardestData && hardestData.length > 0) {
+                const hardestIds = hardestData.map(d => d.question_id);
+                selectedForSubject = fillPool(hardestIds, allIds, config.count);
+            } else {
+                // Fallback to random if no stats available yet
+                selectedForSubject = shuffleArray(allIds).slice(0, config.count);
+            }
         }
         else if (mode === "smart_mix" && userHistory) {
             selectedForSubject = selectSmartMix(allIds, userHistory, config.count);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getCategories, getAllSearchableItems, type Category, type SearchItem } from "../lib/data";
 import { useAuth } from "@/context/AuthContext";
+import { useOnboarding } from "@/context/OnboardingProvider";
 import BlogHero from "@/components/home/BlogHero";
 import SearchSection from "@/components/home/SearchSection";
 import ConcorsiSection from "@/components/home/ConcorsiSection";
@@ -10,9 +11,21 @@ import ConcorsiSection from "@/components/home/ConcorsiSection";
 // =============================================================================
 export default function HomePage() {
   const { profile } = useAuth();
+  const { hasCompletedOnboarding, startOnboarding } = useOnboarding();
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchItems, setSearchItems] = useState<SearchItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Auto-start onboarding for first-time users
+  useEffect(() => {
+    if (!loading && !hasCompletedOnboarding) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        startOnboarding();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, hasCompletedOnboarding, startOnboarding]);
 
   useEffect(() => {
     Promise.all([

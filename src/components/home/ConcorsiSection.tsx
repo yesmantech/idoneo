@@ -151,7 +151,7 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
     if (!contests || contests.length === 0) return null;
 
     return (
-        <div className="max-w-7xl lg:mx-auto">
+        <div className="max-w-7xl lg:mx-auto" data-onboarding="concorsi">
             {/* Header Row */}
             <div className="flex justify-between items-center px-4 lg:px-8 mb-4 lg:mb-6">
                 <div className="flex items-center gap-2.5">
