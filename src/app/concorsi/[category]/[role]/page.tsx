@@ -134,36 +134,7 @@ export default function RolePage() {
             {roleData.description || "Allenati per questo profilo con i nostri simulatori ufficiali."}
           </p>
 
-          {/* Offline Download Button Badge */}
-          {latestQuizId && (
-            <button
-              onClick={!isDownloaded ? handleDownload : undefined}
-              disabled={downloading}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold transition-all ${isDownloaded
-                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 cursor-default'
-                : downloading
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-wait'
-                  : 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 shadow-sm active:scale-95'
-                }`}
-            >
-              {downloading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Scaricamento {progress}%...</span>
-                </>
-              ) : isDownloaded ? (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  <span>Disponibile Offline</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  <span>Scarica per Offline</span>
-                </>
-              )}
-            </button>
-          )}
+          {/* Offline Download Button Removed per user request */}
         </div>
       </div>
 
