@@ -227,7 +227,7 @@ export default function ConcorsoHubPage() {
 
 // Stats Section Component with Popups
 function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, candidatiCount: number, availableSeats: string | null }) {
-  const [selectedStat, setSelectedStat] = React.useState<{ title: string, desc: string, icon: any } | null>(null);
+  const [selectedStat, setSelectedStat] = React.useState<{ title: string, desc: string, icon: any, themeBg: string, themeText: string } | null>(null);
 
   const stats = [
     {
@@ -265,7 +265,13 @@ function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, c
         {stats.map((stat) => (
           <div
             key={stat.id}
-            onClick={() => setSelectedStat({ title: stat.label, desc: stat.description, icon: stat.icon })}
+            onClick={() => setSelectedStat({
+              title: stat.label,
+              desc: stat.description,
+              icon: stat.icon,
+              themeBg: stat.themeBg,
+              themeText: stat.themeText
+            })}
             className="cursor-pointer active:scale-95 transition-transform snap-start flex-1 min-w-[100px] md:w-auto bg-[var(--card)] rounded-2xl p-3 md:p-5 shadow-soft border border-[var(--card-border)] flex flex-col items-center justify-center gap-1 md:gap-2 hover:border-[#00B1FF]/30"
           >
             <div className={`w-7 h-7 md:w-10 md:h-10 rounded-full ${stat.themeBg} flex items-center justify-center mb-1`}>
