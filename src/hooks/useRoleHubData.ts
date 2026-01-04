@@ -125,9 +125,8 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                                 id, 
                                 score, 
                                 created_at, 
-                                is_official_sim,
                                 quiz_id
-                            `)
+                            `) // Removed invalid column 'is_official_sim' (use quiz properties or joins if needed, but for now we just show title)
                             .eq("user_id", user.id)
                             .in("quiz_id", roleQuizIds)
                             .order("created_at", { ascending: false })
@@ -140,6 +139,8 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                         if (attempts) {
                             history = attempts.map(a => ({
                                 ...a,
+                                // Determine if official using the title or assume Simulation based on context
+                                is_official_sim: quizTitleMap.get(a.quiz_id)?.includes("Ufficiale") || false,
                                 quiz: { title: quizTitleMap.get(a.quiz_id) || "Simulazione" }
                             }));
                         }
