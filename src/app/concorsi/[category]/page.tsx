@@ -155,34 +155,34 @@ export default function ConcorsoHubPage() {
                   <Link
                     key={role.id}
                     to={`/concorsi/${category}/${role.slug}`}
-                    className="group relative bg-[#1e2330] p-4 rounded-[24px] shadow-sm border border-[var(--card-border)] transition-all duration-300 hover:bg-[#252b3b] overflow-hidden flex items-center gap-4"
+                    className="group relative bg-white dark:bg-[#1e2330] p-4 rounded-[24px] shadow-sm border border-slate-200/60 dark:border-[var(--card-border)] transition-all duration-300 hover:shadow-md dark:hover:bg-[#252b3b] overflow-hidden flex items-center gap-4"
                   >
                     {/* Icon Avatar */}
-                    <div className="w-12 h-12 rounded-full border border-sky-500/20 bg-[#141820] flex items-center justify-center shrink-0">
-                      <CategoryIcon className="w-5 h-5 text-sky-400" />
+                    <div className="w-12 h-12 rounded-full border border-sky-100 dark:border-sky-500/20 bg-sky-50 dark:bg-[#141820] flex items-center justify-center shrink-0">
+                      <CategoryIcon className="w-5 h-5 text-sky-500 dark:text-sky-400" />
                     </div>
 
                     {/* Text Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[16px] font-bold text-white mb-2 leading-snug truncate">
+                      <h3 className="text-[16px] font-bold text-slate-900 dark:text-white mb-2 leading-snug truncate">
                         {role.title}
                       </h3>
 
                       {/* Badge Row */}
                       <div className="flex flex-wrap items-center gap-2">
                         {/* Active Users Badge */}
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#141820] border border-white/5">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-[#141820] border border-slate-200 dark:border-white/5">
                           <Users className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="text-[12px] font-medium text-slate-300">
-                            {role.activeUsers || 0} <span className="hidden sm:inline text-slate-500">attivi</span>
+                          <span className="text-[12px] font-medium text-slate-600 dark:text-slate-300">
+                            {role.activeUsers || 0} <span className="hidden sm:inline text-slate-400 dark:text-slate-500">attivi</span>
                           </span>
                         </div>
 
                         {/* Seats Badge (if available) - Taking first active contest's seats */}
                         {role.contests[0]?.available_seats && (
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                            <Trophy className="w-3.5 h-3.5 text-emerald-400" />
-                            <span className="text-[12px] font-medium text-emerald-400">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
+                            <Trophy className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                            <span className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400">
                               {role.contests[0].available_seats} <span className="hidden sm:inline">posti</span>
                             </span>
                           </div>
@@ -190,9 +190,9 @@ export default function ConcorsoHubPage() {
 
                         {/* Year Badge */}
                         {role.contests[0]?.year && (
-                          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">
-                            <Calendar className="w-3.5 h-3.5 text-purple-400" />
-                            <span className="text-[12px] font-medium text-purple-400">
+                          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20">
+                            <Calendar className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
+                            <span className="text-[12px] font-medium text-purple-600 dark:text-purple-400">
                               {role.contests[0].year}
                             </span>
                           </div>
@@ -201,7 +201,7 @@ export default function ConcorsoHubPage() {
                     </div>
 
                     {/* Chevy */}
-                    <div className="text-slate-500 group-hover:text-white transition-colors">
+                    <div className="text-slate-300 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-white transition-colors">
                       <ChevronRight className="w-5 h-5" />
                     </div>
                   </Link>
