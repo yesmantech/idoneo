@@ -42,6 +42,8 @@ export default function ReadinessCard({ history, theme }: ReadinessCardProps) {
                         </h3>
                         <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-snug">
                             Completa almeno 3 simulazioni per sbloccare il calcolo del livello di preparazione.
+                            <br />
+                            <span className="text-xs opacity-50">(Simulazioni rilevate: {history?.length || 0})</span>
                         </p>
                     </div>
                     <div className="relative w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
