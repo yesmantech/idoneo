@@ -236,7 +236,7 @@ export default function StatsKPIGrid({
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center"
+                            className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center overflow-y-auto max-h-[90vh] custom-scrollbar"
                         >
                             <button
                                 onClick={() => setExplanation(null)}
@@ -280,7 +280,7 @@ export default function StatsKPIGrid({
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-white dark:bg-[var(--card)] border border-transparent dark:border-[var(--card-border)] rounded-[32px] p-6 max-w-sm w-full shadow-2xl overflow-hidden"
+                            className="relative bg-white dark:bg-[var(--card)] border border-transparent dark:border-[var(--card-border)] rounded-[32px] p-6 max-w-sm w-full shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar"
                         >
                             {/* Decorator */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#00B1FF] to-emerald-500 opacity-[0.1] rounded-bl-[100px] pointer-events-none" />

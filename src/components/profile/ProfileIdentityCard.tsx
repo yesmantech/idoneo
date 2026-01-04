@@ -171,7 +171,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-white rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center"
+                            className="relative bg-white dark:bg-slate-900 rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center overflow-y-auto max-h-[90vh] custom-scrollbar"
                         >
                             <button
                                 onClick={() => setExplanation(null)}
