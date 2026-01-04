@@ -79,27 +79,36 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                 const latestQuizId = quizzes && quizzes.length > 0 ? quizzes[0].id : null;
                 const latestQuizSlug = quizzes && quizzes.length > 0 ? quizzes[0].slug : null;
 
-                // 4. Fetch History (Attempts for this role)
-                // We need to find all quizzes for this role first (official or not) to filter attempts?
-                // OR we can join attempts -> quiz -> role_id
+                // 4. Fetch History (Role-based attempts)
+                // Robust Approach: Get all quiz IDs for this role, then fetch attempts
                 let history: any[] = [];
                 if (user) {
-                    const { data: attempts } = await supabase
-                        .from("quiz_attempts")
-                        .select(`
-                            id, 
-                            score, 
-                            created_at, 
-                            is_official_sim,
-                            quiz:quizzes!inner(role_id, title)
-                        `)
-                        .eq("user_id", user.id)
-                        .eq("quiz.role_id", role.id)
-                        .order("created_at", { ascending: false })
-                        .limit(20);
+                    // 4a. Get all quiz IDs for this role
+                    const { data: roleQuizzes } = await supabase
+                        .from('quizzes')
+                        .select('id')
+                        .eq('role_id', role.id);
 
-                    if (attempts) history = attempts;
-                    if (attempts) history = attempts;
+                    const roleQuizIds = roleQuizzes?.map(q => q.id) || [];
+
+                    if (roleQuizIds.length > 0) {
+                        // 4b. Fetch attempts for these quizzes
+                        const { data: attempts } = await supabase
+                            .from("quiz_attempts")
+                            .select(`
+                                id, 
+                                score, 
+                                created_at, 
+                                is_official_sim,
+                                quiz:quizzes(title)
+                            `)
+                            .eq("user_id", user.id)
+                            .in("quiz_id", roleQuizIds)
+                            .order("created_at", { ascending: false })
+                            .limit(20);
+
+                        if (attempts) history = attempts;
+                    }
                 }
 
                 // 5. Fetch Global Stats (Candidati Count)
