@@ -258,7 +258,7 @@ export const getAllSearchableItems = async (): Promise<SearchItem[]> => {
           id: q.id,
           title: q.title,
           type: 'contest',
-          url: `/concorsi/${catSlug}/${roleSlug}/${q.slug}`
+          url: `/concorsi/${catSlug}/${roleSlug}` // Redirect to Role Hub (Tier S) instead of legacy Contest Page
         });
       }
     });
