@@ -65,7 +65,7 @@ export default function ProgressLineChart({
                             <button
                                 key={m}
                                 onClick={() => setMetric(m)}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {metricConfig[m].label}
@@ -77,7 +77,7 @@ export default function ProgressLineChart({
                             <button
                                 key={t}
                                 onClick={() => setTimeRange(t)}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-text-primary text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {t === 'all' ? 'Tutto' : t}
@@ -132,7 +132,7 @@ export default function ProgressLineChart({
                         <button
                             key={m}
                             onClick={() => setMetric(m)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                 }`}
                         >
                             {metricConfig[m].label}
@@ -144,7 +144,7 @@ export default function ProgressLineChart({
                         <button
                             key={t}
                             onClick={() => setTimeRange(t)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-text-primary text-white' : 'bg-canvas-light text-text-secondary hover:bg-slate-200'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                 }`}
                         >
                             {t === 'all' ? 'Tutto' : t}
@@ -170,8 +170,8 @@ export default function ProgressLineChart({
                         const y = getY(value);
                         return (
                             <g key={t}>
-                                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="#F3F5F7" strokeWidth="1.5" strokeDasharray="4" />
-                                <text x={padding - 8} y={y + 4} textAnchor="end" className="text-[10px] fill-text-tertiary font-medium">
+                                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1.5" strokeDasharray="4" />
+                                <text x={padding - 8} y={y + 4} textAnchor="end" className="text-[10px] fill-[var(--foreground)] opacity-40 font-medium">
                                     {value.toFixed(0)}
                                 </text>
                             </g>
@@ -191,7 +191,7 @@ export default function ProgressLineChart({
                                 cx={getX(i)}
                                 cy={getY(getValue(d))}
                                 r={hoveredPoint === i ? 8 : 5}
-                                fill="white"
+                                fill="var(--card)"
                                 stroke={config.color}
                                 strokeWidth="3"
                                 className="cursor-pointer transition-all"
@@ -205,15 +205,15 @@ export default function ProgressLineChart({
                 {/* Tooltip */}
                 {hoveredPoint !== null && filteredData[hoveredPoint] && (
                     <div
-                        className="absolute bg-white rounded-xl shadow-lg border border-slate-100 p-3 z-10 pointer-events-none"
+                        className="absolute bg-[var(--card)] rounded-xl shadow-lg border border-[var(--card-border)] p-3 z-10 pointer-events-none transition-colors"
                         style={{
                             left: `${(getX(hoveredPoint) / width) * 100}%`,
                             top: `${(getY(getValue(filteredData[hoveredPoint])) / height) * 100 - 20}%`,
                             transform: 'translateX(-50%)'
                         }}
                     >
-                        <p className="text-xs text-text-tertiary mb-1">{filteredData[hoveredPoint].date}</p>
-                        <p className="text-sm font-bold text-text-primary">
+                        <p className="text-xs text-[var(--foreground)] opacity-40 mb-1">{filteredData[hoveredPoint].date}</p>
+                        <p className="text-sm font-bold text-[var(--foreground)]">
                             {getValue(filteredData[hoveredPoint]).toFixed(1)} {config.unit}
                         </p>
                         {filteredData[hoveredPoint].id && (

@@ -20,10 +20,10 @@ export default function LeaderboardViewLegacy({ data, loading, theme, metricLabe
     if (loading) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-4 animate-pulse">
-                <div className="w-24 h-24 bg-canvas-light rounded-full"></div>
-                <div className="w-32 h-6 bg-canvas-light rounded-lg"></div>
-                <div className="w-full max-w-md h-12 bg-canvas-light rounded-xl"></div>
-                <div className="w-full max-w-md h-12 bg-canvas-light rounded-xl"></div>
+                <div className="w-24 h-24 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                <div className="w-32 h-6 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                <div className="w-full max-w-md h-12 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                <div className="w-full max-w-md h-12 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
             </div>
         );
     }
@@ -135,13 +135,13 @@ const RankingRow = ({ entry, theme, metricLabel }: { key?: React.Key; entry: Lea
     return (
         <div className={`flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 ${entry.isCurrentUser
             ? `border ${activeClass} transform scale-[1.01]`
-            : 'bg-white border-transparent hover:bg-canvas-light hover:scale-[1.01] hover:shadow-sm'
+            : 'bg-[var(--card)] border-transparent hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-[1.01] hover:shadow-sm'
             }`}>
             <span className={`font-black w-6 text-center text-sm text-text-tertiary`}>
                 {entry.rank}
             </span>
 
-            <div className="w-10 h-10 rounded-squircle bg-canvas-light overflow-hidden flex-shrink-0 shadow-sm border border-transparent">
+            <div className="w-10 h-10 rounded-squircle bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0 shadow-sm border border-transparent">
                 <img src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
 

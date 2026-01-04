@@ -52,14 +52,14 @@ export default function WaitlistPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans flex flex-col overflow-hidden">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans flex flex-col overflow-hidden transition-colors duration-500">
 
             {/* Top Half: Floating Coins (45% of screen) */}
             <div className="relative w-full h-[45vh] shrink-0 select-none">
                 {icons.map((item, idx) => (
                     <div
                         key={idx}
-                        className={`absolute w-16 h-16 md:w-20 md:h-20 rounded-full shadow-md shadow-black/5 flex items-center justify-center ${item.bg} backdrop-blur-sm animate-in fade-in zoom-in duration-700`}
+                        className={`absolute w-16 h-16 md:w-20 md:h-20 rounded-full shadow-md shadow-black/5 dark:shadow-white/5 flex items-center justify-center ${item.bg} dark:bg-opacity-20 backdrop-blur-sm animate-in fade-in zoom-in duration-700`}
                         style={{
                             left: item.left,
                             top: item.top,
@@ -71,7 +71,7 @@ export default function WaitlistPage() {
                 ))}
 
                 {/* Fade at bottom of icons */}
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[var(--background)] to-transparent" />
             </div>
 
             {/* Bottom Half: Content */}
@@ -79,10 +79,10 @@ export default function WaitlistPage() {
 
                 {/* Hero Text */}
                 <div className="space-y-3 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
                         Passa il tuo<br />prossimo concorso
                     </h1>
-                    <h2 className="text-[17px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
+                    <h2 className="text-[17px] md:text-lg font-medium text-[var(--foreground)] opacity-60 leading-relaxed max-w-xs mx-auto">
                         Analytics, simulazioni e un piano di studio guidato in un’unica app
                     </h2>
                 </div>
@@ -96,7 +96,7 @@ export default function WaitlistPage() {
                         Iscriviti alla waitlist
                     </button>
 
-                    <p className="text-[11px] text-slate-400 font-medium">
+                    <p className="text-[11px] text-[var(--foreground)] opacity-40 font-medium">
                         Niente spam, solo aggiornamenti sui concorsi.
                     </p>
                 </div>

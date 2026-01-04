@@ -55,9 +55,9 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl">
-                    <h3 className="font-bold text-xl text-slate-800">🤖 Importa da AI Script</h3>
+            <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="p-6 border-b border-[var(--card-border)] flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 rounded-t-xl">
+                    <h3 className="font-bold text-xl text-[var(--foreground)]">🤖 Importa da AI Script</h3>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => {
@@ -68,12 +68,12 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                         >
                             📋 Copia Prompt
                         </button>
-                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold text-xl ml-2">×</button>
+                        <button onClick={onClose} className="text-[var(--foreground)] opacity-40 hover:opacity-100 font-bold text-xl ml-2 transition-all">×</button>
                     </div>
                 </div>
 
                 <div className="p-6 flex-1 overflow-y-auto space-y-4">
-                    <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm">
+                    <div className="bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 p-4 rounded-lg text-sm border border-blue-100 dark:border-blue-500/20">
                         Incolla qui il JSON generato da ChatGPT. Assicurati che segua lo schema richiesto.
                     </div>
 
@@ -81,7 +81,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                         value={jsonInput}
                         onChange={(e) => setJsonInput(e.target.value)}
                         placeholder='{ "title": "...", "content": [...] }'
-                        className="w-full h-64 p-4 font-mono text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        className="w-full h-64 p-4 font-mono text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:ring-2 focus:ring-emerald-500 focus:outline-none placeholder-[var(--foreground)]/20"
                     />
 
                     {error && (
@@ -91,17 +91,17 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     )}
                 </div>
 
-                <div className="p-6 border-t border-slate-100 bg-slate-50 rounded-b-xl flex justify-end gap-3">
+                <div className="p-6 border-t border-[var(--card-border)] bg-slate-50 dark:bg-slate-900/50 rounded-b-xl flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg font-medium transition-colors"
+                        className="px-4 py-2 text-[var(--foreground)] opacity-60 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"
                     >
                         Annulla
                     </button>
                     <button
                         onClick={handleImport}
                         disabled={!jsonInput.trim()}
-                        className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-lg shadow-emerald-200 disabled:opacity-50 disabled:shadow-none transition-all"
+                        className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:shadow-none transition-all"
                     >
                         Importa Articolo
                     </button>

@@ -23,37 +23,46 @@ export default function HomePage() {
       setSearchItems(items);
       setLoading(false);
     });
+
+    // Offline Sync Trigger
+    import("@/lib/offlineService").then(({ offlineService }) => {
+      if (navigator.onLine) {
+        offlineService.syncAndClean().then(count => {
+          if (count > 0) console.log(`[Offline Sync] Synced ${count} attempts.`);
+        });
+      }
+    });
   }, []);
 
   const consigliati = categories.slice(0, 8);
   const tuttiConcorsi = categories.slice(2, 12);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] text-slate-900 pb-24">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 transition-colors duration-300">
       <main className="flex flex-col">
 
-        {/* 1. BLOG HERO */}
+        {/* 1. BLOG HERO - Immersive Entry */}
         <section>
           <BlogHero />
         </section>
 
-        {/* 2. SEARCH BAR */}
-        <section className="px-4 lg:px-8 -mt-2 max-w-7xl lg:mx-auto lg:w-full">
+        {/* 2. SEARCH BAR - Spotlight Trigger */}
+        <section className="px-4 lg:px-8 -mt-4 lg:-mt-6 max-w-7xl lg:mx-auto lg:w-full relative z-20">
           <SearchSection items={searchItems} />
         </section>
 
-        {/* 3. CONCORSI SECTIONS */}
-        <section className="mt-6 lg:mt-10">
+        {/* 3. CONCORSI SECTIONS - Recommended */}
+        <section className="mt-10 lg:mt-14">
           <ConcorsiSection
-            title="Concorsi consigliati per te"
+            title="Consigliati per te"
             contests={consigliati}
           />
         </section>
 
-        {/* 4. TUTTI CONCORSI */}
-        <section className="mt-6 lg:mt-10">
+        {/* 4. TUTTI CONCORSI - Grid/Carousel */}
+        <section className="mt-10 lg:mt-14">
           <ConcorsiSection
-            title="Tutti i concorsi"
+            title="Esplora concorsi"
             contests={tuttiConcorsi}
           />
         </section>

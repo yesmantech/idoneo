@@ -22,14 +22,14 @@ const SECTION_LABELS = {
 function EditorSectionNav({ activeSection, onChangeSection }: EditorSectionNavProps) {
     return (
         <div className="w-48 shrink-0">
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden sticky top-24">
+            <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] overflow-hidden sticky top-24">
                 {(Object.keys(SECTION_LABELS) as Array<keyof typeof SECTION_LABELS>).map(section => (
                     <button
                         key={section}
                         onClick={() => onChangeSection(section)}
-                        className={`w-full text-left px-4 py-3 border-b border-slate-100 last:border-b-0 transition-colors ${activeSection === section
-                            ? 'bg-emerald-50 text-emerald-700 font-medium'
-                            : 'text-slate-600 hover:bg-slate-50'
+                        className={`w-full text-left px-4 py-3 border-b border-[var(--card-border)] last:border-b-0 transition-colors ${activeSection === section
+                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-medium'
+                            : 'text-[var(--foreground)] opacity-60 hover:bg-slate-50 dark:hover:bg-slate-800'
                             }`}
                     >
                         {SECTION_LABELS[section]}
@@ -120,15 +120,15 @@ export default function AdminBlogEditorPage() {
         <AdminLayout>
             <div className="flex flex-col gap-6">
                 {/* Header */}
-                <div className="flex items-center justify-between sticky top-0 z-20 bg-white/95 backdrop-blur py-4 border-b border-slate-200 -mx-6 px-6">
+                <div className="flex items-center justify-between sticky top-0 z-20 bg-[var(--background)]/95 backdrop-blur py-4 border-b border-[var(--card-border)] -mx-6 px-6">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/admin/blog')}
-                            className="text-slate-400 hover:text-slate-600 transition-colors"
+                            className="text-[var(--foreground)] opacity-40 hover:opacity-100 transition-all font-medium"
                         >
                             ← Torna
                         </button>
-                        <h1 className="text-xl font-bold text-slate-900">
+                        <h1 className="text-xl font-black text-[var(--foreground)] tracking-tight">
                             {isNew ? 'Nuovo Articolo' : 'Modifica Articolo'}
                         </h1>
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_CONFIG[formState.status].bgColor} ${STATUS_CONFIG[formState.status].color}`}>
@@ -163,34 +163,34 @@ export default function AdminBlogEditorPage() {
                         {activeSection === 'content' && (
                             <div className="space-y-6">
                                 {/* Title & Subtitle */}
-                                <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-                                    <h2 className="font-bold text-lg text-slate-800">Titolo e Sottotitolo</h2>
+                                <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] p-6 space-y-4">
+                                    <h2 className="font-bold text-lg text-[var(--foreground)]">Titolo e Sottotitolo</h2>
                                     <input
                                         type="text"
                                         placeholder="Titolo dell'articolo"
                                         value={formState.title}
                                         onChange={(e) => handleTitleChange(e.target.value)}
-                                        className="w-full px-4 py-3 text-xl font-bold border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-slate-400"
+                                        className="w-full px-4 py-3 text-xl font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-[var(--foreground)]/30"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Sottotitolo / Hook (opzionale)"
                                         value={formState.subtitle}
                                         onChange={(e) => updateField('subtitle', e.target.value)}
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-slate-400"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-70 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-[var(--foreground)]/30"
                                     />
                                 </div>
 
                                 {/* Category & Tags */}
-                                <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-                                    <h2 className="font-bold text-lg text-slate-800">Organizzazione</h2>
+                                <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] p-6 space-y-4">
+                                    <h2 className="font-bold text-lg text-[var(--foreground)]">Organizzazione</h2>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-600 mb-2">Categoria</label>
+                                            <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">Categoria</label>
                                             <select
                                                 value={formState.categoryId}
                                                 onChange={(e) => updateField('categoryId', e.target.value)}
-                                                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-80 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                             >
                                                 <option value="">Seleziona categoria...</option>
                                                 {categories.map(cat => (
@@ -199,10 +199,10 @@ export default function AdminBlogEditorPage() {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-600 mb-2">Tag</label>
-                                            <div className="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg min-h-[42px]">
+                                            <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">Tag</label>
+                                            <div className="flex flex-wrap gap-2 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg min-h-[42px]">
                                                 {allTags.slice(0, 10).map(tag => (
-                                                    <label key={tag.id} className="flex items-center gap-1 text-sm text-slate-600 cursor-pointer hover:text-slate-900">
+                                                    <label key={tag.id} className="flex items-center gap-1 text-sm text-[var(--foreground)] opacity-60 cursor-pointer hover:opacity-100">
                                                         <input
                                                             type="checkbox"
                                                             checked={formState.selectedTags.includes(tag.id)}
@@ -212,7 +212,7 @@ export default function AdminBlogEditorPage() {
                                                                     : formState.selectedTags.filter(t => t !== tag.id);
                                                                 updateField('selectedTags', newTags);
                                                             }}
-                                                            className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                                                            className="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-emerald-500 focus:ring-emerald-500"
                                                         />
                                                         {tag.name}
                                                     </label>
@@ -223,7 +223,7 @@ export default function AdminBlogEditorPage() {
                                 </div>
 
                                 {/* Content Blocks */}
-                                <div className="bg-white rounded-xl border border-slate-200 p-6">
+                                <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] p-6">
                                     <BlockEditor
                                         content={formState.content}
                                         onAdd={addBlock}
@@ -237,11 +237,10 @@ export default function AdminBlogEditorPage() {
 
                         {/* Media Section */}
                         {activeSection === 'media' && (
-                            <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
-                                <h2 className="font-bold text-lg text-slate-800">Immagine di Copertina</h2>
-
+                            <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] p-6 space-y-6">
+                                <h2 className="font-bold text-lg text-[var(--foreground)]">Immagine di Copertina</h2>
                                 {/* Upload Area */}
-                                <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors relative group cursor-pointer bg-slate-50/50">
+                                <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors relative group cursor-pointer bg-slate-50/50 dark:bg-slate-900/20">
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -253,39 +252,37 @@ export default function AdminBlogEditorPage() {
                                         <div className="text-4xl group-hover:scale-110 transition-transform duration-200">
                                             {uploading ? '⏳' : '📤'}
                                         </div>
-                                        <div className="font-medium text-slate-600">
+                                        <div className="font-medium text-[var(--foreground)] opacity-60">
                                             {uploading ? 'Caricamento in corso...' : 'Clicca o trascina un immagine qui'}
                                         </div>
-                                        <div className="text-sm text-slate-500">JPG, PNG, WebP (max 5MB)</div>
+                                        <div className="text-sm text-[var(--foreground)] opacity-40">JPG, PNG, WebP (max 5MB)</div>
                                     </div>
                                 </div>
-
                                 {/* Manual URL Fallback */}
                                 <div className="space-y-2">
-                                    <div className="text-sm text-slate-600 font-medium">Oppure incolla URL</div>
+                                    <div className="text-sm text-[var(--foreground)] opacity-60 font-medium">Oppure incolla URL</div>
                                     <input
                                         type="text"
                                         placeholder="https://..."
                                         value={formState.coverImageUrl}
                                         onChange={(e) => updateField('coverImageUrl', e.target.value)}
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
-
                                 {/* Preview */}
                                 {formState.coverImageUrl && (
-                                    <div className="space-y-2 pt-4 border-t border-slate-200">
-                                        <div className="text-sm font-medium text-slate-600">Anteprima</div>
+                                    <div className="space-y-2 pt-4 border-t border-[var(--card-border)]">
+                                        <div className="text-sm font-medium text-[var(--foreground)] opacity-60">Anteprima</div>
                                         <div className="relative group max-w-lg">
                                             <img
                                                 src={formState.coverImageUrl}
                                                 alt="Preview"
-                                                className="rounded-lg border border-slate-200 w-full shadow-sm bg-slate-50"
+                                                className="rounded-lg border border-[var(--card-border)] w-full shadow-sm bg-slate-50 dark:bg-slate-900"
                                                 onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400?text=Immagine+non+valida')}
                                             />
                                             <button
                                                 onClick={() => updateField('coverImageUrl', '')}
-                                                className="absolute top-2 right-2 bg-white/90 hover:bg-white text-rose-500 p-2 rounded-full shadow-md transition-colors"
+                                                className="absolute top-2 right-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-rose-500 p-2 rounded-full shadow-md transition-colors"
                                                 title="Rimuovi immagine"
                                             >
                                                 ✕
@@ -298,70 +295,70 @@ export default function AdminBlogEditorPage() {
 
                         {/* SEO Section */}
                         {activeSection === 'seo' && (
-                            <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-                                <h2 className="font-bold text-lg text-slate-800">SEO</h2>
+                            <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] p-6 space-y-4">
+                                <h2 className="font-bold text-lg text-[var(--foreground)]">SEO</h2>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-600 mb-2">
+                                    <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">
                                         Slug URL
-                                        <span className="text-slate-400 font-normal ml-2">/blog/{formState.slug || 'url-articolo'}</span>
+                                        <span className="opacity-40 font-normal ml-2">/blog/{formState.slug || 'url-articolo'}</span>
                                     </label>
                                     <input
                                         type="text"
                                         value={formState.slug}
                                         onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-600 mb-2">
+                                    <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">
                                         Titolo SEO
-                                        <span className="text-slate-400 font-normal ml-2">({(formState.seoTitle || formState.title).length}/60)</span>
+                                        <span className="opacity-40 font-normal ml-2">({(formState.seoTitle || formState.title).length}/60)</span>
                                     </label>
                                     <input
                                         type="text"
                                         value={formState.seoTitle}
                                         onChange={(e) => updateField('seoTitle', e.target.value)}
                                         placeholder={formState.title || 'Titolo per i motori di ricerca'}
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-600 mb-2">
+                                    <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">
                                         Meta Description
-                                        <span className="text-slate-400 font-normal ml-2">({formState.seoDescription.length}/160)</span>
+                                        <span className="opacity-40 font-normal ml-2">({formState.seoDescription.length}/160)</span>
                                     </label>
                                     <textarea
                                         value={formState.seoDescription}
                                         onChange={(e) => updateField('seoDescription', e.target.value)}
                                         placeholder="Descrizione che apparirà nei risultati di ricerca..."
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[80px]"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[80px]"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-600 mb-2">Canonical URL (opzionale)</label>
+                                    <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">Canonical URL (opzionale)</label>
                                     <input
                                         type="text"
                                         value={formState.canonicalUrl}
                                         onChange={(e) => updateField('canonicalUrl', e.target.value)}
                                         placeholder="https://idoneo.it/blog/..."
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
 
-                                <label className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                <label className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-500/20">
                                     <input
                                         type="checkbox"
                                         checked={formState.isNoindex}
                                         onChange={(e) => updateField('isNoindex', e.target.checked)}
-                                        className="rounded border-slate-300 text-amber-500 focus:ring-amber-500"
+                                        className="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-amber-500 focus:ring-amber-500"
                                     />
                                     <div>
-                                        <div className="font-medium text-amber-800">Nascondi dai motori di ricerca (noindex)</div>
-                                        <div className="text-sm text-amber-600">Attiva solo per contenuti di test o bassa qualità</div>
+                                        <div className="font-medium text-amber-800 dark:text-amber-400">Nascondi dai motori di ricerca (noindex)</div>
+                                        <div className="text-sm text-amber-600 dark:text-amber-500">Attiva solo per contenuti di test o bassa qualità</div>
                                     </div>
                                 </label>
                             </div>
@@ -369,15 +366,15 @@ export default function AdminBlogEditorPage() {
 
                         {/* Publish Section */}
                         {activeSection === 'publish' && (
-                            <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-                                <h2 className="font-bold text-lg text-slate-800">Pubblicazione</h2>
+                            <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] p-6 space-y-4">
+                                <h2 className="font-bold text-lg text-[var(--foreground)]">Pubblicazione</h2>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-600 mb-2">Stato</label>
+                                    <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">Stato</label>
                                     <select
                                         value={formState.status}
                                         onChange={(e) => updateField('status', e.target.value as typeof formState.status)}
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     >
                                         <option value="draft">📝 Bozza</option>
                                         <option value="scheduled">⏰ Programmato</option>
@@ -388,32 +385,32 @@ export default function AdminBlogEditorPage() {
 
                                 {(formState.status === 'scheduled' || formState.status === 'published') && (
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-600 mb-2">Data di pubblicazione</label>
+                                        <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">Data di pubblicazione</label>
                                         <input
                                             type="datetime-local"
                                             value={formState.publishedAt}
                                             onChange={(e) => updateField('publishedAt', e.target.value)}
-                                            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                            className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                         />
                                     </div>
                                 )}
 
-                                <label className="flex items-center gap-3 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                                <label className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg border border-emerald-200 dark:border-emerald-500/20">
                                     <input
                                         type="checkbox"
                                         checked={formState.isFeatured}
                                         onChange={(e) => updateField('isFeatured', e.target.checked)}
-                                        className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                                        className="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-emerald-500 focus:ring-emerald-500"
                                     />
                                     <div>
-                                        <div className="font-medium text-emerald-800">⭐ Articolo in evidenza</div>
-                                        <div className="text-sm text-emerald-600">Mostra in primo piano nella pagina del blog</div>
+                                        <div className="font-medium text-emerald-800 dark:text-emerald-400">⭐ Articolo in evidenza</div>
+                                        <div className="text-sm text-emerald-600 dark:text-emerald-500">Mostra in primo piano nella pagina del blog</div>
                                     </div>
                                 </label>
 
-                                <div className="pt-4 border-t border-slate-200">
-                                    <div className="text-sm text-slate-500">
-                                        Tempo di lettura stimato: <strong>{readingTime} min</strong>
+                                <div className="pt-4 border-t border-[var(--card-border)]">
+                                    <div className="text-sm text-[var(--foreground)] opacity-40">
+                                        Tempo di lettura stimato: <strong className="opacity-100">{readingTime} min</strong>
                                     </div>
                                 </div>
                             </div>

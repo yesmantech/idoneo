@@ -108,7 +108,7 @@ export default function ContestPage() {
               </div>
             </div>
             <button
-              onClick={() => navigate(`/concorsi/${category}/${role}/${contestSlug}/simulazione/ufficiale/regole`)}
+              onClick={() => navigate(`/quiz/${contestSlug}/official`)}
               className="w-full bg-[#00B1FF] hover:bg-[#0099DD] text-white font-bold text-[16px] py-4 rounded-[18px] shadow-lg shadow-cyan-200/50 transition-all flex items-center justify-center gap-2"
             >
               Avvia Simulazione <span className="text-lg">→</span>

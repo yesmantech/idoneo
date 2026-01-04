@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import compression from 'vite-plugin-compression';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -12,6 +13,16 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
+      // Gzip compression
+      compression({
+        algorithm: 'gzip',
+        ext: '.gz',
+      }),
+      // Brotli compression (better than gzip)
+      compression({
+        algorithm: 'brotliCompress',
+        ext: '.br',
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         devOptions: {
@@ -55,6 +66,26 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, './src'),
       }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Core React runtime - rarely changes
+            'react-vendor': ['react', 'react-dom'],
+            // Router - rarely changes
+            'router': ['react-router-dom'],
+            // Animation library - medium size
+            'framer': ['framer-motion'],
+            // Backend SDK - rarely changes
+            'supabase': ['@supabase/supabase-js'],
+            // Icons - can be large
+            'icons': ['lucide-react'],
+          }
+        }
+      },
+      // Increase chunk size warning to avoid noise
+      chunkSizeWarningLimit: 600,
     },
     define: {
       'process.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),

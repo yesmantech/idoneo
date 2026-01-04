@@ -59,7 +59,7 @@ export default function RoleSimulationSection({ category, role, contestSlug, con
     }, [contestSlug, contestId]);
 
     const handleOfficial = () => {
-        navigate(`/concorsi/${category}/${role}/${contestSlug}/simulazione/ufficiale/regole`);
+        navigate(`/quiz/${contestSlug}/official`);
     };
 
     const handleCustom = () => {

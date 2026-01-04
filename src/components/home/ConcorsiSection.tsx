@@ -51,92 +51,85 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
     return (
         <Link
             to={`/concorsi/${contest.slug}`}
-            className="group relative bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col overflow-hidden rounded-[20px] lg:rounded-[24px]"
+            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)]"
             style={{
-                width: 'clamp(160px, calc((100vw - 32px) * 0.48), 280px)',
-                height: 'clamp(190px, 22vh, 260px)',
+                width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
+                height: 'clamp(210px, 24vh, 280px)',
             }}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
             <div
-                className="relative overflow-hidden flex items-center justify-center"
+                className="relative overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-slate-700"
                 style={{ aspectRatio: '2 / 1', width: '100%' }}
             >
                 {contest.home_banner_url ? (
                     <img
                         src={contest.home_banner_url}
                         alt={contest.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                 ) : (
                     <>
-                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
                         <div
                             className="absolute inset-0"
-                            style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, transparent 70%)' }}
+                            style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
                         />
                         <div
-                            className="absolute"
+                            className="relative z-10 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
                             style={{
-                                width: '80px', height: '80px',
-                                background: `radial-gradient(circle, ${glow} 0%, transparent 70%)`,
-                                filter: 'blur(12px)',
-                            }}
-                        />
-                        <div
-                            className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
-                            style={{
-                                width: '56px',
-                                height: '56px',
-                                borderRadius: '16px',
+                                width: '64px',
+                                height: '64px',
+                                borderRadius: '20px',
                                 background: 'rgba(255,255,255,0.25)',
-                                backdropFilter: 'blur(8px)',
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
                                 border: '1px solid rgba(255,255,255,0.2)'
                             }}
                         >
-                            <Icon className="text-white w-7 h-7" strokeWidth={1.5} />
+                            <Icon className="text-white w-8 h-8" strokeWidth={1.5} />
                         </div>
                     </>
                 )}
 
                 {contest.is_new && (
-                    <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur text-[#00B1FF] text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm z-10">
-                        NUOVO
+                    <div className="absolute top-3.5 right-3.5 bg-white/95 backdrop-blur-md text-[#00B1FF] text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm z-10 border border-[#00B1FF]/10 uppercase tracking-tight">
+                        Nuovo
                     </div>
                 )}
             </div>
 
             {/* 2. TEXT AREA */}
-            <div className="flex flex-col justify-between bg-white relative z-10 p-3 lg:p-4 flex-1">
-                <div>
-                    <h3 className="font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#00B1FF] transition-colors text-[13px] lg:text-[15px]">
+            <div className="flex flex-col justify-between bg-[var(--card)] relative z-10 p-4 lg:p-5 flex-1">
+                <div className="space-y-1.5">
+                    <h3 className="font-extrabold text-[var(--foreground)] leading-[1.3] line-clamp-2 group-hover:text-[#00B1FF] transition-colors text-[14px] lg:text-[16px] tracking-tight">
                         {contest.title}
                     </h3>
                     {contest.subtitle && (
-                        <p className="text-slate-500 line-clamp-1 mt-0.5 text-[10px] lg:text-[12px]">
+                        <p className="text-[var(--foreground)] opacity-60 line-clamp-1 text-[11px] lg:text-[13px] font-medium group-hover:opacity-100 transition-opacity">
                             {contest.subtitle}
                         </p>
                     )}
                 </div>
 
-                {(contest.year || postiDisponibili) && (
-                    <div className="flex items-center justify-between mt-2">
-                        {contest.year && (
-                            <span className="text-slate-400 font-semibold text-[10px] lg:text-[11px]">
+                <div className="flex items-center justify-between mt-4">
+                    {contest.year ? (
+                        <div className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-md">
+                            <span className="text-[var(--foreground)] opacity-50 font-bold text-[10px] lg:text-[11px] uppercase tracking-wider">
                                 {contest.year}
                             </span>
-                        )}
-                        {postiDisponibili && (
-                            <div className="flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
-                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
-                                <span className="text-emerald-600 font-bold text-[9px] lg:text-[10px]">
-                                    {postiDisponibili} posti
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                )}
+                        </div>
+                    ) : <div />}
+
+                    {postiDisponibili && (
+                        <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-[10px] border border-emerald-100 shadow-sm shadow-emerald-900/5">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            <span className="text-emerald-700 font-black text-[10px] lg:text-[11px]">
+                                {postiDisponibili} posti
+                            </span>
+                        </div>
+                    )}
+                </div>
             </div>
         </Link>
     );
@@ -162,10 +155,10 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
             {/* Header Row */}
             <div className="flex justify-between items-center px-4 lg:px-8 mb-4 lg:mb-6">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-[12px] bg-[#E0F2FE] flex items-center justify-center">
+                    <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-[12px] bg-[#E0F2FE] dark:bg-cyan-900/30 flex items-center justify-center">
                         <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-[#00B1FF]" fill="#00B1FF" />
                     </div>
-                    <h2 className="text-[17px] lg:text-xl font-bold text-slate-900 leading-none">
+                    <h2 className="text-[17px] lg:text-xl font-bold text-[var(--foreground)] leading-none">
                         {title}
                     </h2>
                 </div>
@@ -174,15 +167,15 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
                 <div className="flex gap-2">
                     <button
                         onClick={() => scroll('left')}
-                        className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
+                        className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-sm"
                     >
-                        <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5 text-slate-500" />
+                        <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5 text-[var(--foreground)] opacity-60" />
                     </button>
                     <button
                         onClick={() => scroll('right')}
-                        className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
+                        className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-sm"
                     >
-                        <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 text-slate-500" />
+                        <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 text-[var(--foreground)] opacity-60" />
                     </button>
                 </div>
             </div>

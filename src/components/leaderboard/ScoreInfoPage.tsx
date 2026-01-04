@@ -12,29 +12,29 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
     const [activeTab, setActiveTab] = useState<'prep' | 'xp'>(initialTab);
 
     return (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
+        <div className="fixed inset-0 z-50 bg-[var(--background)] flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
             {/* Header */}
-            <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-slate-50 bg-white/90 backdrop-blur-md sticky top-0 z-10">
+            <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--background)]/90 backdrop-blur-md sticky top-0 z-10 transition-colors">
                 <button
                     onClick={onBack}
-                    className="p-3 -ml-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
+                    className="p-3 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-[var(--foreground)] opacity-40 hover:opacity-100 transition-colors"
                 >
                     <ArrowLeft className="w-6 h-6" />
                 </button>
-                <h1 className="font-black text-lg text-slate-900">Come funziona</h1>
+                <h1 className="font-black text-lg text-[var(--foreground)]">Come funziona</h1>
                 <div className="w-12" /> {/* Spacer for centering title */}
             </div>
 
             {/* Content Container */}
-            <div className="flex-1 overflow-y-auto bg-canvas-light">
+            <div className="flex-1 overflow-y-auto bg-[var(--background)]">
                 <div className="p-5 max-w-lg mx-auto pb-20">
 
                     {/* Tabs / Segmented Control */}
-                    <div className="flex p-1 bg-slate-100 rounded-[14px] mb-8 relative">
+                    <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-[14px] mb-8 relative border border-slate-200 dark:border-slate-700">
                         {/* Active Tab Indicator */}
                         <motion.div
                             layoutId="activeTab"
-                            className="absolute inset-y-1 bg-white rounded-[10px] shadow-sm z-0"
+                            className="absolute inset-y-1 bg-white dark:bg-slate-700 rounded-[10px] shadow-sm z-0"
                             initial={false}
                             animate={{
                                 left: activeTab === 'prep' ? '4px' : '50%',
@@ -46,13 +46,13 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
 
                         <button
                             onClick={() => setActiveTab('prep')}
-                            className={`flex-1 relative z-10 py-2.5 text-[13px] font-bold text-center transition-colors ${activeTab === 'prep' ? 'text-slate-900' : 'text-slate-400'}`}
+                            className={`flex-1 relative z-10 py-2.5 text-[13px] font-bold text-center transition-colors ${activeTab === 'prep' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}
                         >
                             Punteggio
                         </button>
                         <button
                             onClick={() => setActiveTab('xp')}
-                            className={`flex-1 relative z-10 py-2.5 text-[13px] font-bold text-center transition-colors ${activeTab === 'xp' ? 'text-slate-900' : 'text-slate-400'}`}
+                            className={`flex-1 relative z-10 py-2.5 text-[13px] font-bold text-center transition-colors ${activeTab === 'xp' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}
                         >
                             XP e Classifiche
                         </button>
@@ -83,11 +83,11 @@ function PrepContent() {
         >
             {/* Hero */}
             <div className="text-center space-y-3">
-                <div className="w-16 h-16 bg-cyan-50 rounded-2xl flex items-center justify-center mx-auto text-cyan-500 mb-2">
+                <div className="w-16 h-16 bg-cyan-50 dark:bg-cyan-900/30 rounded-2xl flex items-center justify-center mx-auto text-cyan-500 mb-2">
                     <Target className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-black text-slate-900">Punteggio di Preparazione</h2>
-                <p className="text-slate-500 font-medium leading-relaxed">
+                <h2 className="text-2xl font-black text-[var(--foreground)]">Punteggio di Preparazione</h2>
+                <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed">
                     Misuriamo la tua preparazione da 0 a 100 basandoci sui quiz svolti, la qualità delle risposte e la costanza.
                 </p>
             </div>
@@ -130,27 +130,27 @@ function PrepContent() {
             </div>
 
             {/* Reliability Note */}
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-3">
-                <div className="flex items-center gap-2 text-slate-900 font-bold">
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 space-y-3">
+                <div className="flex items-center gap-2 text-[var(--foreground)] font-bold">
                     <AlertTriangle className="w-5 h-5 text-amber-500" />
                     <span>Affidabilità del punteggio</span>
                 </div>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className="text-sm text-[var(--foreground)] opacity-60 leading-relaxed">
                     Se hai svolto pochi quiz (meno di 50-100), il tuo punteggio sarà limitato perché i dati non sono sufficienti per una stima affidabile. Continua ad allenarti per sbloccare il tuo vero potenziale!
                 </p>
             </div>
 
             {/* Examples */}
             <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider pl-1">Esempi</h3>
+                <h3 className="text-sm font-bold text-[var(--foreground)] opacity-40 uppercase tracking-wider pl-1">Esempi</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                        <div className="font-bold text-slate-900 mb-1">Utente Principiante</div>
-                        <div className="text-[13px] text-slate-500">Pochi quiz ma 100% corretti → <span className="text-amber-500 font-bold">Punteggio Medio-Basso</span> (Manca volume)</div>
+                    <div className="bg-[var(--card)] p-4 rounded-2xl border border-[var(--card-border)] shadow-sm">
+                        <div className="font-bold text-[var(--foreground)] mb-1">Utente Principiante</div>
+                        <div className="text-[13px] text-[var(--foreground)] opacity-50">Pochi quiz ma 100% corretti → <span className="text-amber-500 font-bold">Punteggio Medio-Basso</span> (Manca volume)</div>
                     </div>
-                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                        <div className="font-bold text-slate-900 mb-1">Utente Esperto</div>
-                        <div className="text-[13px] text-slate-500">Tanti quiz, 85% corretti, attivo oggi → <span className="text-emerald-500 font-bold">Punteggio Alto</span></div>
+                    <div className="bg-[var(--card)] p-4 rounded-2xl border border-[var(--card-border)] shadow-sm">
+                        <div className="font-bold text-[var(--foreground)] mb-1">Utente Esperto</div>
+                        <div className="text-[13px] text-[var(--foreground)] opacity-50">Tanti quiz, 85% corretti, attivo oggi → <span className="text-emerald-500 font-bold">Punteggio Alto</span></div>
                     </div>
                 </div>
             </div>
@@ -169,11 +169,11 @@ function XPContent() {
         >
             {/* Hero */}
             <div className="text-center space-y-3">
-                <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto text-amber-500 mb-2">
+                <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto text-amber-500 mb-2">
                     <Trophy className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-black text-slate-900">XP e Classifiche</h2>
-                <p className="text-slate-500 font-medium leading-relaxed">
+                <h2 className="text-2xl font-black text-[var(--foreground)]">XP e Classifiche</h2>
+                <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed">
                     Gli XP premiano il tuo impegno quotidiano. Scala la <strong>Gold League</strong> sfidando gli altri utenti ogni due settimane.
                 </p>
             </div>
@@ -227,22 +227,22 @@ function XPContent() {
 
 function InfoCard({ icon, title, subtitle, text, color }: { icon: React.ReactNode, title: string, subtitle: string, text: string, color: string }) {
     const bgColors: Record<string, string> = {
-        cyan: 'bg-cyan-50 text-cyan-500',
-        emerald: 'bg-emerald-50 text-emerald-500',
-        amber: 'bg-amber-50 text-amber-500',
-        purple: 'bg-indigo-50 text-indigo-500',
-        blue: 'bg-blue-50 text-blue-500'
+        cyan: 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-500',
+        emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500',
+        amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-500',
+        purple: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500',
+        blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-500'
     };
 
     return (
-        <div className="bg-white p-5 rounded-[20px] shadow-sm border border-slate-100/80 flex gap-4">
+        <div className="bg-[var(--card)] p-5 rounded-[20px] shadow-sm border border-[var(--card-border)] flex gap-4 transition-colors">
             <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center ${bgColors[color] || bgColors.cyan}`}>
                 {icon}
             </div>
             <div>
-                <h4 className="font-bold text-slate-900 text-[16px]">{title}</h4>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">{subtitle}</div>
-                <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
+                <h4 className="font-bold text-[var(--foreground)] text-[16px]">{title}</h4>
+                <div className="text-xs font-bold text-[var(--foreground)] opacity-40 uppercase tracking-wide mb-2">{subtitle}</div>
+                <p className="text-[13px] text-[var(--foreground)] opacity-60 leading-relaxed font-medium">
                     {text}
                 </p>
             </div>

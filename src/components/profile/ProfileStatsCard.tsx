@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { leaderboardService } from '@/lib/leaderboardService';
 import { Trophy, Zap, Gem, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProfileStatsCardProps {
     xp: number;
+    score?: number;
 }
 
 interface MetricDesc {
@@ -13,67 +16,98 @@ interface MetricDesc {
     color: string;
 }
 
-export default function ProfileStatsCard({ xp }: ProfileStatsCardProps) {
+export default function ProfileStatsCard({ xp = 0, score = 0 }: ProfileStatsCardProps) {
     const [explanation, setExplanation] = useState<MetricDesc | null>(null);
 
     const metrics: Record<string, MetricDesc> = {
         xp: {
             title: "XP Totali",
             description: "Punti esperienza accumulati rispondendo correttamente alle domande. Più XP hai, più sali nelle classifiche globali!",
-            icon: <Trophy className="w-6 h-6" />,
-            color: "text-amber-500 bg-amber-50"
+            icon: <Trophy className="w-5 h-5 text-amber-500" fill="currentColor" />,
+            color: "bg-amber-50 text-amber-500"
         },
-        energy: {
-            title: "Energia",
-            description: "Necessaria per avviare nuove simulazioni. Attualmente è infinita per te, così puoi allenarti senza limiti!",
-            icon: <Zap className="w-6 h-6" />,
-            color: "text-red-500 bg-red-50"
+        score: {
+            title: "Punteggio Idoneità",
+            description: "Il tuo livello di preparazione reale (0-100), calcolato da un algoritmo avanzato che considera costanza, precisione e copertura degli argomenti.",
+            icon: <Zap className="w-5 h-5 text-emerald-500" fill="currentColor" />,
+            color: "bg-emerald-50 text-emerald-500"
         },
         gems: {
             title: "Gemme",
             description: "Valuta speciale che potrai usare in futuro per sbloccare contenuti esclusivi, temi e vantaggi extra.",
-            icon: <Gem className="w-6 h-6" />,
-            color: "text-cyan-500 bg-cyan-50"
+            icon: <Gem className="w-5 h-5 text-cyan-500" fill="currentColor" />,
+            color: "bg-cyan-50 text-cyan-500"
         }
     };
 
     return (
-        <div className="grid grid-cols-3 gap-3 mb-2">
+        <div className="space-y-3">
 
             {/* XP Card */}
             <div
-                onClick={() => setExplanation(metrics.xp)}
-                className="bg-white rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-50 aspect-square sm:aspect-auto cursor-pointer active:scale-95 transition-transform"
+                onClick={async () => {
+                    try {
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (!user) return;
+                        const quizzes = await leaderboardService.getUserActiveQuizzes(user.id);
+                        if (quizzes.length === 0) {
+                            alert("Nessun quiz attivo trovato.");
+                            return;
+                        }
+                        const firstQuiz = quizzes[0];
+                        await leaderboardService.updateUserScore(user.id, firstQuiz.id);
+                        const fresh = await leaderboardService.getUserSkillRank(user.id, firstQuiz.id);
+                        if (fresh) {
+                            alert(`Score aggiornato: ${fresh.score}`);
+                        }
+                    } catch (e: any) {
+                        alert(`Errore: ${e.message}`);
+                    }
+                    setExplanation(metrics.xp);
+                }}
+                className="bg-white rounded-[32px] p-5 shadow-sm border border-slate-100/60 flex flex-col justify-between h-[140px] cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group"
             >
-                <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center mb-2">
-                    <Trophy className="w-4 h-4 text-amber-500" fill="currentColor" />
+                <div className="flex justify-between items-start">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                        <Trophy className="w-6 h-6 text-amber-500" fill="currentColor" />
+                    </div>
                 </div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-center">XP Totali</div>
-                <div className="text-xl font-bold text-slate-900">{xp}</div>
+                <div>
+                    <div className="text-3xl font-black text-slate-900 tracking-tight">{xp}</div>
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">XP Totali</div>
+                </div>
             </div>
 
-            {/* Energy Card */}
+            {/* Preparation Score Card */}
             <div
-                onClick={() => setExplanation(metrics.energy)}
-                className="bg-white rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-50 aspect-square sm:aspect-auto cursor-pointer active:scale-95 transition-transform"
+                onClick={() => setExplanation(metrics.score)}
+                className="bg-white rounded-[32px] p-5 shadow-sm border border-slate-100/60 flex flex-col justify-between h-[140px] cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group"
             >
-                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center mb-2">
-                    <Zap className="w-4 h-4 text-red-500" fill="currentColor" />
+                <div className="flex justify-between items-start">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                        <Zap className="w-6 h-6 text-emerald-500" fill="currentColor" />
+                    </div>
                 </div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-center">Energia</div>
-                <div className="text-xl font-bold text-slate-900">∞</div>
+                <div>
+                    <div className="text-3xl font-black text-slate-900 tracking-tight">{score}</div>
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Punteggio Idoneità</div>
+                </div>
             </div>
 
             {/* Gems Card */}
             <div
                 onClick={() => setExplanation(metrics.gems)}
-                className="bg-white rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-50 aspect-square sm:aspect-auto cursor-pointer active:scale-95 transition-transform"
+                className="bg-white rounded-[32px] p-5 shadow-sm border border-slate-100/60 flex flex-col justify-between h-[140px] cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group"
             >
-                <div className="w-8 h-8 rounded-full bg-cyan-50 flex items-center justify-center mb-2">
-                    <Gem className="w-4 h-4 text-cyan-500" fill="currentColor" />
+                <div className="flex justify-between items-start">
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-50 flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
+                        <Gem className="w-6 h-6 text-cyan-500" fill="currentColor" />
+                    </div>
                 </div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-center">Gemme</div>
-                <div className="text-xl font-bold text-slate-900">0</div>
+                <div>
+                    <div className="text-3xl font-black text-slate-900 tracking-tight">0</div>
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Gemme</div>
+                </div>
             </div>
 
             {/* Explanation Modal */}
@@ -85,33 +119,33 @@ export default function ProfileStatsCard({ xp }: ProfileStatsCardProps) {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setExplanation(null)}
-                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
                         />
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-white rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center"
+                            className="relative bg-white rounded-[40px] p-8 max-w-xs w-full shadow-2xl text-center border border-white/20"
                         >
                             <button
                                 onClick={() => setExplanation(null)}
                                 className="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="w-5 h-5" />
                             </button>
 
-                            <div className={`w-16 h-16 rounded-[22px] ${explanation.color} flex items-center justify-center mx-auto mb-5`}>
-                                {explanation.icon}
+                            <div className={`w-20 h-20 rounded-[24px] ${explanation.color} flex items-center justify-center mx-auto mb-6 shadow-sm`}>
+                                {React.cloneElement(explanation.icon as React.ReactElement, { className: "w-10 h-10" })}
                             </div>
 
-                            <h3 className="text-xl font-black text-slate-900 mb-2">{explanation.title}</h3>
-                            <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{explanation.title}</h3>
+                            <p className="text-slate-500 text-[15px] font-medium leading-relaxed mb-8">
                                 {explanation.description}
                             </p>
 
                             <button
                                 onClick={() => setExplanation(null)}
-                                className="w-full mt-8 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-colors"
+                                className="w-full py-4 bg-slate-900 text-white rounded-[24px] font-bold hover:bg-slate-800 transition-colors text-[15px] shadow-lg shadow-slate-900/20"
                             >
                                 Ho capito
                             </button>

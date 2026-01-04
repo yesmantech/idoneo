@@ -27,13 +27,13 @@ type ResultFilter = 'all' | 'pass' | 'near' | 'fail';
 function getAttemptTypeDisplay(mode?: string | null) {
     switch (mode) {
         case 'custom':
-            return { label: 'Personalizzata', className: 'bg-purple-100 text-purple-600' };
+            return { label: 'Personalizzata', className: 'bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' };
         case 'official':
-            return { label: 'Esame', className: 'bg-blue-100 text-blue-600' };
+            return { label: 'Esame', className: 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' };
         case 'simulation':
-            return { label: 'Simulazione', className: 'bg-sky-100 text-sky-600' };
+            return { label: 'Simulazione', className: 'bg-sky-100 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400' };
         default:
-            return { label: 'Simulazione', className: 'bg-slate-100 text-slate-500' };
+            return { label: 'Simulazione', className: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' };
     }
 }
 
@@ -50,8 +50,8 @@ function getResultStatus(accuracy: number): {
             label: 'Idoneo',
             status: 'pass',
             icon: Check,
-            bgColor: 'bg-emerald-50',
-            textColor: 'text-emerald-600',
+            bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
+            textColor: 'text-emerald-600 dark:text-emerald-400',
             progressColor: '#10B981'
         };
     } else if (accuracy >= 50) {
@@ -59,8 +59,8 @@ function getResultStatus(accuracy: number): {
             label: 'Quasi',
             status: 'near',
             icon: AlertTriangle,
-            bgColor: 'bg-amber-50',
-            textColor: 'text-amber-600',
+            bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+            textColor: 'text-amber-600 dark:text-amber-400',
             progressColor: '#F59E0B'
         };
     } else {
@@ -68,8 +68,8 @@ function getResultStatus(accuracy: number): {
             label: 'Non idoneo',
             status: 'fail',
             icon: X,
-            bgColor: 'bg-red-50',
-            textColor: 'text-red-600',
+            bgColor: 'bg-red-50 dark:bg-red-900/20',
+            textColor: 'text-red-600 dark:text-red-400',
             progressColor: '#EF4444'
         };
     }
@@ -93,7 +93,7 @@ function CircularProgress({ percentage, color, size = 44 }: { percentage: number
                     fill="none"
                     stroke="currentColor"
                     strokeWidth={strokeWidth}
-                    className="text-slate-100"
+                    className="text-slate-100 dark:text-slate-800"
                 />
                 {/* Progress circle */}
                 <circle
@@ -110,7 +110,7 @@ function CircularProgress({ percentage, color, size = 44 }: { percentage: number
                 />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-slate-700">{percentage.toFixed(0)}%</span>
+                <span className="text-[10px] font-bold text-[var(--foreground)] opacity-70">{percentage.toFixed(0)}%</span>
             </div>
         </div>
     );
@@ -152,7 +152,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
 
     if (attempts.length === 0) {
         return (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-[var(--foreground)] opacity-40">
                 <div className="text-4xl mb-3">📝</div>
                 Nessuna attività recente.
             </div>
@@ -166,7 +166,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
             {/* Filter Toggle */}
             <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                className="flex items-center gap-2 text-xs font-bold text-[var(--foreground)] opacity-50 hover:opacity-100 transition-opacity"
             >
                 Filtri
                 {hasActiveFilters && (
@@ -177,7 +177,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
 
             {/* Filter Chips */}
             {showFilters && (
-                <div className="flex flex-wrap gap-4 pb-2">
+                <div className="flex flex-wrap gap-4 pb-2 p-4 bg-[var(--card)] rounded-2xl border border-[var(--card-border)] shadow-sm">
                     <div className="flex gap-1">
                         <span className="text-[10px] font-bold text-slate-400 uppercase mr-2 self-center">Tipo:</span>
                         {[
@@ -188,7 +188,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                             <button
                                 key={f.value}
                                 onClick={() => setTypeFilter(f.value as FilterType)}
-                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${typeFilter === f.value ? 'bg-[#00B1FF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${typeFilter === f.value ? 'bg-[#00B1FF] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {f.label}
@@ -206,7 +206,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                             <button
                                 key={f.value}
                                 onClick={() => setResultFilter(f.value as ResultFilter)}
-                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${resultFilter === f.value ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${resultFilter === f.value ? 'bg-slate-900 dark:bg-slate-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {f.label}
@@ -218,7 +218,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
 
             {/* Results Count */}
             {hasActiveFilters && (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--foreground)] opacity-40">
                     {filteredAttempts.length} risultat{filteredAttempts.length === 1 ? 'o' : 'i'} trovat{filteredAttempts.length === 1 ? 'o' : 'i'}
                 </p>
             )}
@@ -235,7 +235,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                         <Link
                             key={att.id}
                             to={`/quiz/results/${att.id}`}
-                            className="block bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] border border-slate-100 group"
+                            className="block bg-[var(--card)] rounded-2xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] border border-[var(--card-border)] group"
                         >
                             <div className="flex items-center gap-4">
                                 {/* Circular Progress */}
@@ -248,7 +248,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                                 <div className="flex-1 min-w-0">
                                     {/* Date & Type */}
                                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                        <span className="text-sm font-bold text-slate-900">
+                                        <span className="text-sm font-bold text-[var(--foreground)]">
                                             {new Date(att.created_at).toLocaleDateString('it-IT', {
                                                 day: '2-digit',
                                                 month: 'short',
@@ -268,14 +268,14 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                                                 {resultStatus.label}
                                             </span>
                                         </div>
-                                        <span className="text-[11px] text-slate-400">
+                                        <span className="text-[11px] text-[var(--foreground)] opacity-40">
                                             {att.correct}/{att.total_questions} • Voto: {att.score?.toFixed(1) || '0.0'}
                                         </span>
                                     </div>
                                 </div>
 
                                 {/* Chevron */}
-                                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#00B1FF] transition-colors flex-shrink-0" />
+                                <ChevronRight className="w-5 h-5 text-[var(--foreground)] opacity-20 group-hover:opacity-100 group-hover:text-[#00B1FF] transition-all flex-shrink-0" />
                             </div>
                         </Link>
                     );
@@ -283,7 +283,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
             </div>
 
             {filteredAttempts.length === 0 && (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-[var(--foreground)] opacity-40">
                     <div className="text-4xl mb-3">🔍</div>
                     Nessun tentativo corrisponde ai filtri selezionati.
                 </div>

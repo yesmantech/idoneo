@@ -63,8 +63,9 @@ export default function SubjectRadarChart({ data }: SubjectRadarChartProps) {
                             key={level}
                             points={levelPoints}
                             fill="none"
-                            stroke="#F3F5F7" // canvas-light
+                            stroke="currentColor"
                             strokeWidth="1.5"
+                            className="text-slate-100 dark:text-slate-800"
                         />
                     );
                 })}
@@ -72,13 +73,13 @@ export default function SubjectRadarChart({ data }: SubjectRadarChartProps) {
                 {/* Axes */}
                 {axes.map((axis, i) => (
                     <g key={i}>
-                        <line x1={center} y1={center} x2={axis.x} y2={axis.y} stroke="#F3F5F7" strokeWidth="1.5" />
+                        <line x1={center} y1={center} x2={axis.x} y2={axis.y} stroke="currentColor" strokeWidth="1.5" className="text-slate-100 dark:text-slate-800" />
                         <text
                             x={axis.lx}
                             y={axis.ly}
                             textAnchor="middle"
                             dominantBaseline="middle"
-                            className="text-[10px] fill-text-tertiary font-bold uppercase tracking-wider"
+                            className="text-[10px] fill-[var(--foreground)] opacity-40 font-bold uppercase tracking-wider"
                         >
                             {axis.label.substring(0, 15)}
                         </text>
@@ -98,7 +99,7 @@ export default function SubjectRadarChart({ data }: SubjectRadarChartProps) {
                 {data.map((d, i) => {
                     const { x, y } = getCoordinates(d.accuracy, i);
                     return (
-                        <circle key={i} cx={x} cy={y} r="5" fill="#06D6D3" stroke="white" strokeWidth="3" />
+                        <circle key={i} cx={x} cy={y} r="5" fill="#06D6D3" stroke="var(--card)" strokeWidth="3" />
                     );
                 })}
             </svg>
@@ -112,12 +113,12 @@ function FallbackBarChart({ data }: { data: SubjectData[] }) {
             {data.map(d => (
                 <div key={d.subject}>
                     <div className="flex justify-between mb-2">
-                        <span className="text-sm font-bold text-text-secondary">{d.subject}</span>
-                        <span className="text-sm font-bold text-text-primary">{d.accuracy.toFixed(0)}%</span>
+                        <span className="text-sm font-bold text-[var(--foreground)] opacity-60">{d.subject}</span>
+                        <span className="text-sm font-bold text-[var(--foreground)]">{d.accuracy.toFixed(0)}%</span>
                     </div>
-                    <div className="h-2 w-full bg-canvas-light rounded-pill overflow-hidden">
+                    <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-pill overflow-hidden">
                         <div
-                            className={`h-full rounded-pill transition-all duration-500 ${d.accuracy >= 70 ? 'bg-semantic-success' : d.accuracy >= 50 ? 'bg-brand-orange' : 'bg-semantic-error'}`}
+                            className={`h-full rounded-pill transition-all duration-500 ${d.accuracy >= 70 ? 'bg-emerald-500' : d.accuracy >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`}
                             style={{ width: `${d.accuracy}%` }}
                         />
                     </div>

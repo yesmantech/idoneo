@@ -215,26 +215,26 @@ export default function CustomQuizWizardPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] pb-32">
+        <div className="min-h-screen bg-[var(--background)] pb-32">
             {/* ============================================================= */}
             {/* TOP BAR */}
             {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+            <header className="sticky top-0 z-50 bg-[var(--background)]/95 backdrop-blur border-b border-[var(--card-border)]">
                 <div className="flex items-center justify-between px-4 py-3">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 active:scale-95 transition-all"
+                        className="w-10 h-10 rounded-full bg-[var(--card)] flex items-center justify-center hover:opacity-80 active:scale-95 transition-all text-[var(--foreground)]"
                     >
-                        <ChevronLeft className="w-5 h-5 text-slate-600" />
+                        <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <h1 className="text-[17px] font-semibold text-slate-900">Prova Personalizzata</h1>
+                    <h1 className="text-[17px] font-semibold text-[var(--foreground)]">Prova Personalizzata</h1>
                     <div className="w-10" />
                 </div>
             </header>
@@ -245,16 +245,16 @@ export default function CustomQuizWizardPage() {
                 {/* ============================================================= */}
                 <section>
                     <div className="flex justify-between items-center mb-3">
-                        <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Seleziona Materie</h2>
+                        <h2 className="text-[11px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">Seleziona Materie</h2>
                         <button
                             onClick={toggleAllSubjects}
-                            className="text-[13px] font-semibold text-purple-500 hover:text-purple-600 transition-colors"
+                            className="text-[13px] font-semibold text-purple-500 hover:text-purple-400 transition-colors"
                         >
                             {Object.keys(subjectSelections).length === subjects.length ? "Deseleziona tutte" : "Seleziona tutte"}
                         </button>
                     </div>
 
-                    <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                    <div className="bg-[var(--card)] rounded-2xl overflow-hidden border border-[var(--card-border)]" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                         {subjects.map((s, idx) => {
                             const count = subjectSelections[s.id];
                             const isSelected = count !== undefined;
@@ -262,7 +262,7 @@ export default function CustomQuizWizardPage() {
                             return (
                                 <div
                                     key={s.id}
-                                    className={`${idx !== 0 ? 'border-t border-slate-100' : ''}`}
+                                    className={`${idx !== 0 ? 'border-t border-[var(--card-border)]' : ''}`}
                                 >
                                     <div className="p-4">
                                         <div
@@ -272,17 +272,17 @@ export default function CustomQuizWizardPage() {
                                             {/* Radio circle */}
                                             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${isSelected
                                                 ? 'border-purple-500 bg-purple-500'
-                                                : 'border-slate-300'
+                                                : 'border-slate-300 dark:border-slate-600'
                                                 }`}>
                                                 {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
                                             </div>
 
                                             {/* Subject info */}
                                             <div className="flex-1 min-w-0">
-                                                <p className={`text-[15px] font-medium ${isSelected ? 'text-slate-900' : 'text-slate-500'}`}>
+                                                <p className={`text-[15px] font-medium ${isSelected ? 'text-[var(--foreground)]' : 'text-[var(--foreground)] opacity-50'}`}>
                                                     {s.name}
                                                 </p>
-                                                <p className="text-[12px] text-slate-400">
+                                                <p className="text-[12px] text-[var(--foreground)] opacity-40">
                                                     {s.question_count} disponibili
                                                 </p>
                                             </div>
@@ -297,21 +297,21 @@ export default function CustomQuizWizardPage() {
                                                     max={s.question_count}
                                                     value={count}
                                                     onChange={e => updateSubjectCount(s.id, parseInt(e.target.value), s.question_count)}
-                                                    className="flex-1 h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-purple-500"
+                                                    className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full appearance-none cursor-pointer accent-purple-500"
                                                 />
                                                 <div className="flex items-center gap-1">
                                                     <button
                                                         onClick={() => updateSubjectCount(s.id, count - 1, s.question_count)}
-                                                        className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 active:scale-95 transition-all"
+                                                        className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:opacity-80 active:scale-95 transition-all"
                                                     >
-                                                        <Minus className="w-3.5 h-3.5 text-slate-500" />
+                                                        <Minus className="w-3.5 h-3.5 text-[var(--foreground)] opacity-60" />
                                                     </button>
-                                                    <span className="w-10 text-center font-bold text-purple-600 text-[15px]">{count}</span>
+                                                    <span className="w-10 text-center font-bold text-purple-600 dark:text-purple-400 text-[15px]">{count}</span>
                                                     <button
                                                         onClick={() => updateSubjectCount(s.id, count + 1, s.question_count)}
-                                                        className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 active:scale-95 transition-all"
+                                                        className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:opacity-80 active:scale-95 transition-all"
                                                     >
-                                                        <Plus className="w-3.5 h-3.5 text-slate-500" />
+                                                        <Plus className="w-3.5 h-3.5 text-[var(--foreground)] opacity-60" />
                                                     </button>
                                                 </div>
                                             </div>
@@ -327,14 +327,14 @@ export default function CustomQuizWizardPage() {
                 {/* TIPO DI DOMANDE */}
                 {/* ============================================================= */}
                 <section>
-                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Tipo di Domande</h2>
+                    <h2 className="text-[11px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider mb-3">Tipo di Domande</h2>
 
-                    <div className="bg-white rounded-2xl p-4 relative" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                    <div className="bg-[var(--card)] rounded-2xl p-4 relative border border-[var(--card-border)]" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                         <div className="flex items-center justify-between">
                             <select
                                 value={selectionMode}
                                 onChange={(e) => setSelectionMode(e.target.value as QuestionSelectionMode)}
-                                className="w-full appearance-none bg-transparent text-[15px] font-semibold text-slate-900 outline-none cursor-pointer pr-8"
+                                className="w-full appearance-none bg-transparent text-[15px] font-semibold text-[var(--foreground)] outline-none cursor-pointer pr-8"
                             >
                                 <option value="random">Casuali</option>
                                 <option value="weak">Sbagliate spesso</option>
@@ -343,11 +343,11 @@ export default function CustomQuizWizardPage() {
                                 <option value="hardest">Più difficili (Globali)</option>
                                 <option value="smart_mix">Mix Intelligente</option>
                             </select>
-                            <ChevronDown className="w-5 h-5 text-slate-400 absolute right-4 pointer-events-none" />
+                            <ChevronDown className="w-5 h-5 text-[var(--foreground)] opacity-40 absolute right-4 pointer-events-none" />
                         </div>
                     </div>
 
-                    <p className="text-[12px] text-slate-400 mt-2 px-1">
+                    <p className="text-[12px] text-[var(--foreground)] opacity-40 mt-2 px-1">
                         {modeDescriptions[selectionMode]}
                     </p>
                 </section>
@@ -356,10 +356,10 @@ export default function CustomQuizWizardPage() {
                 {/* NUMERO DI QUIZ SELEZIONATI */}
                 {/* ============================================================= */}
                 <section>
-                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Numero di Quiz Selezionati</h2>
+                    <h2 className="text-[11px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider mb-3">Numero di Quiz Selezionati</h2>
 
-                    <div className="bg-white rounded-2xl p-4 flex items-center justify-between" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                        <span className="text-[14px] font-medium text-slate-500">Totale</span>
+                    <div className="bg-[var(--card)] rounded-2xl p-4 flex items-center justify-between border border-[var(--card-border)]" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <span className="text-[14px] font-medium text-[var(--foreground)] opacity-60">Totale</span>
                         <span className="text-[28px] font-bold text-purple-500">{totalSelectedQuestions}</span>
                     </div>
                 </section>
@@ -369,30 +369,30 @@ export default function CustomQuizWizardPage() {
                 {/* ============================================================= */}
                 <section>
                     <div className="flex justify-between items-center mb-3">
-                        <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Durata Prova</h2>
+                        <h2 className="text-[11px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">Durata Prova</h2>
 
                         {/* Toggle Switch */}
                         <div className="flex items-center gap-2">
-                            <span className={`text-[12px] font-semibold ${noTimeLimit ? 'text-purple-500' : 'text-slate-400'}`}>
+                            <span className={`text-[12px] font-semibold ${noTimeLimit ? 'text-purple-500' : 'text-[var(--foreground)] opacity-40'}`}>
                                 Senza limite
                             </span>
                             <button
                                 onClick={() => setNoTimeLimit(!noTimeLimit)}
-                                className={`w-11 h-6 rounded-full p-0.5 transition-colors ${noTimeLimit ? 'bg-purple-500' : 'bg-slate-300'}`}
+                                className={`w-11 h-6 rounded-full p-0.5 transition-colors ${noTimeLimit ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
                                 <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${noTimeLimit ? 'translate-x-5' : 'translate-x-0'}`} />
                             </button>
                         </div>
                     </div>
 
-                    <div className={`bg-white rounded-2xl p-4 grid grid-cols-3 gap-3 transition-opacity ${noTimeLimit ? 'opacity-40 pointer-events-none' : ''}`} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                    <div className={`bg-[var(--card)] rounded-2xl p-4 grid grid-cols-3 gap-3 transition-opacity border border-[var(--card-border)] ${noTimeLimit ? 'opacity-40 pointer-events-none' : ''}`} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                         {/* Ore */}
                         <div className="text-center">
-                            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-2">Ore</p>
+                            <p className="text-[10px] font-semibold text-[var(--foreground)] opacity-40 uppercase mb-2">Ore</p>
                             <select
                                 value={timeHours}
                                 onChange={e => setTimeHours(parseInt(e.target.value))}
-                                className="w-full py-2 px-3 bg-slate-100 rounded-xl text-[18px] font-bold text-slate-900 text-center outline-none appearance-none cursor-pointer"
+                                className="w-full py-2 px-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-[18px] font-bold text-[var(--foreground)] text-center outline-none appearance-none cursor-pointer"
                             >
                                 {[0, 1, 2, 3, 4].map(h => <option key={h} value={h}>{h}</option>)}
                             </select>
@@ -400,11 +400,11 @@ export default function CustomQuizWizardPage() {
 
                         {/* Minuti */}
                         <div className="text-center">
-                            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-2">Minuti</p>
+                            <p className="text-[10px] font-semibold text-[var(--foreground)] opacity-40 uppercase mb-2">Minuti</p>
                             <select
                                 value={timeMinutes}
                                 onChange={e => setTimeMinutes(parseInt(e.target.value))}
-                                className="w-full py-2 px-3 bg-slate-100 rounded-xl text-[18px] font-bold text-slate-900 text-center outline-none appearance-none cursor-pointer"
+                                className="w-full py-2 px-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-[18px] font-bold text-[var(--foreground)] text-center outline-none appearance-none cursor-pointer"
                             >
                                 {Array.from({ length: 60 }, (_, i) => i).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
@@ -412,11 +412,11 @@ export default function CustomQuizWizardPage() {
 
                         {/* Secondi */}
                         <div className="text-center">
-                            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-2">Secondi</p>
+                            <p className="text-[10px] font-semibold text-[var(--foreground)] opacity-40 uppercase mb-2">Secondi</p>
                             <select
                                 value={timeSeconds}
                                 onChange={e => setTimeSeconds(parseInt(e.target.value))}
-                                className="w-full py-2 px-3 bg-slate-100 rounded-xl text-[18px] font-bold text-slate-900 text-center outline-none appearance-none cursor-pointer"
+                                className="w-full py-2 px-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-[18px] font-bold text-[var(--foreground)] text-center outline-none appearance-none cursor-pointer"
                             >
                                 {Array.from({ length: 60 }, (_, i) => i).map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
@@ -428,7 +428,7 @@ export default function CustomQuizWizardPage() {
                 {/* PUNTEGGIO */}
                 {/* ============================================================= */}
                 <section>
-                    <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">Punteggio</h2>
+                    <h2 className="text-[11px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider mb-3 px-1">Punteggio</h2>
 
                     <div className="grid grid-cols-3 gap-3">
                         {[
@@ -438,7 +438,7 @@ export default function CustomQuizWizardPage() {
                         ].map((item) => (
                             <div
                                 key={item.key}
-                                className="bg-white rounded-[24px] p-3 flex flex-col items-center gap-3 active:scale-[0.98] transition-transform"
+                                className="bg-[var(--card)] rounded-[24px] p-3 flex flex-col items-center gap-3 active:scale-[0.98] transition-transform border border-[var(--card-border)]"
                                 style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.04)' }}
                             >
                                 <span className={`text-[10px] font-bold uppercase tracking-wider ${item.color === 'red' ? 'text-red-500' :
@@ -450,9 +450,9 @@ export default function CustomQuizWizardPage() {
                                 <div className="flex items-center gap-1.5">
                                     <button
                                         onClick={() => setScoring(s => ({ ...s, [item.key]: parseFloat(((s as any)[item.key] - 0.1).toFixed(1)) }))}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${item.color === 'red' ? 'bg-red-50 text-red-500 hover:bg-red-100' :
-                                            item.color === 'amber' ? 'bg-amber-50 text-amber-500 hover:bg-amber-100' :
-                                                'bg-emerald-50 text-emerald-500 hover:bg-emerald-100'
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${item.color === 'red' ? 'bg-red-50 dark:bg-red-500/10 text-red-500 hover:opacity-80' :
+                                            item.color === 'amber' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500 hover:opacity-80' :
+                                                'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 hover:opacity-80'
                                             }`}
                                     >
                                         <Minus className="w-3.5 h-3.5" strokeWidth={3} />
@@ -465,7 +465,7 @@ export default function CustomQuizWizardPage() {
                                                 animate={{ y: 0, opacity: 1 }}
                                                 exit={{ y: -5, opacity: 0 }}
                                                 transition={{ duration: 0.15 }}
-                                                className="absolute inset-0 flex items-center justify-center text-[15px] font-bold text-slate-900"
+                                                className="absolute inset-0 flex items-center justify-center text-[15px] font-bold text-[var(--foreground)]"
                                             >
                                                 {item.key === 'correct' ? `+${item.value}` : item.value}
                                             </motion.span>
@@ -473,9 +473,9 @@ export default function CustomQuizWizardPage() {
                                     </div>
                                     <button
                                         onClick={() => setScoring(s => ({ ...s, [item.key]: parseFloat(((s as any)[item.key] + 0.1).toFixed(1)) }))}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${item.color === 'red' ? 'bg-red-50 text-red-500 hover:bg-red-100' :
-                                            item.color === 'amber' ? 'bg-amber-50 text-amber-500 hover:bg-amber-100' :
-                                                'bg-emerald-50 text-emerald-500 hover:bg-emerald-100'
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${item.color === 'red' ? 'bg-red-50 dark:bg-red-500/10 text-red-500 hover:opacity-80' :
+                                            item.color === 'amber' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500 hover:opacity-80' :
+                                                'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 hover:opacity-80'
                                             }`}
                                     >
                                         <Plus className="w-3.5 h-3.5" strokeWidth={3} />
@@ -490,14 +490,14 @@ export default function CustomQuizWizardPage() {
             {/* ============================================================= */}
             {/* BOTTOM CTA */}
             {/* ============================================================= */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-5 py-4 pb-safe z-50">
+            <div className="fixed bottom-0 left-0 right-0 bg-[var(--background)]/95 backdrop-blur-md border-t border-[var(--card-border)] px-5 py-4 pb-safe z-50">
                 <div className="max-w-lg mx-auto">
                     <button
                         onClick={handleStart}
                         disabled={generating || totalSelectedQuestions === 0}
                         className={`w-full py-4 rounded-2xl font-bold text-[16px] transition-all active:scale-[0.98] ${totalSelectedQuestions > 0
                             ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/25 hover:bg-purple-600'
-                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                             }`}
                     >
                         {generating ? "Creazione in corso..." : `Avvia Prova (${totalSelectedQuestions})`}

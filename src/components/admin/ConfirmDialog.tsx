@@ -61,12 +61,12 @@ export default function ConfirmDialog({
             />
 
             {/* Dialog */}
-            <div className="relative bg-slate-900 border border-slate-700 rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="p-6 pb-4">
                     <h2
                         id="dialog-title"
-                        className="text-lg font-bold text-white"
+                        className="text-lg font-bold text-[var(--foreground)]"
                     >
                         {title}
                     </h2>
@@ -74,13 +74,13 @@ export default function ConfirmDialog({
 
                 {/* Content */}
                 <div className="px-6 pb-4">
-                    <p className="text-slate-400 text-sm">
+                    <p className="text-[var(--foreground)] opacity-50 text-sm">
                         {description}
                     </p>
 
                     {warning && (
-                        <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                            <p className="text-rose-400 text-sm font-medium flex items-start gap-2">
+                        <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg">
+                            <p className="text-rose-500 dark:text-rose-400 text-sm font-medium flex items-start gap-2">
                                 <span>⚠️</span>
                                 <span>{warning}</span>
                             </p>
@@ -89,11 +89,11 @@ export default function ConfirmDialog({
                 </div>
 
                 {/* Actions */}
-                <div className="p-4 bg-slate-800/50 border-t border-slate-800 flex justify-end gap-3">
+                <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-[var(--card-border)] flex justify-end gap-3">
                     <button
                         onClick={onClose}
                         disabled={loading}
-                        className="px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+                        className="px-4 py-3 text-sm font-medium text-[var(--foreground)] opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800 hover:opacity-100 rounded-lg transition-all disabled:opacity-50"
                     >
                         {cancelLabel}
                     </button>

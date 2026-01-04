@@ -186,15 +186,15 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
 
     return (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] shadow-2xl flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--card)] border border-[var(--card-border)] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] shadow-2xl flex flex-col animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
-                <div className="p-8 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-slate-900/95 backdrop-blur z-10">
+                <div className="p-8 border-b border-[var(--card-border)] flex justify-between items-center sticky top-0 bg-[var(--card)]/95 backdrop-blur z-10">
                     <div>
-                        <h2 className="text-2xl font-black text-white tracking-tight">Regole Simulazione Ufficiale</h2>
-                        <p className="text-sm font-medium text-slate-500 mt-1">{quiz.title}</p>
+                        <h2 className="text-2xl font-black text-[var(--foreground)] tracking-tight">Regole Simulazione Ufficiale</h2>
+                        <p className="text-sm font-medium text-[var(--foreground)] opacity-40 mt-1">{quiz.title}</p>
                     </div>
-                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 p-2 rounded-full">
+                    <button onClick={onClose} className="text-[var(--foreground)] opacity-40 hover:opacity-100 transition-all bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-full">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
@@ -206,17 +206,17 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
 
                         {/* LEFT: Global Settings */}
                         <div className="space-y-6">
-                            <div className="bg-slate-950/50 p-6 rounded-[24px] border border-slate-800">
+                            <div className="bg-slate-50 dark:bg-slate-950/50 p-6 rounded-[24px] border border-slate-200 dark:border-slate-800">
                                 <h3 className="text-emerald-400 font-black text-lg mb-6 flex items-center gap-2">
                                     <span className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-sm border border-emerald-500/20">⚙️</span>
                                     Impostazioni Globali
                                 </h3>
                                 <div className="space-y-5">
                                     <div>
-                                        <label className="block text-slate-400 font-bold text-xs uppercase tracking-wider mb-2">Durata (minuti)</label>
+                                        <label className="block text-[var(--foreground)] opacity-40 font-bold text-xs uppercase tracking-wider mb-2">Durata (minuti)</label>
                                         <input
                                             type="number"
-                                            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[var(--foreground)] font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
                                             value={timeLimit}
                                             onChange={e => setTimeLimit(Number(e.target.value))}
                                         />
@@ -224,28 +224,28 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
 
                                     <div className="grid grid-cols-3 gap-3">
                                         <div>
-                                            <label className="block text-slate-400 font-bold text-[10px] uppercase tracking-wider mb-2">Esatti</label>
-                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-emerald-400 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500 text-center" value={pointsCorrect} onChange={e => setPointsCorrect(Number(e.target.value))} />
+                                            <label className="block text-[var(--foreground)] opacity-30 font-bold text-[10px] uppercase tracking-wider mb-2 text-center">Esatti</label>
+                                            <input type="number" step="0.1" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-emerald-500 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500 text-center font-mono" value={pointsCorrect} onChange={e => setPointsCorrect(Number(e.target.value))} />
                                         </div>
                                         <div>
-                                            <label className="block text-slate-400 font-bold text-[10px] uppercase tracking-wider mb-2">Errati</label>
-                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-rose-400 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-rose-500 text-center" value={pointsWrong} onChange={e => setPointsWrong(Number(e.target.value))} />
+                                            <label className="block text-[var(--foreground)] opacity-30 font-bold text-[10px] uppercase tracking-wider mb-2 text-center">Errati</label>
+                                            <input type="number" step="0.1" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-rose-500 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-rose-500 text-center font-mono" value={pointsWrong} onChange={e => setPointsWrong(Number(e.target.value))} />
                                         </div>
                                         <div>
-                                            <label className="block text-slate-400 font-bold text-[10px] uppercase tracking-wider mb-2">Vuoti</label>
-                                            <input type="number" step="0.1" className="bg-slate-900 border border-slate-700 text-slate-400 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-slate-500 text-center" value={pointsBlank} onChange={e => setPointsBlank(Number(e.target.value))} />
+                                            <label className="block text-[var(--foreground)] opacity-30 font-bold text-[10px] uppercase tracking-wider mb-2 text-center">Vuoti</label>
+                                            <input type="number" step="0.1" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[var(--foreground)] opacity-50 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-slate-500 text-center font-mono" value={pointsBlank} onChange={e => setPointsBlank(Number(e.target.value))} />
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 pt-2 bg-slate-900 p-3 rounded-xl border border-slate-800">
+                                    <div className="flex items-center gap-3 pt-2 bg-slate-100 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                                         <input
                                             type="checkbox"
                                             id="isOfficial"
-                                            className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-emerald-500 focus:ring-emerald-500"
                                             checked={isOfficial}
                                             onChange={e => setIsOfficial(e.target.checked)}
                                         />
-                                        <label htmlFor="isOfficial" className="text-slate-200 font-bold text-sm cursor-pointer select-none">
+                                        <label htmlFor="isOfficial" className="text-[var(--foreground)] opacity-80 font-bold text-sm cursor-pointer select-none">
                                             Simulazione Ufficiale
                                         </label>
                                     </div>
@@ -263,7 +263,7 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
 
                         {/* RIGHT: Subject Rules */}
                         <div className="space-y-6">
-                            <div className="bg-slate-950/50 p-6 rounded-[24px] border border-slate-800 h-full flex flex-col">
+                            <div className="bg-slate-50 dark:bg-slate-950/50 p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 h-full flex flex-col">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-purple-400 font-black text-lg flex items-center gap-2">
                                         <span className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-sm border border-purple-500/20">📚</span>
@@ -274,7 +274,7 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                     {availableSubjects.length > 0 && (
                                         <div className="flex gap-2">
                                             <select
-                                                className="bg-slate-900 text-slate-300 text-xs font-bold p-2.5 rounded-xl border border-slate-700 max-w-[150px] focus:outline-none focus:border-purple-500"
+                                                className="bg-white dark:bg-slate-900 text-[var(--foreground)] opacity-60 text-xs font-bold p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 max-w-[150px] focus:outline-none focus:border-purple-500"
                                                 onChange={(e) => {
                                                     if (e.target.value) {
                                                         handleAddRule(e.target.value);
@@ -293,8 +293,8 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
 
                                 <div className="flex-1 overflow-y-auto space-y-3 min-h-[300px] pr-2 custom-scrollbar">
                                     {rules.length === 0 ? (
-                                        <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-xl">
-                                            <p className="text-slate-600 font-bold">Nessuna materia configurata.</p>
+                                        <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                                            <p className="text-[var(--foreground)] opacity-30 font-bold">Nessuna materia configurata.</p>
                                         </div>
                                     ) : (
                                         rules.map((rule, idx) => {
@@ -303,17 +303,17 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                             const isError = rule.question_count > available;
 
                                             return (
-                                                <div key={rule.subject_id} className="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4 transition-all hover:border-slate-700">
+                                                <div key={rule.subject_id} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="font-bold text-slate-200 text-sm truncate" title={subjectName}>{subjectName}</p>
-                                                        <p className="text-[10px] text-slate-500 font-medium mt-0.5">Disponibili: <span className="text-slate-400">{available}</span></p>
+                                                        <p className="font-bold text-[var(--foreground)] opacity-80 text-sm truncate" title={subjectName}>{subjectName}</p>
+                                                        <p className="text-[10px] text-[var(--foreground)] opacity-30 font-medium mt-0.5">Disponibili: <span className="opacity-100">{available}</span></p>
                                                     </div>
 
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex flex-col items-end">
                                                             <input
                                                                 type="number"
-                                                                className={`w-16 bg-slate-950 border ${isError ? 'border-rose-500 text-rose-500' : 'border-slate-700 text-white'} rounded-lg p-2 text-center text-sm font-bold focus:outline-none`}
+                                                                className={`w-16 bg-slate-50 dark:bg-slate-950 border ${isError ? 'border-rose-500 text-rose-500' : 'border-slate-200 dark:border-slate-700 text-[var(--foreground)]'} rounded-lg p-2 text-center text-sm font-bold focus:outline-none focus:border-purple-500 font-mono`}
                                                                 value={rule.question_count}
                                                                 onChange={e => handleUpdateRuleCount(idx, parseInt(e.target.value) || 0)}
                                                             />
@@ -333,10 +333,10 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                     )}
                                 </div>
 
-                                <div className="pt-6 border-t border-slate-800 mt-4">
-                                    <div className="flex justify-between items-center text-xs text-slate-500 font-bold mb-4 uppercase tracking-wider">
+                                <div className="pt-6 border-t border-[var(--card-border)] mt-4">
+                                    <div className="flex justify-between items-center text-xs text-[var(--foreground)] opacity-40 font-bold mb-4 uppercase tracking-wider">
                                         <span>Totale domande</span>
-                                        <b className="text-white text-lg">{rules.reduce((a, b) => a + b.question_count, 0)}</b>
+                                        <b className="text-[var(--foreground)] text-lg">{rules.reduce((a, b) => a + b.question_count, 0)}</b>
                                     </div>
                                     <button
                                         onClick={handleSaveRules}

@@ -223,24 +223,24 @@ export default function ProfileSetupPage() {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-white text-slate-900 font-sans flex flex-col justify-center overflow-y-auto overflow-x-hidden relative supports-[min-height:100dvh]:min-h-[100dvh]">
+        <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] font-sans flex flex-col justify-center overflow-y-auto overflow-x-hidden relative supports-[min-height:100dvh]:min-h-[100dvh] transition-colors duration-500">
 
             {/* Content Container */}
             <div className="w-full max-w-md mx-auto px-6 py-6 flex flex-col items-center justify-center space-y-6 md:space-y-8 animate-in slide-in-from-bottom-10 fade-in duration-700 relative z-10">
 
                 {/* Header */}
                 <div className="space-y-2 md:space-y-3 text-center w-full">
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
                         Completa il profilo
                     </h1>
-                    <h2 className="text-[16px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
+                    <h2 className="text-[16px] md:text-lg font-medium text-[var(--foreground)] opacity-60 leading-relaxed max-w-xs mx-auto">
                         Scegli una foto e un nickname per iniziare
                     </h2>
                 </div>
 
                 {/* Avatar Upload */}
                 <div className="relative group cursor-pointer shrink-0">
-                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-sky-50 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg shadow-slate-200 transition-all group-hover:scale-105 group-hover:shadow-xl">
+                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center overflow-hidden border-4 border-[var(--background)] shadow-lg shadow-black/5 transition-all group-hover:scale-105 group-hover:shadow-xl">
                         {avatarUrl ? (
                             <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
@@ -258,7 +258,7 @@ export default function ProfileSetupPage() {
                     {/* Plus Button */}
                     <label
                         htmlFor="avatar-upload"
-                        className="absolute bottom-1 right-1 bg-[#00B1FF] text-white p-2 md:p-2.5 rounded-full shadow-lg cursor-pointer hover:bg-[#0099e6] transition-colors border-2 border-white"
+                        className="absolute bottom-1 right-1 bg-[#00B1FF] text-white p-2 md:p-2.5 rounded-full shadow-lg cursor-pointer hover:bg-[#0099e6] transition-colors border-2 border-[var(--background)]"
                     >
                         <Plus className="w-5 h-5 md:w-6 md:h-6" strokeWidth={3} />
                         <input
@@ -275,19 +275,19 @@ export default function ProfileSetupPage() {
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="w-full space-y-5 md:space-y-6">
                     <div className="space-y-3">
-                        <label className="text-sm font-semibold text-slate-700 ml-1">Nickname</label>
+                        <label className="text-sm font-semibold text-[var(--foreground)] opacity-70 ml-1">Nickname</label>
                         <input
                             type="text"
                             placeholder="Inserisci il tuo nickname"
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                             required
-                            className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-[17px] md:text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                            className="w-full h-14 px-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 text-[17px] md:text-lg font-medium text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-30 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-[var(--card)] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
                         />
                     </div>
 
                     {error && (
-                        <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-sm font-medium text-center animate-in fade-in">
+                        <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-medium text-center animate-in fade-in border border-red-100 dark:border-red-800/30">
                             {error}
                         </div>
                     )}
@@ -300,7 +300,7 @@ export default function ProfileSetupPage() {
                         {saving ? 'Salvataggio...' : 'Continua'}
                     </button>
 
-                    <p className="text-[11px] text-slate-400 font-medium text-center">
+                    <p className="text-[11px] text-[var(--foreground)] opacity-40 font-medium text-center">
                         Potrai modificare queste informazioni in seguito
                     </p>
                 </form>

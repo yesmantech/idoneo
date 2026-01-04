@@ -28,13 +28,13 @@ export default function EmptyState({
             </div>
 
             {/* Title */}
-            <h3 className="text-lg font-semibold text-slate-700 mb-2">
+            <h3 className="text-lg font-semibold text-[var(--foreground)] opacity-80 mb-2">
                 {title}
             </h3>
 
             {/* Description */}
             {description && (
-                <p className="text-slate-500 text-sm max-w-md mb-6">
+                <p className="text-[var(--foreground)] opacity-50 text-sm max-w-md mb-6">
                     {description}
                 </p>
             )}

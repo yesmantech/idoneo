@@ -49,9 +49,9 @@ function LeagueCountdown() {
     }, []);
 
     return (
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-[14px] border border-amber-100 shadow-sm transition-all duration-300">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/30 rounded-[14px] border border-amber-100 dark:border-amber-800 shadow-sm transition-all duration-300">
             <Clock className="w-3 h-3 text-amber-500" />
-            <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide whitespace-nowrap">
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide whitespace-nowrap">
                 {timeLeft}
             </span>
         </div>
@@ -60,8 +60,9 @@ function LeagueCountdown() {
 
 export default function UnifiedLeaderboardPage() {
 
-    const { user } = useAuth();
-    const isAdmin = user?.email === 'alessandro.valenza22@gmail.com' || user?.email === 'alessandro.valenza22@icloud.com';
+    const { user, profile } = useAuth();
+    // Use role-based check instead of hardcoded emails
+    const isAdmin = profile?.role === 'admin';
 
     // Conditional Components
     const SelectorComponent = LeaderboardSelector;
@@ -203,7 +204,7 @@ export default function UnifiedLeaderboardPage() {
     };
 
     return (
-        <div className="flex flex-col h-full overflow-hidden bg-[#F5F5F7] text-slate-900">
+        <div className="flex flex-col h-full overflow-hidden bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
 
             {/* Header Area - Desktop Optimized */}
             <div className="flex-none p-4 lg:p-8 pt-safe relative z-40">
@@ -211,15 +212,15 @@ export default function UnifiedLeaderboardPage() {
                     {/* Desktop Header Row */}
                     <div className="hidden lg:flex items-center justify-between mb-8">
                         <div>
-                            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-[var(--foreground)] flex items-center gap-3">
                                 <Trophy className="w-8 h-8 text-amber-500" />
                                 Classifica
                             </h1>
-                            <p className="text-slate-500 mt-1">Competi con gli altri studenti e scala la classifica</p>
+                            <p className="text-[var(--foreground)] opacity-50 mt-1">Competi con gli altri studenti e scala la classifica</p>
                         </div>
                         <button
                             onClick={handleOpenInfo}
-                            className="p-3 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors shadow-sm border border-slate-200"
+                            className="p-3 rounded-xl bg-[var(--card)] hover:bg-slate-100 dark:hover:bg-slate-700 text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors shadow-sm border border-[var(--card-border)]"
                         >
                             <Info className="w-5 h-5" />
                         </button>
@@ -236,7 +237,7 @@ export default function UnifiedLeaderboardPage() {
                         />
                         <button
                             onClick={handleOpenInfo}
-                            className="p-2 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                            className="p-2 rounded-full bg-[var(--card)] shadow-sm border border-[var(--card-border)] text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors"
                         >
                             <Info className="w-6 h-6" />
                         </button>
@@ -257,12 +258,12 @@ export default function UnifiedLeaderboardPage() {
 
             {/* Main Content Area - Responsive Card */}
             <div className="flex-1 overflow-hidden relative w-full max-w-5xl mx-auto px-4 lg:px-8 pb-4 lg:pb-8">
-                <div className="relative h-full bg-white rounded-t-[32px] lg:rounded-[32px] shadow-lg flex flex-col border border-slate-200/50 overflow-hidden pb-safe">
+                <div className="relative h-full bg-[var(--card)] rounded-t-[32px] lg:rounded-[32px] shadow-lg flex flex-col border border-[var(--card-border)] overflow-hidden pb-safe">
                     {/* Status Area: Subtitle + Participants + Timer */}
                     {!loading && data.length > 0 && (
-                        <div className="flex-none flex flex-col items-center justify-center pt-4 pb-3 px-4 border-b border-slate-50/50 bg-white space-y-2">
+                        <div className="flex-none flex flex-col items-center justify-center pt-4 pb-3 px-4 border-b border-slate-100 dark:border-slate-700 bg-[var(--card)] space-y-2">
                             {/* Subtitle Inside Card */}
-                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <p className="text-[11px] text-[var(--foreground)] opacity-50 font-bold uppercase tracking-widest flex items-center gap-2">
                                 {isXP ? (
                                     <>
                                         <Zap className="w-3.5 h-3.5 text-purple-500" />

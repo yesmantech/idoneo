@@ -3,11 +3,16 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 
 const navItems = [
-    { path: "/admin", label: "Domande", exactMatch: true, color: "text-slate-300", borderColor: "border-slate-700", hoverBorder: "hover:border-sky-500" },
-    { path: "/admin/structure", label: "Struttura (Categorie/Ruoli)", exactMatch: false, color: "text-emerald-400", borderColor: "border-emerald-900", hoverBorder: "hover:border-emerald-500" },
-    { path: "/admin/quiz", label: "Concorsi & Materie", exactMatch: false, color: "text-slate-300", borderColor: "border-slate-700", hoverBorder: "hover:border-sky-500" },
-    { path: "/admin/rules", label: "Regole Simulazione", exactMatch: false, color: "text-purple-400", borderColor: "border-purple-900", hoverBorder: "hover:border-purple-500" },
-    { path: "/admin/upload-csv", label: "Import CSV", exactMatch: false, color: "text-amber-500", borderColor: "border-amber-900", hoverBorder: "hover:border-amber-500" },
+    { path: "/admin", label: "Dashboard", exactMatch: true, color: "text-sky-400", borderColor: "border-sky-900", hoverBorder: "hover:border-sky-500" },
+    { path: "/admin/questions", label: "Domande", exactMatch: false, color: "text-slate-300", borderColor: "border-slate-700", hoverBorder: "hover:border-slate-500" },
+    { path: "/admin/structure", label: "Struttura (Cat/Ruoli)", exactMatch: false, color: "text-emerald-400", borderColor: "border-emerald-900", hoverBorder: "hover:border-emerald-500" },
+    { path: "/admin/quiz", label: "Concorsi & Materie", exactMatch: false, color: "text-blue-400", borderColor: "border-blue-900", hoverBorder: "hover:border-blue-500" },
+    { path: "/admin/blog", label: "Blog & News", exactMatch: false, color: "text-purple-400", borderColor: "border-purple-900", hoverBorder: "hover:border-purple-500" },
+    { path: "/admin/images", label: "Media Library", exactMatch: false, color: "text-pink-400", borderColor: "border-pink-900", hoverBorder: "hover:border-pink-500" },
+    { path: "/admin/leaderboard", label: "Classifiche", exactMatch: false, color: "text-amber-400", borderColor: "border-amber-900", hoverBorder: "hover:border-amber-500" },
+    { path: "/admin/users", label: "Utenti", exactMatch: false, color: "text-indigo-400", borderColor: "border-indigo-900", hoverBorder: "hover:border-indigo-500" },
+    { path: "/admin/rules", label: "Regole Simulazione", exactMatch: false, color: "text-rose-400", borderColor: "border-rose-900", hoverBorder: "hover:border-rose-500" },
+    { path: "/admin/upload-csv", label: "Import CSV", exactMatch: false, color: "text-orange-400", borderColor: "border-orange-900", hoverBorder: "hover:border-orange-500" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -80,14 +85,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             {item.label}
                         </button>
                     ))}
-                    <div className="pt-4 mt-4 border-t border-slate-800">
-                        <button
-                            disabled
-                            className="w-full text-left px-4 py-3 rounded-lg text-sm font-medium bg-slate-800 text-slate-600 cursor-not-allowed"
-                        >
-                            Admin Utenti (WIP)
-                        </button>
-                    </div>
                 </nav>
             </div>
 
@@ -126,12 +123,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             {item.label}
                         </button>
                     ))}
-                    <button
-                        disabled
-                        className="px-4 py-2 rounded-md text-sm font-medium border bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed"
-                    >
-                        Admin Utenti (WIP)
-                    </button>
                 </nav>
 
                 {children}

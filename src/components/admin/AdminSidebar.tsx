@@ -8,7 +8,8 @@ import {
     Users,
     Settings,
     ArrowLeft,
-    ChevronDown
+    ChevronDown,
+    AlertTriangle
 } from 'lucide-react';
 
 // ================== TYPES ==================
@@ -64,6 +65,11 @@ const MENU_ITEMS: NavItem[] = [
         label: 'Utenti',
         path: '/admin/users',
     },
+    {
+        icon: AlertTriangle,
+        label: 'Segnalazioni',
+        path: '/admin/reports',
+    },
 ];
 
 // ================== MAIN COMPONENT ==================
@@ -107,7 +113,7 @@ export default function AdminSidebar() {
     };
 
     return (
-        <aside className="w-[280px] bg-[#E9EEF4] border-r border-slate-200/50 hidden lg:flex flex-col h-screen sticky top-0 z-20">
+        <aside className="w-[280px] bg-[#E9EEF4] dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-800 hidden lg:flex flex-col h-screen sticky top-0 z-20 transition-colors">
             {/* Logo / Brand */}
             <div className="p-6 pb-8">
                 <Link to="/admin" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -115,8 +121,8 @@ export default function AdminSidebar() {
                         I
                     </div>
                     <div>
-                        <div className="font-black text-slate-900 text-base tracking-tight leading-none">IDONEO</div>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Admin Panel</div>
+                        <div className="font-black text-slate-900 dark:text-white text-base tracking-tight leading-none">IDONEO</div>
+                        <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">Admin Panel</div>
                     </div>
                 </Link>
             </div>
@@ -135,8 +141,8 @@ export default function AdminSidebar() {
                                     onClick={() => toggleExpanded(item.path)}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 group justify-between
                                         ${isActive
-                                            ? 'bg-white text-slate-900 shadow-sm'
-                                            : 'text-slate-500 hover:bg-white/50 hover:text-slate-700'
+                                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                                            : 'text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
                                 >
                                     <span className="flex items-center gap-3">
@@ -159,8 +165,8 @@ export default function AdminSidebar() {
                                                     key={child.path}
                                                     to={child.path}
                                                     className={`block px-4 py-2 text-sm font-medium rounded-xl transition-all ${childActive
-                                                        ? 'text-[#00B1FF] bg-[#00B1FF]/5'
-                                                        : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                                                        ? 'text-[#00B1FF] bg-[#00B1FF]/5 dark:bg-[#00B1FF]/10'
+                                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50'
                                                         }`}
                                                 >
                                                     {child.label}
@@ -179,8 +185,8 @@ export default function AdminSidebar() {
                                 to={item.path}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 group
                                     ${isActive
-                                        ? 'bg-white text-slate-900 shadow-sm'
-                                        : 'text-slate-500 hover:bg-white/50 hover:text-slate-700'
+                                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                                        : 'text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
                                     }`}
                             >
                                 {isActive && <div className="w-1 h-4 bg-[#00B1FF] rounded-full -ml-2 mr-1" />}

@@ -83,23 +83,23 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={onClose}
             />
 
             {/* Modal */}
-            <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="relative bg-[var(--card)] w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-[var(--card-border)]">
                 {/* Header */}
-                <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <div className="px-6 py-5 border-b border-[var(--card-border)] flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-bold text-text-primary">Nuovo obiettivo</h2>
-                        <p className="text-xs text-text-tertiary mt-0.5">Imposta un traguardo per restare motivato</p>
+                        <h2 className="text-lg font-bold text-[var(--foreground)]">Nuovo obiettivo</h2>
+                        <p className="text-xs text-[var(--foreground)] opacity-50 mt-0.5">Imposta un traguardo per restare motivato</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-canvas-light rounded-full transition-colors"
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
                     >
-                        <X className="w-5 h-5 text-text-tertiary" />
+                        <X className="w-5 h-5 text-[var(--foreground)] opacity-40" />
                     </button>
                 </div>
 
@@ -107,7 +107,7 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {/* Goal Type Selection */}
                     <div>
-                        <label className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest block mb-3">
+                        <label className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest block mb-3">
                             Tipo di obiettivo
                         </label>
                         <div className="space-y-2">
@@ -124,21 +124,21 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
                                             setTargetValue('');
                                         }}
                                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${isSelected
-                                                ? 'border-brand-cyan bg-brand-cyan/5'
-                                                : 'border-slate-100 hover:border-slate-200 bg-white'
+                                            ? 'border-brand-cyan bg-brand-cyan/5 dark:bg-brand-cyan/10'
+                                            : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 bg-[var(--card)]'
                                             }`}
                                     >
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? 'bg-brand-cyan text-white' : 'bg-canvas-light text-text-tertiary'
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-slate-800 text-[var(--foreground)] opacity-40'
                                             }`}>
                                             <Icon className="w-5 h-5" />
                                         </div>
                                         <div className="flex-1 text-left">
-                                            <p className={`text-sm font-bold ${isSelected ? 'text-brand-cyan' : 'text-text-primary'}`}>
+                                            <p className={`text-sm font-bold ${isSelected ? 'text-brand-cyan' : 'text-[var(--foreground)]'}`}>
                                                 {option.label}
                                             </p>
-                                            <p className="text-xs text-text-tertiary">{option.description}</p>
+                                            <p className="text-xs text-[var(--foreground)] opacity-50">{option.description}</p>
                                         </div>
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-brand-cyan' : 'border-slate-200'
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-brand-cyan' : 'border-slate-200 dark:border-slate-700'
                                             }`}>
                                             {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-brand-cyan" />}
                                         </div>
@@ -150,7 +150,7 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
 
                     {/* Target Value */}
                     <div>
-                        <label className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest block mb-2">
+                        <label className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest block mb-2">
                             Valore target
                         </label>
                         <div className="relative">
@@ -161,10 +161,10 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
                                 placeholder={selectedOption.placeholder}
                                 min={selectedOption.min}
                                 max={selectedOption.max}
-                                className="w-full px-4 py-3 pr-16 rounded-xl border border-slate-200 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-text-primary font-bold text-lg transition-all"
+                                className="w-full px-4 py-3 pr-16 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 focus:border-brand-cyan dark:focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-[var(--foreground)] font-bold text-lg transition-all"
                                 required
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary font-bold">
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40 font-bold">
                                 {selectedOption.unit}
                             </span>
                         </div>
@@ -172,17 +172,17 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
 
                     {/* Deadline */}
                     <div>
-                        <label className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest block mb-2">
+                        <label className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest block mb-2">
                             Scadenza (opzionale)
                         </label>
                         <div className="relative">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
+                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground)] opacity-40" />
                             <input
                                 type="date"
                                 value={deadline}
                                 onChange={(e) => setDeadline(e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
-                                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-text-primary font-medium transition-all"
+                                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 focus:border-brand-cyan dark:focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-[var(--foreground)] font-medium transition-all"
                             />
                         </div>
                     </div>
@@ -199,7 +199,7 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-3 px-4 rounded-xl border border-slate-200 font-bold text-text-secondary hover:bg-canvas-light transition-colors"
+                            className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-800 font-bold text-[var(--foreground)] opacity-60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
                             Annulla
                         </button>

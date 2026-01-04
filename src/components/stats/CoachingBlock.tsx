@@ -21,31 +21,31 @@ interface CoachingBlockProps {
 const typeConfig = {
     review: {
         icon: BookOpen,
-        bgColor: 'bg-amber-50',
-        iconBg: 'bg-amber-100',
-        iconColor: 'text-amber-600',
-        borderColor: 'border-amber-100'
+        bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+        iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+        iconColor: 'text-amber-600 dark:text-amber-400',
+        borderColor: 'border-amber-100 dark:border-amber-800/30'
     },
     practice: {
         icon: Target,
-        bgColor: 'bg-red-50',
-        iconBg: 'bg-red-100',
-        iconColor: 'text-red-600',
-        borderColor: 'border-red-100'
+        bgColor: 'bg-red-50 dark:bg-red-900/20',
+        iconBg: 'bg-red-100 dark:bg-red-900/30',
+        iconColor: 'text-red-600 dark:text-red-400',
+        borderColor: 'border-red-100 dark:border-red-800/30'
     },
     simulation: {
         icon: Zap,
-        bgColor: 'bg-blue-50',
-        iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
-        borderColor: 'border-blue-100'
+        bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+        iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+        iconColor: 'text-blue-600 dark:text-blue-400',
+        borderColor: 'border-blue-100 dark:border-blue-800/30'
     },
     goal: {
         icon: Flag,
-        bgColor: 'bg-green-50',
-        iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
-        borderColor: 'border-green-100'
+        bgColor: 'bg-green-50 dark:bg-green-900/20',
+        iconBg: 'bg-green-100 dark:bg-green-900/30',
+        iconColor: 'text-green-600 dark:text-green-400',
+        borderColor: 'border-green-100 dark:border-green-800/30'
     }
 };
 
@@ -65,11 +65,11 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
     };
 
     return (
-        <div className="bg-white rounded-card shadow-soft p-6">
+        <div className="bg-[var(--card)] rounded-card shadow-soft p-6 border border-[var(--card-border)] transition-colors">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-lg font-bold text-text-primary">Cosa fare adesso</h3>
-                    <p className="text-xs text-text-tertiary mt-0.5">Suggerimenti personalizzati per te</p>
+                    <h3 className="text-lg font-bold text-[var(--foreground)]">Cosa fare adesso</h3>
+                    <p className="text-xs text-[var(--foreground)] opacity-40 mt-0.5">Suggerimenti personalizzati per te</p>
                 </div>
                 <div className="w-10 h-10 rounded-squircle bg-brand-cyan/10 flex items-center justify-center">
                     <span className="text-lg">🎯</span>
@@ -91,10 +91,10 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
                                 <Icon className="w-5 h-5" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-text-primary leading-tight">{rec.title}</p>
-                                <p className="text-xs text-text-tertiary mt-0.5 line-clamp-1">{rec.description}</p>
+                                <p className="text-sm font-bold text-[var(--foreground)] leading-tight">{rec.title}</p>
+                                <p className="text-xs text-[var(--foreground)] opacity-40 mt-0.5 line-clamp-1">{rec.description}</p>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-text-tertiary group-hover:text-text-secondary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                            <ChevronRight className="w-5 h-5 text-[var(--foreground)] opacity-30 group-hover:opacity-60 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                         </button>
                     );
                 })}

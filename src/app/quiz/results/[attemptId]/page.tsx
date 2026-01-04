@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
+import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
 import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen, AlertCircle } from "lucide-react";
 import { SuccessBadge } from "@/components/ui/SuccessBadge";
 import { FailBadge } from "@/components/ui/FailBadge";
@@ -63,6 +64,38 @@ export default function QuizResultsPage() {
     useEffect(() => {
         if (!attemptId) return;
         const fetchAttempt = async () => {
+            // OFFLINE HANDLING
+            if (attemptId.startsWith('local-')) {
+                try {
+                    const localData = await offlineService.getLocalAttempt(attemptId);
+                    if (localData) {
+                        const mapped: AttemptData = {
+                            id: localData.id,
+                            user_id: "offline",
+                            quiz_id: localData.quiz_id,
+                            score: localData.score || 0,
+                            total_questions: localData.answers.length,
+                            correct: localData.correct || 0,
+                            wrong: localData.wrong || 0,
+                            blank: localData.blank || 0,
+                            answers: localData.answers.map((a: any) => ({
+                                ...a,
+                                subjectName: a.subjectName || "Materia"
+                            })),
+                            is_idoneo: localData.is_idoneo,
+                            pass_threshold: localData.pass_threshold,
+                            xp_awarded: false
+                        };
+                        setAttempt(mapped);
+                    }
+                } catch (e) {
+                    console.error("Offline fetch error", e);
+                }
+                setLoading(false);
+                return;
+            }
+
+            // ONLINE HANDLING
             const { data, error } = await supabase
                 .from("quiz_attempts")
                 .select("*")
@@ -75,9 +108,11 @@ export default function QuizResultsPage() {
         fetchAttempt();
     }, [attemptId]);
 
-    // Handle XP Awarding
+    // Handle XP Awarding (Only Online)
     useEffect(() => {
         const awardXP = async () => {
+            if (attemptId?.startsWith('local-')) return;
+
             if (attempt && attempt.user_id && attemptId && !xpAwardedRef.current) {
                 xpAwardedRef.current = true;
                 if (attempt.xp_awarded) {
@@ -152,6 +187,12 @@ export default function QuizResultsPage() {
 
     const handleRipassaErrori = async () => {
         if (!attempt || processingReview) return;
+
+        if (attemptId?.startsWith('local-')) {
+            alert("Il ripasso errori non è ancora disponibile in modalità offline.");
+            return;
+        }
+
         setProcessingReview(true);
 
         try {
@@ -204,7 +245,7 @@ export default function QuizResultsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center transition-colors">
                 <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -212,8 +253,8 @@ export default function QuizResultsPage() {
 
     if (!attempt) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center p-6">
-                <p className="text-slate-500">Risultati non trovati.</p>
+            <div className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-6 transition-colors">
+                <p className="text-[var(--foreground)] opacity-50">Risultati non trovati.</p>
                 <Link to="/" className="mt-4 text-[#00B1FF] font-semibold">← Torna alla Home</Link>
             </div>
         );
@@ -261,12 +302,12 @@ export default function QuizResultsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] pb-32 lg:pb-8">
+        <div className="min-h-screen bg-[var(--background)] pb-32 lg:pb-8 transition-colors duration-500">
             {/* ============================================================= */}
             {/* COMPLETION HERO - Responsive */}
             {/* ============================================================= */}
             <div
-                className="bg-white pb-6 lg:pb-8 px-6 text-center relative"
+                className="bg-[var(--card)] border-b border-[var(--card-border)] pb-6 lg:pb-8 px-6 text-center relative"
                 style={{ paddingTop: 'calc(env(safe-area-inset-top) + 2.5rem)' }}
             >
                 <div className="max-w-4xl mx-auto">
@@ -277,11 +318,11 @@ export default function QuizResultsPage() {
 
                     <h1 className={cn(
                         "text-2xl lg:text-4xl font-bold mb-2",
-                        passed ? "text-slate-900" : "text-red-600"
+                        passed ? "text-[var(--foreground)]" : "text-red-600"
                     )}>
                         {passed ? "Quiz Completato! 🚀" : "Non Idoneo ❌"}
                     </h1>
-                    <p className="text-sm lg:text-base text-slate-500 max-w-md mx-auto">
+                    <p className="text-sm lg:text-base text-[var(--foreground)] opacity-50 max-w-md mx-auto">
                         {passed
                             ? "Hai completato la simulazione con successo. Ottimo lavoro!"
                             : "Non hai raggiunto il punteggio minimo. Continua a studiare!"}
@@ -297,32 +338,36 @@ export default function QuizResultsPage() {
                     {/* Main Stats Row */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4">
                         {/* Score Card */}
-                        <div className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 text-center shadow-sm">
+                        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl lg:rounded-3xl p-4 lg:p-6 text-center shadow-sm">
                             <div className="flex items-center justify-center gap-2 mb-2">
                                 <Trophy className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" />
-                                <span className="text-[10px] lg:text-xs font-semibold text-slate-400 uppercase tracking-wider">Punteggio</span>
+                                <span className="text-[10px] lg:text-xs font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">Punteggio</span>
                             </div>
-                            <div className="text-2xl lg:text-4xl font-bold text-slate-900">
+                            <div className="text-2xl lg:text-4xl font-bold text-[var(--foreground)]">
                                 {attempt.score.toFixed(2)}
                             </div>
                         </div>
 
                         {/* XP Card */}
-                        <div className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 text-center shadow-sm">
+                        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl lg:rounded-3xl p-4 lg:p-6 text-center shadow-sm">
                             <div className="flex items-center justify-center gap-2 mb-2">
                                 <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-purple-500" />
-                                <span className="text-[10px] lg:text-xs font-semibold text-slate-400 uppercase tracking-wider">XP Guadagnati</span>
+                                <span className="text-[10px] lg:text-xs font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">XP Guadagnati</span>
                             </div>
                             <div className="text-2xl lg:text-4xl font-bold text-purple-500">
-                                +{xpEarned ?? 0}
+                                {attemptId?.startsWith('local-') ? (
+                                    <span className="text-sm text-slate-400">Sync...</span>
+                                ) : (
+                                    `+${xpEarned ?? 0}`
+                                )}
                             </div>
                         </div>
 
                         {/* Accuracy Card - Desktop Only */}
-                        <div className="hidden lg:block bg-white rounded-3xl p-6 text-center shadow-sm">
+                        <div className="hidden lg:block bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-6 text-center shadow-sm">
                             <div className="flex items-center justify-center gap-2 mb-2">
                                 <Target className="w-5 h-5 text-emerald-500" />
-                                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precisione</span>
+                                <span className="text-xs font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">Precisione</span>
                             </div>
                             <div className="text-4xl font-bold text-emerald-500">
                                 {percentage}%
@@ -330,10 +375,10 @@ export default function QuizResultsPage() {
                         </div>
 
                         {/* Questions Card - Desktop Only */}
-                        <div className="hidden lg:block bg-white rounded-3xl p-6 text-center shadow-sm">
+                        <div className="hidden lg:block bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-6 text-center shadow-sm">
                             <div className="flex items-center justify-center gap-2 mb-2">
                                 <BookOpen className="w-5 h-5 text-sky-500" />
-                                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Domande</span>
+                                <span className="text-xs font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">Domande</span>
                             </div>
                             <div className="text-4xl font-bold text-sky-500">
                                 {total}
@@ -344,26 +389,26 @@ export default function QuizResultsPage() {
                     {/* Correct / Wrong / Skipped Summary */}
                     <div className="grid grid-cols-3 gap-2 lg:gap-4">
                         {/* Correct */}
-                        <div className="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
+                        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
                             <div className="text-xl lg:text-3xl font-bold text-emerald-500">{attempt.correct}</div>
-                            <div className="text-[10px] lg:text-sm text-slate-500">
+                            <div className="text-[10px] lg:text-sm text-[var(--foreground)] opacity-50">
                                 Corrette <span className="text-emerald-500">({Math.round((attempt.correct / total) * 100)}%)</span>
                             </div>
                         </div>
 
                         {/* Wrong */}
-                        <div className="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
+                        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
                             <div className="text-xl lg:text-3xl font-bold text-red-500">{attempt.wrong}</div>
-                            <div className="text-[10px] lg:text-sm text-slate-500">
+                            <div className="text-[10px] lg:text-sm text-[var(--foreground)] opacity-50">
                                 Errate <span className="text-red-500">({Math.round((attempt.wrong / total) * 100)}%)</span>
                             </div>
                         </div>
 
                         {/* Skipped */}
-                        <div className="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
-                            <div className="text-xl lg:text-3xl font-bold text-slate-400">{attempt.blank}</div>
-                            <div className="text-[10px] lg:text-sm text-slate-500">
-                                Omesse <span className="text-slate-400">({Math.round((attempt.blank / total) * 100)}%)</span>
+                        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl lg:rounded-2xl p-3 lg:p-5 text-center shadow-sm">
+                            <div className="text-xl lg:text-3xl font-bold text-[var(--foreground)] opacity-40">{attempt.blank}</div>
+                            <div className="text-[10px] lg:text-sm text-[var(--foreground)] opacity-50">
+                                Omesse <span className="text-[var(--foreground)] opacity-40">({Math.round((attempt.blank / total) * 100)}%)</span>
                             </div>
                         </div>
                     </div>
@@ -376,13 +421,13 @@ export default function QuizResultsPage() {
                     {/* Left Sidebar - Tabs + CTA (Desktop) */}
                     <div className="lg:space-y-4">
                         {/* Tabs */}
-                        <div className="bg-slate-200/60 p-1 rounded-xl mb-4 lg:mb-0 lg:bg-white lg:rounded-2xl lg:p-3 lg:shadow-sm">
+                        <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-xl mb-4 lg:mb-0 lg:bg-[var(--card)] lg:border lg:border-[var(--card-border)] lg:rounded-2xl lg:p-3 lg:shadow-sm">
                             <div className="flex lg:flex-col lg:gap-1">
                                 <button
                                     onClick={() => setActiveTab('errate')}
                                     className={`flex-1 lg:w-full py-2.5 lg:py-3 lg:px-4 rounded-lg lg:rounded-xl text-[13px] lg:text-sm font-semibold transition-all lg:text-left lg:flex lg:items-center lg:justify-between ${activeTab === 'errate'
-                                        ? 'bg-white text-red-500 shadow-sm lg:bg-red-50 lg:shadow-none'
-                                        : 'text-slate-500 lg:hover:bg-slate-50'
+                                        ? 'bg-white dark:bg-red-900/40 text-red-500 shadow-sm lg:shadow-none'
+                                        : 'text-[var(--foreground)] opacity-50 lg:hover:bg-slate-50 dark:lg:hover:bg-slate-800/50'
                                         }`}
                                 >
                                     <span className="lg:flex lg:items-center lg:gap-2">
@@ -396,8 +441,8 @@ export default function QuizResultsPage() {
                                 <button
                                     onClick={() => setActiveTab('corrette')}
                                     className={`flex-1 lg:w-full py-2.5 lg:py-3 lg:px-4 rounded-lg lg:rounded-xl text-[13px] lg:text-sm font-semibold transition-all lg:text-left lg:flex lg:items-center lg:justify-between ${activeTab === 'corrette'
-                                        ? 'bg-white text-emerald-500 shadow-sm lg:bg-emerald-50 lg:shadow-none'
-                                        : 'text-slate-500 lg:hover:bg-slate-50'
+                                        ? 'bg-white dark:bg-emerald-900/40 text-emerald-500 shadow-sm lg:shadow-none'
+                                        : 'text-[var(--foreground)] opacity-50 lg:hover:bg-slate-50 dark:lg:hover:bg-slate-800/50'
                                         }`}
                                 >
                                     <span className="lg:flex lg:items-center lg:gap-2">
@@ -411,8 +456,8 @@ export default function QuizResultsPage() {
                                 <button
                                     onClick={() => setActiveTab('omesse')}
                                     className={`flex-1 lg:w-full py-2.5 lg:py-3 lg:px-4 rounded-lg lg:rounded-xl text-[13px] lg:text-sm font-semibold transition-all lg:text-left lg:flex lg:items-center lg:justify-between ${activeTab === 'omesse'
-                                        ? 'bg-white text-slate-600 shadow-sm lg:bg-slate-100 lg:shadow-none'
-                                        : 'text-slate-500 lg:hover:bg-slate-50'
+                                        ? 'bg-white dark:bg-slate-700/60 text-[var(--foreground)] shadow-sm lg:shadow-none'
+                                        : 'text-[var(--foreground)] opacity-50 lg:hover:bg-slate-50 dark:lg:hover:bg-slate-800/50'
                                         }`}
                                 >
                                     <span className="lg:flex lg:items-center lg:gap-2">
@@ -431,15 +476,18 @@ export default function QuizResultsPage() {
                             {hasErrors ? (
                                 <button
                                     onClick={handleRipassaErrori}
-                                    disabled={processingReview}
-                                    className="w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/25 hover:shadow-xl hover:-translate-y-0.5"
+                                    disabled={processingReview || !!attemptId?.startsWith('local-')}
+                                    className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5
+                                        ${attemptId?.startsWith('local-')
+                                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                                            : 'bg-[#00B1FF] text-white shadow-[#00B1FF]/25'}`}
                                 >
                                     {processingReview ? (
                                         <span>Caricamento...</span>
                                     ) : (
                                         <>
                                             <RotateCcw className="w-5 h-5" />
-                                            Ripassa Errori ({wrongList.length + skippedList.length})
+                                            Ripassa ({wrongList.length + skippedList.length})
                                         </>
                                     )}
                                 </button>
@@ -461,11 +509,11 @@ export default function QuizResultsPage() {
                     {/* Right Content - Questions List */}
                     <div className="lg:min-h-[400px]">
                         {getFilteredList().length === 0 ? (
-                            <div className="bg-white rounded-2xl lg:rounded-3xl p-8 lg:p-12 text-center shadow-sm">
+                            <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl lg:rounded-3xl p-8 lg:p-12 text-center shadow-sm">
                                 <div className="text-5xl lg:text-6xl mb-4">
                                     {activeTab === 'errate' ? '🎉' : activeTab === 'corrette' ? '📋' : '📝'}
                                 </div>
-                                <p className="text-slate-500 text-sm lg:text-base">
+                                <p className="text-[var(--foreground)] opacity-50 text-sm lg:text-base">
                                     {activeTab === 'errate'
                                         ? 'Nessun errore! Ottimo lavoro.'
                                         : activeTab === 'corrette'
@@ -479,15 +527,15 @@ export default function QuizResultsPage() {
                                     <Link
                                         key={q.id}
                                         to={`/quiz/explanations/${attemptId}/${q.id}`}
-                                        className="block bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-5 transition-all hover:shadow-lg hover:-translate-y-0.5 shadow-sm group"
+                                        className="block bg-[var(--card)] border border-[var(--card-border)] rounded-2xl lg:rounded-3xl p-4 lg:p-5 transition-all hover:shadow-lg hover:-translate-y-0.5 shadow-sm group"
                                     >
                                         <div className="flex items-start gap-3">
                                             {/* Status Icon */}
                                             <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 ${activeTab === 'errate'
-                                                ? 'bg-red-100'
+                                                ? 'bg-red-100 dark:bg-red-900/30'
                                                 : activeTab === 'corrette'
-                                                    ? 'bg-emerald-100'
-                                                    : 'bg-slate-100'
+                                                    ? 'bg-emerald-100 dark:bg-emerald-900/30'
+                                                    : 'bg-slate-100 dark:bg-slate-800'
                                                 }`}>
                                                 {activeTab === 'errate' && <X className="w-5 h-5 lg:w-6 lg:h-6 text-red-500" />}
                                                 {activeTab === 'corrette' && <Check className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-500" />}
@@ -497,11 +545,11 @@ export default function QuizResultsPage() {
                                             {/* Content */}
                                             <div className="flex-1 min-w-0">
                                                 {q.subject && (
-                                                    <span className="inline-block text-[10px] lg:text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">
+                                                    <span className="inline-block text-[10px] lg:text-xs font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wide mb-1">
                                                         {q.subject}
                                                     </span>
                                                 )}
-                                                <p className="text-sm lg:text-base font-medium text-slate-900 line-clamp-2 mb-2 lg:mb-3 group-hover:text-[#00B1FF] transition-colors">
+                                                <p className="text-sm lg:text-base font-medium text-[var(--foreground)] line-clamp-2 mb-2 lg:mb-3 group-hover:text-[#00B1FF] transition-colors">
                                                     {q.text}
                                                 </p>
                                                 <div className="flex flex-wrap gap-2 lg:gap-3 text-[11px] lg:text-xs">
@@ -528,13 +576,16 @@ export default function QuizResultsPage() {
             {/* ============================================================= */}
             {/* BOTTOM CTA - Mobile Only */}
             {/* ============================================================= */}
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-5 py-3 pb-safe z-50">
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--card)]/95 backdrop-blur-md border-t border-[var(--card-border)] px-5 py-3 pb-safe z-50">
                 <div className="max-w-lg mx-auto space-y-2">
                     {hasErrors ? (
                         <button
                             onClick={handleRipassaErrori}
-                            disabled={processingReview}
-                            className="w-full py-4 rounded-2xl font-bold text-[16px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/25"
+                            disabled={processingReview || !!attemptId?.startsWith('local-')}
+                            className={`w-full py-4 rounded-2xl font-bold text-[16px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg
+                                ${attemptId?.startsWith('local-')
+                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                                    : 'bg-[#00B1FF] text-white shadow-[#00B1FF]/25'}`}
                         >
                             {processingReview ? (
                                 <span>Caricamento...</span>

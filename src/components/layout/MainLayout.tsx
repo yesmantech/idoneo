@@ -71,14 +71,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const isHomePage = location.pathname === '/';
 
     return (
-        <div className="flex min-h-screen bg-[#F5F5F7] font-sans text-slate-900">
+        <div className="flex min-h-screen bg-[var(--background)] font-sans text-[var(--foreground)] transition-colors duration-300">
             {/* Fixed top safe area cover to prevent overscroll showing empty area */}
             {isNativeApp && !isAdmin && (
                 <div
                     className="fixed top-0 left-0 right-0 z-[100]"
                     style={{
                         height: 'env(safe-area-inset-top, 0px)',
-                        backgroundColor: '#F5F5F7'
+                        backgroundColor: 'var(--background)'
                     }}
                 />
             )}
@@ -104,7 +104,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     >
                         <div className="flex items-center gap-3">
                             {/* Nav Pill */}
-                            <nav className="flex-1 bg-slate-100/90 backdrop-blur-xl rounded-full px-2 py-2 flex justify-around items-center shadow-lg shadow-slate-900/5">
+                            <nav className="flex-1 bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-full px-2 py-2 flex justify-around items-center shadow-lg shadow-slate-900/5 dark:shadow-black/20">
                                 {NAV_ITEMS.map(item => {
                                     const isActive = location.pathname === item.path ||
                                         (item.path !== '/' && location.pathname.startsWith(item.path));
@@ -114,15 +114,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
                                             to={item.path}
                                             className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full transition-all
                                                         ${isActive
-                                                    ? 'bg-white shadow-sm'
+                                                    ? 'bg-white dark:bg-slate-700 shadow-sm'
                                                     : ''
                                                 }`}
                                         >
                                             <item.Icon
-                                                className={`w-5 h-5 transition-all ${isActive ? 'text-slate-900' : 'text-slate-500'}`}
+                                                className={`w-5 h-5 transition-all ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
                                                 strokeWidth={isActive ? 2.5 : 1.5}
                                             />
-                                            <span className={`text-[10px] font-semibold ${isActive ? 'text-slate-900' : 'text-slate-500'}`}>
+                                            <span className={`text-[10px] font-semibold ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
                                                 {item.label}
                                             </span>
                                         </Link>

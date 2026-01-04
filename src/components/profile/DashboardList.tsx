@@ -30,12 +30,12 @@ export default function DashboardList({ userId }: DashboardListProps) {
 
     if (quizzes.length === 0) {
         return (
-            <div className="text-center py-12 bg-canvas-light rounded-card border-none mb-8">
-                <div className="text-4xl mb-3">☁️</div>
-                <p className="text-text-secondary font-medium mb-6">Non hai ancora iniziato nessun corso.</p>
+            <div className="text-center py-12 bg-white dark:bg-[var(--card)] rounded-[32px] border border-slate-100/60 dark:border-slate-800 mb-8 shadow-sm transition-colors">
+                <div className="text-4xl mb-4">☁️</div>
+                <p className="text-slate-500 dark:text-slate-400 font-medium mb-8">Non hai ancora iniziato nessun corso.</p>
                 <button
                     onClick={() => navigate('/')}
-                    className="text-white bg-brand-cyan px-6 py-3 rounded-pill font-bold hover:shadow-lg hover:scale-105 transition-all"
+                    className="text-white bg-[#00B1FF] px-8 py-3.5 rounded-2xl font-bold hover:shadow-lg hover:scale-105 transition-all"
                 >
                     Inizia ora!
                 </button>
@@ -46,7 +46,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
     return (
         <div className="space-y-6 mb-8">
             <div className="flex items-center justify-between px-1">
-                <h3 className="text-lg font-bold text-text-primary">La tua Dashboard</h3>
+                <h3 className="text-lg font-bold text-[var(--foreground)]">La tua Dashboard</h3>
 
             </div>
 
@@ -67,7 +67,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
             <div className="md:hidden">
                 <button
                     onClick={() => navigate('/')}
-                    className="w-full py-4 rounded-card border-2 border-canvas-light text-text-tertiary font-bold hover:bg-canvas-light hover:text-text-secondary transition-colors"
+                    className="w-full py-4 rounded-[32px] border-2 border-dashed border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                     + Aggiungi corsi
                 </button>

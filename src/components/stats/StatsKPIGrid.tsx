@@ -133,33 +133,33 @@ export default function StatsKPIGrid({
 
             {/* Preparation Level Banner */}
             {readiness && (
-                <div className="bg-white p-5 rounded-[24px] shadow-soft flex items-center justify-between relative overflow-hidden group">
+                <div className="bg-[var(--card)] p-5 rounded-[24px] shadow-soft flex items-center justify-between relative overflow-hidden group border border-[var(--card-border)]">
                     <div className={`absolute left-0 top-0 w-1.5 h-full bg-${readiness.color === 'semantic-success' ? 'green-500' : readiness.color === 'semantic-error' ? 'red-500' : 'amber-500'}`}></div>
 
                     <div className="flex items-center gap-4 pl-2">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${readiness.level === 'high' ? 'bg-green-100 text-green-600' :
-                            readiness.level === 'medium' ? 'bg-amber-100 text-amber-600' :
-                                'bg-red-100 text-red-600'
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${readiness.level === 'high' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
+                            readiness.level === 'medium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
+                                'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                             }`}>
                             <Trophy className="w-5 h-5" />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-0.5">
-                                <h3 className="font-bold text-slate-900 text-[15px]">Livello di preparazione</h3>
+                                <h3 className="font-bold text-[var(--foreground)] text-[15px]">Livello di preparazione</h3>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setExplanation(metrics.readiness); }}
-                                    className="text-slate-300 hover:text-brand-blue transition-colors"
+                                    className="text-[var(--foreground)] opacity-20 hover:opacity-100 hover:text-brand-blue transition-colors"
                                 >
                                     <Info className="w-4 h-4" />
                                 </button>
                             </div>
-                            <p className="text-[13px] text-slate-500 font-medium">Basato sulle tue ultime performance</p>
+                            <p className="text-[13px] text-[var(--foreground)] opacity-50 font-medium">Basato sulle tue ultime performance</p>
                         </div>
                     </div>
 
-                    <div className={`hidden sm:flex px-4 py-1.5 rounded-full text-[13px] font-bold tracking-wide ${readiness.level === 'high' ? 'bg-green-100 text-green-700' :
-                        readiness.level === 'medium' ? 'bg-amber-100 text-amber-700' :
-                            'bg-red-100 text-red-700'
+                    <div className={`hidden sm:flex px-4 py-1.5 rounded-full text-[13px] font-bold tracking-wide ${readiness.level === 'high' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                        readiness.level === 'medium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                         }`}>
                         {readiness.label}
                     </div>
@@ -181,11 +181,11 @@ export default function StatsKPIGrid({
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-white rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center"
+                            className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center"
                         >
                             <button
                                 onClick={() => setExplanation(null)}
-                                className="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                                className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-[var(--foreground)] opacity-40 hover:opacity-100 transition-colors"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -194,14 +194,14 @@ export default function StatsKPIGrid({
                                 {explanation.icon}
                             </div>
 
-                            <h3 className="text-xl font-black text-slate-900 mb-2">{explanation.title}</h3>
-                            <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                            <h3 className="text-xl font-black text-[var(--foreground)] mb-2">{explanation.title}</h3>
+                            <p className="text-[var(--foreground)] opacity-50 text-sm font-medium leading-relaxed">
                                 {explanation.description}
                             </p>
 
                             <button
                                 onClick={() => setExplanation(null)}
-                                className="w-full mt-8 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-colors"
+                                className="w-full mt-8 py-3 bg-[var(--foreground)] text-[var(--background)] rounded-2xl font-bold hover:opacity-90 transition-opacity"
                             >
                                 Ho capito
                             </button>
@@ -233,7 +233,7 @@ function StatsCard({
     onInfo: () => void
 }) {
     return (
-        <div className="bg-white p-4 rounded-[24px] shadow-soft border border-slate-50 hover:shadow-card transition-all duration-300 group flex flex-col justify-between h-[150px] relative overflow-hidden">
+        <div className="bg-[var(--card)] p-4 rounded-[24px] shadow-soft border border-[var(--card-border)] hover:shadow-card transition-all duration-300 group flex flex-col justify-between h-[150px] relative overflow-hidden">
             {/* Top Row */}
             <div className="flex justify-between items-start z-10 relative">
                 <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${iconBg} transition-transform group-hover:scale-110 duration-300`}>
@@ -243,18 +243,18 @@ function StatsCard({
 
             {/* Middle Content */}
             <div className="z-10 relative">
-                <div className="text-[32px] font-black text-slate-900 leading-none tracking-tight mb-1">
+                <div className="text-[32px] font-black text-[var(--foreground)] leading-none tracking-tight mb-1">
                     {value}
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                    <p className="text-[11px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-wide">
                         {subLabel}
                     </p>
 
                     <button
                         onClick={(e) => { e.stopPropagation(); onInfo(); }}
-                        className="p-1.5 rounded-full bg-slate-50 text-slate-300 hover:text-brand-blue hover:bg-brand-blue/5 transition-all"
+                        className="p-1.5 rounded-full bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] opacity-20 hover:opacity-100 hover:text-brand-blue hover:bg-brand-blue/5 transition-all"
                     >
                         <Info className="w-3.5 h-3.5" />
                     </button>

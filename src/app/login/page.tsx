@@ -89,14 +89,14 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans flex flex-col justify-center overflow-hidden relative">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans flex flex-col justify-center overflow-hidden relative transition-colors duration-500">
 
             {/* Decorative Background Icons */}
             <div className="absolute inset-0 pointer-events-none">
                 {decorativeIcons.map((item, idx) => (
                     <div
                         key={idx}
-                        className={`absolute rounded-full flex items-center justify-center ${item.bg} ${item.size} animate-in fade-in zoom-in duration-1000`}
+                        className={`absolute rounded-full flex items-center justify-center ${item.bg} dark:bg-slate-800/50 ${item.size} animate-in fade-in zoom-in duration-1000 opacity-60 dark:opacity-40`}
                         style={{
                             top: item.top,
                             left: item.left,
@@ -117,10 +117,10 @@ export default function LoginPage() {
                 {/* Header or Success Message */}
                 {!success ? (
                     <div className="space-y-3 text-center w-full">
-                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
                             {isLogin ? 'Bentornato' : 'Benvenuto'}
                         </h1>
-                        <h2 className="text-[17px] md:text-lg font-medium text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
+                        <h2 className="text-[17px] md:text-lg font-medium text-[var(--foreground)] opacity-50 leading-relaxed max-w-xs mx-auto">
                             {isLogin
                                 ? 'Inserisci le tue credenziali per accedere'
                                 : 'Inserisci le tue credenziali per registrarti'
@@ -129,16 +129,16 @@ export default function LoginPage() {
                     </div>
                 ) : (
                     <div className="space-y-4 text-center w-full animate-in zoom-in-50 duration-500">
-                        <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                            <Sparkles className="w-10 h-10 text-green-600" />
+                        <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+                            <Sparkles className="w-10 h-10 text-green-600 dark:text-green-400" />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                        <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">
                             Controlla l'email
                         </h1>
-                        <p className="text-lg text-slate-600 leading-relaxed max-w-sm mx-auto">
+                        <p className="text-lg text-[var(--foreground)] opacity-60 leading-relaxed max-w-sm mx-auto">
                             Ti abbiamo inviato un link magico per accedere. Cliccalo per confermare la tua identità!
                         </p>
-                        <div className="p-4 bg-slate-50 rounded-xl text-sm text-slate-500 border border-slate-100">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm text-[var(--foreground)] opacity-50 border border-slate-100 dark:border-slate-700">
                             Non trovi l'email? Controlla nello spam o riprova.
                         </div>
                         <button
@@ -160,7 +160,7 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 dark:focus:bg-slate-700 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none border border-transparent dark:border-slate-700"
                             />
                             <input
                                 type="password"
@@ -168,7 +168,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-white transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 dark:focus:bg-slate-700 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none border border-transparent dark:border-slate-700"
                             />
                         </div>
 

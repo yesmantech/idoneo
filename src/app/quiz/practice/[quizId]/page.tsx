@@ -210,7 +210,7 @@ export default function PracticeStartPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center transition-colors">
                 <div className="w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -218,8 +218,8 @@ export default function PracticeStartPage() {
 
     if (error && subjects.length === 0) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center p-4">
-                <div className="bg-red-50 text-red-600 p-4 rounded-xl max-w-sm text-center">
+            <div className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-4 transition-colors">
+                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl max-w-sm text-center border border-red-100 dark:border-red-800/30">
                     <AlertCircle className="w-8 h-8 mx-auto mb-2" />
                     <p className="font-medium">{error}</p>
                     <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold underline">Torna indietro</button>
@@ -229,14 +229,14 @@ export default function PracticeStartPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
+        <div className="min-h-screen bg-[var(--background)] flex flex-col transition-colors duration-500">
             {/* Top Bar */}
-            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+            <header className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
                 <div className="px-4 h-14 flex items-center gap-3 max-w-3xl mx-auto w-full">
-                    <button onClick={() => navigate(-1)} className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full hover:bg-slate-50">
+                    <button onClick={() => navigate(-1)} className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <ChevronRight className="w-5 h-5 text-slate-400 rotate-180" />
                     </button>
-                    <span className="font-semibold text-slate-900">Allenamento</span>
+                    <span className="font-semibold text-[var(--foreground)]">Allenamento</span>
                 </div>
             </header>
 
@@ -246,15 +246,15 @@ export default function PracticeStartPage() {
                         <Target className="w-6 h-6 text-brand-cyan" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-slate-900">{quizTitle}</h1>
-                        <p className="text-sm text-slate-500">Pratica personalizzata</p>
+                        <h1 className="text-xl font-bold text-[var(--foreground)]">{quizTitle}</h1>
+                        <p className="text-sm text-[var(--foreground)] opacity-50">Pratica personalizzata</p>
                     </div>
                 </div>
 
                 {/* Subject Selection */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mt-6 mb-4">
+                <div className="bg-[var(--card)] rounded-3xl p-5 shadow-sm border border-[var(--card-border)] mt-6 mb-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                        <h3 className="font-bold text-[var(--foreground)] flex items-center gap-2">
                             <BookOpen className="w-5 h-5 text-brand-cyan" />
                             Seleziona Materie
                         </h3>
@@ -268,7 +268,7 @@ export default function PracticeStartPage() {
                             <span className="text-slate-300">|</span>
                             <button
                                 onClick={deselectAll}
-                                className="text-xs font-bold text-slate-400 hover:underline"
+                                className="text-xs font-bold text-[var(--foreground)] opacity-40 hover:opacity-100 hover:underline"
                             >
                                 Nessuna
                             </button>
@@ -283,16 +283,16 @@ export default function PracticeStartPage() {
                                     key={subject.id}
                                     onClick={() => toggleSubject(subject.id)}
                                     className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${isSelected
-                                            ? 'bg-brand-cyan/10 border border-brand-cyan/30'
-                                            : 'bg-slate-50 border border-transparent hover:bg-slate-100'
+                                        ? 'bg-brand-cyan/10 border border-brand-cyan/30'
+                                        : 'bg-slate-50 dark:bg-slate-800/50 border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800'
                                         }`}
                                 >
-                                    <span className={`font-medium ${isSelected ? 'text-brand-cyan' : 'text-slate-700'}`}>
+                                    <span className={`font-medium ${isSelected ? 'text-brand-cyan' : 'text-[var(--foreground)]'}`}>
                                         {subject.name}
                                     </span>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-slate-400">{subject.questionCount} domande</span>
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-brand-cyan bg-brand-cyan' : 'border-slate-300'
+                                        <span className="text-xs text-[var(--foreground)] opacity-40">{subject.questionCount} domande</span>
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-brand-cyan bg-brand-cyan' : 'border-slate-300 dark:border-slate-700'
                                             }`}>
                                             {isSelected && (
                                                 <svg className="w-3 h-3 text-white" viewBox="0 0 14 14" fill="none">
@@ -308,8 +308,8 @@ export default function PracticeStartPage() {
                 </div>
 
                 {/* Question Count */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-6">
-                    <h3 className="font-bold text-slate-900 mb-4">Numero di Domande</h3>
+                <div className="bg-[var(--card)] rounded-3xl p-5 shadow-sm border border-[var(--card-border)] mb-6">
+                    <h3 className="font-bold text-[var(--foreground)] mb-4">Numero di Domande</h3>
                     <div className="flex gap-2">
                         {[5, 10, 20, 30, 50].map(count => (
                             <button
@@ -317,24 +317,24 @@ export default function PracticeStartPage() {
                                 onClick={() => setQuestionCount(count)}
                                 disabled={count > totalAvailableQuestions}
                                 className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${questionCount === count
-                                        ? 'bg-brand-cyan text-white'
-                                        : count > totalAvailableQuestions
-                                            ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                    ? 'bg-brand-cyan text-white'
+                                    : count > totalAvailableQuestions
+                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {count}
                             </button>
                         ))}
                     </div>
-                    <p className="text-xs text-slate-400 mt-2 text-center">
+                    <p className="text-xs text-[var(--foreground)] opacity-40 mt-2 text-center">
                         {totalAvailableQuestions} domande disponibili
                     </p>
                 </div>
 
                 {/* Error */}
                 {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-4 text-center">
+                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl text-sm mb-4 text-center border border-red-100 dark:border-red-800/30">
                         {error}
                     </div>
                 )}

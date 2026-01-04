@@ -34,12 +34,12 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative w-full max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
+                        className="relative w-full max-w-md bg-[var(--card)] rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl max-h-[90vh] flex flex-col border border-[var(--card-border)]"
                     >
                         {/* Close Button */}
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 z-10"
+                            className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-[var(--foreground)] opacity-50 hover:opacity-100 z-10"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -49,13 +49,13 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
 
                             {/* Hero */}
                             <div className="flex flex-col items-center text-center mb-8">
-                                <div className={`w-20 h-20 rounded-[28px] flex items-center justify-center mb-6 shadow-sm ${isPrep ? 'bg-cyan-50 text-cyan-500' : 'bg-amber-50 text-amber-500'}`}>
+                                <div className={`w-20 h-20 rounded-[28px] flex items-center justify-center mb-6 shadow-sm ${isPrep ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-500' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-500'}`}>
                                     {isPrep ? <Target className="w-10 h-10" /> : <Trophy className="w-10 h-10" />}
                                 </div>
-                                <h2 className="text-2xl font-black text-slate-900 leading-tight mb-3">
+                                <h2 className="text-2xl font-black text-[var(--foreground)] leading-tight mb-3">
                                     {isPrep ? "Il tuo Punteggio" : "XP e Classifiche"}
                                 </h2>
-                                <p className="text-slate-500 font-medium leading-relaxed px-2">
+                                <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed px-2">
                                     {isPrep
                                         ? "Il punteggio da 0 a 100 indica quanto sei pronto per questo concorso, basandosi sulle tue simulazioni."
                                         : "Gli XP misurano quanto ti alleni su Idoneo e servono per scalare le classifiche globali."
@@ -93,7 +93,7 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
                                 </Button>
                                 <button
                                     onClick={onMoreInfo}
-                                    className="w-full py-2 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors"
+                                    className="w-full py-2 text-sm font-bold text-[var(--foreground)] opacity-40 hover:opacity-100 transition-colors"
                                 >
                                     Voglio saperne di più →
                                 </button>
@@ -108,15 +108,15 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
 
 // Helper Component for consistency
 function BulletRow({ icon, title, text, color }: { icon: React.ReactNode, title: string, text: string, color: 'cyan' | 'amber' }) {
-    const bgClass = color === 'cyan' ? 'bg-cyan-50 text-cyan-500' : 'bg-amber-50 text-amber-500';
+    const bgClass = color === 'cyan' ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-500' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-500';
     return (
-        <div className="flex gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50">
+        <div className="flex gap-4 p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100/50 dark:border-slate-700/50">
             <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${bgClass}`}>
                 {icon}
             </div>
             <div>
-                <h4 className="font-bold text-slate-900 text-[15px] mb-0.5">{title}</h4>
-                <p className="text-[13px] text-slate-500 leading-snug">{text}</p>
+                <h4 className="font-bold text-[var(--foreground)] text-[15px] mb-0.5">{title}</h4>
+                <p className="text-[13px] text-[var(--foreground)] opacity-50 leading-snug">{text}</p>
             </div>
         </div>
     );

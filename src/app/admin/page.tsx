@@ -114,7 +114,7 @@ export default function AdminQuestionsPage() {
       label: 'ID',
       width: '80px',
       render: (q: QuestionListItem) => (
-        <span className="font-mono text-[10px] text-slate-500">{q.id.slice(0, 6)}</span>
+        <span className="font-mono text-[10px] text-[var(--foreground)] opacity-40">{q.id.slice(0, 6)}</span>
       )
     },
     {
@@ -132,7 +132,7 @@ export default function AdminQuestionsPage() {
 
         return (
           <div className="relative pr-4">
-            <span className="text-slate-700 font-medium block">
+            <span className="text-[var(--foreground)] opacity-80 font-medium block">
               {truncatedText}
             </span>
             {hasMissingData && (
@@ -150,7 +150,7 @@ export default function AdminQuestionsPage() {
       label: 'Materia',
       width: '150px',
       render: (q: QuestionListItem) => (
-        <span className="text-slate-400 text-xs">
+        <span className="text-[var(--foreground)] opacity-40 text-xs">
           {q.subjects?.name || (q.subject_id ? "..." : "-")}
         </span>
       )
@@ -160,7 +160,7 @@ export default function AdminQuestionsPage() {
       label: 'Concorso',
       width: '180px',
       render: (q: QuestionListItem) => (
-        <span className="text-slate-400 text-xs truncate max-w-[150px] block" title={q.quizzes?.title}>
+        <span className="text-[var(--foreground)] opacity-40 text-xs truncate max-w-[150px] block" title={q.quizzes?.title}>
           {q.quizzes?.title || (q.quiz_id ? "..." : "-")}
         </span>
       )
@@ -209,11 +209,11 @@ export default function AdminQuestionsPage() {
       />
 
       {/* SEARCH & FILTER BAR */}
-      <div className="mb-8 p-4 bg-white border border-slate-200/50 rounded-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="mb-8 p-4 bg-[var(--card)] border border-[var(--card-border)] rounded-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex flex-col md:flex-row gap-4 items-center justify-between transition-colors">
         <div className="flex-1 w-full md:max-w-md relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40">🔍</span>
           <input
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#00B1FF]/20 focus:border-[#00B1FF] transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40 focus:outline-none focus:bg-[var(--card)] focus:ring-2 focus:ring-[#00B1FF]/20 focus:border-[#00B1FF] transition-all"
             placeholder="Cerca per testo, materia, concorso..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -221,10 +221,10 @@ export default function AdminQuestionsPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-slate-500 font-medium cursor-pointer select-none hover:text-slate-700 transition-colors">
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground)] opacity-50 font-medium cursor-pointer select-none hover:opacity-100 transition-all">
             <input
               type="checkbox"
-              className="rounded-md bg-white border-slate-300 text-[#00B1FF] focus:ring-[#00B1FF]"
+              className="rounded-md bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-[#00B1FF] focus:ring-[#00B1FF]"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
             />
@@ -233,7 +233,7 @@ export default function AdminQuestionsPage() {
 
           <button
             onClick={loadQuestions}
-            className="p-2.5 text-slate-400 hover:text-[#00B1FF] hover:bg-[#00B1FF]/5 rounded-xl transition-colors"
+            className="p-2.5 text-[var(--foreground)] opacity-40 hover:text-[#00B1FF] hover:opacity-100 hover:bg-[#00B1FF]/5 rounded-xl transition-all"
             title="Ricarica"
           >
             🔄
@@ -243,7 +243,7 @@ export default function AdminQuestionsPage() {
 
       {/* ERROR */}
       {error && (
-        <div className="mb-4 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600">
+        <div className="mb-4 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-900/30 rounded-xl text-rose-600 dark:text-rose-400">
           {error}
         </div>
       )}

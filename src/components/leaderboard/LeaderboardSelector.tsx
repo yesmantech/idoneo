@@ -72,22 +72,22 @@ export default function LeaderboardSelector({
             {/* Trigger Pill */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-3 px-5 py-3 bg-white rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] 
+                className={`flex items-center gap-3 px-5 py-3 bg-[var(--card)] rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] 
                            border transition-all duration-300 active:scale-[0.98]
                            ${isOpen
-                        ? 'border-[#00B1FF]/30 ring-4 ring-[#00B1FF]/10'
-                        : 'border-slate-100 hover:border-slate-200 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]'
+                        ? 'border-[#00B1FF]/50 ring-4 ring-[#00B1FF]/10'
+                        : 'border-[var(--card-border)] hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg'
                     }`}
             >
                 {/* Dynamic Icon */}
                 <span className="scale-110">{icon}</span>
 
-                <span className="text-[17px] font-bold text-slate-800 tracking-tight min-w-[100px] text-center">
+                <span className="text-[17px] font-bold text-[var(--foreground)] tracking-tight min-w-[100px] text-center">
                     {currentLabel}
                 </span>
 
                 <svg
-                    className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#00B1FF]' : ''}`}
+                    className={`w-4 h-4 text-[var(--foreground)] opacity-40 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#00B1FF] !opacity-100' : ''}`}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -96,15 +96,15 @@ export default function LeaderboardSelector({
 
             {/* Floating Dropdown Menu */}
             {isOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[320px] bg-white rounded-[24px] 
-                                shadow-xl border border-slate-100 overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[320px] bg-[var(--card)] rounded-[24px] 
+                                shadow-2xl border border-[var(--card-border)] overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200">
 
                     {/* Search Bar */}
-                    <div className="p-3 border-b border-slate-50">
+                    <div className="p-3 border-b border-[var(--card-border)] opacity-80">
                         <input
                             type="text"
                             placeholder="Cerca concorso..."
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium text-slate-700 placeholder:text-slate-400"
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             autoFocus
@@ -119,11 +119,11 @@ export default function LeaderboardSelector({
                                 <button
                                     onClick={() => handleSelect('xp')}
                                     className={`w-full text-left px-4 py-3.5 rounded-[16px] flex items-center gap-3 transition-all ${currentSelection === 'xp'
-                                        ? 'bg-amber-50 text-amber-600 shadow-sm'
-                                        : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900'
+                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shadow-sm'
+                                        : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-[var(--foreground)] opacity-70 hover:opacity-100'
                                         }`}
                                 >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-black/5 ${currentSelection === 'xp' ? 'bg-amber-100 text-amber-600' : 'bg-white text-slate-400'}`}>
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-black/5 ${currentSelection === 'xp' ? 'bg-amber-100 dark:bg-amber-800 text-amber-600' : 'bg-white dark:bg-slate-700 text-slate-400'}`}>
                                         🏆
                                     </div>
                                     <div className="flex-1">
@@ -139,7 +139,7 @@ export default function LeaderboardSelector({
                         {/* 2. My Concorsi */}
                         {filteredActive.length > 0 && (
                             <div>
-                                <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-slate-400 tracking-widest">
+                                <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-[var(--foreground)] opacity-40 tracking-widest leading-none mt-2">
                                     I Tuoi Concorsi ({filteredActive.length})
                                 </div>
                                 {filteredActive.map(q => (
@@ -156,7 +156,7 @@ export default function LeaderboardSelector({
                         {/* 3. Other Concorsi */}
                         <div>
                             {filteredOther.length > 0 && (
-                                <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-slate-400 tracking-widest mt-2">
+                                <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-[var(--foreground)] opacity-40 tracking-widest mt-2">
                                     Tutti i Concorsi ({filteredOther.length})
                                 </div>
                             )}
@@ -188,11 +188,11 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
         <button
             onClick={onClick}
             className={`w-full text-left px-4 py-3 rounded-[16px] flex items-center gap-3 transition-all mb-1 ${isSelected
-                ? 'bg-cyan-50 text-cyan-600 shadow-sm'
-                : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 shadow-sm'
+                : 'bg-transparent text-[var(--foreground)] opacity-70 hover:opacity-100 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
         >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black border border-black/5 shadow-sm ${isSelected ? 'bg-cyan-100 text-cyan-600' : 'bg-white text-slate-400'}`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black border border-black/5 dark:border-white/5 shadow-sm ${isSelected ? 'bg-cyan-100 dark:bg-cyan-800 text-cyan-600' : 'bg-white dark:bg-slate-700 text-slate-400'}`}>
                 {/* Use Role initial if available, else Title */}
                 {(roleTitle || quiz.title).substring(0, 2).toUpperCase()}
             </div>
@@ -203,7 +203,7 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
                 </div>
                 {/* Only show subtitle if it's different and relevant, otherwise keep it clean */}
                 {roleTitle && roleTitle !== quiz.title && (
-                    <div className="text-[11px] text-slate-400 truncate">
+                    <div className="text-[11px] opacity-50 truncate">
                         {quiz.title}
                     </div>
                 )}

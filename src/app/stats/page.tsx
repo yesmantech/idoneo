@@ -90,22 +90,22 @@ export default function StatsPage() {
     if (loading) return <div className="p-8 text-center">Caricamento statistiche...</div>;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-20 transition-colors duration-500">
             {/* Header */}
-            <div className="bg-white px-6 py-6 rounded-b-3xl shadow-sm mb-6">
+            <div className="bg-[var(--card)] px-6 py-6 rounded-b-3xl shadow-sm mb-6 border-b border-[var(--card-border)]">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">Le mie Statistiche</h1>
-                    <button onClick={() => navigate("/")} className="text-sm font-bold text-slate-500">Chiudi</button>
+                    <h1 className="text-2xl font-bold text-[var(--foreground)]">Le mie Statistiche</h1>
+                    <button onClick={() => navigate("/")} className="text-sm font-bold text-[var(--foreground)] opacity-50">Chiudi</button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
                         <p className="text-xs text-indigo-400 font-bold uppercase mb-1">Test Completati</p>
-                        <p className="text-3xl font-black text-indigo-900">{globalStats.totalTests}</p>
+                        <p className="text-3xl font-black text-indigo-900 dark:text-indigo-300">{globalStats.totalTests}</p>
                     </div>
-                    <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                        <p className="text-xs text-emerald-600 font-bold uppercase mb-1">Accuratezza Media</p>
-                        <p className="text-3xl font-black text-emerald-900">{globalStats.avgAccuracy.toFixed(1)}%</p>
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold uppercase mb-1">Accuratezza Media</p>
+                        <p className="text-3xl font-black text-emerald-900 dark:text-emerald-300">{globalStats.avgAccuracy.toFixed(1)}%</p>
                     </div>
                 </div>
             </div>
@@ -117,12 +117,12 @@ export default function StatsPage() {
                     <h2 className="font-bold text-lg mb-4">Punti di Forza e Debolezza</h2>
                     <div className="space-y-3">
                         {subjectPerformance.slice(0, 5).map((subj, idx) => (
-                            <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <div key={idx} className="bg-[var(--card)] p-3 rounded-xl border border-[var(--card-border)] flex items-center justify-between">
                                 <div>
-                                    <p className="font-bold text-sm">{subj.name}</p>
-                                    <p className="text-[10px] text-slate-400">{subj.count} domande</p>
+                                    <p className="font-bold text-sm text-[var(--foreground)]">{subj.name}</p>
+                                    <p className="text-[10px] text-[var(--foreground)] opacity-40">{subj.count} domande</p>
                                 </div>
-                                <div className={`px-3 py-1 rounded-lg text-xs font-bold ${subj.accuracy > 70 ? 'bg-emerald-100 text-emerald-700' : subj.accuracy < 50 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
+                                <div className={`px-3 py-1 rounded-lg text-xs font-bold ${subj.accuracy > 70 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : subj.accuracy < 50 ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'}`}>
                                     {subj.accuracy.toFixed(0)}%
                                 </div>
                             </div>
@@ -136,16 +136,16 @@ export default function StatsPage() {
                     <h2 className="font-bold text-lg mb-4">Cronologia</h2>
                     <div className="space-y-3">
                         {attempts.map((att) => (
-                            <Link to={`/quiz/results/${att.id}`} key={att.id} className="block bg-white p-4 rounded-xl border border-slate-200 hover:border-slate-900 transition-colors">
+                            <Link to={`/quiz/results/${att.id}`} key={att.id} className="block bg-[var(--card)] p-4 rounded-xl border border-[var(--card-border)] hover:border-[#00B1FF] transition-colors">
                                 <div className="flex justify-between items-start mb-2">
-                                    <h3 className="font-bold text-sm">{att.quiz?.title || "Test"}</h3>
-                                    <span className="text-[10px] text-slate-400">{new Date(att.created_at).toLocaleDateString()}</span>
+                                    <h3 className="font-bold text-sm text-[var(--foreground)]">{att.quiz?.title || "Test"}</h3>
+                                    <span className="text-[10px] text-[var(--foreground)] opacity-40">{new Date(att.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <div className="flex justify-between items-end">
-                                    <div className="text-xs text-slate-500">
-                                        Punteggio: <span className="text-slate-900 font-bold">{att.score.toFixed(2)}</span>
+                                    <div className="text-xs text-[var(--foreground)] opacity-50">
+                                        Punteggio: <span className="text-[var(--foreground)] font-bold">{att.score.toFixed(2)}</span>
                                     </div>
-                                    <div className="text-xs text-slate-500">
+                                    <div className="text-xs text-[var(--foreground)] opacity-50">
                                         {att.correct}/{att.total_questions}
                                     </div>
                                 </div>

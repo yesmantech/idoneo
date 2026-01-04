@@ -269,7 +269,7 @@ export default function QuizStatsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] text-text-primary pb-24 relative overflow-hidden">
+        <div className="min-h-screen bg-[var(--background)] text-text-primary pb-24 relative overflow-hidden transition-colors duration-300">
             <div className="max-w-7xl mx-auto space-y-6 px-4 md:px-8 pt-safe">
 
 
@@ -277,7 +277,7 @@ export default function QuizStatsPage() {
                 <div className="flex items-center justify-between gap-4 py-4">
                     <button
                         onClick={() => navigate("/profile")}
-                        className="p-3 bg-white rounded-full shadow-soft hover:shadow-card hover:scale-105 transition-all text-slate-400 hover:text-slate-900 border border-transparent hover:border-slate-100"
+                        className="p-3 bg-white dark:bg-slate-800/50 rounded-full shadow-soft hover:shadow-card hover:scale-105 transition-all text-slate-400 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
@@ -314,7 +314,7 @@ export default function QuizStatsPage() {
 
                     {/* Left: Radar Chart + Goals */}
                     <div className="lg:col-span-5 space-y-6">
-                        <div className="bg-white p-6 rounded-card shadow-soft flex flex-col items-center">
+                        <div className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft flex flex-col items-center">
                             <h3 className="text-lg font-bold text-text-primary mb-6 w-full">Performance per Materia</h3>
                             <SubjectRadarChart data={subjectData} />
 
@@ -330,11 +330,11 @@ export default function QuizStatsPage() {
                                             <button
                                                 key={s.subject}
                                                 onClick={() => perfData && setSelectedSubject(perfData)}
-                                                className="w-full flex justify-between items-center text-sm border-b border-canvas-light pb-2 group cursor-pointer hover:bg-canvas-light/50 -mx-2 px-2 rounded-lg transition-colors"
+                                                className="w-full flex justify-between items-center text-sm border-b border-canvas-light dark:border-slate-800 pb-2 group cursor-pointer hover:bg-canvas-light/50 dark:hover:bg-slate-800/50 -mx-2 px-2 rounded-lg transition-colors"
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <div className={`w-2 h-2 rounded-full ${statusColor}`}></div>
-                                                    <span className="font-bold text-text-secondary truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
+                                                    <span className="font-bold text-text-secondary dark:text-slate-400 truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xs text-text-tertiary">({s.total})</span>
@@ -361,16 +361,16 @@ export default function QuizStatsPage() {
                     <div className="lg:col-span-7 space-y-8">
 
                         {/* Trend Chart */}
-                        <div className="bg-white p-6 rounded-card shadow-soft">
+                        <div className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft">
                             <h3 className="text-lg font-bold text-text-primary mb-4">Andamento nel Tempo</h3>
                             <ProgressLineChart data={trendData} />
                         </div>
 
                         {/* History Table */}
-                        <div className="bg-white p-6 rounded-card shadow-soft">
+                        <div className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-bold text-text-primary">Cronologia Tentativi</h3>
-                                <span className="text-[10px] font-bold bg-canvas-light text-text-tertiary px-3 py-1.5 rounded-pill uppercase tracking-wider">Ultimi 50</span>
+                                <span className="text-[10px] font-bold bg-canvas-light dark:bg-slate-800 text-text-tertiary px-3 py-1.5 rounded-pill uppercase tracking-wider">Ultimi 50</span>
                             </div>
                             <AttemptsHistoryTable attempts={attempts} quizId={quizId} />
                         </div>

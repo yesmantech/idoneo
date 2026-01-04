@@ -7,7 +7,8 @@ import { xpService } from "@/lib/xpService";
 import { statsService } from "@/lib/statsService";
 import { leaderboardService } from "@/lib/leaderboardService";
 import { badgeService } from "@/lib/badgeService";
-import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
+import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check, Flag, AlertTriangle } from "lucide-react";
 
 // Types
 type RichAnswer = {
@@ -54,6 +55,13 @@ export default function QuizRunnerPage() {
     const [showSettings, setShowSettings] = useState(false);
     const [drawerExpanded, setDrawerExpanded] = useState(false);
 
+    // Report State
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [showReportSuccess, setShowReportSuccess] = useState(false); // New Success Modal State
+    const [reportReason, setReportReason] = useState<string>("");
+    const [reportDescription, setReportDescription] = useState("");
+    const [isReporting, setIsReporting] = useState(false);
+
     // Modes - Load from localStorage for persistence
     const [instantCheck, setInstantCheck] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -93,6 +101,56 @@ export default function QuizRunnerPage() {
         if (!quizAttemptId) return;
 
         const load = async () => {
+            // Check for Offline Attempt
+            if (quizAttemptId.startsWith('local-')) {
+                try {
+                    const localData = await offlineService.getLocalAttempt(quizAttemptId);
+                    if (localData) {
+                        // Map local answers to RichAnswer
+                        let loadedAnswers: RichAnswer[] = localData.answers.map((a: any) => ({
+                            questionId: a.questionId,
+                            text: a.text,
+                            subjectId: a.subjectId || "",
+                            subjectName: a.subjectName || "Materia", // Fallback
+                            selectedOption: a.selectedOption,
+                            correctOption: a.correctOption,
+                            isCorrect: false, // Calc dynamically or stored
+                            isSkipped: false,
+                            isLocked: false,
+                            explanation: a.explanation,
+                            options: a.options
+                        }));
+
+                        // Local Storage Backup
+                        const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
+                        if (localBackup) {
+                            try {
+                                const parsed = JSON.parse(localBackup);
+                                if (Array.isArray(parsed) && parsed.length === loadedAnswers.length) {
+                                    loadedAnswers = parsed;
+                                }
+                            } catch (e) {
+                                console.error("LocalStorage parse error", e);
+                            }
+                        }
+
+                        setAnswering(loadedAnswers);
+                        answeringRef.current = loadedAnswers;
+                        setLoading(false);
+                        return; // Exit early
+                    } else {
+                        alert("Sessione offline non trovata.");
+                        navigate(-1);
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Offline load error", e);
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            // Online Loading from Supabase
             const { data } = await supabase.from("quiz_attempts").select("*").eq("id", quizAttemptId).single();
             if (data) {
                 let loadedAnswers = Array.isArray(data.answers) ? data.answers : [];
@@ -143,7 +201,7 @@ export default function QuizRunnerPage() {
             setLoading(false);
         };
         load();
-    }, [quizAttemptId]);
+    }, [quizAttemptId, navigate]);
 
     // Timer
     const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -197,6 +255,63 @@ export default function QuizRunnerPage() {
         }
     }, [lastAutoAdvanceTime, autoNext, finished, instantCheck, answering.length]);
 
+
+
+    const handleReport = async () => {
+        if (!reportReason) return alert("Seleziona una motivazione.");
+
+        console.log("Starting report process...");
+        // DEBUG: Check answering ref
+        const currentQ = answeringRef.current.length > 0 ? answeringRef.current[currentIndex] : answering[currentIndex];
+        console.log("Current Question:", currentQ);
+
+        if (!currentQ) {
+            alert("Errore: Impossibile identificare la domanda corrente.");
+            return;
+        }
+
+        setIsReporting(true);
+        try {
+            console.log("Checking auth...");
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) {
+                console.error("Auth Error:", authError);
+                throw new Error("Devi essere loggato per inviare segnalazioni.");
+            }
+            console.log("User found:", user.id);
+
+            const payload = {
+                user_id: user.id,
+                question_id: currentQ.questionId,
+                reason: reportReason,
+                description: reportDescription || "", // Ensure not undefined
+                status: 'pending'
+            };
+            console.log("Sending payload:", payload);
+
+            const { data, error } = await supabase.from('question_reports').insert(payload).select();
+
+            if (error) {
+                console.error("Supabase Level Error:", error);
+                throw error;
+            }
+
+            console.log("Success! Data:", data);
+
+            // Success feedback
+            setShowReportModal(false);
+            setReportReason("");
+            setReportDescription("");
+            setShowSettings(false);
+            setShowReportSuccess(true);
+        } catch (e: any) {
+            console.error("Report Catch Error:", e);
+            alert(`Errore Invio: ${e.message || JSON.stringify(e)}`);
+        } finally {
+            setIsReporting(false);
+        }
+    };
+
     const handleSelect = useCallback((opt: string) => {
         if (finished) return;
         const currentList = answeringRef.current.length > 0 ? answeringRef.current : answering;
@@ -230,6 +345,18 @@ export default function QuizRunnerPage() {
             localStorage.setItem(`quiz_progress_${quizAttemptId}`, JSON.stringify(nextList));
         }
     }, [finished, currentIndex, instantCheck, quizAttemptId, answering, autoNext]);
+
+    // Auto-scroll effect for question navigator
+    useEffect(() => {
+        const activeBtn = document.getElementById(`question-nav-${currentIndex}`);
+        if (activeBtn) {
+            activeBtn.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }, [currentIndex, drawerExpanded]);
 
     const handleFinish = async () => {
         if (finished || !quizAttemptId) return;
@@ -270,6 +397,42 @@ export default function QuizRunnerPage() {
 
         score = Math.round(score * 100) / 100;
 
+        // OFFLINE SAVE
+        if (quizAttemptId.startsWith('local-')) {
+            try {
+                // Get existing to preserve metadata
+                const existing = await offlineService.getLocalAttempt(quizAttemptId);
+                const updated = {
+                    ...existing,
+                    finished_at: new Date().toISOString(),
+                    score,
+                    correct,
+                    wrong,
+                    blank,
+                    answers: finalAnswers, // This saves the selection state
+                    duration_seconds: remainingSeconds !== null ? (parseFloat(timeLimitParam || "0") * 60 - remainingSeconds) : 0,
+                    is_idoneo: quizConfig?.useCustomPassThreshold ? correct >= (quizConfig.minCorrectForPass || 0) : null,
+                    pass_threshold: quizConfig?.useCustomPassThreshold ? quizConfig.minCorrectForPass : null,
+                };
+
+                await offlineService.savePendingAttempt(updated);
+
+                localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
+
+                // If we are Online, we could try to sync immediately? 
+                // Or just navigate to results which should handle local ID.
+                // syncing happens elsewhere or on user action.
+
+                navigate(`/quiz/results/${quizAttemptId}`);
+                return;
+            } catch (e) {
+                console.error("Local save error", e);
+                alert("Errore salvataggio locale.");
+                return;
+            }
+        }
+
+        // ONLINE SAVE
         const { error } = await supabase.from("quiz_attempts").update({
             finished_at: new Date().toISOString(),
             score,
@@ -296,12 +459,6 @@ export default function QuizRunnerPage() {
                 await xpService.awardXpForAttempt(quizAttemptId, user.id);
 
                 // 2. Update Goals
-                // We need the quiz_id from original data or we can fetch it. 
-                // Since we don't have quiz_id in scope easily without fetching, let's fetch it or rely on loading state
-                // Actually `data` (line 73) was local scope. 
-                // Let's refetch minimal data or just pass it if we store it.
-                // Simpler: fetch quiz_id from the attempt we just updated/read?
-                // Actually, let's just do a quick fetch since we need it for goals.
                 const { data: currentAttempt } = await supabase
                     .from('quiz_attempts')
                     .select('quiz_id')
@@ -347,31 +504,31 @@ export default function QuizRunnerPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center transition-colors">
                 <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     const currentQ = answering[currentIndex];
-    if (!currentQ) return <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">Errore dati</div>;
+    if (!currentQ) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center text-[var(--foreground)]">Errore dati</div>;
 
     const isLocked = currentQ.isLocked || false;
     const normalizedCorrect = normalizeDBAnswer(currentQ.correctOption);
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col transition-colors duration-500">
             {/* ============================================================= */}
             {/* TOP BAR */}
             {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-white border-b border-slate-100 pt-safe">
+            <header className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
                 <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
                     {/* Left: Close */}
                     <Link
                         to="/"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     >
-                        <X className="w-5 h-5 text-slate-600" />
+                        <X className="w-5 h-5 text-[var(--foreground)] opacity-50" />
                     </Link>
 
                     {/* Center: Timer & Progress */}
@@ -379,7 +536,7 @@ export default function QuizRunnerPage() {
                         <span className={`font-mono font-bold text-xl ${getTimerColor()}`}>
                             {formatTime(remainingSeconds)}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                        <span className="text-[10px] text-[var(--foreground)] opacity-40 font-semibold uppercase tracking-wider">
                             Domanda {currentIndex + 1}/{answering.length}
                         </span>
                     </div>
@@ -387,12 +544,12 @@ export default function QuizRunnerPage() {
                     {/* Right: Mode Toggle + Settings */}
                     <div className="flex items-center gap-2">
                         {/* Mode Toggle */}
-                        <div className="hidden sm:flex items-center bg-slate-100 rounded-full p-0.5">
+                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-0.5">
                             <button
                                 onClick={() => setInstantCheck(!instantCheck)}
                                 className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${instantCheck
-                                    ? 'bg-white text-[#00B1FF] shadow-sm'
-                                    : 'text-slate-500'
+                                    ? 'bg-white dark:bg-slate-700 text-[#00B1FF] shadow-sm'
+                                    : 'text-slate-500 dark:text-slate-400'
                                     }`}
                             >
                                 Check
@@ -400,8 +557,8 @@ export default function QuizRunnerPage() {
                             <button
                                 onClick={() => setAutoNext(!autoNext)}
                                 className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${autoNext
-                                    ? 'bg-white text-[#00B1FF] shadow-sm'
-                                    : 'text-slate-500'
+                                    ? 'bg-white dark:bg-slate-700 text-[#00B1FF] shadow-sm'
+                                    : 'text-slate-500 dark:text-slate-400'
                                     }`}
                             >
                                 Auto
@@ -411,9 +568,9 @@ export default function QuizRunnerPage() {
                         {/* Settings */}
                         <button
                             onClick={() => setShowSettings(true)}
-                            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+                            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
-                            <Settings className="w-5 h-5 text-slate-400" />
+                            <Settings className="w-5 h-5 text-[var(--foreground)] opacity-30" />
                         </button>
                     </div>
                 </div>
@@ -425,13 +582,13 @@ export default function QuizRunnerPage() {
             <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-36">
                 {/* Question Meta */}
                 <div className="mb-3">
-                    <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <span className="text-[12px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">
                         {currentIndex + 1} / {answering.length} • {currentQ.subjectName}
                     </span>
                 </div>
 
                 {/* Question Text */}
-                <h2 className="text-[20px] font-bold text-slate-900 leading-[1.4] mb-8">
+                <h2 className="text-[20px] font-bold text-[var(--foreground)] leading-[1.4] mb-8">
                     {currentQ.text}
                 </h2>
 
@@ -453,9 +610,9 @@ export default function QuizRunnerPage() {
                         const isDisabled = isLocked;
 
                         // Determine styling
-                        let cardStyle = "bg-white border-slate-200";
-                        let badgeStyle = "bg-slate-100 text-slate-500";
-                        let textStyle = "text-slate-700";
+                        let cardStyle = "bg-[var(--card)] border-[var(--card-border)]";
+                        let badgeStyle = "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400";
+                        let textStyle = "text-[var(--foreground)] opacity-80";
 
                         if (isLocked) {
                             if (isCorrectAnswer) {
@@ -463,11 +620,11 @@ export default function QuizRunnerPage() {
                                 badgeStyle = "bg-emerald-500 text-white";
                                 textStyle = "text-emerald-700";
                             } else if (isSelected) {
-                                cardStyle = "bg-red-50 border-red-500";
+                                cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500";
                                 badgeStyle = "bg-red-500 text-white";
-                                textStyle = "text-red-700";
+                                textStyle = "text-red-700 dark:text-red-400";
                             } else {
-                                cardStyle = "bg-slate-50 border-slate-100 opacity-50";
+                                cardStyle = "bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 opacity-50";
                             }
                         } else if (isSelected) {
                             cardStyle = "bg-[#00B1FF]/5 border-[#00B1FF]";
@@ -507,11 +664,11 @@ export default function QuizRunnerPage() {
 
                 {/* Explanation */}
                 {isLocked && instantCheck && currentQ.explanation && (
-                    <div className="mt-6 bg-white rounded-2xl p-5 border border-[#00B1FF]/20">
+                    <div className="mt-6 bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-5 shadow-sm">
                         <h4 className="text-[12px] font-bold text-[#00B1FF] uppercase tracking-wider mb-2">
                             Spiegazione
                         </h4>
-                        <p className="text-[14px] text-slate-600 leading-relaxed">
+                        <p className="text-[14px] text-[var(--foreground)] opacity-70 leading-relaxed">
                             {currentQ.explanation}
                         </p>
                     </div>
@@ -521,7 +678,7 @@ export default function QuizRunnerPage() {
             {/* ============================================================= */}
             {/* BOTTOM NAVIGATOR */}
             {/* ============================================================= */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white pb-safe z-40">
+            <div className="fixed bottom-0 left-0 right-0 bg-[var(--card)] border-t border-[var(--card-border)] pb-safe z-40 transition-colors">
                 {/* Raised Tab / Drawer Handle */}
                 <div className="relative flex justify-center">
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2">
@@ -537,7 +694,7 @@ export default function QuizRunnerPage() {
                                 {/* Outer white shape */}
                                 <path
                                     d="M10 32 L18 8 C20 3 24 0 30 0 L82 0 C88 0 92 3 94 8 L102 32 Z"
-                                    fill="white"
+                                    fill="var(--card)"
                                 />
                             </svg>
                             {/* Inner cyan button */}
@@ -563,27 +720,27 @@ export default function QuizRunnerPage() {
                 </div>
 
                 {/* Border line */}
-                <div className="h-px bg-slate-100" />
+                <div className="h-px bg-slate-100 dark:bg-slate-800" />
 
                 {/* Collapsible Question Pills */}
                 <div
-                    className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[50vh] overflow-y-auto' : 'max-h-14 overflow-hidden'
+                    className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[50vh] overflow-y-auto' : 'max-h-20 overflow-hidden'
                         }`}
                 >
-                    <div className="px-4 py-3 border-b border-slate-50">
-                        <div className={`flex gap-2 max-w-3xl mx-auto ${drawerExpanded
-                            ? 'flex-wrap justify-center'
-                            : 'overflow-x-auto scrollbar-hide'
+                    <div className="px-4 py-1 border-b border-slate-50 dark:border-slate-800">
+                        <div className={`flex gap-2 py-2 max-w-3xl mx-auto ${drawerExpanded
+                            ? 'flex-wrap justify-center px-1'
+                            : 'overflow-x-auto scrollbar-hide pl-1'
                             }`}>
                             {answering.map((ans, idx) => {
                                 const isActive = idx === currentIndex;
                                 const hasAnswer = ans.selectedOption !== null;
 
-                                let buttonClass = "bg-slate-200 text-slate-400"; // Default: Unanswered (Grey)
+                                let buttonClass = "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-200"; // Default: Unanswered (Grey)
 
                                 if (isActive) {
                                     // Current: Blue Outline ("corners only")
-                                    buttonClass = "bg-white text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm";
+                                    buttonClass = "bg-white dark:bg-slate-900 text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm scale-110 z-10";
                                 } else if (hasAnswer) {
                                     // Answered: Solid Blue
                                     buttonClass = "bg-[#00B1FF] text-white shadow-sm";
@@ -592,8 +749,9 @@ export default function QuizRunnerPage() {
                                 return (
                                     <button
                                         key={idx}
+                                        id={`question-nav-${idx}`}
                                         onClick={() => setCurrentIndex(idx)}
-                                        className={`w-9 h-9 rounded-xl flex-shrink-0 font-semibold text-[13px] transition-all flex items-center justify-center ${buttonClass}`}
+                                        className={`w-9 h-9 rounded-squircle flex-shrink-0 font-semibold text-[13px] transition-all flex items-center justify-center ${buttonClass}`}
                                     >
                                         {idx + 1}
                                     </button>
@@ -622,8 +780,8 @@ export default function QuizRunnerPage() {
                                 onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
                                 disabled={currentIndex === 0}
                                 className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
-                                    ? 'bg-slate-100 text-slate-300'
-                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'
+                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98]'
                                     }`}
                             >
                                 <ChevronLeft className="w-5 h-5" />
@@ -640,7 +798,7 @@ export default function QuizRunnerPage() {
                             ) : (
                                 <button
                                     onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
-                                    className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                    className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                 >
                                     Successiva
                                     <ChevronRight className="w-5 h-5" />
@@ -656,16 +814,16 @@ export default function QuizRunnerPage() {
             {/* ============================================================= */}
             {showSettings && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowSettings(false)} />
-                    <div className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 animate-in slide-in-from-bottom duration-300">
-                        <h3 className="text-lg font-bold text-slate-900 mb-6">Impostazioni</h3>
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
+                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 animate-in slide-in-from-bottom duration-300">
+                        <h3 className="text-lg font-bold text-[var(--foreground)] mb-6">Impostazioni</h3>
 
                         <div className="space-y-4">
                             {/* Instant Check */}
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-semibold text-slate-900">Verifica Istantanea</p>
-                                    <p className="text-[13px] text-slate-500">Mostra risposta corretta subito</p>
+                                    <p className="font-semibold text-[var(--foreground)]">Verifica Istantanea</p>
+                                    <p className="text-[13px] text-[var(--foreground)] opacity-50">Mostra risposta corretta subito</p>
                                 </div>
                                 <button
                                     onClick={() => setInstantCheck(!instantCheck)}
@@ -678,21 +836,121 @@ export default function QuizRunnerPage() {
                             {/* Auto Next */}
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-semibold text-slate-900">Auto Successiva</p>
-                                    <p className="text-[13px] text-slate-500">Passa alla domanda successiva</p>
+                                    <p className="font-semibold text-[var(--foreground)]">Auto Successiva</p>
+                                    <p className="text-[13px] text-[var(--foreground)] opacity-50">Passa alla domanda successiva</p>
                                 </div>
                                 <button
                                     onClick={() => setAutoNext(!autoNext)}
-                                    className={`w-12 h-7 rounded-full transition-colors ${autoNext ? 'bg-[#00B1FF]' : 'bg-slate-200'}`}
+                                    className={`w-12 h-7 rounded-full transition-colors ${autoNext ? 'bg-[#00B1FF]' : 'bg-slate-200 dark:bg-slate-700'}`}
                                 >
                                     <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${autoNext ? 'translate-x-6' : 'translate-x-1'}`} />
                                 </button>
                             </div>
+
+                            {/* Report Button */}
+                            <div className="pt-4 border-t border-[var(--card-border)]">
+                                <button
+                                    onClick={() => setShowReportModal(true)}
+                                    className="w-full py-3 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                    <Flag className="w-4 h-4" />
+                                    Segnala un errore
+                                </button>
+                            </div>
+
+
                         </div>
 
                         <button
                             onClick={() => setShowSettings(false)}
-                            className="w-full mt-6 py-3 bg-slate-100 text-slate-600 font-semibold rounded-xl"
+                            className="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold rounded-xl"
+                        >
+                            Chiudi
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================= */}
+            {/* REPORT MODAL */}
+            {/* ============================================================= */}
+            {showReportModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowReportModal(false)} />
+                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+                            </div>
+                            <h3 className="text-lg font-bold text-[var(--foreground)]">Segnala Errore</h3>
+                        </div>
+
+                        <p className="text-sm text-[var(--foreground)] opacity-60 mb-4">
+                            Aiutaci a migliorare. Qual è il problema con questa domanda?
+                        </p>
+
+                        <div className="space-y-3 mb-6">
+                            {[
+                                "Risposta errata",
+                                "Domanda malformata",
+                                "Typos o errori grammaticali",
+                                "Altro"
+                            ].map((r) => (
+                                <button
+                                    key={r}
+                                    onClick={() => setReportReason(r)}
+                                    className={`w-full p-3 rounded-xl text-left text-sm font-medium transition-all ${reportReason === r
+                                        ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 border border-amber-200 dark:border-amber-800'
+                                        : 'bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'
+                                        }`}
+                                >
+                                    {r}
+                                </button>
+                            ))}
+                        </div>
+
+                        <textarea
+                            value={reportDescription}
+                            onChange={(e) => setReportDescription(e.target.value)}
+                            placeholder="Dettagli aggiuntivi (opzionale)..."
+                            className="w-full mb-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none text-sm text-[var(--foreground)] focus:ring-2 focus:ring-amber-500 min-h-[80px]"
+                        />
+
+                        <button
+                            onClick={handleReport}
+                            disabled={isReporting || !reportReason}
+                            className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
+                        >
+                            {isReporting ? "Invio..." : "Invia Segnalazione"}
+                        </button>
+
+                        <button
+                            onClick={() => setShowReportModal(false)}
+                            className="w-full mt-3 py-3 text-[var(--foreground)] opacity-50 font-medium text-sm"
+                        >
+                            Annulla
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================= */}
+            {/* REPORT SUCCESS MODAL */}
+            {/* ============================================================= */}
+            {showReportSuccess && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowReportSuccess(false)} />
+                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
+                        <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4">
+                            <Check className="w-8 h-8 text-emerald-500" />
+                        </div>
+                        <h3 className="text-xl font-black text-[var(--foreground)] mb-2">Segnalazione Inviata</h3>
+                        <p className="text-slate-500 dark:text-slate-400 mb-6">
+                            Grazie per il tuo contributo! Analizzeremo la tua segnalazione al più presto.
+                        </p>
+                        <button
+                            onClick={() => setShowReportSuccess(false)}
+                            className="w-full py-3.5 bg-[#00B1FF] hover:bg-[#0095dd] text-white font-bold rounded-xl transition-colors shadow-lg shadow-[#00B1FF]/20"
                         >
                             Chiudi
                         </button>
@@ -705,12 +963,12 @@ export default function QuizRunnerPage() {
             {/* ============================================================= */}
             {showTerminateConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowTerminateConfirm(false)} />
-                    <div className="relative bg-white rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
-                        <h3 className="text-lg font-bold text-slate-900 text-center mb-2">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTerminateConfirm(false)} />
+                    <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold text-[var(--foreground)] text-center mb-2">
                             Terminare il quiz?
                         </h3>
-                        <p className="text-slate-500 text-center text-[14px] mb-6">
+                        <p className="text-[var(--foreground)] opacity-50 text-center text-[14px] mb-6">
                             Verranno salvate tutte le risposte date finora.
                         </p>
 
@@ -723,7 +981,7 @@ export default function QuizRunnerPage() {
 
                         <button
                             onClick={() => setShowTerminateConfirm(false)}
-                            className="w-full mt-3 py-3 text-slate-500 font-medium"
+                            className="w-full mt-3 py-3 text-[var(--foreground)] opacity-50 font-medium"
                         >
                             Continua
                         </button>

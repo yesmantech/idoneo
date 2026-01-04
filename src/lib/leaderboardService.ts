@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabaseClient";
-import { computePreparationScore } from "./leaderboardAlgorithm";
 
 export interface LeaderboardEntry {
     rank: number;
@@ -21,87 +20,15 @@ export interface LeaderboardEntry {
 }
 
 export const leaderboardService = {
-    // 0. Update User Score (Calculate & Save)
+    // 0. Update User Score
+    // [REFACTORED] Function logic moved to Postgres Trigger (2026-01-02)
+    // This is now an O(1) operation on the server.
     async updateUserScore(userId: string, quizId: string) {
-        // 1. Fetch all attempts for this user & quiz AND Quiz Details (Bank Size)
-        const { data: attempts, error } = await supabase
-            .from("quiz_attempts")
-            .select(`
-                answers, 
-                created_at, 
-                started_at,
-                quiz:quizzes (
-                    total_questions
-                )
-            `)
-            .eq("user_id", userId)
-            .eq("quiz_id", quizId);
-
-        if (error || !attempts) {
-            console.error("Error fetching attempts for score update:", error);
-            throw new Error(`Fetch Attempts Failed: ${error?.message}`);
-        }
-
-        // Determine Bank Size
-        // If multiple attempts, they point to same quiz, so just take first.
-        const firstQuiz = (attempts as any)[0]?.quiz;
-        const bankSize = Array.isArray(firstQuiz) ? firstQuiz[0]?.total_questions : firstQuiz?.total_questions;
-        const safeBankSize = bankSize || 1000; // Default if missing
-
-        // 2. Unpack answers to pure array
-        let allAnswers: { isCorrect: boolean; questionId: string; timestamp: number }[] = [];
-
-        attempts.forEach(att => {
-            if (Array.isArray(att.answers)) {
-                att.answers.forEach((ans: any) => {
-                    // Normalize question ID
-                    const qId = ans.questionId || ans.question_id || ans.id;
-                    const ts = new Date(att.created_at || att.started_at).getTime();
-
-                    if (qId) {
-                        allAnswers.push({
-                            isCorrect: !!ans.isCorrect,
-                            questionId: String(qId),
-                            timestamp: ts
-                        });
-                    }
-                });
-            }
-        });
-
-        // 3. Run Algorithm
-        const result = computePreparationScore({
-            answers: allAnswers,
-            bankSize: safeBankSize
-        });
-
-        // 4. Upsert to concorso_leaderboard
-        const payload = {
-            user_id: userId,
-            quiz_id: quizId,
-            score: result.score,
-
-            // New Breakdown Columns
-            accuracy_weighted: result.accuracyScore, // reusing existing column name if possible, or mapping
-            volume_factor: result.volumeScore,       // reusing existing column name
-            // New columns from migration
-            recency_score: result.recencyScore,
-            coverage_score: result.coverageScore,
-            reliability: result.reliability,
-            unique_questions: result.uniqueQuestions,
-            total_answers: result.totalAnswers,
-
-            last_calculated_at: new Date().toISOString()
-        };
-
-        const { error: upsertError } = await supabase
-            .from("concorso_leaderboard")
-            .upsert(payload);
-
-        if (upsertError) {
-            console.error("Error upserting leaderboard score:", upsertError);
-            throw new Error(`Upsert Leaderboard Failed: ${upsertError.message}`);
-        }
+        // We no longer need to fetch attempts or calculate locally.
+        // The trigger 'on_new_attempt_score' on 'quiz_attempts' handles this
+        // immediately after the attempt is inserted/updated.
+        console.log("updateUserScore: Managed by Server-Side Trigger for user", userId);
+        return;
     },
 
     // 1. Fetch Skill Leaderboard for a quiz
@@ -323,16 +250,14 @@ export const leaderboardService = {
         };
     },
 
-    // 3. Get User's Active Quizzes (for "My Concorsi" selector)
+    // 3. Get User's Active Quizzes (from Leaderboard)
     async getUserActiveQuizzes(userId: string) {
-        // Fetch attempts with quiz details
-        // Note: distinct on quiz_id would be better but requires specific RPC or post-processing
-        const { data: attempts, error } = await supabase
-            .from("quiz_attempts")
+        // Fetch from concorso_leaderboard which stores the "Official" preparation score
+        const { data: leaderboardRows, error } = await supabase
+            .from("concorso_leaderboard")
             .select(`
-                quiz_id,
-                correct,
-                total_questions,
+                score,
+                last_calculated_at,
                 quiz:quizzes (
                     id, 
                     title, 
@@ -343,52 +268,30 @@ export const leaderboardService = {
                 )
             `)
             .eq("user_id", userId)
-            .order("created_at", { ascending: false })
-            .limit(50); // Scan last 50 attempts to find active ones
+            .order("last_calculated_at", { ascending: false });
 
         if (error) {
-            console.error("Error fetching active quizzes:", error);
+            console.error("Error fetching active quizzes from leaderboard:", error);
+            // Fallback to empty, or could try attempts as backup (omitted for cleaner logic)
             return [];
         }
 
-        if (!attempts) return [];
+        if (!leaderboardRows) return [];
 
-        // Deduplicate by Quiz ID and compute stats
-        const quizStatsMap = new Map<string, { quiz: any, totalCorrect: number, totalQuestions: number, attemptsCount: number }>();
-
-        for (const att of attempts) {
-            // Supabase sometimes returns relation as array
-            const quizData = att.quiz as any;
-            const q = Array.isArray(quizData) ? quizData[0] : quizData;
-
-            if (q && q.id) {
-                if (!quizStatsMap.has(q.id)) {
-                    quizStatsMap.set(q.id, {
-                        quiz: q,
-                        totalCorrect: 0,
-                        totalQuestions: 0,
-                        attemptsCount: 0
-                    });
-                }
-
-                const stats = quizStatsMap.get(q.id)!;
-                stats.attemptsCount++;
-                if (att.total_questions > 0) {
-                    stats.totalCorrect += (att.correct || 0);
-                    stats.totalQuestions += (att.total_questions || 0);
-                }
-            }
-        }
-
-        return Array.from(quizStatsMap.values()).map(item => {
-            const avgAccuracy = item.totalQuestions > 0
-                ? (item.totalCorrect / item.totalQuestions) * 100
-                : 0;
+        return leaderboardRows.map(row => {
+            // Flatten the structure
+            const quizData = row.quiz as any;
+            const quiz = Array.isArray(quizData) ? quizData[0] : quizData;
 
             return {
-                ...item.quiz,
-                accuracy: Math.round(avgAccuracy),
-                attempts: item.attemptsCount
+                ...quiz,
+                // Use the official preparation score (0-100)
+                accuracy: Math.round(row.score || 0),
+                // We don't have exact attempts count here easily without another join, 
+                // but for dashboard "progress" visual, score is what matters.
+                // We could rename 'accuracy' to 'score' in the component later if needed, 
+                // but keeping 'accuracy' key for compatibility.
+                lastPlayed: row.last_calculated_at
             };
         });
     },

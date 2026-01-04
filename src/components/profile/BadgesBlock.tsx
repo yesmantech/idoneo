@@ -16,14 +16,15 @@ interface Badge {
 }
 
 export default function BadgesBlock() {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
     const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
     const [loading, setLoading] = useState(true);
     const [debugData, setDebugData] = useState<any>(null);
     const [showDebug, setShowDebug] = useState(false);
 
-    const isAdmin = user?.email === 'alessandro.valenza22@gmail.com' || user?.email === 'alessandro.valenza22@icloud.com';
+    // Use role-based check instead of hardcoded emails
+    const isAdmin = profile?.role === 'admin';
 
     useEffect(() => {
         if (user?.id) {

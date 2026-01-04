@@ -69,12 +69,12 @@ export default function WaitlistSuccessPage() {
     return (
         <div
             onClick={handleScreenClick}
-            className="min-h-screen bg-white flex flex-col items-center justify-between p-6 text-center relative overflow-hidden font-sans"
+            className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-between p-6 text-center relative overflow-hidden font-sans transition-colors duration-500"
         >
             {/* Home Button */}
             <button
                 onClick={() => navigate('/')}
-                className="absolute left-6 top-6 p-3 rounded-full bg-white shadow-soft text-slate-400 hover:text-[#00B1FF] hover:scale-110 transition-all duration-300 z-50 border border-slate-50"
+                className="absolute left-6 top-6 p-3 rounded-full bg-[var(--card)] shadow-soft text-[var(--foreground)] opacity-40 hover:opacity-100 hover:scale-110 transition-all duration-300 z-50 border border-[var(--card-border)]"
                 aria-label="Torna alla Home"
             >
                 <Home className="w-6 h-6" />
@@ -82,11 +82,11 @@ export default function WaitlistSuccessPage() {
 
             {/* Top Text Content */}
             <div className="w-full max-w-sm mx-auto z-10 space-y-4 pt-10 flex-shrink-0">
-                <h1 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight animate-in slide-in-from-bottom-5 fade-in duration-700">
+                <h1 className="text-3xl md:text-4xl font-bold text-[var(--foreground)] leading-tight animate-in slide-in-from-bottom-5 fade-in duration-700">
                     Grazie! Sei nella<br /> nostra lista d'attesa.
                 </h1>
 
-                <h2 className="text-[17px] md:text-lg text-[#6B6B6B] font-medium leading-relaxed animate-in slide-in-from-bottom-5 fade-in duration-1000 delay-200">
+                <h2 className="text-[17px] md:text-lg text-[var(--foreground)] opacity-60 font-medium leading-relaxed animate-in slide-in-from-bottom-5 fade-in duration-1000 delay-200">
                     Ti avviseremo appena saremo online. Vuoi saltare la coda? Invita i tuoi amici e ottieni accesso prioritario.
                 </h2>
             </div>
@@ -108,16 +108,16 @@ export default function WaitlistSuccessPage() {
                     Invita amici
                 </button>
 
-                <p className="text-xs text-slate-400 font-medium">
+                <p className="text-xs text-[var(--foreground)] opacity-40 font-medium">
                     Più amici inviti, più in alto vai in lista.
                 </p>
             </div>
 
             {/* Background elements (optional subtle touches) */}
-            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--background)] to-transparent pointer-events-none z-20" />
 
             {/* DEBUG: User Identity */}
-            <div className="fixed bottom-1 left-0 right-0 text-[10px] text-slate-300 text-center z-[60] pointer-events-none opacity-50 font-mono">
+            <div className="fixed bottom-1 left-0 right-0 text-[10px] text-[var(--foreground)] opacity-30 text-center z-[60] pointer-events-none font-mono">
                 {user?.email || 'No User'}
             </div>
 

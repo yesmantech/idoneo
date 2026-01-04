@@ -32,15 +32,15 @@ export default function SubjectDetailSheet({
 
     const TrendIcon = subject.trend === 'improving' ? TrendingUp : subject.trend === 'declining' ? TrendingDown : Minus;
     const trendColor = subject.trend === 'improving'
-        ? 'text-semantic-success'
+        ? 'text-emerald-500'
         : subject.trend === 'declining'
-            ? 'text-semantic-error'
-            : 'text-text-tertiary';
+            ? 'text-rose-500'
+            : 'text-[var(--foreground)] opacity-30';
 
     const statusConfig = {
-        good: { label: 'Buono', color: 'bg-semantic-success', bgColor: 'bg-semantic-success/10', textColor: 'text-semantic-success' },
-        warning: { label: 'Da migliorare', color: 'bg-brand-orange', bgColor: 'bg-brand-orange/10', textColor: 'text-brand-orange' },
-        critical: { label: 'Critico', color: 'bg-semantic-error', bgColor: 'bg-semantic-error/10', textColor: 'text-semantic-error' }
+        good: { label: 'Buono', color: 'bg-emerald-500', bgColor: 'bg-emerald-500/10', textColor: 'text-emerald-500' },
+        warning: { label: 'Da migliorare', color: 'bg-amber-500', bgColor: 'bg-amber-500/10', textColor: 'text-amber-500' },
+        critical: { label: 'Critico', color: 'bg-rose-500', bgColor: 'bg-rose-500/10', textColor: 'text-rose-500' }
     };
 
     const statusStyle = statusConfig[subject.status];
@@ -73,26 +73,26 @@ export default function SubjectDetailSheet({
             />
 
             {/* Sheet */}
-            <div className="relative bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[85vh] overflow-auto animate-in slide-in-from-bottom-4 duration-300">
+            <div className="relative bg-[var(--card)] w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[85vh] overflow-auto animate-in slide-in-from-bottom-4 duration-300 border-t sm:border border-[var(--card-border)]">
                 {/* Handle */}
                 <div className="flex justify-center pt-3 pb-2 sm:hidden">
-                    <div className="w-10 h-1 bg-slate-200 rounded-full" />
+                    <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
                 </div>
 
                 {/* Header */}
-                <div className="sticky top-0 bg-white px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div className="sticky top-0 bg-[var(--card)] px-6 py-4 border-b border-[var(--card-border)] flex items-center justify-between z-10">
                     <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${statusStyle.color}`} />
                         <div>
-                            <h2 className="text-lg font-bold text-text-primary">{subject.subjectName}</h2>
-                            <p className="text-xs text-text-tertiary">Analisi dettagliata</p>
+                            <h2 className="text-lg font-bold text-[var(--foreground)]">{subject.subjectName}</h2>
+                            <p className="text-xs text-[var(--foreground)] opacity-40">Analisi dettagliata</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-canvas-light rounded-full transition-colors"
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
                     >
-                        <X className="w-5 h-5 text-text-tertiary" />
+                        <X className="w-5 h-5 text-[var(--foreground)] opacity-40" />
                     </button>
                 </div>
 
@@ -100,8 +100,8 @@ export default function SubjectDetailSheet({
                 <div className="p-6 space-y-6">
                     {/* Main Stats */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-canvas-light rounded-2xl p-4">
-                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-1">Accuratezza</p>
+                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest mb-1">Accuratezza</p>
                             <p className={`text-3xl font-black ${statusStyle.textColor}`}>
                                 {subject.accuracy.toFixed(0)}%
                             </p>
@@ -114,20 +114,20 @@ export default function SubjectDetailSheet({
                             </div>
                         </div>
 
-                        <div className="bg-canvas-light rounded-2xl p-4">
-                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-1">Domande</p>
-                            <p className="text-3xl font-black text-text-primary">
+                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest mb-1">Domande</p>
+                            <p className="text-3xl font-black text-[var(--foreground)]">
                                 {subject.totalQuestions}
                             </p>
-                            <p className="text-xs text-text-tertiary mt-1">
+                            <p className="text-xs text-[var(--foreground)] opacity-40 mt-1">
                                 {subject.correctAnswers} corrette · {wrongAnswers} sbagliate
                             </p>
                         </div>
                     </div>
 
                     {/* Status Badge */}
-                    <div className={`${statusStyle.bgColor} rounded-2xl p-4 flex items-center gap-3`}>
-                        <div className={`w-10 h-10 rounded-xl ${statusStyle.color} flex items-center justify-center`}>
+                    <div className={`${statusStyle.bgColor} rounded-2xl p-4 flex items-center gap-3 border border-current opacity-90`}>
+                        <div className={`w-10 h-10 rounded-xl ${statusStyle.color} flex items-center justify-center shadow-lg shadow-current/10`}>
                             <span className="text-white text-lg">
                                 {subject.status === 'good' ? '✓' : subject.status === 'warning' ? '!' : '✗'}
                             </span>
@@ -136,7 +136,7 @@ export default function SubjectDetailSheet({
                             <p className={`text-sm font-bold ${statusStyle.textColor}`}>
                                 Stato: {statusStyle.label}
                             </p>
-                            <p className="text-xs text-text-tertiary">
+                            <p className="text-xs text-[var(--foreground)] opacity-50">
                                 {subject.status === 'good'
                                     ? 'Ottimo lavoro! Continua così.'
                                     : subject.status === 'warning'
@@ -148,9 +148,9 @@ export default function SubjectDetailSheet({
 
                     {/* Average Response Time (if available) */}
                     {subject.avgResponseTimeMs && (
-                        <div className="bg-canvas-light rounded-2xl p-4">
-                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-1">Tempo medio per risposta</p>
-                            <p className="text-2xl font-black text-text-primary">
+                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest mb-1">Tempo medio per risposta</p>
+                            <p className="text-2xl font-black text-[var(--foreground)]">
                                 {(subject.avgResponseTimeMs / 1000).toFixed(1)}s
                             </p>
                         </div>
@@ -158,36 +158,36 @@ export default function SubjectDetailSheet({
 
                     {/* Actions */}
                     <div className="space-y-3">
-                        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">Azioni consigliate</p>
+                        <p className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest">Azioni consigliate</p>
 
                         {wrongAnswers > 0 && (
                             <button
                                 onClick={handleReviewErrors}
-                                className="w-full flex items-center gap-4 p-4 rounded-2xl border border-amber-100 bg-amber-50 hover:bg-amber-100/50 transition-all text-left group"
+                                className="w-full flex items-center gap-4 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/30 bg-amber-50 dark:bg-amber-900/10 hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-all text-left group"
                             >
-                                <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                                <div className="w-11 h-11 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
                                     <BookOpen className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm font-bold text-text-primary">Ripassa {wrongAnswers} errori</p>
-                                    <p className="text-xs text-text-tertiary">Rivedi le domande sbagliate</p>
+                                    <p className="text-sm font-bold text-[var(--foreground)]">Ripassa {wrongAnswers} errori</p>
+                                    <p className="text-xs text-[var(--foreground)] opacity-40">Rivedi le domande sbagliate</p>
                                 </div>
-                                <ChevronRight className="w-5 h-5 text-text-tertiary group-hover:translate-x-0.5 transition-transform" />
+                                <ChevronRight className="w-5 h-5 text-[var(--foreground)] opacity-20 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                             </button>
                         )}
 
                         <button
                             onClick={handlePractice}
-                            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-brand-cyan/20 bg-brand-cyan/5 hover:bg-brand-cyan/10 transition-all text-left group"
+                            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-brand-cyan/20 bg-brand-cyan/5 dark:bg-brand-cyan/10 hover:bg-brand-cyan/10 dark:hover:bg-brand-cyan/20 transition-all text-left group"
                         >
                             <div className="w-11 h-11 rounded-xl bg-brand-cyan/20 text-brand-cyan flex items-center justify-center flex-shrink-0">
                                 <Target className="w-5 h-5" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-sm font-bold text-text-primary">Esercitati su questa materia</p>
-                                <p className="text-xs text-text-tertiary">Quiz focalizzato solo su {subject.subjectName}</p>
+                                <p className="text-sm font-bold text-[var(--foreground)]">Esercitati su questa materia</p>
+                                <p className="text-xs text-[var(--foreground)] opacity-40">Quiz focalizzato solo su {subject.subjectName}</p>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-text-tertiary group-hover:translate-x-0.5 transition-transform" />
+                            <ChevronRight className="w-5 h-5 text-[var(--foreground)] opacity-20 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                         </button>
                     </div>
                 </div>

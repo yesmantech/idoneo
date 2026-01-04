@@ -89,7 +89,7 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
             <button
                 ref={buttonRef}
                 onClick={handleOpen}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--foreground)] opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 hover:opacity-100 transition-all"
             >
                 ⋮
             </button>
@@ -97,7 +97,7 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
             {open && ReactDOM.createPortal(
                 <div
                     ref={menuRef}
-                    className="fixed w-48 bg-white border border-slate-200 rounded-xl shadow-2xl z-[9999] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                    className="fixed w-48 bg-[var(--card)] border border-[var(--card-border)] rounded-xl shadow-2xl z-[9999] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                     style={{ top: menuPosition.top, left: menuPosition.left }}
                 >
                     {actions.map((action, idx) => (
@@ -109,8 +109,8 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
                                 action.onClick();
                             }}
                             className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${action.variant === 'destructive'
-                                ? 'text-rose-500 hover:bg-rose-50'
-                                : 'text-slate-700 hover:bg-slate-50'
+                                ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20'
+                                : 'text-[var(--foreground)] opacity-70 hover:bg-slate-50 dark:hover:bg-slate-800 hover:opacity-100'
                                 }`}
                         >
                             {action.icon && <span className="text-base">{action.icon}</span>}
@@ -130,9 +130,9 @@ function TableSkeleton({ columns }: { columns: number }) {
     return (
         <div className="animate-pulse">
             {[1, 2, 3, 4, 5].map(row => (
-                <div key={row} className="flex gap-4 px-4 py-3 border-b border-slate-100">
+                <div key={row} className="flex gap-4 px-4 py-3 border-b border-[var(--card-border)]">
                     {Array.from({ length: columns }).map((_, col) => (
-                        <div key={col} className="flex-1 h-4 bg-slate-100 rounded" />
+                        <div key={col} className="flex-1 h-4 bg-slate-100 dark:bg-slate-800 rounded" />
                     ))}
                 </div>
             ))}
@@ -153,7 +153,7 @@ export default function AdminTable<T>({
 }: AdminTableProps<T>) {
     if (loading) {
         return (
-            <div className="rounded-[20px] border border-slate-200/50 bg-white overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+            <div className="rounded-[20px] border border-[var(--card-border)] bg-[var(--card)] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
                 <TableSkeleton columns={columns.length} />
             </div>
         );
@@ -161,23 +161,23 @@ export default function AdminTable<T>({
 
     if (data.length === 0 && emptyState) {
         return (
-            <div className="rounded-[20px] border border-slate-200/50 bg-white overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+            <div className="rounded-[20px] border border-[var(--card-border)] bg-[var(--card)] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
                 {emptyState}
             </div>
         );
     }
 
     return (
-        <div className="rounded-[20px] border border-slate-200/50 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+        <div className="rounded-[20px] border border-[var(--card-border)] bg-[var(--card)] shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
             <div className="overflow-x-auto overflow-y-visible">
                 <table className="w-full text-left text-sm">
                     {/* Header */}
-                    <thead className="bg-slate-50/50 border-b border-slate-100">
+                    <thead className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-[var(--card-border)]">
                         <tr>
                             {columns.map(col => (
                                 <th
                                     key={col.key}
-                                    className={`py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-widest ${col.align === 'center' ? 'text-center' :
+                                    className={`py-4 px-6 text-xs font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest ${col.align === 'center' ? 'text-center' :
                                         col.align === 'right' ? 'text-right' : 'text-left'
                                         }`}
                                     style={{ width: col.width }}
@@ -192,20 +192,20 @@ export default function AdminTable<T>({
                     </thead>
 
                     {/* Body */}
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[var(--card-border)]">
                         {data.map((item, rowIndex) => (
                             <tr
                                 key={rowKey(item)}
                                 onClick={() => onRowClick?.(item)}
                                 className={`transition-all duration-200 group ${onRowClick
-                                    ? 'cursor-pointer hover:bg-slate-50'
-                                    : 'hover:bg-slate-50/50'
+                                    ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                    : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/30'
                                     }`}
                             >
                                 {columns.map(col => (
                                     <td
                                         key={col.key}
-                                        className={`py-4 px-6 text-slate-700 font-medium ${col.align === 'center' ? 'text-center' :
+                                        className={`py-4 px-6 text-[var(--foreground)] opacity-80 font-medium ${col.align === 'center' ? 'text-center' :
                                             col.align === 'right' ? 'text-right' : 'text-left'
                                             }`}
                                     >

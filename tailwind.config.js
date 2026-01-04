@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -43,6 +44,20 @@ export default {
             },
             transitionTimingFunction: {
                 'ios': 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+            },
+            keyframes: {
+                float: {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-15px)' },
+                },
+                sparkle: {
+                    '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+                    '50%': { opacity: '1', transform: 'scale(1.2)' },
+                }
+            },
+            animation: {
+                'float': 'float 6s ease-in-out infinite',
+                'sparkle': 'sparkle 3s ease-in-out infinite',
             }
         },
     },
