@@ -94,7 +94,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
 
                     let query = supabase
                         .from('quizzes')
-                        .select('id');
+                        .select('id, title'); // Select title here directly
 
                     if (contestIds.length > 0) {
                         // Match role_id OR contest_id
@@ -106,9 +106,12 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                     const { data: allQuizzes } = await query;
 
                     const roleQuizIds = allQuizzes?.map(q => q.id) || [];
+                    const quizTitleMap = new Map(allQuizzes?.map(q => [q.id, q.title]));
 
                     if (roleQuizIds.length > 0) {
                         // 4b. Fetch attempts for these quizzes
+                        // NOTE: NOT joining quiz:quizzes(title) to avoid RLS issues on joins.
+                        // We map title manually below.
                         const { data: attempts } = await supabase
                             .from("quiz_attempts")
                             .select(`
@@ -116,14 +119,19 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                                 score, 
                                 created_at, 
                                 is_official_sim,
-                                quiz:quizzes(title)
+                                quiz_id
                             `)
                             .eq("user_id", user.id)
                             .in("quiz_id", roleQuizIds)
                             .order("created_at", { ascending: false })
                             .limit(20);
 
-                        if (attempts) history = attempts;
+                        if (attempts) {
+                            history = attempts.map(a => ({
+                                ...a,
+                                quiz: { title: quizTitleMap.get(a.quiz_id) || "Simulazione" }
+                            }));
+                        }
                     }
                 }
 
