@@ -112,22 +112,21 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
 
                 // Optimized approach: 
                 // We need all quizzes for this role to count unique users. 
-                const { data: allRoleQuizzes } = await supabase.from('quizzes').select('id').eq('role_id', role.id);
                 let candidatiCount = 0;
 
-                if (allRoleQuizzes && allRoleQuizzes.length > 0) {
-                    const quizIds = allRoleQuizzes.map(q => q.id);
-                    // Supabase doesn't support "distinct count" easily in one go without RPC. 
-                    // We will approximate or use a known RPC if available. 
-                    // For now, let's use a "head" count of attempts as a proxy for "volume", or if we want users we need a different approach.
-                    // Given the constraint, I'll count *total attempts* as "Partecipazioni" or just use a placeholder if performance is key.
-                    // better: RPC 'get_role_user_count' if it existed.
-                    // Fallback: Just count attempts for now to show activity.
-                    const { count } = await supabase
-                        .from('quiz_attempts')
-                        .select('*', { count: 'exact', head: true })
-                        .in('quiz_id', quizIds);
-                    candidatiCount = count || 0;
+                if (role && role.id) {
+                    try {
+                        const { data: countData, error: countError } = await supabase
+                            .rpc('get_role_candidate_count', { target_role_id: role.id });
+
+                        if (!countError) {
+                            candidatiCount = countData as number;
+                        } else {
+                            console.error("RPC Error:", countError);
+                        }
+                    } catch (e) {
+                        console.error("Failed to fetch candidate count via RPC", e);
+                    }
                 }
 
                 setData({
