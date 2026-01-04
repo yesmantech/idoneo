@@ -303,8 +303,8 @@ function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, c
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-                {React.createElement(selectedStat.icon, { className: "w-8 h-8 text-[var(--foreground)]" })}
+              <div className={`w-16 h-16 rounded-2xl ${selectedStat.themeBg} flex items-center justify-center mx-auto mb-4`}>
+                {React.createElement(selectedStat.icon, { className: `w-8 h-8 ${selectedStat.themeText}` })}
               </div>
 
               <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">{selectedStat.title}</h3>
