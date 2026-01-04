@@ -49,7 +49,12 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
         if (!roleSlug) return;
 
         const load = async () => {
+            let trace = `User: ${user ? user.id.substring(0, 4) + '...' : 'NULL'}`;
             try {
+                // Check Session explicitly
+                const { data: { session } } = await supabase.auth.getSession();
+                trace += ` | Sess: ${!!session}`;
+
                 // 1. Fetch Role
                 const { data: role, error: roleError } = await supabase
                     .from("roles")
@@ -114,7 +119,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                     if (roleQuizIds.length > 0) {
                         // 4b. Fetch attempts for these quizzes
                         // NOTE: NOT joining quiz:quizzes(title) to avoid RLS issues on joins.
-                        const { data: attempts } = await supabase
+                        const { data: attempts, error: attemptsError } = await supabase
                             .from("quiz_attempts")
                             .select(`
                                 id, 
@@ -128,6 +133,10 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                             .order("created_at", { ascending: false })
                             .limit(20);
 
+                        if (attemptsError) {
+                            trace += ` | AtmpErr: ${attemptsError.code || attemptsError.message}`;
+                        }
+
                         if (attempts) {
                             history = attempts.map(a => ({
                                 ...a,
@@ -139,11 +148,20 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
 
                 // 5. Fetch Global Stats (Candidati Count)
                 let candidatiCount = 0;
-                let trace = `User: ${user ? user.id.substring(0, 4) + '...' : 'NULL'}`;
 
-                // ... (existing candidate count logic) ...
                 if (role && role.id) {
-                    // ...
+                    try {
+                        const { data: countData, error: countError } = await supabase
+                            .rpc('get_role_candidate_count', { target_role_id: role.id });
+
+                        if (!countError) {
+                            candidatiCount = countData as number;
+                        } else {
+                            console.error("RPC Error:", countError);
+                        }
+                    } catch (e) {
+                        console.error("Failed to fetch candidate count via RPC", e);
+                    }
                 }
 
                 // Finalize Trace
@@ -171,7 +189,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
 
             } catch (err: any) {
                 console.error(err);
-                setData(prev => ({ ...prev, loading: false, error: err.message, debugTrace: prev.debugTrace + " | ERR: " + err.message }));
+                setData(prev => ({ ...prev, loading: false, error: err.message, debugTrace: trace + " | ERR: " + err.message }));
             }
         };
 
