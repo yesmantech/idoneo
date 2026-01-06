@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { supabase } from '@/lib/supabaseClient';
+import { deleteUserAccount } from '@/lib/accountService';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil, Check, AlertTriangle, Loader2, Sun, Moon, Monitor } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
@@ -19,6 +20,8 @@ export default function ProfileSettingsPage() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,12 +97,24 @@ export default function ProfileSettingsPage() {
 
     // Deletion
     const handleDeleteAccount = () => {
+        setDeleteError(null);
         setShowDeleteModal(true);
     };
 
-    const confirmDeleteAccount = () => {
-        alert('Funzionalità in arrivo. Il tuo account verrà eliminato.');
-        setShowDeleteModal(false);
+    const confirmDeleteAccount = async () => {
+        setIsDeleting(true);
+        setDeleteError(null);
+
+        const result = await deleteUserAccount();
+
+        if (result.success) {
+            // Account deleted successfully, redirect to home
+            navigate('/', { replace: true });
+        } else {
+            // Show error and allow retry
+            setDeleteError(result.error || 'Errore durante l\'eliminazione');
+            setIsDeleting(false);
+        }
     };
 
     if (loading) return (
@@ -176,8 +191,8 @@ export default function ProfileSettingsPage() {
                         <button
                             onClick={() => setTheme('light')}
                             className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'light'
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                 }`}
                         >
                             <Sun className="w-5 h-5" />
@@ -186,8 +201,8 @@ export default function ProfileSettingsPage() {
                         <button
                             onClick={() => setTheme('dark')}
                             className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'dark'
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                 }`}
                         >
                             <Moon className="w-5 h-5" />
@@ -196,8 +211,8 @@ export default function ProfileSettingsPage() {
                         <button
                             onClick={() => setTheme('system')}
                             className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'system'
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                 }`}
                         >
                             <Monitor className="w-5 h-5" />
@@ -269,6 +284,8 @@ export default function ProfileSettingsPage() {
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={confirmDeleteAccount}
+                isDeleting={isDeleting}
+                error={deleteError}
             />
         </div>
     );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { useAuth } from '@/context/AuthContext';
+import { useOnboarding } from '@/context/OnboardingProvider';
 import { Info, Trophy, Zap, Clock } from 'lucide-react';
 
 import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/LeaderboardSelector';
@@ -49,7 +50,7 @@ function LeagueCountdown() {
     }, []);
 
     return (
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/30 rounded-[14px] border border-amber-100 dark:border-amber-800 shadow-sm transition-all duration-300">
+        <div data-onboarding="lb-timer" className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/30 rounded-[14px] border border-amber-100 dark:border-amber-800 shadow-sm transition-all duration-300">
             <Clock className="w-3 h-3 text-amber-500" />
             <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide whitespace-nowrap">
                 {timeLeft}
@@ -82,6 +83,16 @@ export default function UnifiedLeaderboardPage() {
     const [loading, setLoading] = useState(true);
 
     // 1. Fetch Options (Active & Others)
+    const { startOnboarding, hasCompletedContext } = useOnboarding();
+
+    // Auto-start leaderboard onboarding
+    useEffect(() => {
+        if (!loading && data.length > 0 && !hasCompletedContext('leaderboard')) {
+            const timer = setTimeout(() => startOnboarding('leaderboard'), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, data.length, hasCompletedContext, startOnboarding]);
+
     useEffect(() => {
         async function loadOptions() {
             try {
@@ -229,12 +240,14 @@ export default function UnifiedLeaderboardPage() {
                     {/* Mobile Header Row */}
                     <div className="lg:hidden flex items-center justify-between mb-6">
                         <div className="w-10" /> {/* Spacer for centering selector */}
-                        <SelectorComponent
-                            currentSelection={selection}
-                            onSelect={setSelection}
-                            activeQuizzes={activeQuizzes}
-                            otherQuizzes={otherQuizzes}
-                        />
+                        <div data-onboarding="lb-selector">
+                            <SelectorComponent
+                                currentSelection={selection}
+                                onSelect={setSelection}
+                                activeQuizzes={activeQuizzes}
+                                otherQuizzes={otherQuizzes}
+                            />
+                        </div>
                         <button
                             onClick={handleOpenInfo}
                             className="p-2 rounded-full bg-[var(--card)] shadow-sm border border-[var(--card-border)] text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors"
@@ -258,7 +271,7 @@ export default function UnifiedLeaderboardPage() {
 
             {/* Main Content Area - Responsive Card */}
             <div className="flex-1 overflow-hidden relative w-full max-w-5xl mx-auto px-4 lg:px-8 pb-4 lg:pb-8">
-                <div className="relative h-full bg-[var(--card)] rounded-t-[32px] lg:rounded-[32px] shadow-lg flex flex-col border border-[var(--card-border)] overflow-hidden pb-safe">
+                <div data-onboarding="lb-ranking" className="relative h-full bg-[var(--card)] rounded-t-[32px] lg:rounded-[32px] shadow-lg flex flex-col border border-[var(--card-border)] overflow-hidden pb-safe">
                     {/* Status Area: Subtitle + Participants + Timer */}
                     {!loading && data.length > 0 && (
                         <div className="flex-none flex flex-col items-center justify-center pt-4 pb-3 px-4 border-b border-slate-100 dark:border-slate-700 bg-[var(--card)] space-y-2">
