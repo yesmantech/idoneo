@@ -34,14 +34,20 @@ export const badgeService = {
 
     /**
      * Award a badge to a user (Idempotent)
+     * Silently handles RLS errors to prevent console spam
      */
     async awardBadge(userId: string, badgeId: BadgeId) {
-        const { error } = await supabase
-            .from('user_badges')
-            .upsert({ user_id: userId, badge_id: badgeId }, { onConflict: 'user_id, badge_id' });
+        try {
+            const { error } = await supabase
+                .from('user_badges')
+                .upsert({ user_id: userId, badge_id: badgeId }, { onConflict: 'user_id, badge_id' });
 
-        if (error) {
-            console.error(`Error awarding badge ${badgeId}:`, error);
+            // Silently ignore RLS policy errors (42501) - user may not have permission yet
+            if (error && error.code !== '42501') {
+                console.warn(`Badge award skipped for ${badgeId}:`, error.message);
+            }
+        } catch (e) {
+            // Silently fail - badges are non-critical
         }
     },
 

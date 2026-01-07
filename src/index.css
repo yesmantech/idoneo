@@ -25,6 +25,45 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Shimmer Animation for Skeleton Loaders */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg,
+      var(--skeleton-base, #e2e8f0) 0%,
+      var(--skeleton-shine, #f1f5f9) 50%,
+      var(--skeleton-base, #e2e8f0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .animate-shimmer {
+  --skeleton-base: #334155;
+  --skeleton-shine: #475569;
+}
+
+/* Improved Button Interactions */
+.btn-bounce {
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-bounce:hover {
+  transform: translateY(-2px);
+}
+
+.btn-bounce:active {
+  transform: translateY(0) scale(0.98);
+}
+
+
 /* Custom Scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
