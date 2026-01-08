@@ -6,6 +6,7 @@ import { deleteUserAccount } from '@/lib/accountService';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil, Check, AlertTriangle, Loader2, Sun, Moon, Monitor } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
+import { hapticLight } from '@/lib/haptics';
 
 export default function ProfileSettingsPage() {
     const { user, profile, loading, refreshProfile } = useAuth();
@@ -189,7 +190,7 @@ export default function ProfileSettingsPage() {
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                         <button
-                            onClick={() => setTheme('light')}
+                            onClick={() => { hapticLight(); setTheme('light'); }}
                             className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'light'
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -199,7 +200,7 @@ export default function ProfileSettingsPage() {
                             <span className="text-[11px] font-bold">Chiaro</span>
                         </button>
                         <button
-                            onClick={() => setTheme('dark')}
+                            onClick={() => { hapticLight(); setTheme('dark'); }}
                             className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'dark'
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -209,7 +210,7 @@ export default function ProfileSettingsPage() {
                             <span className="text-[11px] font-bold">Scuro</span>
                         </button>
                         <button
-                            onClick={() => setTheme('system')}
+                            onClick={() => { hapticLight(); setTheme('system'); }}
                             className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'system'
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
