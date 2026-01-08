@@ -5,6 +5,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
 import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
+import { analytics } from "@/lib/analytics"; // ANALYTICS
 import TierSLoader from "@/components/ui/TierSLoader";
 import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen, AlertCircle } from "lucide-react";
 import { SuccessBadge } from "@/components/ui/SuccessBadge";
@@ -139,6 +140,19 @@ export default function QuizResultsPage() {
         const passed = attempt.is_idoneo !== null
             ? attempt.is_idoneo
             : attempt.correct >= Math.floor(total / 2) + 1;
+
+        // Track quiz completion analytics
+        analytics.track('quiz_completed', {
+            quiz_id: attempt.quiz_id,
+            score: attempt.score,
+            correct: attempt.correct,
+            wrong: attempt.wrong,
+            blank: attempt.blank,
+            total_questions: total,
+            percentage: Math.round((attempt.correct / total) * 100),
+            passed: passed,
+            is_offline: attemptId?.startsWith('local-') || false
+        });
 
         if (!passed) return; // No confetti for fail
 

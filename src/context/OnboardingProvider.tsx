@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { analytics } from '@/lib/analytics';
 
 // ============================================
 // TYPES
@@ -258,6 +259,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const startTourFromWelcome = useCallback(() => {
         setShowWelcome(false);
         localStorage.setItem(WELCOME_KEY, 'true');
+        // Track onboarding started
+        analytics.track('onboarding_started', { context: 'homepage', source: 'welcome_screen' });
         // Start homepage tour
         setActiveContext('homepage');
         setCurrentStepIndex(0);
@@ -291,22 +294,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         if (activeContext) {
             localStorage.setItem(STORAGE_PREFIX + activeContext, 'true');
             setCompletedContexts(prev => new Set([...prev, activeContext]));
+            // Track onboarding skipped
+            analytics.track('onboarding_skipped', { context: activeContext, step: currentStepIndex });
         }
         setIsActive(false);
         setActiveContext(null);
-    }, [activeContext]);
+    }, [activeContext, currentStepIndex]);
 
     const completeOnboarding = useCallback(() => {
         if (activeContext) {
             localStorage.setItem(STORAGE_PREFIX + activeContext, 'true');
             setCompletedContexts(prev => new Set([...prev, activeContext]));
+            // Track onboarding completed
+            analytics.track('onboarding_completed', { context: activeContext, steps_count: steps.length });
         }
         setIsActive(false);
         setActiveContext(null);
         // Show celebration!
         setShowCelebration(true);
         setTimeout(() => setShowCelebration(false), 3000);
-    }, [activeContext]);
+    }, [activeContext, steps.length]);
 
     const dismissCelebration = useCallback(() => {
         setShowCelebration(false);
