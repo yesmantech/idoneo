@@ -1,35 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { AdminLayout, AdminPageHeader, AIInsightCard } from '@/components/admin';
 import { adminAnalytics, GrowthStats, QuizPerformance } from '@/lib/adminAnalytics';
+import { insightService, Insight } from '@/lib/insightService';
 import {
     Users,
     Play,
     CheckCircle2,
     TrendingUp,
     Sparkles,
-    ClipboardList,
     BarChart3,
     ArrowRight,
     Search,
-    AlertTriangle
+    AlertTriangle,
+    RefreshCw,
+    Clock,
+    X
 } from 'lucide-react';
 
 export default function AdminAnalyticsPage() {
     const [stats, setStats] = useState<GrowthStats | null>(null);
     const [performance, setPerformance] = useState<QuizPerformance[]>([]);
+    const [insights, setInsights] = useState<Insight[]>([]);
     const [loading, setLoading] = useState(true);
+    const [insightsLoading, setInsightsLoading] = useState(false);
     const [pastedData, setPastedData] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     useEffect(() => {
         async function loadData() {
             try {
-                const [s, p] = await Promise.all([
+                const [s, p, i] = await Promise.all([
                     adminAnalytics.getGrowthStats(),
-                    adminAnalytics.getQuizPerformance()
+                    adminAnalytics.getQuizPerformance(),
+                    insightService.getActiveInsights()
                 ]);
                 setStats(s);
                 setPerformance(p);
+                setInsights(i);
             } catch (err) {
                 console.error("Failed to load analytics:", err);
             } finally {
@@ -39,13 +46,34 @@ export default function AdminAnalyticsPage() {
         loadData();
     }, []);
 
-    const handleAnalyze = () => {
+    const handleGenerateInsights = async () => {
+        setInsightsLoading(true);
+        try {
+            const newInsights = await insightService.generateInsights();
+            setInsights(newInsights);
+        } catch (err) {
+            console.error('Failed to generate insights:', err);
+        } finally {
+            setInsightsLoading(false);
+        }
+    };
+
+    const handleDismissInsight = async (id: string) => {
+        await insightService.dismissInsight(id);
+        setInsights(prev => prev.filter(i => i.id !== id));
+    };
+
+    const handleAnalyze = async () => {
         setIsAnalyzing(true);
-        // Simulate AI analysis delay
-        setTimeout(() => {
+        try {
+            // Parse pasted data and generate insights
+            const newInsights = await insightService.generateInsights();
+            setInsights(newInsights);
+        } catch (err) {
+            console.error('Failed to analyze:', err);
+        } finally {
             setIsAnalyzing(false);
-            alert("Analisi completata! Ho aggiunto nuovi suggerimenti basati sui tuoi dati.");
-        }, 1500);
+        }
     };
 
     return (
@@ -157,8 +185,8 @@ export default function AdminAnalyticsPage() {
                                 onClick={handleAnalyze}
                                 disabled={!pastedData || isAnalyzing}
                                 className={`w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] ${!pastedData || isAnalyzing
-                                        ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-500/20'
+                                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-500/20'
                                     }`}
                             >
                                 {isAnalyzing ? (
@@ -179,33 +207,64 @@ export default function AdminAnalyticsPage() {
 
                 {/* RIGHT: AI INSIGHTS SIDEBAR */}
                 <div className="space-y-6">
-                    <h3 className="font-bold text-lg flex items-center gap-2 px-2">
-                        <Sparkles className="w-5 h-5 text-cyan-400" />
-                        AI Insights
-                    </h3>
+                    <div className="flex items-center justify-between px-2">
+                        <h3 className="font-bold text-lg flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-cyan-400" />
+                            AI Insights
+                        </h3>
+                        <button
+                            onClick={handleGenerateInsights}
+                            disabled={insightsLoading}
+                            className="text-xs font-bold text-cyan-400 flex items-center gap-1 hover:text-cyan-300 transition-colors disabled:opacity-50"
+                        >
+                            <RefreshCw className={`w-4 h-4 ${insightsLoading ? 'animate-spin' : ''}`} />
+                            Rigenera
+                        </button>
+                    </div>
 
-                    <AIInsightCard
-                        title="Gap di Conversione"
-                        description="Molte persone cercano 'Maresciallo' ma solo il 5% avvia effettivamente la simulazione ufficiale."
-                        priority="high"
-                        trend="down"
-                        recommendation="Il pulsante 'Avvia Prova' è troppo basso nella pagina. Spostalo sopra l'elenco delle materie."
-                    />
+                    {/* Dynamic Insights */}
+                    {insights.length === 0 && !insightsLoading && (
+                        <div className="text-center py-8 text-slate-400">
+                            <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                            <p className="text-sm">Nessun insight attivo.</p>
+                            <button
+                                onClick={handleGenerateInsights}
+                                className="mt-3 text-sm font-bold text-cyan-400 hover:underline"
+                            >
+                                Genera insight dai dati
+                            </button>
+                        </div>
+                    )}
 
-                    <AIInsightCard
-                        title="Banca Dati Incompleta"
-                        description="Gli utenti cercano spesso 'Inglese' nel concorso Polizia, ma abbiamo poche domande su questo tema."
-                        priority="medium"
-                        recommendation="Carica almeno altre 50 domande di Inglese per il ruolo Agente per migliorare la ritenzione."
-                    />
+                    {insightsLoading && (
+                        <div className="text-center py-8">
+                            <div className="w-8 h-8 border-3 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-3" />
+                            <p className="text-sm text-slate-400">Generando insight...</p>
+                        </div>
+                    )}
 
-                    <AIInsightCard
-                        title="Picco di Accessi"
-                        description="C'è stato un aumento del 15% di nuovi iscritti dopo l'ultimo post sul blog."
-                        priority="low"
-                        trend="up"
-                        recommendation="Crea una notifica push o un banner che punta all'articolo per massimizzare l'engagement."
-                    />
+                    {insights.map((insight) => (
+                        <div key={insight.id} className="relative group">
+                            <AIInsightCard
+                                title={insight.title}
+                                description={insight.description}
+                                priority={insight.priority as 'high' | 'medium' | 'low'}
+                                trend={insight.trend as 'up' | 'down' | undefined}
+                                recommendation={insight.recommendation || undefined}
+                            />
+                            <button
+                                onClick={() => handleDismissInsight(insight.id)}
+                                className="absolute top-3 right-3 p-1.5 bg-slate-100 dark:bg-slate-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-200 dark:hover:bg-slate-600"
+                                title="Nascondi insight"
+                            >
+                                <X className="w-3 h-3 text-slate-500" />
+                            </button>
+                            <div className="absolute bottom-3 right-3 text-[10px] text-slate-400 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Clock className="w-3 h-3" />
+                                {new Date(insight.created_at).toLocaleDateString('it-IT')}
+                            </div>
+                        </div>
+                    ))}
 
                     <div className="p-5 bg-cyan-500/10 border border-cyan-500/20 rounded-[24px]">
                         <h4 className="text-sm font-bold text-cyan-400 mb-2 flex items-center gap-2">
@@ -213,10 +272,10 @@ export default function AdminAnalyticsPage() {
                             Tip per te
                         </h4>
                         <p className="text-xs opacity-70 leading-relaxed mb-4">
-                            I dati vengono aggiornati ogni ora. Scarica periodicamente i report da GA4 per avere analisi più precise.
+                            Gli insight vengono generati analizzando i dati reali del database. Clicca "Rigenera" per aggiornare.
                         </p>
                         <button className="text-xs font-bold text-cyan-400 flex items-center gap-1 hover:underline">
-                            Scopri come esportare <ArrowRight className="w-3 h-3" />
+                            Scopri come funziona <ArrowRight className="w-3 h-3" />
                         </button>
                     </div>
                 </div>
@@ -224,3 +283,4 @@ export default function AdminAnalyticsPage() {
         </AdminLayout>
     );
 }
+
