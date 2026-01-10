@@ -53,7 +53,11 @@ export function StreakBadge({ collapsed, className }: StreakBadgeProps) {
         ? "bg-brand-orange/10 border-brand-orange/20 shadow-sm"
         : "bg-canvas-light border-transparent hover:bg-slate-200/50";
 
-    const handleTestClick = () => {
+    const handleTestClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("Triggering Streak Celebration Test");
         const event = new CustomEvent('streak_updated', {
             detail: {
                 streak: currentStreak > 0 ? currentStreak : 1,
