@@ -34,25 +34,29 @@ export function StreakCelebration() {
         };
     }, []);
 
-    const handleShare = async () => {
+    const handleShare = async (e?: React.MouseEvent) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
         const title = 'Idoneo Streak 🔥';
         const text = `Sto bruciando tutto su Idoneo! 🔥 Ho raggiunto uno streak di ${streak} giorni! Riesci a battermi? 🚀`;
         const url = 'https://idoneo.ai';
 
+        console.log("Attempting to share...");
+
         try {
-            // Try Native Share first
-            const canShare = await Share.canShare();
-            if (canShare.value) {
-                await Share.share({
-                    title,
-                    text,
-                    url,
-                    dialogTitle: 'Condividi il tuo successo!',
-                });
-            } else {
-                throw new Error('Web Share API not supported');
-            }
+            // Attempt Native/Web Share directly
+            // If it's not supported, it will throw or do nothing, triggering catch
+            await Share.share({
+                title,
+                text,
+                url,
+                dialogTitle: 'Condividi il tuo successo!',
+            });
         } catch (error) {
+            console.warn("Share API failed or closed, trying clipboard fallback...", error);
             // Fallback: Copy to Clipboard
             try {
                 await navigator.clipboard.writeText(`${title}\n${text}\n${url}`);
@@ -60,6 +64,8 @@ export function StreakCelebration() {
                 setTimeout(() => setShareState('idle'), 2000);
             } catch (clipboardError) {
                 console.error('Failed to copy to clipboard', clipboardError);
+                // Last resort feedback
+                alert('Impossibile condividere automaticamente. Fai uno screenshot!');
             }
         }
     };
@@ -171,7 +177,7 @@ export function StreakCelebration() {
 
                             {/* Secondary Action - Share (with feedback) */}
                             <button
-                                onClick={handleShare}
+                                onClick={(e) => handleShare(e)}
                                 className={`w-full py-4 font-bold rounded-full transition-all flex items-center justify-center gap-2 border backdrop-blur-sm duration-200 active:scale-[0.98]
                                     ${shareState === 'success'
                                         ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50'
