@@ -158,7 +158,17 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                             {/* Streak */}
                             <div
                                 className="flex-1 flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-                                onClick={() => setExplanation(metrics.streak)}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const event = new CustomEvent('streak_updated', {
+                                        detail: {
+                                            streak: profile?.streak_current || 1,
+                                            isMilestone: true
+                                        }
+                                    });
+                                    window.dispatchEvent(event);
+                                }}
                             >
                                 <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-red-100 to-red-50 dark:from-red-800/50 dark:to-red-900/30 flex items-center justify-center mb-1.5 ring-1 ring-red-200/50 dark:ring-red-700/50">
                                     <Flame className="w-5 h-5 text-red-500" fill="currentColor" />
@@ -171,51 +181,53 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                     </div>
                 </div>
 
-            </div>
+            </div >
 
             {/* Explanation Modal */}
             <AnimatePresence>
-                {explanation && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setExplanation(null)}
-                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-white dark:bg-slate-800 rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center overflow-y-auto max-h-[90vh] custom-scrollbar border border-slate-100 dark:border-slate-700"
-                        >
-                            <button
+                {
+                    explanation && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
                                 onClick={() => setExplanation(null)}
-                                className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors"
+                                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                            />
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                className="relative bg-white dark:bg-slate-800 rounded-[32px] p-8 max-w-xs w-full shadow-2xl text-center overflow-y-auto max-h-[90vh] custom-scrollbar border border-slate-100 dark:border-slate-700"
                             >
-                                <X className="w-5 h-5" />
-                            </button>
+                                <button
+                                    onClick={() => setExplanation(null)}
+                                    className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
 
-                            <div className={`w-16 h-16 rounded-2xl ${explanation.color} flex items-center justify-center mx-auto mb-5`}>
-                                {React.cloneElement(explanation.icon as React.ReactElement, { className: "w-8 h-8" })}
-                            </div>
+                                <div className={`w-16 h-16 rounded-2xl ${explanation.color} flex items-center justify-center mx-auto mb-5`}>
+                                    {React.cloneElement(explanation.icon as React.ReactElement, { className: "w-8 h-8" })}
+                                </div>
 
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{explanation.title}</h3>
-                            <p className="text-slate-500 dark:text-slate-300 text-[14px] font-medium leading-relaxed mb-6">
-                                {explanation.description}
-                            </p>
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{explanation.title}</h3>
+                                <p className="text-slate-500 dark:text-slate-300 text-[14px] font-medium leading-relaxed mb-6">
+                                    {explanation.description}
+                                </p>
 
-                            <button
-                                onClick={() => setExplanation(null)}
-                                className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors text-[14px]"
-                            >
-                                Ho capito
-                            </button>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                                <button
+                                    onClick={() => setExplanation(null)}
+                                    className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors text-[14px]"
+                                >
+                                    Ho capito
+                                </button>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </AnimatePresence >
         </>
     );
 }

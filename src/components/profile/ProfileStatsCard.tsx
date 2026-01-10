@@ -97,7 +97,17 @@ export default function ProfileStatsCard({ xp = 0, score = 0, streak = 0 }: Prof
 
             {/* Streak Card */}
             <div
-                onClick={() => setExplanation(metrics.streak)}
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const event = new CustomEvent('streak_updated', {
+                        detail: {
+                            streak: streak || 1,
+                            isMilestone: true
+                        }
+                    });
+                    window.dispatchEvent(event);
+                }}
                 className="bg-white rounded-[32px] p-5 shadow-sm border border-slate-100/60 flex flex-col justify-between h-[140px] cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group"
             >
                 <div className="flex justify-between items-start">
