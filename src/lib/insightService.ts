@@ -211,10 +211,15 @@ export const insightService = {
         // =================================================================
         if (insights.length > 0) {
             // Deactivate old insights first
-            await supabase
+            const { error: updateError } = await supabase
                 .from('admin_insights')
                 .update({ is_active: false })
                 .eq('is_active', true);
+
+            if (updateError) {
+                console.error('insightService: Failed to deactivate old insights:', updateError);
+                throw new Error(`Errore Deactivate DB: ${updateError.message} (Probabile errore RLS)`);
+            }
 
             // Insert new insights
             const { data: inserted, error } = await supabase
@@ -223,8 +228,8 @@ export const insightService = {
                 .select();
 
             if (error) {
-                console.error('Failed to save insights:', error);
-                return [];
+                console.error('insightService: Failed to save insights:', error);
+                throw new Error(`Errore Salva DB: ${error.message} (Probabile errore RLS)`);
             }
 
             return inserted || [];

@@ -49,10 +49,16 @@ export default function AdminAnalyticsPage() {
     const handleGenerateInsights = async () => {
         setInsightsLoading(true);
         try {
+            console.log('AdminAnalyticsPage: Generating insights...');
             const newInsights = await insightService.generateInsights();
+            console.log('AdminAnalyticsPage: Insights generated:', newInsights.length);
             setInsights(newInsights);
-        } catch (err) {
+            if (newInsights.length === 0) {
+                alert("Analisi completata, ma non sono stati rilevati nuovi insight significativi con i dati attuali.");
+            }
+        } catch (err: any) {
             console.error('Failed to generate insights:', err);
+            alert(`Errore nella generazione degli insight: ${err.message || 'Errore sconosciuto'}`);
         } finally {
             setInsightsLoading(false);
         }
@@ -64,13 +70,16 @@ export default function AdminAnalyticsPage() {
     };
 
     const handleAnalyze = async () => {
+        if (!pastedData.trim()) return;
         setIsAnalyzing(true);
         try {
-            // Parse pasted data and generate insights
+            console.log('AdminAnalyticsPage: Analyzing pasted data...');
             const newInsights = await insightService.generateInsights();
             setInsights(newInsights);
-        } catch (err) {
+            alert("Analisi completata con successo!");
+        } catch (err: any) {
             console.error('Failed to analyze:', err);
+            alert(`Errore nell'analisi: ${err.message || 'Errore sconosciuto'}`);
         } finally {
             setIsAnalyzing(false);
         }
