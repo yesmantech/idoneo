@@ -9,3 +9,9 @@ export { default as StatusBadge, STATUS_PRESETS } from './StatusBadge';
 export { default as EmptyState } from './EmptyState';
 export { default as ConfirmDialog, useConfirmDialog } from './ConfirmDialog';
 export * from './AIInsightCard';
+
+// Dashboard Components
+export { default as LiveMetricsCard } from './LiveMetricsCard';
+export { default as PowerUsersCard } from './PowerUsersCard';
+export { default as QuickActionsPanel } from './QuickActionsPanel';
+
