@@ -11,6 +11,7 @@ import DashboardList from '@/components/profile/DashboardList';
 import BadgesBlock from '@/components/profile/BadgesBlock';
 import FriendsBlock from '@/components/profile/FriendsBlock';
 import { ProfileBackgroundDecor } from '@/components/ui/ProfileBackgroundDecor';
+import SEOHead from '@/components/seo/SEOHead';
 
 import { xpService } from '@/lib/xpService';
 
@@ -54,6 +55,11 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-[var(--background)] pb-24 relative overflow-hidden transition-colors duration-300">
+            <SEOHead
+                title={`${profile.nickname || 'Il mio Profilo'} | Idoneo`}
+                description="Gestisci la tua preparazione, guarda le tue statistiche e sfida i tuoi amici su Idoneo."
+                url="/profile"
+            />
 
             {/* Animated Background Decorations */}
             <ProfileBackgroundDecor />

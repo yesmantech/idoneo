@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { leaderboardService } from '@/lib/leaderboardService';
-import { Trophy, Zap, Gem, X } from 'lucide-react';
+import { Trophy, Zap, Flame, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProfileStatsCardProps {
     xp: number;
     score?: number;
+    streak?: number;
 }
 
 interface MetricDesc {
@@ -16,7 +17,7 @@ interface MetricDesc {
     color: string;
 }
 
-export default function ProfileStatsCard({ xp = 0, score = 0 }: ProfileStatsCardProps) {
+export default function ProfileStatsCard({ xp = 0, score = 0, streak = 0 }: ProfileStatsCardProps) {
     const [explanation, setExplanation] = useState<MetricDesc | null>(null);
 
     const metrics: Record<string, MetricDesc> = {
@@ -32,11 +33,11 @@ export default function ProfileStatsCard({ xp = 0, score = 0 }: ProfileStatsCard
             icon: <Zap className="w-5 h-5 text-emerald-500" fill="currentColor" />,
             color: "bg-emerald-50 text-emerald-500"
         },
-        gems: {
-            title: "Gemme",
-            description: "Valuta speciale che potrai usare in futuro per sbloccare contenuti esclusivi, temi e vantaggi extra.",
-            icon: <Gem className="w-5 h-5 text-cyan-500" fill="currentColor" />,
-            color: "bg-cyan-50 text-cyan-500"
+        streak: {
+            title: "Streak Giornaliera",
+            description: "I giorni consecutivi in cui hai completato almeno un quiz. Mantienila accesa ogni giorno per sbloccare badge speciali!",
+            icon: <Flame className="w-5 h-5 text-orange-500" fill="currentColor" />,
+            color: "bg-orange-50 text-orange-500"
         }
     };
 
@@ -94,19 +95,19 @@ export default function ProfileStatsCard({ xp = 0, score = 0 }: ProfileStatsCard
                 </div>
             </div>
 
-            {/* Gems Card */}
+            {/* Streak Card */}
             <div
-                onClick={() => setExplanation(metrics.gems)}
+                onClick={() => setExplanation(metrics.streak)}
                 className="bg-white rounded-[32px] p-5 shadow-sm border border-slate-100/60 flex flex-col justify-between h-[140px] cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group"
             >
                 <div className="flex justify-between items-start">
-                    <div className="w-12 h-12 rounded-2xl bg-cyan-50 flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
-                        <Gem className="w-6 h-6 text-cyan-500" fill="currentColor" />
+                    <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center group-hover:bg-orange-100 transition-colors">
+                        <Flame className="w-6 h-6 text-orange-500" fill="currentColor" />
                     </div>
                 </div>
                 <div>
-                    <div className="text-3xl font-black text-slate-900 tracking-tight">0</div>
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Gemme</div>
+                    <div className="text-3xl font-black text-slate-900 tracking-tight">{streak}</div>
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Streak</div>
                 </div>
             </div>
 

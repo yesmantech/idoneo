@@ -12,7 +12,7 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
     const [activeTab, setActiveTab] = useState<'prep' | 'xp'>(initialTab);
 
     return (
-        <div className="fixed inset-0 z-50 bg-[var(--background)] flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
+        <div className="fixed inset-0 z-[60] bg-[var(--background)] flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
             {/* Header */}
             <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--background)]/90 backdrop-blur-md sticky top-0 z-10 transition-colors">
                 <button

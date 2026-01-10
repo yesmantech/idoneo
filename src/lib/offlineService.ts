@@ -61,8 +61,8 @@ export const offlineService = {
         // 2. Fetch All Questions for this quiz
         // REFINED: We will fetch ALL questions for the subjects in this quiz.
         const { data: structure } = await supabase
-            .from('structure_nodes')
-            .select('id, subject_id, total_questions')
+            .from('quiz_subject_rules')
+            .select('id, subject_id, question_count')
             .eq('quiz_id', quizId);
 
         if (!structure || structure.length === 0) throw new Error("No structure found for quiz");

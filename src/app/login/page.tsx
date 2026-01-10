@@ -6,6 +6,7 @@ import {
     Cloud, Sun, Moon, Music,
     Gift, Crown, Bell, Sparkles
 } from "lucide-react";
+import SEOHead from '@/components/seo/SEOHead';
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -90,6 +91,10 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans flex flex-col justify-center overflow-hidden relative transition-colors duration-500">
+            <SEOHead
+                title={isLogin ? "Accedi | Idoneo" : "Inizia ora | Idoneo"}
+                description="Entra nel mondo di Idoneo e inizia a prepararti per il tuo futuro nelle Forze Armate e di Polizia."
+            />
 
             {/* Decorative Background Icons */}
             <div className="absolute inset-0 pointer-events-none">

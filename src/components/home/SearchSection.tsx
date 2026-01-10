@@ -2,6 +2,7 @@ import React from "react";
 import { Search, Command } from "lucide-react";
 import { useSpotlight } from "@/context/SpotlightContext";
 import { hapticLight } from "@/lib/haptics";
+import { analytics } from "@/lib/analytics";
 
 // ============================================
 // SEARCH SECTION - Spotlight Trigger
@@ -17,6 +18,7 @@ export default function SearchSection({ items = [] }: SearchSectionProps) {
 
     const handleClick = () => {
         hapticLight();
+        analytics.track('search_used', { context: 'homepage_trigger' });
         open();
     };
 

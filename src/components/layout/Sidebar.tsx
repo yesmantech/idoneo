@@ -4,6 +4,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
 import MobileDrawer from './MobileDrawer';
 import { Home, User, Trophy, Newspaper, Shield, Heart, Briefcase, ChevronLeft, ChevronRight, LogIn } from 'lucide-react';
+import { StreakBadge } from '../gamification/StreakBadge';
 
 const MENU_ITEMS = [
     { icon: Home, label: 'Home', path: '/' },
@@ -117,19 +118,23 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                 </div>
             </div>
 
-            {/* User Footer */}
-            <div className={`p-4 border-t border-slate-200/50 bg-white ${collapsed ? 'flex justify-center' : ''}`}>
+            {/* User Footer with Streak */}
+            <div className={`p-4 border-t border-slate-200/50 bg-white ${collapsed ? 'flex flex-col gap-2 items-center' : ''}`}>
+
+                {/* Streak Badge (Tier S) */}
+                <StreakBadge collapsed={collapsed} />
+
                 <Link
                     to={user ? "/profile" : "/login"}
-                    className={`flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all group ${collapsed ? 'justify-center' : ''}`}
+                    className={`flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all group ${collapsed ? 'justify-center w-full' : ''}`}
                     onClick={() => setMobileOpen(false)}
                 >
                     {user && profile?.avatar_url ? (
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-[#00B1FF]/20 transition-all shadow-sm">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-[#00B1FF]/20 transition-all shadow-sm shrink-0">
                             <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                         </div>
                     ) : (
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#00B1FF]/10 group-hover:text-[#00B1FF] ring-2 ring-transparent group-hover:ring-[#00B1FF]/20 transition-all shadow-sm">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#00B1FF]/10 group-hover:text-[#00B1FF] ring-2 ring-transparent group-hover:ring-[#00B1FF]/20 transition-all shadow-sm shrink-0">
                             {user ? <User className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
                         </div>
                     )}

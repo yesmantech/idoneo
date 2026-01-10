@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
 import { Home, User, Trophy, Newspaper, Shield, Heart, Briefcase, X, LogIn } from 'lucide-react';
+import { StreakBadge } from '../gamification/StreakBadge';
 
 const MENU_ITEMS = [
     { icon: Home, label: 'Home', path: '/' },
@@ -109,6 +110,11 @@ export default function MobileDrawer() {
 
                 {/* Footer / User */}
                 <div className="p-4 border-t border-slate-200/50 bg-white">
+                    {/* Tier S Streak Badge */}
+                    <div className="mb-4">
+                        <StreakBadge />
+                    </div>
+
                     <Link
                         to={user ? "/profile" : "/login"}
                         onClick={() => setMobileOpen(false)}

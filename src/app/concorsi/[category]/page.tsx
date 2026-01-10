@@ -4,6 +4,7 @@ import { useConcorsoData } from '@/hooks/useConcorsoData';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Shield, Sparkles, X, ChevronRight, Stethoscope, Briefcase, Scale, Gavel, GraduationCap, Car } from 'lucide-react';
 import TierSLoader from '@/components/ui/TierSLoader';
+import SEOHead from '@/components/seo/SEOHead';
 
 // =============================================================================
 // CONCORSO HUB PAGE - Tier S Redesign
@@ -44,6 +45,11 @@ export default function ConcorsoHubPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-24 transition-colors duration-300">
+      <SEOHead
+        title={`${categoryData.title} | Concorsi 2025`}
+        description={`Scopri tutti i concorsi per ${categoryData.title}. Preparati con simulatori ufficiali e statistiche avanzate.`}
+        url={`/concorsi/${category}`}
+      />
       {/* ===================================================================== */}
       {/* 1. IMMERSIVE HEADER */}
       {/* ===================================================================== */}

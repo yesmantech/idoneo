@@ -110,27 +110,51 @@ export default function OnboardingSpotlight() {
             return;
         }
 
-        const findTarget = () => {
+        const findTarget = (shouldScroll = false) => {
             const target = document.querySelector(currentStep.targetSelector);
             if (target) {
                 const rect = target.getBoundingClientRect();
                 setTargetRect(rect);
 
+                // Auto-scroll to target if it's not well-positioned
+                // Only scroll if explicitly requested (e.g. new step)
+                if (shouldScroll) {
+                    const isOutOfView = rect.top < 100 || rect.bottom > window.innerHeight - 100;
+                    if (isOutOfView) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+
                 // Calculate tooltip position
                 const padding = 24;
+                const tooltipHeight = 220; // Estimated height for flip logic (generous)
                 let x = rect.left + rect.width / 2;
                 let y = rect.bottom + padding;
                 let arrowDirection: 'up' | 'down' | 'left' | 'right' = 'up';
 
-                // Adjust based on position preference
-                if (currentStep.position === 'top') {
+                // Initial request
+                let requestedPos = currentStep.position || 'bottom';
+
+                // Smart Flip: Bidirectional collision detection
+                // 1. If bottom is requested but doesn't fit, try top
+                if (requestedPos === 'bottom' && y + tooltipHeight > window.innerHeight) {
+                    requestedPos = 'top';
+                }
+                // 2. If top is requested but doesn't fit (e.g. element near navbar), force bottom
+                // Use a safe margin (e.g. 200px) to ensure tooltip fits
+                else if (requestedPos === 'top' && rect.top < 220) {
+                    requestedPos = 'bottom';
+                }
+
+                // Adjust based on final position
+                if (requestedPos === 'top') {
                     y = rect.top - padding;
                     arrowDirection = 'down';
-                } else if (currentStep.position === 'left') {
+                } else if (requestedPos === 'left') {
                     x = rect.left - padding;
                     y = rect.top + rect.height / 2;
                     arrowDirection = 'right';
-                } else if (currentStep.position === 'right') {
+                } else if (requestedPos === 'right') {
                     x = rect.right + padding;
                     y = rect.top + rect.height / 2;
                     arrowDirection = 'left';
@@ -144,15 +168,27 @@ export default function OnboardingSpotlight() {
             }
         };
 
-        // Initial find with small delay for DOM to settle
-        const timer = setTimeout(findTarget, 100);
+        // Throttled update function to prevent layout thrashing
+        let throttleTimeout: NodeJS.Timeout | null = null;
+
+        const handleUpdate = () => {
+            if (throttleTimeout === null) {
+                throttleTimeout = setTimeout(() => {
+                    findTarget(false); // Do not auto-scroll on updates
+                    throttleTimeout = null;
+                }, 50); // Limit updates to ~20fps
+            }
+        };
+
+        // Initial find with small delay for DOM to settle - Auto-scroll allowed here
+        const timer = setTimeout(() => findTarget(true), 100);
 
         // Re-find on scroll/resize
-        const handleUpdate = () => findTarget();
         window.addEventListener('scroll', handleUpdate, true);
         window.addEventListener('resize', handleUpdate);
 
         return () => {
+            if (throttleTimeout) clearTimeout(throttleTimeout);
             clearTimeout(timer);
             window.removeEventListener('scroll', handleUpdate, true);
             window.removeEventListener('resize', handleUpdate);
@@ -176,17 +212,38 @@ export default function OnboardingSpotlight() {
 
     const progress = steps.length > 0 ? ((currentStepIndex + 1) / steps.length) * 100 : 0;
 
-    // Calculate tooltip final position
+    // Calculate tooltip final position with Viewport Clamping
     const getTooltipStyle = () => {
-        if (currentStep?.position === 'top') {
-            return {
-                left: Math.max(16, Math.min(tooltipPosition.x - 160, window.innerWidth - 336)),
-                bottom: window.innerHeight - tooltipPosition.y + 8,
-            };
+        const isTop = tooltipPosition.arrowDirection === 'down';
+        const horizontalOffset = Math.max(16, Math.min(tooltipPosition.x - 160, window.innerWidth - 336));
+
+        // Get actual height or use estimate
+        const currentHeight = tooltipRef.current?.offsetHeight || 220;
+        const safeMargin = 16;
+        const maxTop = window.innerHeight - currentHeight - safeMargin;
+        const minTop = safeMargin;
+
+        let finalTop = 0;
+
+        if (isTop) {
+            // Position above target
+            // Anchor is at bottom of tooltip
+            finalTop = tooltipPosition.y - currentHeight - 12;
+
+            // Note: We use 'top' for everything now to make clamping easier
+        } else {
+            // Position below target
+            // Anchor is at top of tooltip
+            finalTop = tooltipPosition.y + 12;
         }
+
+        // CLAMPING: Force tooltip to stay within vertical safe area
+        // This overrides placement to ensure text is ALWAYS visible
+        finalTop = Math.max(minTop, Math.min(finalTop, maxTop));
+
         return {
-            left: Math.max(16, Math.min(tooltipPosition.x - 160, window.innerWidth - 336)),
-            top: tooltipPosition.y + 8,
+            left: horizontalOffset,
+            top: finalTop,
         };
     };
 
@@ -272,17 +329,23 @@ export default function OnboardingSpotlight() {
                         )}
 
                         {/* Pointer Arrow */}
-                        {targetRect && tooltipPosition.arrowDirection === 'up' && (
+                        {targetRect && (
                             <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="absolute pointer-events-none"
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="absolute pointer-events-none z-10"
                                 style={{
-                                    left: targetRect.left + targetRect.width / 2 - 12,
-                                    top: targetRect.bottom + 8,
+                                    left: tooltipPosition.x - 12,
+                                    top: tooltipPosition.arrowDirection === 'up' ? tooltipPosition.y : tooltipPosition.y - 12,
                                 }}
                             >
-                                <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+                                <svg
+                                    width="24"
+                                    height="12"
+                                    viewBox="0 0 24 12"
+                                    fill="none"
+                                    className={tooltipPosition.arrowDirection === 'down' ? 'rotate-180' : ''}
+                                >
                                     <path d="M12 0L24 12H0L12 0Z" fill="white" className="dark:fill-slate-900" />
                                 </svg>
                             </motion.div>
@@ -351,7 +414,7 @@ export default function OnboardingSpotlight() {
                                 </button>
 
                                 <div className="flex items-center gap-2">
-                                    {currentStepIndex > 0 && (
+                                    {currentStepIndex > 0 && currentStepIndex < steps.length - 1 && (
                                         <button
                                             onClick={handlePrevious}
                                             className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1"

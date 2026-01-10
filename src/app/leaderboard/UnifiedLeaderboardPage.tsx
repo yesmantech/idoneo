@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
+import { xpService } from '@/lib/xpService';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingProvider';
 import { Info, Trophy, Zap, Clock } from 'lucide-react';
@@ -10,6 +11,7 @@ import LeaderboardView from '@/components/leaderboard/LeaderboardView';
 import LeaderboardViewLegacy from '@/components/leaderboard/LeaderboardViewLegacy';
 import InfoModal from '@/components/leaderboard/InfoModal';
 import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';
+import SEOHead from '@/components/seo/SEOHead';
 
 function LeagueCountdown() {
     const [timeLeft, setTimeLeft] = useState('--g --o --m');
@@ -148,10 +150,13 @@ export default function UnifiedLeaderboardPage() {
                 let personalEntry: LeaderboardEntry | null = null;
 
                 if (selection === 'xp') {
+                    // Fetch Active Season ID
+                    const activeSeasonId = await xpService.getActiveSeasonId();
+
                     const [topEntries, total, myRank] = await Promise.all([
-                        leaderboardService.getXPLeaderboard(),
-                        leaderboardService.getXPParticipantsCount(),
-                        user ? leaderboardService.getUserXPRank(user.id) : null
+                        leaderboardService.getXPLeaderboard(activeSeasonId),
+                        leaderboardService.getXPParticipantsCount(activeSeasonId),
+                        user ? leaderboardService.getUserXPRank(user.id, activeSeasonId) : null
                     ]);
                     entries = topEntries;
                     pCount = total;
@@ -195,14 +200,28 @@ export default function UnifiedLeaderboardPage() {
     const [showInfoPage, setShowInfoPage] = useState(false);
     const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
 
-    // Auto-Onboarding Check
+    // Auto-Onboarding Check for Global XP
     useEffect(() => {
         const hasSeen = localStorage.getItem('idoneo_leaderboard_onboarding');
-        if (!hasSeen) {
+        if (!hasSeen && selection === 'xp') {
             setInfoType('xp');
             setTimeout(() => setShowInfoModal(true), 500);
         }
-    }, []);
+    }, [selection]);
+
+    // Auto-Onboarding Check for Contest specific leaderboard
+    useEffect(() => {
+        if (selection !== 'xp') {
+            // It's a contest/quiz leaderboard
+            const hasSeenContestInfo = localStorage.getItem('idoneo_contest_leaderboard_onboarding');
+            if (!hasSeenContestInfo) {
+                setInfoType('prep');
+                setTimeout(() => setShowInfoModal(true), 500);
+                localStorage.setItem('idoneo_contest_leaderboard_onboarding', 'true');
+            }
+        }
+    }, [selection]);
+
 
     const handleCloseModal = () => {
         setShowInfoModal(false);
@@ -216,6 +235,11 @@ export default function UnifiedLeaderboardPage() {
 
     return (
         <div className="flex flex-col h-full overflow-hidden bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
+            <SEOHead
+                title="Classifica Globale | Sfida gli altri candidati"
+                description="Guarda la tua posizione nelle classifiche di Idoneo. Confrontati con gli altri candidati e scala la Gold League."
+                url="/leaderboard"
+            />
 
             {/* Header Area - Desktop Optimized */}
             <div className="flex-none p-4 lg:p-8 pt-safe relative z-40">
@@ -270,8 +294,8 @@ export default function UnifiedLeaderboardPage() {
             </div>
 
             {/* Main Content Area - Responsive Card */}
-            <div className="flex-1 overflow-hidden relative w-full max-w-5xl mx-auto px-4 lg:px-8 pb-4 lg:pb-8">
-                <div data-onboarding="lb-ranking" className="relative h-full bg-[var(--card)] rounded-t-[32px] lg:rounded-[32px] shadow-lg flex flex-col border border-[var(--card-border)] overflow-hidden pb-safe">
+            <div className="flex-1 overflow-hidden relative w-full max-w-5xl mx-auto px-4 lg:px-8 pb-0 lg:pb-8">
+                <div data-onboarding="lb-ranking" className="relative h-full bg-[var(--card)] rounded-t-[32px] lg:rounded-[32px] shadow-lg flex flex-col border-x border-t border-[var(--card-border)] overflow-hidden pb-safe">
                     {/* Status Area: Subtitle + Participants + Timer */}
                     {!loading && data.length > 0 && (
                         <div className="flex-none flex flex-col items-center justify-center pt-4 pb-3 px-4 border-b border-slate-100 dark:border-slate-700 bg-[var(--card)] space-y-2">
@@ -340,3 +364,4 @@ export default function UnifiedLeaderboardPage() {
         </div>
     );
 }
+

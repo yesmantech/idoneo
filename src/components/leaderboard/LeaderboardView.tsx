@@ -59,7 +59,7 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
 
 
             <div className="flex-1 overflow-y-auto scrollbar-hide relative bg-[var(--card)]">
-                <div className="px-4 pb-20 pt-4">
+                <div className="px-4 pb-24 pt-4">
                     {/* PODIUM */}
                     <div className="mb-8">
                         <Podium top3={top3} metricLabel={metricLabel} />

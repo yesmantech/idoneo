@@ -41,6 +41,10 @@ const LeaderboardPage = React.lazy(() => import('./app/leaderboard/page'));
 
 // Informational Pages
 const PunteggiPage = React.lazy(() => import('./app/come-funziona/punteggi/page'));
+const PreparazionePage = React.lazy(() => import('./app/preparazione/page'));
+
+// Demo Pages
+const FlamesDemoPage = React.lazy(() => import('./app/demo/flames/page'));
 
 // Admin Pages
 const AdminDashboardPage = React.lazy(() => import('./app/admin/dashboard/page'));
@@ -56,6 +60,7 @@ const AdminUploadCsvPage = React.lazy(() => import('./app/admin/upload-csv/page'
 const AdminRulesPage = React.lazy(() => import('./app/admin/rules/page'));
 const AdminLeaderboardPage = React.lazy(() => import('./app/admin/leaderboard/page'));
 const AdminUsersPage = React.lazy(() => import('./app/admin/users/page'));
+const AdminReportsPage = React.lazy(() => import('./app/admin/reports/page'));
 
 // Blog Admin
 const AdminBlogListPage = React.lazy(() => import('./app/admin/blog/page'));
@@ -78,6 +83,9 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { initializeNativeApp } from './lib/nativeConfig';
 import OnboardingSpotlight from './components/onboarding/OnboardingSpotlight';
 import SpotlightModal from './components/spotlight/SpotlightModal';
+import { StreakCelebration } from './components/gamification/StreakCelebration';
+import { useAuth } from './context/AuthContext';
+import { streakService } from './lib/streakService';
 
 // Loading fallback for lazy-loaded components
 const AdminLoading = () => (
@@ -88,6 +96,20 @@ const AdminLoading = () => (
         </div>
     </div>
 );
+
+
+// Component to handle side effects that require AuthContext
+function AppEffects() {
+    const { user } = useAuth();
+
+    useEffect(() => {
+        if (user) {
+            streakService.checkAndUpdateStreak(user.id);
+        }
+    }, [user]);
+
+    return null;
+}
 
 export default function App() {
     // Initialize native app features on mount
@@ -104,8 +126,10 @@ export default function App() {
                             <OnboardingProvider>
                                 <SpotlightProvider>
                                     <WaitlistGuard>
+                                        <AppEffects />
                                         <OnboardingSpotlight />
                                         <SpotlightModal />
+                                        <StreakCelebration />
                                         <Suspense fallback={<AdminLoading />}>
                                             <Routes>
                                                 <Route path="/login" element={<LoginPage />} />
@@ -160,6 +184,10 @@ export default function App() {
 
                                                 {/* Informational Pages */}
                                                 <Route path="/come-funziona/punteggi" element={<MainLayout><PunteggiPage /></MainLayout>} />
+                                                <Route path="/preparazione" element={<PreparazionePage />} />
+
+                                                {/* Demo Pages */}
+                                                <Route path="/demo/flames" element={<FlamesDemoPage />} />
 
                                                 {/* Admin - Protected with AdminGuard + Lazy loaded */}
                                                 <Route element={
@@ -183,6 +211,7 @@ export default function App() {
                                                     <Route path="/admin/stats" element={<StatsPage />} />
                                                     <Route path="/admin/leaderboard" element={<AdminLeaderboardPage />} />
                                                     <Route path="/admin/users" element={<AdminUsersPage />} />
+                                                    <Route path="/admin/reports" element={<AdminReportsPage />} />
 
                                                     {/* Admin Blog */}
                                                     <Route path="/admin/blog" element={<AdminBlogListPage />} />

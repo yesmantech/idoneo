@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Clock, HelpCircle, Trophy, ChevronRight, AlertCircle, Play } from "lucide-react";
+import { analytics } from "@/lib/analytics";
 
 // Helper to normalize DB answers
 function normalizeDBAnswer(val: string | null | undefined): string | null {
@@ -190,6 +191,14 @@ export default function OfficialQuizStarterPage() {
                 .single();
 
             if (attemptError || !attempt) throw attemptError;
+
+            // Track quiz started
+            analytics.track('quiz_started', {
+                quiz_id: details.id,
+                title: details.title,
+                mode: 'official',
+                questions_count: richAnswers.length
+            });
 
             // 5. Navigate
             const timeParam = details.time_limit ? `time=${details.time_limit}` : "time=0";

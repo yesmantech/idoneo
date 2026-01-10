@@ -374,7 +374,7 @@ export default function BlogPostPage() {
             {/* ============================================================= */}
             {/* HEADER - Glassmorphism UI */}
             {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#11141a]/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 pt-safe transition-colors">
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 pt-safe transition-colors">
                 <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
                     <button
                         onClick={() => { hapticLight(); navigate('/blog'); }}

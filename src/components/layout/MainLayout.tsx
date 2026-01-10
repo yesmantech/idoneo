@@ -57,7 +57,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const hideBottomNav = location.pathname.startsWith('/blog') ||
         location.pathname.startsWith('/concorsi') ||
         location.pathname.startsWith('/quiz') ||
-        location.pathname === '/profile/settings';
+        location.pathname === '/profile/settings' ||
+        location.pathname.startsWith('/profile/stats') ||
+        location.pathname.startsWith('/preparazione');
 
     // Pages that handle their own safe area in their headers
     const hasOwnSafeArea = location.pathname === '/' ||
@@ -69,6 +71,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
     // Check if we're on the home page for the fixed top bar color
     const isHomePage = location.pathname === '/';
+
+    // Check if we're on the leaderboard for full-height background
+    const isLeaderboard = location.pathname.startsWith('/leaderboard');
 
     return (
         <div className="flex min-h-screen bg-[var(--background)] font-sans text-[var(--foreground)] transition-colors duration-300">
@@ -90,7 +95,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <div className="flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-in-out">
 
                 <main
-                    className={`flex-1 ${hideBottomNav ? 'pb-8' : 'pb-28'} lg:pb-8 animate-in fade-in duration-500`}
+                    className={`flex-1 ${hideBottomNav ? 'pb-8' : (isLeaderboard ? 'pb-0' : 'pb-28')} lg:pb-8 animate-in fade-in duration-500`}
                     style={isNativeApp && !isAdmin && !hasOwnSafeArea ? { paddingTop: 'env(safe-area-inset-top, 0px)' } : undefined}
                 >
                     {children}

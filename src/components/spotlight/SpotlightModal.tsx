@@ -26,6 +26,7 @@ import { leaderboardService } from '@/lib/leaderboardService';
 import { supabase } from '@/lib/supabaseClient';
 import { hapticLight, hapticSelection } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/lib/analytics';
 
 // ============================================
 // SPOTLIGHT MODAL - TIER S
@@ -249,6 +250,11 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
         switch (item.type) {
             case 'search':
                 const searchItem = item.data as SearchItem;
+                analytics.track('search_result_selected', {
+                    item_title: searchItem.title,
+                    item_type: searchItem.type,
+                    query: query
+                });
                 addRecentSearch(searchItem.title);
                 close();
                 navigate(searchItem.url);
@@ -272,6 +278,11 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchResults[0]) {
+            analytics.track('search_used', {
+                query: query,
+                results_count: searchResults.length,
+                context: 'spotlight_keyboard_enter'
+            });
             addRecentSearch(query);
             close();
             navigate(searchResults[0].url);

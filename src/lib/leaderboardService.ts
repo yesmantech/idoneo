@@ -163,11 +163,19 @@ export const leaderboardService = {
         return count || 0;
     },
 
-    async getXPParticipantsCount(): Promise<number> {
-        const { count, error } = await supabase
-            .from('profiles')
-            .select('*', { count: 'exact', head: true })
-            .not('total_xp', 'is', null);
+    async getXPParticipantsCount(seasonId: string | null = null): Promise<number> {
+        let query = supabase.from('profiles').select('*', { count: 'exact', head: true });
+
+        if (seasonId) {
+            query = supabase
+                .from('user_xp')
+                .select('*', { count: 'exact', head: true })
+                .eq('season_id', seasonId);
+        } else {
+            query = query.not('total_xp', 'is', null);
+        }
+
+        const { count, error } = await query;
 
         if (error) return 0;
         return count || 0;
@@ -175,6 +183,7 @@ export const leaderboardService = {
 
     // 2c. Get Specific User Rank
     async getUserSkillRank(userId: string, quizId: string): Promise<LeaderboardEntry | null> {
+        // ... (existing implementation) ...
         // Fetch user's score first
         const { data: userRow, error: scoreError } = await supabase
             .from('concorso_leaderboard')
@@ -220,7 +229,43 @@ export const leaderboardService = {
         };
     },
 
-    async getUserXPRank(userId: string): Promise<LeaderboardEntry | null> {
+    async getUserXPRank(userId: string, seasonId: string | null = null): Promise<LeaderboardEntry | null> {
+        if (seasonId) {
+            // Seasonal Rank
+            const { data: xpRow, error: scoreError } = await supabase
+                .from('user_xp')
+                .select('xp')
+                .eq('user_id', userId)
+                .eq('season_id', seasonId)
+                .maybeSingle(); // Use maybeSingle to avoid 406 if no rows
+
+            // If no record for this season, they are unranked (or rank = last + 1, but technically unranked)
+            if (scoreError || !xpRow) return null;
+
+            // Count higher
+            const { count: higherCount, error: rankError } = await supabase
+                .from('user_xp')
+                .select('*', { count: 'exact', head: true })
+                .eq('season_id', seasonId)
+                .gt('xp', xpRow.xp);
+
+            if (rankError) return null;
+
+            const { data: profile } = await supabase.from('profiles').select('nickname, avatar_url').eq('id', userId).single();
+
+            return {
+                rank: (higherCount || 0) + 1,
+                user: {
+                    id: userId,
+                    nickname: profile?.nickname || 'Io',
+                    avatarUrl: profile?.avatar_url
+                },
+                score: xpRow.xp,
+                isCurrentUser: true
+            };
+        }
+
+        // Default: All Time Rank
         // Fetch user's total_xp
         const { data: profileRow, error: scoreError } = await supabase
             .from('profiles')

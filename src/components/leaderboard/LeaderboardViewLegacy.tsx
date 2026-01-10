@@ -48,7 +48,7 @@ export default function LeaderboardViewLegacy({ data, loading, theme, metricLabe
             <Podium top3={top3} theme={theme} metricLabel={metricLabel} />
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3 scrollbar-thin scrollbar-thumb-gray-200">
+            <div className="flex-1 overflow-y-auto px-6 pb-24 space-y-3 scrollbar-thin scrollbar-thumb-gray-200">
                 {list.map(entry => (
                     <RankingRow key={entry.rank} entry={entry} theme={theme} metricLabel={metricLabel} />
                 ))}

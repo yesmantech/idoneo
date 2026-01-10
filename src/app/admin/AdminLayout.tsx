@@ -13,6 +13,7 @@ const navItems = [
     { path: "/admin/users", label: "Utenti", exactMatch: false, color: "text-indigo-400", borderColor: "border-indigo-900", hoverBorder: "hover:border-indigo-500" },
     { path: "/admin/rules", label: "Regole Simulazione", exactMatch: false, color: "text-rose-400", borderColor: "border-rose-900", hoverBorder: "hover:border-rose-500" },
     { path: "/admin/upload-csv", label: "Import CSV", exactMatch: false, color: "text-orange-400", borderColor: "border-orange-900", hoverBorder: "hover:border-orange-500" },
+    { path: "/admin/analytics", label: "Analisi & AI", exactMatch: false, color: "text-cyan-400", borderColor: "border-cyan-900", hoverBorder: "hover:border-cyan-500" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

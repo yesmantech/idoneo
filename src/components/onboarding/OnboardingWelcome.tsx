@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ChevronRight, X } from 'lucide-react';
+import { ChevronRight, X, Search, FileText, TrendingUp, Trophy, Sparkles } from 'lucide-react';
 import { hapticLight, hapticSuccess } from '@/lib/haptics';
+import { useAuth } from '@/context/AuthContext';
 
 // ============================================
-// ONBOARDING WELCOME SCREEN - TIER S
-// Beautiful intro screen for first-time users
+// ONBOARDING WELCOME SCREEN - TIER S V2
+// Premium intro screen for first-time users
 // ============================================
 
 interface OnboardingWelcomeProps {
@@ -15,7 +16,161 @@ interface OnboardingWelcomeProps {
     onSkip: () => void;
 }
 
+// ============================================
+// TIER S ANIMATED CHECKMARK - FLAME STYLE
+// Uses same visual language as AnimatedFlame
+// ============================================
+
+function AnimatedLogo() {
+    const size = 100;
+    const glowColor = 'rgba(0, 177, 255, 0.5)';
+    const sparkleColors = ['bg-cyan-300', 'bg-emerald-300', 'bg-sky-300', 'bg-teal-300'];
+
+    return (
+        <div className="relative" style={{ width: size, height: size }}>
+            {/* Outer Glow - same as flame */}
+            <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                    background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
+                    filter: 'blur(25px)',
+                }}
+                animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0.8, 0.5],
+                }}
+                transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+            />
+
+            {/* Main Checkmark SVG - flame style */}
+            <motion.svg
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="relative z-10 w-full h-full drop-shadow-xl"
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+                <defs>
+                    {/* Outer gradient - like flame outer */}
+                    <linearGradient id="checkOuter" x1="50%" y1="0%" x2="50%" y2="100%">
+                        <stop offset="0%" stopColor="#00D4AA" />
+                        <stop offset="50%" stopColor="#00B1FF" />
+                        <stop offset="100%" stopColor="#0090CC" />
+                    </linearGradient>
+
+                    {/* Inner gradient - like flame inner */}
+                    <linearGradient id="checkInner" x1="50%" y1="0%" x2="50%" y2="100%">
+                        <stop offset="0%" stopColor="#00E5C0" />
+                        <stop offset="100%" stopColor="#00B1FF" />
+                    </linearGradient>
+
+                    {/* Highlight gradient */}
+                    <linearGradient id="checkHighlight" x1="50%" y1="0%" x2="50%" y2="100%">
+                        <stop offset="0%" stopColor="#FFFFFF" />
+                        <stop offset="100%" stopColor="#B0F0FF" />
+                    </linearGradient>
+
+                    {/* Stroke gradient */}
+                    <linearGradient id="checkStroke" x1="50%" y1="0%" x2="50%" y2="100%">
+                        <stop offset="0%" stopColor="#FFFFFF" />
+                        <stop offset="100%" stopColor="#00D4AA" />
+                    </linearGradient>
+                </defs>
+
+                {/* Outer circle - main body */}
+                <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="url(#checkOuter)"
+                    stroke="url(#checkStroke)"
+                    strokeWidth="3"
+                    animate={{
+                        r: [40, 41, 40],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+
+                {/* Inner circle - core */}
+                <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="32"
+                    fill="url(#checkInner)"
+                    animate={{ opacity: [0.9, 1, 0.9], scale: [1, 1.02, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+
+                {/* Checkmark path */}
+                <motion.path
+                    d="M30 50 L45 65 L70 35"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ delay: 0.3, duration: 0.6, ease: 'easeOut' }}
+                    style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                />
+
+                {/* Highlight arc - like flame highlight */}
+                <motion.path
+                    d="M25 35 Q20 50 28 60"
+                    fill="url(#checkHighlight)"
+                    opacity="0.5"
+                    animate={{ opacity: [0.4, 0.7, 0.4], y: [0, -2, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
+                />
+
+                {/* Shine - like flame shine */}
+                <motion.ellipse
+                    cx="35"
+                    cy="32"
+                    rx="8"
+                    ry="6"
+                    fill="white"
+                    opacity="0.4"
+                    animate={{ opacity: [0.3, 0.5, 0.3] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+            </motion.svg>
+
+            {/* Sparkles - same as flame */}
+            {[...Array(5)].map((_, i) => (
+                <motion.div
+                    key={i}
+                    className={`absolute w-2 h-2 ${sparkleColors[i % sparkleColors.length]} rounded-full`}
+                    style={{
+                        top: `${8 + (i * 12) % 50}%`,
+                        left: i % 2 === 0 ? `${3 + i * 5}%` : `${80 + i * 3}%`,
+                    }}
+                    animate={{
+                        opacity: [0, 1, 0],
+                        scale: [0.4, 1.1, 0.4],
+                        y: [0, -12, 0],
+                    }}
+                    transition={{
+                        duration: 1 + i * 0.15,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: i * 0.25,
+                    }}
+                />
+            ))}
+        </div>
+    );
+}
+
+
 export default function OnboardingWelcome({ onStartTour, onSkip }: OnboardingWelcomeProps) {
+    const { profile } = useAuth();
 
     const handleStart = () => {
         hapticSuccess();
@@ -27,157 +182,119 @@ export default function OnboardingWelcome({ onStartTour, onSkip }: OnboardingWel
         onSkip();
     };
 
+    const features = [
+        { icon: Search, text: 'Cerca i concorsi' },
+        { icon: FileText, text: 'Simula le prove' },
+        { icon: TrendingUp, text: 'Monitora i progressi' },
+        { icon: Trophy, text: 'Scala le classifiche' },
+    ];
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
         >
             {/* Backdrop */}
             <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl"
+                className="absolute inset-0 bg-black/60 backdrop-blur-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                onClick={handleSkip}
             />
-
-            {/* Floating particles */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {[...Array(20)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute w-2 h-2 rounded-full bg-[#00B1FF]/30"
-                        initial={{
-                            x: Math.random() * window.innerWidth,
-                            y: Math.random() * window.innerHeight,
-                            scale: Math.random() * 0.5 + 0.5,
-                        }}
-                        animate={{
-                            y: [null, Math.random() * -200 - 100],
-                            opacity: [0.3, 0.8, 0],
-                        }}
-                        transition={{
-                            duration: Math.random() * 3 + 3,
-                            repeat: Infinity,
-                            delay: Math.random() * 2,
-                        }}
-                    />
-                ))}
-            </div>
 
             {/* Content Card */}
             <motion.div
-                initial={{ scale: 0.9, y: 30, opacity: 0 }}
+                initial={{ scale: 0.9, y: 40, opacity: 0 }}
                 animate={{ scale: 1, y: 0, opacity: 1 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.1 }}
-                className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl overflow-hidden"
+                transition={{ type: 'spring', damping: 25, stiffness: 300, delay: 0.1 }}
+                className="relative w-full max-w-[340px] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden"
             >
                 {/* Skip button */}
                 <button
                     onClick={handleSkip}
-                    className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                 </button>
 
-                {/* Hero Section */}
-                <div className="relative bg-gradient-to-br from-[#00B1FF] via-[#00D4AA] to-[#00B1FF] p-8 pt-12 pb-16">
-                    {/* Decorative circles */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+                {/* Header Section */}
+                <div className="relative pt-8 pb-6 px-6 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900 border-b border-slate-100 dark:border-slate-800">
+                    {/* Subtle gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#00B1FF]/5 to-[#00D4AA]/5" />
 
-                    {/* Mascot/Icon */}
-                    <motion.div
-                        initial={{ scale: 0, rotate: -30 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: 'spring', damping: 15, delay: 0.2 }}
-                        className="relative mx-auto w-24 h-24 bg-white rounded-[28px] shadow-xl flex items-center justify-center"
-                    >
-                        <span className="text-5xl">📚</span>
+                    <div className="relative flex flex-col items-center">
+                        <AnimatedLogo />
 
-                        {/* Sparkle badge */}
                         <motion.div
-                            className="absolute -top-2 -right-2 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center shadow-lg"
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{ duration: 2, repeat: Infinity }}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="text-center mt-5"
                         >
-                            <Sparkles className="w-4 h-4 text-white" />
+                            <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+                                Ciao{profile?.nickname ? `, ${profile.nickname}` : ''}! 👋
+                            </h1>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                                Benvenuto su <span className="font-bold text-[#00B1FF]">Idoneo</span>
+                            </p>
                         </motion.div>
-                    </motion.div>
-
-                    {/* Welcome text */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="text-center mt-6"
-                    >
-                        <h1 className="text-2xl font-black text-white mb-2">
-                            Ciao! 👋
-                        </h1>
-                        <p className="text-white/80 font-medium">
-                            Benvenuto su Idoneo
-                        </p>
-                    </motion.div>
+                    </div>
                 </div>
 
-                {/* Bottom wave decoration */}
-                <svg className="absolute left-0 right-0" style={{ bottom: 'calc(100% - 200px)' }} viewBox="0 0 400 30" fill="none" preserveAspectRatio="none">
-                    <path d="M0 30V15C50 0 100 25 150 20C200 15 250 0 300 10C350 20 375 5 400 15V30H0Z" className="fill-white dark:fill-slate-900" />
-                </svg>
-
                 {/* Content */}
-                <div className="p-6 pt-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
+                <div className="p-5">
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="text-center text-slate-500 dark:text-slate-400 text-[13px] mb-5"
                     >
-                        <p className="text-center text-slate-600 dark:text-slate-400 text-[15px] leading-relaxed mb-6">
-                            Ti guiderò alla scoperta delle funzionalità principali dell'app in <b className="text-slate-900 dark:text-white">meno di 1 minuto</b>.
-                        </p>
+                        Scopri le funzionalità in <b className="text-slate-700 dark:text-slate-300">meno di 1 minuto</b>
+                    </motion.p>
 
-                        {/* Features preview */}
-                        <div className="space-y-3 mb-8">
-                            {[
-                                { emoji: '🔍', text: 'Cerca e scopri i concorsi' },
-                                { emoji: '📝', text: 'Simula le prove ufficiali' },
-                                { emoji: '📊', text: 'Monitora i tuoi progressi' },
-                            ].map((item, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.5 + i * 0.1 }}
-                                    className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl"
-                                >
-                                    <span className="text-xl">{item.emoji}</span>
-                                    <span className="text-[14px] font-medium text-slate-700 dark:text-slate-300">
-                                        {item.text}
-                                    </span>
-                                </motion.div>
-                            ))}
-                        </div>
+                    {/* Features grid */}
+                    <div className="grid grid-cols-2 gap-2 mb-5">
+                        {features.map((item, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.55 + i * 0.08 }}
+                                className="flex items-center gap-2.5 px-3 py-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl"
+                            >
+                                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#00B1FF]/20 to-[#00D4AA]/20 flex items-center justify-center flex-shrink-0">
+                                    <item.icon className="w-3.5 h-3.5 text-[#00B1FF]" />
+                                </div>
+                                <span className="text-[12px] font-medium text-slate-600 dark:text-slate-300 leading-tight">
+                                    {item.text}
+                                </span>
+                            </motion.div>
+                        ))}
+                    </div>
 
-                        {/* CTA Button */}
-                        <motion.button
-                            onClick={handleStart}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="w-full py-4 px-6 bg-gradient-to-r from-[#00B1FF] to-[#00D4AA] rounded-2xl text-white font-bold text-[16px] shadow-lg shadow-[#00B1FF]/25 flex items-center justify-center gap-2"
-                        >
-                            <span>Inizia il Tour</span>
-                            <ChevronRight className="w-5 h-5" />
-                        </motion.button>
+                    {/* CTA Button */}
+                    <motion.button
+                        onClick={handleStart}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.9 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-3.5 px-5 bg-gradient-to-r from-[#00B1FF] to-[#00D4AA] rounded-xl text-white font-bold text-[15px] shadow-lg shadow-[#00B1FF]/25 flex items-center justify-center gap-2"
+                    >
+                        <span>Inizia il Tour</span>
+                        <ChevronRight className="w-4 h-4" />
+                    </motion.button>
 
-                        {/* Skip link */}
-                        <button
-                            onClick={handleSkip}
-                            className="w-full mt-3 py-2 text-[13px] font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                        >
-                            Salta, conosco già l'app
-                        </button>
-                    </motion.div>
+                    {/* Skip link */}
+                    <button
+                        onClick={handleSkip}
+                        className="w-full mt-2 py-2 text-[12px] font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    >
+                        Salta, conosco già l'app
+                    </button>
                 </div>
             </motion.div>
         </motion.div>

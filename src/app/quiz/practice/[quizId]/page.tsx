@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Clock, Target, ChevronRight, AlertCircle, Play, BookOpen } from "lucide-react";
+import { analytics } from "@/lib/analytics";
 
 // Helper to normalize DB answers
 function normalizeDBAnswer(val: string | null | undefined): string | null {
@@ -198,6 +199,15 @@ export default function PracticeStartPage() {
                 .single();
 
             if (attemptError || !attempt) throw attemptError;
+
+            // Track practice quiz started
+            analytics.track('quiz_started', {
+                quiz_id: quizId,
+                title: quizTitle,
+                mode: 'practice',
+                subjects_count: selectedSubjects.length,
+                questions_count: richAnswers.length
+            });
 
             navigate(`/quiz/run/${attempt.id}?mode=practice&time=0`);
 

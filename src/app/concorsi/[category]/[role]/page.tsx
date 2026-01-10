@@ -8,6 +8,7 @@ import { useOnboarding } from "@/context/OnboardingProvider";
 import TierSLoader from "@/components/ui/TierSLoader";
 import ReadinessCard from "@/components/role/ReadinessCard";
 import AttemptCard from "@/components/stats/AttemptCard";
+import SEOHead from "@/components/seo/SEOHead";
 
 // =============================================================================
 // ROLE DETAIL PAGE - Tier S Redesign
@@ -121,14 +122,19 @@ export default function RolePage() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] dark:bg-[var(--background)] pb-24 transition-colors duration-300">
+      <SEOHead
+        title={`${roleData.title} | Idoneo`}
+        description={`Preparati per il concorso come ${roleData.title}. Accedi a simulatori ufficiali, materiali di studio e statistiche avanzate.`}
+        url={`/concorsi/${category}/${role}`}
+      />
       {/* ===================================================================== */}
       {/* 1. IMMERSIVE HERO HEADER */}
       {/* ===================================================================== */}
-      <div className="relative overflow-hidden bg-white dark:bg-[var(--card)] pb-6 md:pb-10 rounded-b-[32px] md:rounded-b-[40px] shadow-sm z-10 transition-colors">
+      <div className="relative overflow-hidden bg-white dark:bg-[var(--card)] pb-6 md:pb-10 rounded-b-[32px] md:rounded-b-[40px] shadow-sm z-10 transition-colors pt-safe">
         <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient} opacity-[0.03] dark:opacity-[0.05]`} />
 
         {/* Nav */}
-        <div className="relative z-20 pt-safe px-4 h-14 flex items-center justify-between">
+        <div className="relative z-20 px-4 h-14 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"

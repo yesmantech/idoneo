@@ -243,33 +243,53 @@ export default function PunteggiPage() {
                         </div>
                         <div>
                             <h2 className="text-xl font-black">Sistema XP</h2>
-                            <p className="text-sm text-slate-500">Punti esperienza e livelli</p>
+                            <p className="text-sm text-slate-500">Punti esperienza e classifiche</p>
                         </div>
                     </div>
 
                     <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                        Guadagni XP completando quiz e raggiungendo obiettivi. Gli XP servono a sbloccare badge e tracciare il tuo progresso generale.
+                        Gli XP misurano quanto ti alleni su Idoneo. Servono per scalare le classifiche globali e tracciare il tuo impegno.
                     </p>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center">
-                            <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">+10 XP</div>
-                            <p className="text-xs text-slate-500 mt-1">Per ogni quiz completato</p>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
+                            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
+                                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">+1</span>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-emerald-700 dark:text-emerald-300">XP per risposta corretta</h4>
+                                <p className="text-sm text-emerald-600 dark:text-emerald-400">Ogni risposta giusta ti dà 1 XP</p>
+                            </div>
                         </div>
-                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center">
-                            <div className="text-2xl font-black text-[#00B1FF]">+5 XP</div>
-                            <p className="text-xs text-slate-500 mt-1">Bonus risposta corretta</p>
+
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800">
+                            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+                                <Trophy className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-amber-700 dark:text-amber-300">Classifica Settimanale</h4>
+                                <p className="text-sm text-amber-600 dark:text-amber-400">La classifica XP si azzera ogni settimana</p>
+                            </div>
                         </div>
-                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center">
-                            <div className="text-2xl font-black text-purple-600 dark:text-purple-400">+50 XP</div>
-                            <p className="text-xs text-slate-500 mt-1">Obiettivo raggiunto</p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center">
-                            <div className="text-2xl font-black text-amber-600 dark:text-amber-400">+25 XP</div>
-                            <p className="text-xs text-slate-500 mt-1">Streak giornaliera</p>
+
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800">
+                            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0">
+                                <BarChart3 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-purple-700 dark:text-purple-300">XP Totali</h4>
+                                <p className="text-sm text-purple-600 dark:text-purple-400">I tuoi XP totali restano sempre nel profilo</p>
+                            </div>
                         </div>
                     </div>
+
+                    <div className="mt-6 p-4 rounded-2xl bg-[#00B1FF]/10 border border-[#00B1FF]/20">
+                        <p className="text-sm text-[#00B1FF] font-medium">
+                            💡 <strong>Nota:</strong> Gli XP misurano l'impegno, non la preparazione. Usa il "Livello di Preparazione" per valutare quanto sei pronto per l'esame!
+                        </p>
+                    </div>
                 </motion.section>
+
 
                 {/* CTA */}
                 <motion.div

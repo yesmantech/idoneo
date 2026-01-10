@@ -8,3 +8,4 @@ export { default as AdminTable } from './AdminTable';
 export { default as StatusBadge, STATUS_PRESETS } from './StatusBadge';
 export { default as EmptyState } from './EmptyState';
 export { default as ConfirmDialog, useConfirmDialog } from './ConfirmDialog';
+export * from './AIInsightCard';

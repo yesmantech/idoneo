@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { analytics } from './analytics';
 
 export type BadgeId =
     | 'primo_passo'
@@ -12,6 +13,9 @@ export type BadgeId =
     | 'nottambulo'
     | 'hub_master'
     | 'costanza'
+    | 'maratona'      // NEW: 14-day streak
+    | 'diamante'      // NEW: 60-day streak
+    | 'immortale'     // NEW: 100-day streak
     | 'leggenda';
 
 export const badgeService = {
@@ -45,6 +49,9 @@ export const badgeService = {
             // Silently ignore RLS policy errors (42501) - user may not have permission yet
             if (error && error.code !== '42501') {
                 console.warn(`Badge award skipped for ${badgeId}:`, error.message);
+            } else if (!error) {
+                // Track successful badge award
+                analytics.track('badge_earned', { badge_id: badgeId });
             }
         } catch (e) {
             // Silently fail - badges are non-critical
@@ -98,10 +105,28 @@ export const badgeService = {
                 await this.awardBadge(userId, 'costanza');
             }
 
-            // 5. inarrestabile: 30 day streak
+            // 5. maratona: 14 day streak (Gold tier)
+            if ((profile.current_streak || 0) >= 14) {
+                console.log('Badge Check: Awarding maratona');
+                await this.awardBadge(userId, 'maratona');
+            }
+
+            // 6. inarrestabile: 30 day streak
             if ((profile.current_streak || 0) >= 30) {
                 console.log('Badge Check: Awarding inarrestabile');
                 await this.awardBadge(userId, 'inarrestabile');
+            }
+
+            // 7. diamante: 60 day streak (Sapphire tier)
+            if ((profile.current_streak || 0) >= 60) {
+                console.log('Badge Check: Awarding diamante');
+                await this.awardBadge(userId, 'diamante');
+            }
+
+            // 8. immortale: 100 day streak (Diamond tier)
+            if ((profile.current_streak || 0) >= 100) {
+                console.log('Badge Check: Awarding immortale');
+                await this.awardBadge(userId, 'immortale');
             }
 
             // 6. hub_master: participation in 5 different quizzes/contests

@@ -63,6 +63,47 @@ export interface Database {
           created_at?: string;
         };
       };
+      profiles: {
+        Row: {
+          id: string;
+          first_name: string | null;
+          last_name: string | null;
+          avatar_url: string | null;
+          role: string | null;
+          onboarding_completed: boolean;
+          // Gamification
+          streak_current: number; // NEW
+          streak_max: number;     // NEW
+          last_active_at: string | null; // NEW
+          updated_at: string | null;
+        };
+        Insert: {
+          id: string;
+          email?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          avatar_url?: string | null;
+          role?: string | null;
+          onboarding_completed?: boolean;
+          streak_current?: number;
+          streak_max?: number;
+          last_active_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          avatar_url?: string | null;
+          role?: string | null;
+          onboarding_completed?: boolean;
+          streak_current?: number;
+          streak_max?: number;
+          last_active_at?: string | null;
+          updated_at?: string;
+        };
+      };
       roles: {
         Row: {
           id: string;

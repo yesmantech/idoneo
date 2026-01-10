@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Target, Zap, Trophy, Crown, Flame, GraduationCap, Medal, Users, ShieldCheck, Crosshair, Sparkles, BookOpen, Moon, Compass } from 'lucide-react';
+import { X, Target, Zap, Trophy, Crown, Flame, GraduationCap, Medal, Users, ShieldCheck, Crosshair, Sparkles, BookOpen, Moon, Compass, Calendar, Gem, Star, Award } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { badgeService } from '@/lib/badgeService';
 import { supabase } from '@/lib/supabaseClient';
@@ -160,11 +160,38 @@ export default function BadgesBlock() {
         {
             id: 'costanza',
             name: 'Costanza',
-            icon: <Flame className="w-8 h-8" />,
+            icon: <Calendar className="w-8 h-8" />,
             unlocked: unlockedBadges.includes('costanza'),
             description: 'Il segreto del successo è la regolarità. Continua così!',
             requirement: 'Completa almeno una simulazione al giorno per 7 giorni di fila.',
-            color: 'from-orange-400 to-red-500'
+            color: 'from-slate-300 to-slate-500' // Silver Tier
+        },
+        {
+            id: 'maratona',
+            name: 'Maratoneta',
+            icon: <Trophy className="w-8 h-8" />,
+            unlocked: unlockedBadges.includes('maratona'),
+            description: 'Due settimane di dedizione! Sei sulla strada giusta per il successo.',
+            requirement: 'Mantieni una streak di studio per 14 giorni consecutivi.',
+            color: 'from-yellow-400 to-amber-500' // Gold Tier
+        },
+        {
+            id: 'diamante',
+            name: 'Diamante',
+            icon: <Gem className="w-8 h-8" />,
+            unlocked: unlockedBadges.includes('diamante'),
+            description: 'Due mesi di costanza! Sei un vero campione di dedizione.',
+            requirement: 'Mantieni una streak di studio per 60 giorni consecutivi.',
+            color: 'from-blue-400 to-indigo-600' // Sapphire Tier
+        },
+        {
+            id: 'immortale',
+            name: 'Immortale',
+            icon: <Star className="w-8 h-8" />,
+            unlocked: unlockedBadges.includes('immortale'),
+            description: 'Leggendario! 100 giorni di studio senza sosta. Sei imbattibile.',
+            requirement: 'Mantieni una streak di studio per 100 giorni consecutivi.',
+            color: 'from-pink-400 via-purple-500 to-cyan-400' // Diamond/Rainbow Tier
         },
         {
             id: 'leggenda',

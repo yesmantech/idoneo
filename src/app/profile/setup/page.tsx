@@ -198,6 +198,7 @@ export default function ProfileSetupPage() {
                         nickname,
                         avatar_url: avatarUrl,
                         email: user.email,
+                        referred_by: referredBy, // FIX: Include referral attribution in INSERT too!
                     });
 
                 if (insertError) {

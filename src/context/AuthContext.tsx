@@ -7,6 +7,8 @@ interface Profile {
     nickname: string | null;
     avatar_url: string | null;
     role: string;
+    streak_current?: number;
+    streak_max?: number;
 }
 
 interface AuthContextType {

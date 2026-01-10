@@ -59,7 +59,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                 if (roleError || !role) throw new Error(roleError?.message || "Ruolo non trovato");
 
                 // 2. Parallelize everything else possible
-                const [resourcesRes, quizzesRes, contestsRes, candidateCountRes] = await Promise.all([
+                const [resourcesRes, quizzesRes, candidateCountRes] = await Promise.all([
                     supabase
                         .from("role_resources")
                         .select("*")
@@ -73,10 +73,6 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                         .eq("is_archived", false)
                         .order("year", { ascending: false })
                         .limit(1),
-                    user ? supabase
-                        .from('contests')
-                        .select('id')
-                        .eq('role_id', role.id) : Promise.resolve({ data: [] }),
                     supabase.rpc('get_role_candidate_count', { target_role_id: role.id })
                 ]);
 
@@ -84,7 +80,6 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
                 const latestQuiz = quizzesRes.data?.[0];
                 const latestQuizId = latestQuiz?.id || null;
                 const latestQuizSlug = latestQuiz?.slug || null;
-                const contestIds = contestsRes.data?.map((c: any) => c.id) || [];
                 const candidatiCount = (candidateCountRes.data as number) || 0;
 
                 let history: any[] = [];
@@ -92,12 +87,7 @@ export function useRoleHubData(categorySlug: string, roleSlug: string) {
 
                 if (user) {
                     // Fetch all relevant quizzes for history & leaderboard data in parallel
-                    let quizQuery = supabase.from('quizzes').select('id, title');
-                    if (contestIds.length > 0) {
-                        quizQuery = quizQuery.or(`role_id.eq.${role.id},contest_id.in.(${contestIds.join(',')})`);
-                    } else {
-                        quizQuery = quizQuery.eq('role_id', role.id);
-                    }
+                    let quizQuery = supabase.from('quizzes').select('id, title').eq('role_id', role.id);
 
                     const [allQuizzesRes, lbRes] = await Promise.all([
                         quizQuery,

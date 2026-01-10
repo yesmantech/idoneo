@@ -512,10 +512,10 @@ export default function QuizRunnerPage() {
 
     // Timer color states
     const getTimerColor = () => {
-        if (remainingSeconds === null) return "text-slate-600";
+        if (remainingSeconds === null) return "text-slate-600 dark:text-slate-300";
         if (remainingSeconds < 60) return "text-red-500";
         if (remainingSeconds < 300) return "text-amber-500";
-        return "text-slate-600";
+        return "text-slate-600 dark:text-slate-300";
     };
 
     if (loading) {
@@ -559,7 +559,7 @@ export default function QuizRunnerPage() {
                             <span className={`font-mono font-bold text-xl ${getTimerColor()}`}>
                                 {formatTime(remainingSeconds)}
                             </span>
-                            <span className="text-[10px] text-[var(--foreground)] opacity-40 font-semibold uppercase tracking-wider">
+                            <span className="text-[10px] text-slate-500 dark:text-slate-300 font-semibold uppercase tracking-wider">
                                 Domanda {currentIndex + 1}/{answering.length}
                             </span>
                         </div>
@@ -603,7 +603,7 @@ export default function QuizRunnerPage() {
                 {/* ============================================================= */}
                 {/* QUESTION CONTENT */}
                 {/* ============================================================= */}
-                <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-36">
+                <main className="flex-1 px-5 py-3 max-w-3xl mx-auto w-full pb-32">
                     {/* Question Meta */}
                     <div className="mb-3">
                         <span className="text-[12px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">
@@ -612,7 +612,7 @@ export default function QuizRunnerPage() {
                     </div>
 
                     {/* Question Text */}
-                    <h2 className="text-[20px] font-bold text-[var(--foreground)] leading-[1.4] mb-8">
+                    <h2 className="text-[19px] font-bold text-[var(--foreground)] leading-[1.35] mb-5">
                         {currentQ.text}
                     </h2>
 
@@ -752,8 +752,8 @@ export default function QuizRunnerPage() {
                         className={`transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-[50vh] overflow-y-auto' : 'max-h-20 overflow-hidden'
                             }`}
                     >
-                        <div className="px-4 py-1 border-b border-slate-50 dark:border-slate-800">
-                            <div className={`flex gap-2 py-2 max-w-3xl mx-auto ${drawerExpanded
+                        <div className="px-4 py-0.5 border-b border-slate-50 dark:border-slate-800">
+                            <div className={`flex gap-2 py-1.5 max-w-3xl mx-auto ${drawerExpanded
                                 ? 'flex-wrap justify-center px-1'
                                 : 'overflow-x-auto scrollbar-hide pl-1'
                                 }`}>
@@ -787,14 +787,14 @@ export default function QuizRunnerPage() {
                     </div>
 
                     {/* Navigation Buttons - Show Termina when drawer expanded */}
-                    <div className="px-4 py-3 flex gap-3 max-w-3xl mx-auto">
+                    <div className="px-4 py-2 flex gap-3 max-w-3xl mx-auto">
                         {drawerExpanded ? (
                             <button
                                 onClick={() => {
                                     setDrawerExpanded(false);
                                     setShowTerminateConfirm(true);
                                 }}
-                                className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                className="flex-1 py-3 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                             >
                                 <X className="w-4 h-4" />
                                 Termina Quiz
@@ -804,7 +804,7 @@ export default function QuizRunnerPage() {
                                 <button
                                     onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
                                     disabled={currentIndex === 0}
-                                    className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
+                                    className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
                                         ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
                                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98]'
                                         }`}
@@ -816,14 +816,14 @@ export default function QuizRunnerPage() {
                                 {currentIndex === answering.length - 1 ? (
                                     <button
                                         onClick={() => setShowTerminateConfirm(true)}
-                                        className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all"
+                                        className="flex-1 py-3 rounded-xl font-semibold text-[15px] bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all"
                                     >
                                         Termina Quiz
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
-                                        className="flex-1 py-3.5 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                        className="flex-1 py-3 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                     >
                                         Successiva
                                         <ChevronRight className="w-5 h-5" />

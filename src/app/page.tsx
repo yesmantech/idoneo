@@ -5,6 +5,7 @@ import { useOnboarding } from "@/context/OnboardingProvider";
 import BlogHero from "@/components/home/BlogHero";
 import SearchSection from "@/components/home/SearchSection";
 import ConcorsiSection from "@/components/home/ConcorsiSection";
+import SEOHead from "@/components/seo/SEOHead";
 
 // =============================================================================
 // MAIN HOME PAGE
@@ -52,6 +53,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 transition-colors duration-300">
+      <SEOHead
+        title="Il miglior simulatore per i tuoi Concorsi Pubblici"
+        description="Preparati al meglio per i concorsi di Polizia, Carabinieri, Forze Armate e molto altro con quiz ufficiali e statistiche avanzate."
+      />
       <main className="flex flex-col">
 
         {/* 1. BLOG HERO - Immersive Entry */}
