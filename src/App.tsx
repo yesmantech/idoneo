@@ -61,6 +61,7 @@ const AdminRulesPage = React.lazy(() => import('./app/admin/rules/page'));
 const AdminLeaderboardPage = React.lazy(() => import('./app/admin/leaderboard/page'));
 const AdminUsersPage = React.lazy(() => import('./app/admin/users/page'));
 const AdminReportsPage = React.lazy(() => import('./app/admin/reports/page'));
+const AdminAnalyticsPage = React.lazy(() => import('./app/admin/analytics/page'));
 
 // Blog Admin
 const AdminBlogListPage = React.lazy(() => import('./app/admin/blog/page'));
@@ -212,6 +213,7 @@ export default function App() {
                                                     <Route path="/admin/leaderboard" element={<AdminLeaderboardPage />} />
                                                     <Route path="/admin/users" element={<AdminUsersPage />} />
                                                     <Route path="/admin/reports" element={<AdminReportsPage />} />
+                                                    <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
 
                                                     {/* Admin Blog */}
                                                     <Route path="/admin/blog" element={<AdminBlogListPage />} />
