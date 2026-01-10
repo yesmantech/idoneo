@@ -53,10 +53,21 @@ export function StreakBadge({ collapsed, className }: StreakBadgeProps) {
         ? "bg-brand-orange/10 border-brand-orange/20 shadow-sm"
         : "bg-canvas-light border-transparent hover:bg-slate-200/50";
 
+    const handleTestClick = () => {
+        const event = new CustomEvent('streak_updated', {
+            detail: {
+                streak: currentStreak > 0 ? currentStreak : 1,
+                isMilestone: true
+            }
+        });
+        window.dispatchEvent(event);
+    };
+
     return (
         <div
+            onClick={handleTestClick}
             className={`
-                group relative flex items-center gap-3 rounded-card border transition-all duration-300
+                group relative flex items-center gap-3 rounded-card border transition-all duration-300 cursor-pointer
                 ${activeBg}
                 ${containerClasses}
                 ${className}
