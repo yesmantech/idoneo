@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, X, Share2, ArrowRight } from 'lucide-react';
+import { Flame, X, Share2, ArrowRight, Check, Copy } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedFlame, getTierFromStreak } from './AnimatedFlame';
+import { Share } from '@capacitor/share';
 
 export function StreakCelebration() {
     const [show, setShow] = useState(false);
     const [streak, setStreak] = useState(0);
     const [isMilestone, setIsMilestone] = useState(false);
     const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+    const [shareState, setShareState] = useState<'idle' | 'success'>('idle');
 
     useEffect(() => {
         const handleResize = () => {
@@ -20,6 +22,7 @@ export function StreakCelebration() {
             setStreak(streak);
             setIsMilestone(isMilestone);
             setShow(true);
+            setShareState('idle'); // Reset share state on new show
         };
 
         window.addEventListener('resize', handleResize);
@@ -30,6 +33,36 @@ export function StreakCelebration() {
             window.removeEventListener('streak_updated', handleStreakUpdate as EventListener);
         };
     }, []);
+
+    const handleShare = async () => {
+        const title = 'Idoneo Streak 🔥';
+        const text = `Sto bruciando tutto su Idoneo! 🔥 Ho raggiunto uno streak di ${streak} giorni! Riesci a battermi? 🚀`;
+        const url = 'https://idoneo.ai';
+
+        try {
+            // Try Native Share first
+            const canShare = await Share.canShare();
+            if (canShare.value) {
+                await Share.share({
+                    title,
+                    text,
+                    url,
+                    dialogTitle: 'Condividi il tuo successo!',
+                });
+            } else {
+                throw new Error('Web Share API not supported');
+            }
+        } catch (error) {
+            // Fallback: Copy to Clipboard
+            try {
+                await navigator.clipboard.writeText(`${title}\n${text}\n${url}`);
+                setShareState('success');
+                setTimeout(() => setShareState('idle'), 2000);
+            } catch (clipboardError) {
+                console.error('Failed to copy to clipboard', clipboardError);
+            }
+        }
+    };
 
     // Determine flame tier based on streak count
     const flameTier = getTierFromStreak(streak);
@@ -136,13 +169,26 @@ export function StreakCelebration() {
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
 
-                            {/* Secondary Action - White/Transparent */}
+                            {/* Secondary Action - Share (with feedback) */}
                             <button
-                                onClick={() => setShow(false)}
-                                className="w-full py-4 bg-white/10 hover:bg-white/15 active:scale-[0.98] text-white font-bold rounded-full transition-all flex items-center justify-center gap-2 border border-white/10 backdrop-blur-sm duration-200"
+                                onClick={handleShare}
+                                className={`w-full py-4 font-bold rounded-full transition-all flex items-center justify-center gap-2 border backdrop-blur-sm duration-200 active:scale-[0.98]
+                                    ${shareState === 'success'
+                                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50'
+                                        : 'bg-white/10 hover:bg-white/15 text-white border-white/10'
+                                    }`}
                             >
-                                <Share2 className="w-5 h-5" />
-                                Condividi
+                                {shareState === 'success' ? (
+                                    <>
+                                        <Check className="w-5 h-5" />
+                                        Copiato!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Share2 className="w-5 h-5" />
+                                        Condividi
+                                    </>
+                                )}
                             </button>
                         </motion.div>
                     </motion.div>
