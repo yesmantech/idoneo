@@ -365,14 +365,40 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Touch-friendly tap highlight */
+/* Touch-friendly optimizations for iOS/Mobile */
 @media (hover: none) and (pointer: coarse) {
 
+  /* Remove all tap highlight - critical for "sticky press" fix */
   button,
   a,
-  [role="button"] {
-    -webkit-tap-highlight-color: rgba(6, 214, 211, 0.15);
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [tabindex] {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    /* Removes 300ms delay, improves responsiveness */
   }
+
+  /* Prevent accidental text selection on interactive elements */
+  button,
+  [role="button"] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+/* Global touch optimization - apply to all devices */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 /* Ensure proper viewport on mobile */
