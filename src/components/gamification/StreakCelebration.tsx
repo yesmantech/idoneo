@@ -19,8 +19,8 @@ export function StreakCelebration() {
 
         const handleStreakUpdate = (e: any) => {
             const { streak, isMilestone } = e.detail;
-            setStreak(streak);
-            setIsMilestone(isMilestone);
+            setStreak(100); // TEST: Always show 100 for Day 100 test
+            setIsMilestone(true); // TEST: Always treat as milestone
             setShow(true);
             setShareState('idle'); // Reset share state on new show
         };
