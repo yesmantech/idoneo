@@ -184,13 +184,14 @@ export default function OnboardingSpotlight() {
         const timer = setTimeout(() => findTarget(true), 100);
 
         // Re-find on scroll/resize
-        window.addEventListener('scroll', handleUpdate, true);
+        const root = document.getElementById('root');
+        root?.addEventListener('scroll', handleUpdate, true);
         window.addEventListener('resize', handleUpdate);
 
         return () => {
             if (throttleTimeout) clearTimeout(throttleTimeout);
             clearTimeout(timer);
-            window.removeEventListener('scroll', handleUpdate, true);
+            root?.removeEventListener('scroll', handleUpdate, true);
             window.removeEventListener('resize', handleUpdate);
         };
     }, [isActive, currentStep]);

@@ -24,7 +24,8 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: 'LIGHT',
-      backgroundColor: '#00B1FF',
+      backgroundColor: '#0F172A',
+      overlaysWebView: true,
     },
     Keyboard: {
       resizeOnFullScreen: true,
@@ -34,14 +35,16 @@ const config: CapacitorConfig = {
     },
   },
   ios: {
-    // Handle safe area automatically
-    contentInset: 'automatic',
+    // Extend content to edges (no safe area padding)
+    contentInset: 'never',
     // Mobile-optimized content
     preferredContentMode: 'mobile',
     // Disable link previews for cleaner UX
     allowsLinkPreview: false,
     // Custom URL scheme for deep linking
     scheme: 'idoneo',
+    // DEFINITIVE FIX: Match background color to dark mode
+    backgroundColor: '#0F172A',
   },
 };
 

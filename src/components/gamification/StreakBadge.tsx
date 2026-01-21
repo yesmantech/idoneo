@@ -57,10 +57,10 @@ export function StreakBadge({ collapsed, className }: StreakBadgeProps) {
         e.preventDefault();
         e.stopPropagation();
 
-        console.log("Triggering Streak Celebration Test");
+        console.log("Triggering Streak Celebration Test - Day 100!");
         const event = new CustomEvent('streak_updated', {
             detail: {
-                streak: currentStreak > 0 ? currentStreak : 1,
+                streak: 100, // TEST: Hardcoded to 100 for testing Day 100 celebration
                 isMilestone: true
             }
         });

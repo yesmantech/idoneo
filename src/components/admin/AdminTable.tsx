@@ -58,11 +58,11 @@ function RowActionsMenu({ actions }: RowActionsMenuProps) {
             setTimeout(() => {
                 document.addEventListener('mousedown', handleClickOutside);
             }, 0);
-            document.addEventListener('scroll', handleScroll, true);
+            document.getElementById('root')?.addEventListener('scroll', handleScroll, true);
         }
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('scroll', handleScroll, true);
+            document.getElementById('root')?.removeEventListener('scroll', handleScroll, true);
         };
     }, [open]);
 
