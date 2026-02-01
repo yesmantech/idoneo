@@ -1,10 +1,57 @@
+/**
+ * @file analytics.ts
+ * @description Google Analytics 4 (GA4) integration for user event tracking.
+ *
+ * This service provides a centralized interface for analytics tracking across
+ * the application. It uses react-ga4 as the GA4 client library.
+ *
+ * ## Features
+ * - **Event Tracking**: Custom events with properties
+ * - **Page Views**: Automatic page view tracking
+ * - **User Identification**: Persistent user ID tracking
+ * - **Development Mode**: Console logging for debugging
+ *
+ * ## Tracked Events
+ * | Event               | When                              |
+ * |---------------------|-----------------------------------|
+ * | page_view           | Navigation to any page            |
+ * | quiz_started        | User begins a quiz attempt        |
+ * | quiz_completed      | User finishes a quiz attempt      |
+ * | badge_earned        | User unlocks an achievement       |
+ * | streak_extended     | User's streak increases           |
+ * | theme_changed       | User toggles dark/light mode      |
+ * | onboarding_started  | User begins onboarding tour       |
+ * | onboarding_completed| User finishes onboarding tour     |
+ * | error_occurred      | Application error caught          |
+ *
+ * ## Configuration
+ * Requires `VITE_GA_MEASUREMENT_ID` environment variable (e.g., G-XXXXXXXXXX).
+ * If not set, analytics calls are silently ignored.
+ *
+ * @example
+ * ```typescript
+ * import { analytics } from '@/lib/analytics';
+ *
+ * // Initialize (called once on app start)
+ * analytics.init(userId, { nickname, total_xp });
+ *
+ * // Track an event
+ * analytics.track('quiz_completed', { quiz_id: 'abc', score: 85 });
+ *
+ * // Track a page view
+ * analytics.pageView('Profile Page');
+ * ```
+ */
+
 import ReactGA from 'react-ga4';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
 /**
- * Analytics Service - Lightweight event tracking
- * 
- * This service provides a simple interface for tracking user events.
- * It uses Google Analytics 4 (GA4) via react-ga4.
+ * Supported event names for tracking.
+ * Each event should have a corresponding handler in the application.
  */
 
 type EventName =

@@ -1,8 +1,59 @@
+/**
+ * @file useReferral.ts
+ * @description Referral system hook for waitlist priority and sharing.
+ *
+ * This hook manages the user's referral code and provides sharing utilities.
+ * Users who refer others get higher priority on the waitlist.
+ *
+ * ## Data Provided
+ *
+ * | Field          | Description                                |
+ * |----------------|--------------------------------------------|
+ * | `referralCode` | User's unique code (from `profiles.referral_code`) |
+ * | `referralLink` | Full shareable URL with code as query param |
+ * | `referralCount`| Number of successful referrals             |
+ * | `priorityLevel`| Percentile ranking (Top 10%, 25%, 50%)     |
+ *
+ * ## Share Methods
+ *
+ * | Method        | Platform                          |
+ * |---------------|-----------------------------------|
+ * | `copyLink`    | Copy to clipboard                 |
+ * | `shareVia`    | WhatsApp, Telegram, Email (web)   |
+ * | `nativeShare` | iOS/Android native share sheet    |
+ *
+ * ## Priority Calculation
+ *
+ * Users are ranked by referral count. Percentiles are calculated against
+ * all users to determine priority tier for access.
+ *
+ * @example
+ * ```tsx
+ * import { useReferral } from '@/hooks/useReferral';
+ *
+ * function ReferralPage() {
+ *   const { referralLink, referralCount, nativeShare, copyLink } = useReferral();
+ *
+ *   return (
+ *     <div>
+ *       <p>You've referred {referralCount} friends!</p>
+ *       <button onClick={nativeShare}>Share</button>
+ *       <button onClick={copyLink}>Copy Link</button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 interface ReferralStats {
     referralCode: string;

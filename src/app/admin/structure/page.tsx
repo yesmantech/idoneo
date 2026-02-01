@@ -1,15 +1,61 @@
+/**
+ * @file page.tsx (Admin Structure)
+ * @description Admin panel for managing the Category → Role → Quiz hierarchy.
+ *
+ * This is the primary admin interface for organizing content structure.
+ * Uses a 3-column cascading selection pattern:
+ *
+ * ```
+ * [Categories] → [Roles] → [Quizzes]
+ *     ↓              ↓          ↓
+ *  Select      Filter+Select  View
+ * ```
+ *
+ * ## Features
+ *
+ * | Feature          | Description                               |
+ * |------------------|-------------------------------------------|
+ * | CRUD Categories  | Add/delete categories with auto-slug      |
+ * | CRUD Roles       | Add/delete roles within selected category |
+ * | View Quizzes     | List quizzes for selected role            |
+ * | Column Navigation| Cascading selection filters next column   |
+ *
+ * ## Data Hierarchy
+ *
+ * - **Category**: Top-level grouping (e.g., "Polizia di Stato")
+ * - **Role**: Job position within category (e.g., "Allievo Agente")
+ * - **Quiz**: Actual test/simulation for the role
+ *
+ * ## Note
+ *
+ * Quizzes are created/edited in the Quiz Admin panel (`/admin/quiz`),
+ * not directly in this structure view.
+ */
+
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { AdminLayout } from "@/components/admin";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 // --- Types Local to this Admin Page ---
 type Category = { id: string; slug: string; title: string; description: string; is_featured: boolean };
 type Role = { id: string; category_id: string; slug: string; title: string; order_index: number };
 type Quiz = { id: string; title: string; slug: string; year: number; is_official: boolean; role_id: string };
 
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
 // Simple Slugify Helper
 const slugify = (text: string) => text.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 export default function AdminStructurePage() {
     // Data

@@ -1,5 +1,55 @@
+/**
+ * @file useSafeArea.ts
+ * @description Safe area inset hooks for notched iOS devices.
+ *
+ * Modern iPhones (X and later) have notches and home indicators that
+ * require content to avoid certain screen edges. This hook reads the
+ * CSS environment variables set by iOS Safari/WKWebView.
+ *
+ * ## Safe Area Variables
+ *
+ * | Variable   | CSS Property       | Edge    |
+ * |------------|--------------------|---------|
+ * | `--sat`    | safe-area-inset-top| Notch   |
+ * | `--sab`    | safe-area-inset-bottom| Home bar |
+ * | `--sal`    | safe-area-inset-left| Side (landscape) |
+ * | `--sar`    | safe-area-inset-right| Side (landscape) |
+ *
+ * ## CSS Setup Required
+ *
+ * Add these to your `index.css`:
+ * ```css
+ * :root {
+ *   --sat: env(safe-area-inset-top);
+ *   --sab: env(safe-area-inset-bottom);
+ *   --sal: env(safe-area-inset-left);
+ *   --sar: env(safe-area-inset-right);
+ * }
+ * ```
+ *
+ * @example
+ * ```tsx
+ * import { useSafeArea, useHasNotch } from '@/hooks/useSafeArea';
+ *
+ * function BottomNav() {
+ *   const { bottom } = useSafeArea();
+ *   const hasNotch = useHasNotch();
+ *
+ *   return (
+ *     <nav style={{ paddingBottom: bottom }}>
+ *       {/* Navigation items *\/}
+ *     </nav>
+ *   );
+ * }
+ * ```
+ */
+
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 interface SafeAreaInsets {
     top: number;

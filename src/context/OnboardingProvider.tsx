@@ -1,12 +1,72 @@
+/**
+ * @file OnboardingProvider.tsx
+ * @description Context-aware onboarding tour system.
+ *
+ * This provider manages a multi-step guided tour that teaches users
+ * how to use different sections of the app. Features include:
+ *
+ * - Context-specific tour steps (homepage, quiz, profile, etc.)
+ * - Welcome screen for first-time users
+ * - Completion celebration
+ * - Persistence via localStorage
+ * - Analytics tracking
+ *
+ * ## Onboarding Contexts
+ *
+ * | Context      | Purpose                              | Steps |
+ * |--------------|--------------------------------------|-------|
+ * | `homepage`   | Search bar, category navigation     | 2     |
+ * | `rolepage`   | Start quiz, readiness, history       | 4     |
+ * | `quiz`       | Timer, settings, navigation          | 3     |
+ * | `profile`    | Stats, settings                       | 2     |
+ * | `leaderboard`| Ranking, league timer                 | 3     |
+ *
+ * ## How It Works
+ *
+ * 1. On first visit, show welcome modal
+ * 2. User starts tour or dismisses
+ * 3. Each step highlights an element via `targetSelector`
+ * 4. Steps are shown as tooltips near the target element
+ * 5. Completion triggers celebration and localStorage save
+ *
+ * ## Target Elements
+ *
+ * Components should add `data-onboarding="id"` attribute:
+ * ```tsx
+ * <button data-onboarding="start-quiz">Start Quiz</button>
+ * ```
+ *
+ * ## Analytics Events
+ *
+ * - `onboarding_started` - User begins tour
+ * - `onboarding_skipped` - User skips mid-tour
+ * - `onboarding_completed` - User finishes all steps
+ *
+ * @example
+ * ```tsx
+ * import { useOnboarding } from '@/context/OnboardingProvider';
+ *
+ * function MyPage() {
+ *   const { startOnboarding, hasCompletedContext } = useOnboarding();
+ *
+ *   useEffect(() => {
+ *     if (!hasCompletedContext('homepage')) {
+ *       startOnboarding('homepage');
+ *     }
+ *   }, []);
+ * }
+ * ```
+ */
+
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { analytics } from '@/lib/analytics';
 
-// ============================================
+// ============================================================================
 // TYPES
-// ============================================
+// ============================================================================
 
 export interface OnboardingStep {
     id: string;

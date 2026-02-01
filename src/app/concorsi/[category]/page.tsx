@@ -1,3 +1,29 @@
+/**
+ * @file ConcorsoHubPage.tsx
+ * @description The main landing page for a specific competition category (e.g. "Polizia").
+ *           "The Destination" for users interested in a specific force.
+ *
+ * ## Features
+ *
+ * - **Immersive Header**: Dynamic background image and theming based on category title
+ * - **Stats Section**: Live data on candidates and available seats
+ * - **Role Selection**: Grid of available roles (profiles) within this category
+ * - **Dynamic Theming**: Color schemes adapt to the force (Police=Blue, Army=Green, etc.)
+ *
+ * ## Dynamic Themes
+ *
+ * | Category Keyword | Theme Colors          |
+ * |------------------|-----------------------|
+ * | Polizia          | Cyan/Blue             |
+ * | Carabinieri      | Blue/Indigo           |
+ * | Finanza          | Amber/Orange          |
+ * | Esercito         | Emerald/Green         |
+ * | Sanità           | Rose/Pink             |
+ *
+ * ## Route
+ * `/concorsi/:category` (e.g. `/concorsi/polizia-di-stato`)
+ */
+
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useConcorsoData } from '@/hooks/useConcorsoData';
@@ -6,10 +32,11 @@ import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Shield, Sparkle
 import TierSLoader from '@/components/ui/TierSLoader';
 import SEOHead from '@/components/seo/SEOHead';
 
-// =============================================================================
+// ============================================
 // CONCORSO HUB PAGE - Tier S Redesign
 // "The Destination"
-// =============================================================================
+// ============================================
+
 export default function ConcorsoHubPage() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();

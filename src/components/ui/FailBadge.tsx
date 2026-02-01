@@ -1,6 +1,42 @@
+/**
+ * @file FailBadge.tsx
+ * @description Animated failure indicator badge for quiz results.
+ *
+ * Displays a floating, pulsing red X badge to indicate quiz failure.
+ * Used on the quiz results page when the user doesn't meet the
+ * passing threshold.
+ *
+ * ## Animations
+ *
+ * | Animation     | Effect                        | Duration |
+ * |---------------|-------------------------------|----------|
+ * | `badge-float` | Vertical float oscillation    | 3s       |
+ * | `badge-pulse` | Outer ring scale pulse        | 2s       |
+ * | `badge-check` | X icon pop-in with rotation   | 0.6s     |
+ *
+ * ## Props
+ *
+ * | Prop       | Type   | Description            |
+ * |------------|--------|------------------------|
+ * | `className`| string | Additional CSS classes |
+ *
+ * @example
+ * ```tsx
+ * import { FailBadge } from '@/components/ui/FailBadge';
+ *
+ * function QuizResultsFailed() {
+ *   return <FailBadge className="mb-4" />;
+ * }
+ * ```
+ */
+
 import React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 interface FailBadgeProps {
     className?: string;

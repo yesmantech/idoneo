@@ -1,8 +1,70 @@
+/**
+ * @file quiz-smart-selection.ts
+ * @description Smart question selection algorithm for personalized quiz generation.
+ *
+ * This module provides intelligent question selection based on user history,
+ * difficulty data, and configurable modes. The goal is to maximize learning
+ * efficiency by presenting the most valuable questions to each user.
+ *
+ * ## Selection Modes
+ *
+ * | Mode         | Description                                       |
+ * |--------------|---------------------------------------------------|
+ * | `random`     | Pure random selection (baseline)                  |
+ * | `unseen`     | Prioritize questions the user hasn't seen         |
+ * | `weak`       | Prioritize questions the user answered incorrectly|
+ * | `unanswered` | Prioritize questions the user skipped             |
+ * | `hardest`    | Select by global difficulty (from question_stats) |
+ * | `smart_mix`  | 40% weak + 30% unseen + 30% random                |
+ *
+ * ## Performance Optimization
+ *
+ * The algorithm is designed for O(2) database queries maximum:
+ * 1. Batch fetch all questions for requested subjects
+ * 2. Batch fetch user's answer history (if needed)
+ *
+ * All filtering and selection happens in-memory for speed.
+ *
+ * ## Data Flow
+ *
+ * ```
+ * SubjectConfigs → fetchSmartQuestions() → Database Queries
+ *                                        → In-Memory Filtering
+ *                                        → Shuffled Selection
+ *                                        → Question IDs
+ * ```
+ *
+ * @example
+ * ```typescript
+ * import { fetchSmartQuestions } from '@/lib/quiz-smart-selection';
+ *
+ * const questions = await fetchSmartQuestions(
+ *   userId,
+ *   quizId,
+ *   [{ subjectId: 'xyz', count: 10 }],
+ *   'smart_mix'
+ * );
+ * ```
+ */
+
 import { supabase } from "@/lib/supabaseClient";
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Available question selection algorithms.
+ */
 export type QuestionSelectionMode = "random" | "weak" | "unseen" | "unanswered" | "hardest" | "smart_mix";
+
+/**
+ * Configuration for how many questions to select per subject.
+ */
 export type SubjectConfig = {
+    /** Subject UUID */
     subjectId: string;
+    /** Number of questions to select from this subject */
     count: number;
 };
 

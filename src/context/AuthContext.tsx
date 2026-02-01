@@ -1,22 +1,83 @@
+/**
+ * @file AuthContext.tsx
+ * @description Global authentication state management using React Context.
+ *
+ * This provider wraps the entire application and provides:
+ * - **User Object**: The Supabase Auth user (email, id, metadata)
+ * - **Profile Data**: Extended user profile from the `profiles` table
+ * - **Loading State**: True while initial auth check is in progress
+ * - **Refresh Function**: Manually refetch profile after updates
+ *
+ * ## Auth Flow
+ * ```
+ * App Mount → getSession() → Set user + fetch profile → Listen for changes
+ *                                     ↓
+ *                            Login/Logout events trigger onAuthStateChange
+ * ```
+ *
+ * ## Profile Data
+ * The profile includes gamification data (streaks) and role information
+ * for admin access control.
+ *
+ * @example
+ * ```tsx
+ * import { useAuth } from '@/context/AuthContext';
+ *
+ * function ProfilePage() {
+ *   const { user, profile, loading } = useAuth();
+ *
+ *   if (loading) return <Spinner />;
+ *   if (!user) return <Navigate to="/login" />;
+ *
+ *   return <h1>Welcome, {profile?.nickname}</h1>;
+ * }
+ * ```
+ */
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Extended user profile from the `profiles` table.
+ * Contains display info and gamification stats.
+ */
 interface Profile {
+    /** User UUID (matches auth.users.id) */
     id: string;
+    /** Display name chosen by user */
     nickname: string | null;
+    /** Profile picture URL (Supabase Storage) */
     avatar_url: string | null;
+    /** User role for access control ('user' or 'admin') */
     role: string;
+    /** Current consecutive day streak */
     streak_current?: number;
+    /** Highest streak ever achieved */
     streak_max?: number;
 }
 
+/**
+ * Shape of the AuthContext value.
+ */
 interface AuthContextType {
+    /** Supabase Auth user object (null if not logged in) */
     user: User | null;
+    /** Extended profile data (null if not loaded or not logged in) */
     profile: Profile | null;
+    /** True while checking initial session */
     loading: boolean;
+    /** Manually refresh profile data after updates */
     refreshProfile: () => Promise<void>;
 }
+
+// ============================================================================
+// CONTEXT SETUP
+// ============================================================================
 
 const AuthContext = createContext<AuthContextType>({
     user: null,

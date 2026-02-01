@@ -1,3 +1,25 @@
+/**
+ * @file RulesPage.tsx
+ * @description Pre-simulation briefing screen ("The Rules").
+ *
+ * Displays the official rules for the selected simulation type before starting.
+ * Fetches configuration from the quiz and subject rules to show:
+ * - Time limit
+ * - Total questions
+ * - Scoring system (correct/wrong/blank)
+ *
+ * ## Features
+ *
+ * - **Dynamic Configuration**: Loads rules from `quizzes` and `quiz_subject_rules`
+ * - **Scoring Table**: Visual breakdown of points
+ * - **Safety Check**: Prevents starting if `is_official` is false (unless testing)
+ *
+ * ## Route Parameters
+ *
+ * - `contestSlug`: The slug of the quiz (e.g. `allievi-marescialli-2025`)
+ * - `type`: The simulation type (e.g. `official`, `infinite`, `training`)
+ */
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";

@@ -1,3 +1,33 @@
+/**
+ * @file LoginPage.tsx
+ * @description Unified authentication page (Login/Register).
+ *
+ * Handles user authentication using Supabase Auth.
+ * Features a decorative animated background and a dual-mode form.
+ *
+ * ## Features
+ *
+ * - **Dual Mode**: Toggles between Login and Registration
+ * - **Magic Link**: Supports passwordless/email confirmation flows
+ * - **Feedback**: Animated success state for registration
+ * - **Decoration**: Floating icons sequence using Framer Motion
+ *
+ * ## Auth Flow
+ *
+ * 1. user enters email/pass
+ * 2. `supabase.auth.signInWithPassword` OR `signUp`
+ * 3. On Register:
+ *    - Checks if user exists via workaround (Supabase identity check)
+ *    - If new, shows "Check Email" success screen
+ * 4. On Login:
+ *    - Redirects to `/profile/setup` (or intended destination)
+ *
+ * ## Decorative Elements
+ *
+ * Uses `decorativeIcons` array to place floating icons (Star, Cloud, Zap...)
+ * at absolute positions with staggered entrance animations.
+ */
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -7,6 +37,10 @@ import {
     Gift, Crown, Bell, Sparkles
 } from "lucide-react";
 import SEOHead from '@/components/seo/SEOHead';
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 export default function LoginPage() {
     const navigate = useNavigate();

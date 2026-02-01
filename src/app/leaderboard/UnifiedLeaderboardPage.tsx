@@ -1,3 +1,35 @@
+/**
+ * @file UnifiedLeaderboardPage.tsx
+ * @description The main ranking interface for the application.
+ *
+ * Unifies global XP rankings (Gold League) and specific contest leaderboards
+ * into a single, responsive interface.
+ *
+ * ## Modes
+ *
+ * 1. **Global XP (Default)**:
+ *    - Shows weekly XP ranking
+ *    - Features a countdown timer to weekly reset
+ *    - Theme: Gold/Amber
+ *
+ * 2. **Contest Specific**:
+ *    - Shows ranking based on simulation scores for a specific contest
+ *    - Filterable by "My Quizzes" vs "All Quizzes"
+ *    - Theme: Emerald/Green
+ *
+ * ## Sub-Components
+ *
+ * - `LeaderboardSelector`: Dropdown/Tabs to switch between Global/Contest modes
+ * - `LeaderboardView`: The actual list of users (Admin version detailed)
+ * - `LeaderboardViewLegacy`: Simplified list for users
+ * - `LeagueCountdown`: Digital timer for season reset
+ *
+ * ## Access Control
+ *
+ * - Admin users see `LeaderboardView` (more data)
+ * - Regular users see `LeaderboardViewLegacy`
+ */
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
@@ -85,7 +117,7 @@ export default function UnifiedLeaderboardPage() {
     const [loading, setLoading] = useState(true);
 
     // 1. Fetch Options (Active & Others)
-    const { startOnboarding, hasCompletedContext } = useOnboarding();
+    const { startOnboarding, hasCompletedContext, isActive: isTourActive, activeContext } = useOnboarding();
 
     // Auto-start leaderboard onboarding
     useEffect(() => {
@@ -201,17 +233,21 @@ export default function UnifiedLeaderboardPage() {
     const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
 
     // Auto-Onboarding Check for Global XP
+    // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
         const hasSeen = localStorage.getItem('idoneo_leaderboard_onboarding');
-        if (!hasSeen && selection === 'xp') {
+        const tourIsActive = isTourActive && activeContext === 'leaderboard';
+        if (!hasSeen && selection === 'xp' && !tourIsActive) {
             setInfoType('xp');
             setTimeout(() => setShowInfoModal(true), 500);
         }
-    }, [selection]);
+    }, [selection, isTourActive, activeContext]);
 
     // Auto-Onboarding Check for Contest specific leaderboard
+    // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
-        if (selection !== 'xp') {
+        const tourIsActive = isTourActive && activeContext === 'leaderboard';
+        if (selection !== 'xp' && !tourIsActive) {
             // It's a contest/quiz leaderboard
             const hasSeenContestInfo = localStorage.getItem('idoneo_contest_leaderboard_onboarding');
             if (!hasSeenContestInfo) {
@@ -220,7 +256,7 @@ export default function UnifiedLeaderboardPage() {
                 localStorage.setItem('idoneo_contest_leaderboard_onboarding', 'true');
             }
         }
-    }, [selection]);
+    }, [selection, isTourActive, activeContext]);
 
 
     const handleCloseModal = () => {

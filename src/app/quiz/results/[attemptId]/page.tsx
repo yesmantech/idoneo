@@ -1,3 +1,40 @@
+/**
+ * @file page.tsx (Quiz Results)
+ * @description Post-quiz results page showing score breakdown and error review.
+ *
+ * This page displays after a quiz is completed, showing:
+ * - Pass/Fail status with confetti celebration
+ * - Score statistics (correct, wrong, blank)
+ * - XP earned from the quiz
+ * - Tabs to review questions by status
+ * - "Ripassa Errori" to retry incorrect questions
+ *
+ * ## Features
+ *
+ * | Feature          | Description                               |
+ * |------------------|-------------------------------------------|
+ * | Confetti         | Canvas confetti on pass                   |
+ * | XP Display       | Shows XP earned from this attempt         |
+ * | Error Review     | Create new attempt with only wrong Qs     |
+ * | Question Tabs    | Filter by correct/wrong/skipped           |
+ * | Analytics        | Tracks quiz completion event              |
+ *
+ * ## Pass/Fail Logic
+ *
+ * 1. If quiz has `min_correct_for_pass`, use that threshold
+ * 2. Otherwise, default to floor(total/2) + 1 correct
+ *
+ * ## Offline Support
+ *
+ * When viewing offline attempts (IDs starting with "local-"):
+ * - XP is not awarded (will sync later)
+ * - "Ripassa Errori" is disabled
+ *
+ * ## URL Parameters
+ *
+ * - `attemptId`: Quiz attempt UUID or local-xxx for offline
+ */
+
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -12,6 +49,10 @@ import { SuccessBadge } from "@/components/ui/SuccessBadge";
 import { FailBadge } from "@/components/ui/FailBadge";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 // Types
 interface RichAnswer {

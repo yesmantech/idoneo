@@ -1,8 +1,55 @@
+/**
+ * @file SEOHead.tsx
+ * @description Dynamic SEO meta tag management for React SPA.
+ *
+ * Since this is a single-page app, meta tags must be dynamically updated
+ * for each "page" using JavaScript. This component manages:
+ *
+ * - Document title
+ * - Meta description
+ * - Open Graph tags (for Facebook, LinkedIn)
+ * - Twitter Card tags
+ * - Canonical URLs
+ * - JSON-LD structured data
+ *
+ * ## Props
+ *
+ * | Prop            | Type    | Default                          | Description                |
+ * |-----------------|---------|----------------------------------|----------------------------|
+ * | `title`         | string  | 'Idoneo - Preparati...'          | Page title                 |
+ * | `description`   | string  | Default site description         | Meta description           |
+ * | `image`         | string  | Site logo                        | OG image URL               |
+ * | `url`           | string  | Current path                     | Canonical URL              |
+ * | `type`          | string  | 'website'                        | OG type                    |
+ * | `noindex`       | boolean | false                            | Block search indexing      |
+ * | `structuredData`| object  | undefined                        | JSON-LD schema             |
+ *
+ * ## Structured Data Helpers
+ *
+ * The module also exports helper functions for common schema types:
+ * - `getOrganizationSchema()` - For homepage
+ * - `getWebsiteSchema()` - Site-wide schema with search action
+ * - `getQuizSchema(name, desc)` - For quiz pages
+ * - `getBreadcrumbSchema(items)` - For navigation breadcrumbs
+ *
+ * @example
+ * ```tsx
+ * import SEOHead, { getQuizSchema } from '@/components/seo/SEOHead';
+ *
+ * <SEOHead
+ *   title="Polizia di Stato"
+ *   description="Simulazioni per il concorso..."
+ *   url="/concorsi/polizia"
+ *   structuredData={getQuizSchema('Allievo Agente', 'Quiz...')}
+ * />
+ * ```
+ */
+
 import { useEffect } from 'react';
 
-// =============================================================================
-// SEO HEAD - Dynamic meta tags for SEO optimization
-// =============================================================================
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
 
 interface SEOProps {
     title?: string;

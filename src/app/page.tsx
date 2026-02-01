@@ -1,3 +1,22 @@
+/**
+ * @file HomePage.tsx
+ * @description The main entry point ("Landing Page") of the application.
+ *
+ * ## Layout Structure
+ *
+ * 1. **BlogHero**: Immersive top section with latest news/articles
+ * 2. **SearchSection**: Prominent search bar triggering Spotlight
+ * 3. **ConcorsiSection (Recommended)**: Personalized suggestions based on user interests
+ * 4. **ConcorsiSection (All)**: Carousel of all available competitions
+ *
+ * ## Features
+ *
+ * - **Onboarding Trigger**: Automatically starts tour for new users
+ * - **Data Pre-fetching**: Loads categories and search index on mount
+ * - **Offline Sync**: Triggers background sync of pending attempts
+ * - **SEO**: configured with main meta tags
+ */
+
 import React, { useEffect, useState } from "react";
 import { getCategories, getAllSearchableItems, type Category, type SearchItem } from "../lib/data";
 import { useAuth } from "@/context/AuthContext";

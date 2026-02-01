@@ -1,8 +1,52 @@
+/**
+ * @file nativeConfig.ts
+ * @description Native app configuration and Capacitor plugin initialization.
+ *
+ * This module configures the iOS/Android app experience, including:
+ * - Status bar appearance
+ * - Splash screen behavior
+ * - Keyboard handling
+ * - Back button navigation
+ * - Deep link routing
+ *
+ * ## Initialization
+ *
+ * Call `initializeNativeApp()` once in `App.tsx` useEffect on mount.
+ * This sets up all native configurations for the session.
+ *
+ * ## Status Bar
+ *
+ * The app uses a dark status bar background (#0F172A) with light text (Style.Light).
+ * The web view extends behind the status bar (overlay mode).
+ *
+ * ## Deep Links
+ *
+ * The app handles `idoneo://` URL scheme for deep linking.
+ * URLs are parsed and routed via `window.location.href`.
+ *
+ * @example
+ * ```typescript
+ * import { initializeNativeApp, setStatusBarDark } from '@/lib/nativeConfig';
+ *
+ * // In App.tsx
+ * useEffect(() => {
+ *   initializeNativeApp();
+ * }, []);
+ *
+ * // For light-background pages
+ * setStatusBarDark();
+ * ```
+ */
+
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { Keyboard, KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 import { App } from '@capacitor/app';
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
 /**
  * Initialize native app configurations

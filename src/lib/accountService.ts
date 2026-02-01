@@ -1,11 +1,52 @@
 /**
- * Account Deletion Service
- * 
- * Handles secure account deletion for Apple App Store compliance.
- * Apple requires apps to allow users to delete their accounts (Guideline 5.1.1)
+ * @file accountService.ts
+ * @description User account management and deletion service.
+ *
+ * This service handles account-level operations, primarily focused on
+ * secure account deletion for Apple App Store compliance (Guideline 5.1.1).
+ *
+ * ## Account Deletion Process
+ *
+ * 1. **Avatar Cleanup**: Delete user's avatar from Supabase Storage
+ * 2. **Database Deletion**: Call `delete_user_account` RPC function
+ * 3. **Session Cleanup**: Sign out the user
+ *
+ * ## Data Cascade
+ *
+ * The `delete_user_account` database function triggers CASCADE deletion of:
+ * - `profiles` - User profile data
+ * - `quiz_attempts` - All quiz history
+ * - `user_xp` - XP records
+ * - `user_badges` - Earned badges
+ * - `concorso_leaderboard` - Leaderboard entries
+ * - `xp_events` - XP transaction history
+ * - `friendships` - Social connections
+ *
+ * ## Security
+ *
+ * The RPC function verifies the calling user can only delete their own account
+ * via RLS policies and `auth.uid()` matching.
+ *
+ * @example
+ * ```typescript
+ * import { deleteUserAccount } from '@/lib/accountService';
+ *
+ * const handleDelete = async () => {
+ *   const result = await deleteUserAccount();
+ *   if (result.success) {
+ *     // Redirect to home
+ *   } else {
+ *     showError(result.error);
+ *   }
+ * };
+ * ```
  */
 
 import { supabase } from './supabaseClient';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 export interface DeleteAccountResult {
     success: boolean;

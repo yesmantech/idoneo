@@ -1,5 +1,48 @@
+/**
+ * @file streakService.ts
+ * @description Daily streak tracking service for user engagement.
+ *
+ * The streak system encourages daily app usage by tracking consecutive
+ * days of activity. Key features:
+ *
+ * - **Current Streak**: Number of consecutive days the user has been active
+ * - **Max Streak**: Highest streak ever achieved (for badges/achievements)
+ * - **Milestones**: Special celebrations at weekly intervals (7, 14, 21...)
+ *
+ * ## Streak Logic
+ *
+ * | Scenario | Action |
+ * |----------|--------|
+ * | First activity ever | Set streak to 1 |
+ * | Active yesterday | Increment streak |
+ * | Active today already | Update timestamp only |
+ * | Inactive for 2+ days | Reset streak to 1 (broken) |
+ *
+ * ## Events
+ *
+ * When streak is extended, the service:
+ * 1. Updates the database (`profiles.streak_current`, `streak_max`, `last_active_at`)
+ * 2. Tracks an analytics event (`streak_extended`)
+ * 3. Dispatches a window event (`streak_updated`) for UI celebration
+ *
+ * @example
+ * ```typescript
+ * import { streakService } from '@/lib/streakService';
+ *
+ * // Called on app initialization (see App.tsx)
+ * const result = await streakService.checkAndUpdateStreak(userId);
+ * if (result?.isMilestone) {
+ *   // Show celebration UI
+ * }
+ * ```
+ */
+
 import { supabase } from './supabaseClient';
 import { analytics } from './analytics';
+
+// ============================================================================
+// STREAK SERVICE
+// ============================================================================
 
 export const streakService = {
     /**

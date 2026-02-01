@@ -1,3 +1,24 @@
+/**
+ * @file ProfilePage.tsx
+ * @description User dashboard and personal statistics hub.
+ *
+ * Displays the user's progress, identity card, and social connections.
+ *
+ * ## Components
+ *
+ * - **ProfileIdentityCard**: User avatar, level, role, and XP summary
+ * - **DashboardList**: List of recent activities and quick actions
+ * - **BadgesBlock**: Collection of earned achievements
+ * - **FriendsBlock**: Social graph and friend requests
+ * - **ProfileBackgroundDecor**: Animated background elements
+ *
+ * ## Data Flow
+ *
+ * 1. Checks Auth state (redirects if null)
+ * 2. Fetches User XP stats via `xpService`
+ * 3. Triggers Profile Onboarding Tour if not completed
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';

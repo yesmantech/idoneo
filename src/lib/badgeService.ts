@@ -1,22 +1,83 @@
+/**
+ * @file badgeService.ts
+ * @description Achievement badge system for user recognition.
+ *
+ * Badges reward users for reaching milestones and demonstrating engagement.
+ * They are visual achievements displayed on user profiles.
+ *
+ * ## Badge Categories
+ *
+ * ### Streak Badges (Consistency)
+ * | Badge        | Requirement      | Tier     |
+ * |--------------|------------------|----------|
+ * | costanza     | 7-day streak     | Bronze   |
+ * | maratona     | 14-day streak    | Silver   |
+ * | inarrestabile| 30-day streak    | Gold     |
+ * | diamante     | 60-day streak    | Sapphire |
+ * | immortale    | 100-day streak   | Diamond  |
+ *
+ * ### Activity Badges
+ * | Badge        | Requirement                    |
+ * |--------------|--------------------------------|
+ * | primo_passo  | Complete first quiz attempt    |
+ * | secchione    | Get 100% on 10+ question quiz  |
+ * | veterano     | Earn 1000+ total XP            |
+ * | hub_master   | Practice 5+ different quizzes  |
+ * | nottambulo   | 5+ attempts between 1-5 AM     |
+ *
+ * ### Social Badges
+ * | Badge        | Requirement       |
+ * |--------------|-------------------|
+ * | social       | Refer 5+ friends  |
+ *
+ * ## Implementation Notes
+ * - Badges are stored in `user_badges` junction table
+ * - `awardBadge` is idempotent (uses UPSERT with conflict handling)
+ * - Badge checks silently fail to avoid blocking core functionality
+ *
+ * @example
+ * ```typescript
+ * import { badgeService } from '@/lib/badgeService';
+ *
+ * // Check and award all applicable badges (call after quiz completion)
+ * await badgeService.checkAndAwardBadges(userId);
+ *
+ * // Get user's earned badges for profile display
+ * const badges = await badgeService.getUserBadges(userId);
+ * ```
+ */
+
 import { supabase } from './supabaseClient';
 import { analytics } from './analytics';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Available badge identifiers.
+ * Each corresponds to a specific achievement criteria.
+ */
 export type BadgeId =
-    | 'primo_passo'
-    | 'secchione'
-    | 'veterano'
-    | 'social'
-    | 'inarrestabile'
-    | 'cecchino'
-    | 'fulmine'
-    | 'enciclopedia'
-    | 'nottambulo'
-    | 'hub_master'
-    | 'costanza'
-    | 'maratona'      // NEW: 14-day streak
-    | 'diamante'      // NEW: 60-day streak
-    | 'immortale'     // NEW: 100-day streak
-    | 'leggenda';
+    | 'primo_passo'    // First quiz attempt
+    | 'secchione'      // Perfect score on 10+ questions
+    | 'veterano'       // 1000+ total XP
+    | 'social'         // 5+ referrals
+    | 'inarrestabile'  // 30-day streak
+    | 'cecchino'       // Reserved: Accuracy badge
+    | 'fulmine'        // Reserved: Speed badge
+    | 'enciclopedia'   // Reserved: Coverage badge
+    | 'nottambulo'     // Night owl (1-5 AM attempts)
+    | 'hub_master'     // 5+ different quizzes
+    | 'costanza'       // 7-day streak
+    | 'maratona'       // 14-day streak
+    | 'diamante'       // 60-day streak
+    | 'immortale'      // 100-day streak
+    | 'leggenda';      // Reserved: Ultimate badge
+
+// ============================================================================
+// BADGE SERVICE
+// ============================================================================
 
 export const badgeService = {
     /**

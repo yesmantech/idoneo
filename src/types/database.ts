@@ -1,4 +1,56 @@
+/**
+ * @file database.ts
+ * @description TypeScript type definitions for the Supabase database schema.
+ *
+ * This file provides type safety for database operations using the Supabase client.
+ * The types are structured to match Supabase's auto-generated types pattern:
+ *
+ * ```typescript
+ * Database.public.Tables.<table_name>.Row    // SELECT result type
+ * Database.public.Tables.<table_name>.Insert // INSERT payload type
+ * Database.public.Tables.<table_name>.Update // UPDATE payload type
+ * ```
+ *
+ * ## Key Tables
+ *
+ * | Table               | Purpose                                      |
+ * |---------------------|----------------------------------------------|
+ * | categories          | Top-level contest categories (Polizia, etc.) |
+ * | roles               | Specific positions within categories         |
+ * | quizzes             | Quiz/exam definitions with scoring rules     |
+ * | subjects            | Subject areas within quizzes                 |
+ * | questions           | Multiple choice questions                    |
+ * | quiz_attempts       | User's quiz sessions with answers            |
+ * | profiles            | Extended user profiles with gamification     |
+ * | xp_events           | XP transaction audit log                     |
+ *
+ * ## Usage with Supabase Client
+ *
+ * ```typescript
+ * import { supabase } from '@/lib/supabaseClient';
+ * import type { Database } from '@/types/database';
+ *
+ * type Profile = Database['public']['Tables']['profiles']['Row'];
+ *
+ * const { data } = await supabase
+ *   .from('profiles')
+ *   .select('*')
+ *   .single();
+ *
+ * // data is typed as Profile
+ * ```
+ *
+ * @note These types may need to be updated when database migrations are applied.
+ */
 
+// ============================================================================
+// BASE TYPES
+// ============================================================================
+
+/**
+ * Represents any valid JSON value.
+ * Used for JSONB columns like `answers` in `quiz_attempts`.
+ */
 export type Json =
   | string
   | number
@@ -7,6 +59,14 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+// ============================================================================
+// JSON COLUMN TYPES
+// ============================================================================
+
+/**
+ * Structure of a single answer in a quiz attempt.
+ * Stored in `quiz_attempts.answers` JSONB column.
+ */
 // Type-safe definitions for JSON columns
 export interface RichAnswer {
   questionId: string;

@@ -1,3 +1,56 @@
+/**
+ * @file page.tsx (Quiz Runner)
+ * @description Core quiz taking experience - the main page where users answer questions.
+ *
+ * This is the most complex page in the application, handling:
+ * - Real-time answer selection and validation
+ * - Timer countdown with auto-submit
+ * - Offline quiz support via IndexedDB
+ * - Progress persistence in localStorage
+ * - Answer locking in "instant check" mode
+ *
+ * ## Features
+ *
+ * | Feature        | Description                                |
+ * |----------------|--------------------------------------------|
+ * | Instant Check  | Lock answer after selection, show correct  |
+ * | Auto Next      | Auto-advance to next question after answer |
+ * | Timer          | Configurable countdown with color feedback |
+ * | Report         | Flag questions with issues                 |
+ * | Offline        | Run quizzes from IndexedDB cache           |
+ *
+ * ## URL Parameters
+ *
+ * | Param      | Description                    | Default |
+ * |------------|--------------------------------|---------|
+ * | `time`     | Quiz duration in minutes       | null    |
+ * | `correct`  | Points for correct answer      | 1       |
+ * | `wrong`    | Points for wrong answer        | 0       |
+ * | `blank`    | Points for skipped answer      | 0       |
+ *
+ * ## Data Flow
+ *
+ * ```
+ * Quiz Start → Load Attempt (DB or IndexedDB) → Answer Questions
+ *                                             → Save to localStorage (backup)
+ *                                             → Finish → Calculate Score
+ *                                                      → Award XP
+ *                                                      → Update Leaderboard
+ *                                                      → Check Badges
+ *                                                      → Navigate to Results
+ * ```
+ *
+ * ## State Persistence
+ *
+ * Progress is saved to `localStorage` on every answer change. On reload,
+ * the app restores the user's progress from localStorage if available.
+ *
+ * ## Offline Mode
+ *
+ * When `attemptId` starts with "local-", the page reads/writes to IndexedDB
+ * via `offlineService` instead of Supabase. Syncing happens later.
+ */
+
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -12,6 +65,10 @@ import { useOnboarding } from "@/context/OnboardingProvider";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { AnimatePresence } from "framer-motion";
 import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check, Flag, AlertTriangle } from "lucide-react";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 // Types
 type RichAnswer = {

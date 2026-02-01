@@ -1,3 +1,31 @@
+/**
+ * @file vite.config.ts
+ * @description Vite bundler configuration for the Idoneo application.
+ *
+ * ## Key Features Configured
+ *
+ * - **Development Server**: Port 3000 with network access (0.0.0.0)
+ * - **React Plugin**: Fast Refresh for development
+ * - **PWA Plugin**: Service worker and manifest generation
+ * - **Compression**: Both Gzip and Brotli for production builds
+ * - **Code Splitting**: Manual chunks for optimal caching
+ *
+ * ## Build Optimizations
+ *
+ * Manual chunks separate vendor code for better cache utilization:
+ * - `react-vendor`: React core (rarely changes)
+ * - `router`: React Router DOM
+ * - `framer`: Framer Motion animations
+ * - `supabase`: Supabase SDK
+ * - `icons`: Lucide React icons
+ *
+ * ## Path Aliases
+ *
+ * - `@/` maps to `./src/` for clean imports
+ *
+ * @see https://vitejs.dev/config/
+ */
+
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';

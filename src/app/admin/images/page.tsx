@@ -1,3 +1,28 @@
+/**
+ * @file AdminImagesPage.tsx
+ * @description Image management dashboard for question images.
+ *
+ * Provides an interface to upload, view, and manage images stored in
+ * the 'question-images' Supabase storage bucket.
+ *
+ * ## Features
+ *
+ * - **Upload**: Drag-and-drop or file select to upload images
+ * - **Gallery**: Grid view of all images in the bucket
+ * - **Copy URL**: One-click copy of public URL for use in questions
+ * - **Auto-naming**: Files are renamed with timestamp to prevent collisions
+ *
+ * ## Storage Bucket
+ *
+ * Using bucket: `question-images`
+ *
+ * ## Usage in Questions
+ *
+ * 1. Upload image here
+ * 2. Copy URL
+ * 3. Paste URL into the `image_url` field of a question
+ */
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
@@ -5,11 +30,19 @@ import { AdminLayout } from "@/components/admin";
 
 const BUCKET = "question-images";
 
+// ============================================================================
+// TYPES
+// ============================================================================
+
 type StoredImage = {
   name: string;
   publicUrl: string;
   created_at?: string;
 };
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 export default function AdminImagesPage() {
   const navigate = useNavigate();
@@ -111,8 +144,8 @@ export default function AdminImagesPage() {
 
         {msg && (
           <div className={`mb-6 p-3 rounded-lg border text-sm ${msg.type === 'error'
-              ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-400'
-              : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+            ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-400'
+            : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
             }`}>
             {msg.text}
           </div>

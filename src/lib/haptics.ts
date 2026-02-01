@@ -1,5 +1,44 @@
+/**
+ * @file haptics.ts
+ * @description Haptic feedback utilities for native iOS/Android experience.
+ *
+ * Provides tactile feedback for user interactions, enhancing the mobile
+ * app experience. Haptics are only triggered on native platforms (iOS/Android),
+ * silently ignored on web.
+ *
+ * ## Feedback Types
+ *
+ * | Function          | Use Case                              |
+ * |-------------------|---------------------------------------|
+ * | `hapticLight`     | Button taps, minor UI interactions    |
+ * | `hapticMedium`    | Toggle switches, selections           |
+ * | `hapticHeavy`     | Significant actions, confirmations    |
+ * | `hapticSuccess`   | Quiz correct, badge earned            |
+ * | `hapticWarning`   | Form validation, streak broken        |
+ * | `hapticError`     | Failed actions, errors                |
+ * | `hapticSelection` | Picker scrolling, slider movement     |
+ *
+ * @example
+ * ```typescript
+ * import { hapticSuccess, hapticLight } from '@/lib/haptics';
+ *
+ * // On correct answer
+ * hapticSuccess();
+ *
+ * // On button tap
+ * onClick={() => {
+ *   hapticLight();
+ *   handleAction();
+ * }}
+ * ```
+ */
+
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+
+// ============================================================================
+// PLATFORM DETECTION
+// ============================================================================
 
 /**
  * Check if running as a native app

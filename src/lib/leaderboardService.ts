@@ -1,15 +1,75 @@
+/**
+ * @file leaderboardService.ts
+ * @description Leaderboard management service for competitive rankings.
+ *
+ * This service provides two types of leaderboards:
+ *
+ * ## 1. Skill Leaderboard (Per-Quiz)
+ * Ranks users based on their preparation score for a specific quiz/concorso.
+ * Stored in `concorso_leaderboard` table, calculated by database triggers.
+ *
+ * **Scoring Algorithm** (5-factor composite):
+ * | Factor       | Weight | Description                              |
+ * |--------------|--------|------------------------------------------|
+ * | Volume       | 20%    | Raw count of correct answers             |
+ * | Accuracy     | 25%    | Correct / Total ratio                    |
+ * | Recency      | 20%    | Recent attempts weighted more            |
+ * | Coverage     | 20%    | Subject diversity across the quiz        |
+ * | Reliability  | 15%    | Consistency (low variance in scores)     |
+ *
+ * ## 2. XP Leaderboard (Global/Seasonal)
+ * Ranks users by experience points earned across all activities.
+ * - All-time: Uses `profiles.total_xp`
+ * - Seasonal: Uses `user_xp` table filtered by `season_id`
+ *
+ * ## Data Flow
+ * ```
+ * quiz_attempts INSERT → DB Trigger → concorso_leaderboard UPDATE
+ *                     → xpService → user_xp UPDATE
+ * ```
+ *
+ * @example
+ * ```typescript
+ * import { leaderboardService } from '@/lib/leaderboardService';
+ *
+ * // Fetch top 50 for a specific quiz
+ * const skillBoard = await leaderboardService.getSkillLeaderboard(quizId);
+ *
+ * // Fetch global XP rankings
+ * const xpBoard = await leaderboardService.getXPLeaderboard();
+ *
+ * // Get current user's rank
+ * const myRank = await leaderboardService.getUserSkillRank(userId, quizId);
+ * ```
+ */
+
 import { supabase } from "@/lib/supabaseClient";
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Represents a single entry in a leaderboard.
+ * Used for both Skill and XP leaderboards.
+ */
 export interface LeaderboardEntry {
+    /** Position in the ranking (1-indexed) */
     rank: number;
+    /** User information for display */
     user: {
         avatarUrl?: string;
         nickname: string;
         id: string;
     };
+    /** The score value (preparation score or XP) */
     score: number;
+    /** Whether this entry represents the currently logged-in user */
     isCurrentUser?: boolean;
-    // New breakdown fields (optional as they might not persist for XP)
+    /**
+     * Score breakdown by factor (only available for Skill leaderboard).
+     * Each factor is a value between 0-100.
+     */
     breakdown?: {
         volume: number;
         accuracy: number;
@@ -18,6 +78,10 @@ export interface LeaderboardEntry {
         reliability: number;
     };
 }
+
+// ============================================================================
+// LEADERBOARD SERVICE
+// ============================================================================
 
 export const leaderboardService = {
     // 0. Update User Score

@@ -1,11 +1,51 @@
+/**
+ * @file SpotlightContext.tsx
+ * @description Command palette / spotlight search context.
+ *
+ * Provides global state for the spotlight search feature, similar to
+ * macOS Spotlight or VS Code's command palette.
+ *
+ * ## Features
+ *
+ * | Feature          | Description                               |
+ * |------------------|-------------------------------------------|
+ * | Open/Close       | Toggle spotlight visibility               |
+ * | Keyboard         | ⌘K / Ctrl+K opens, Escape closes          |
+ * | Recent Searches  | Persisted to localStorage                 |
+ *
+ * ## Keyboard Shortcuts
+ *
+ * - `⌘K` (Mac) / `Ctrl+K` (Windows) - Toggle spotlight
+ * - `Escape` - Close spotlight (when open)
+ *
+ * ## Usage
+ *
+ * ```tsx
+ * import { useSpotlight } from '@/context/SpotlightContext';
+ *
+ * function SearchButton() {
+ *   const { open, isOpen } = useSpotlight();
+ *   return <button onClick={open}>Search</button>;
+ * }
+ *
+ * function SpotlightInput() {
+ *   const { close, addRecentSearch } = useSpotlight();
+ *
+ *   const handleSearch = (query: string) => {
+ *     addRecentSearch(query);
+ *     // ... perform search
+ *   };
+ * }
+ * ```
+ */
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
-// ============================================
-// SPOTLIGHT CONTEXT
-// Global state for command palette / spotlight
-// ============================================
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
 
 interface SpotlightContextType {
     isOpen: boolean;

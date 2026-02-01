@@ -1,4 +1,48 @@
+/**
+ * @file data.ts
+ * @description Core data fetching utilities for categories, roles, and quizzes.
+ *
+ * This module provides typed fetcher functions for the Supabase database.
+ * It serves as the data access layer between components and the database.
+ *
+ * ## Entity Hierarchy
+ *
+ * ```
+ * Category (e.g., "Polizia di Stato")
+ *    └── Role (e.g., "Allievo Agente")
+ *          └── Quiz/Contest (e.g., "2024 Official")
+ * ```
+ *
+ * ## Fetchers
+ *
+ * | Function               | Returns           | Description                    |
+ * |------------------------|-------------------|--------------------------------|
+ * | `getCategories()`      | `Category[]`      | All categories, sorted by title|
+ * | `getCategoryBySlug()`  | `Category | null` | Single category by slug        |
+ * | `getRolesByCategory()` | `Role[]`          | Roles in a category            |
+ * | `getContestBySlug()`   | `Contest | null`  | Single quiz/contest by slug    |
+ * | `getContestsByRole()`  | `Contest[]`       | All quizzes for a role         |
+ * | `getAllSearchableItems()`| `SearchItem[]`  | All items for spotlight search |
+ *
+ * ## Search Integration
+ *
+ * `getAllSearchableItems()` returns a flat array of all Categories, Roles,
+ * and Quizzes with their URLs for spotlight search indexing.
+ *
+ * @example
+ * ```typescript
+ * import { getCategories, getRolesByCategory } from '@/lib/data';
+ *
+ * const categories = await getCategories();
+ * const roles = await getRolesByCategory('polizia-di-stato');
+ * ```
+ */
+
 import { supabase } from "./supabaseClient";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 // --- Types ---
 export interface Category {

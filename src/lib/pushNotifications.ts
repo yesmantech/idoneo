@@ -1,9 +1,60 @@
+/**
+ * @file pushNotifications.ts
+ * @description Push notification setup and management for iOS/Android.
+ *
+ * This module handles the full push notification lifecycle:
+ * - Permission request
+ * - Device token registration
+ * - Foreground notification handling
+ * - Tap action routing
+ *
+ * ## Initialization Flow
+ *
+ * ```
+ * App Start → Check Permissions → Request (if needed) → Register
+ *                                                      → Receive Token
+ *                                                      → Send to Backend
+ * ```
+ *
+ * ## Event Handlers
+ *
+ * | Event                          | Description                          |
+ * |--------------------------------|--------------------------------------|
+ * | `onToken`                      | Device token received (save to DB)   |
+ * | `onNotification`               | Notification received in foreground  |
+ * | `onAction`                     | User tapped on notification          |
+ *
+ * ## Web Fallback
+ *
+ * Push notifications are not available on web. All functions safely no-op.
+ *
+ * @example
+ * ```typescript
+ * import { initPushNotifications } from '@/lib/pushNotifications';
+ *
+ * // In App.tsx after auth
+ * await initPushNotifications(
+ *   (token) => saveTokenToDatabase(userId, token),
+ *   (notification) => showInAppBanner(notification),
+ *   (action) => navigateTo(action.notification.data.url)
+ * );
+ * ```
+ */
+
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications, Token, PushNotificationSchema, ActionPerformed } from '@capacitor/push-notifications';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 type TokenHandler = (token: string) => void;
 type NotificationHandler = (notification: PushNotificationSchema) => void;
 type ActionHandler = (action: ActionPerformed) => void;
+
+// ============================================================================
+// PUSH NOTIFICATION SERVICE
+// ============================================================================
 
 /**
  * Initialize push notifications

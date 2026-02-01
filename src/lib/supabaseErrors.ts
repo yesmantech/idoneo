@@ -1,7 +1,41 @@
+/**
+ * @file supabaseErrors.ts
+ * @description Centralized error handling utilities for Supabase/PostgreSQL errors.
+ *
+ * This module provides:
+ * - User-friendly error messages in Italian
+ * - Error type detection (permission, network, not-found)
+ * - Consistent error logging with context
+ *
+ * The error messages are designed to be displayed directly to end users,
+ * while the parsed error object provides programmatic access for handling
+ * different error scenarios (e.g., redirect on permission error).
+ *
+ * @example
+ * ```typescript
+ * import { parseSupabaseError, getErrorMessage } from '@/lib/supabaseErrors';
+ *
+ * const { data, error } = await supabase.from('profiles').select('*');
+ * if (error) {
+ *   const parsed = parseSupabaseError(error);
+ *   if (parsed.isPermissionError) {
+ *     navigate('/login');
+ *   } else {
+ *     showToast(parsed.message);
+ *   }
+ * }
+ * ```
+ */
+
 import { PostgrestError } from '@supabase/supabase-js';
 
+// ============================================================================
+// ERROR MESSAGE MAPPING
+// ============================================================================
+
 /**
- * User-friendly error messages for Supabase errors (Italian)
+ * User-friendly error messages for Supabase errors (Italian localization).
+ * Maps PostgreSQL/PostgREST error codes to human-readable messages.
  */
 const ERROR_MESSAGES: Record<string, string> = {
     // RLS / Permission errors

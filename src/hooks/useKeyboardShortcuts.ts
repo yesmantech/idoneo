@@ -1,4 +1,53 @@
+/**
+ * @file useKeyboardShortcuts.ts
+ * @description Keyboard shortcut hooks for accessibility and power users.
+ *
+ * This module provides three hooks for common keyboard interaction patterns:
+ *
+ * ## Hooks
+ *
+ * | Hook                   | Purpose                          |
+ * |------------------------|----------------------------------|
+ * | `useKeyboardShortcuts` | Generic multi-shortcut handler   |
+ * | `useEscapeKey`         | Modal/overlay close handler      |
+ * | `useSearchShortcut`    | Cmd/Ctrl+K spotlight search      |
+ *
+ * ## Modifier Support
+ *
+ * Shortcuts can require modifiers:
+ * - `ctrl` - Control key (maps to Cmd on Mac)
+ * - `meta` - Command/Windows key (maps to Ctrl on Windows)
+ * - `alt` - Option/Alt key
+ * - `shift` - Shift key
+ *
+ * ## Cross-Platform
+ *
+ * The hooks treat Cmd (Mac) and Ctrl (Windows) as equivalent for
+ * better cross-platform compatibility.
+ *
+ * @example
+ * ```tsx
+ * import { useKeyboardShortcuts, useEscapeKey } from '@/hooks/useKeyboardShortcuts';
+ *
+ * function Modal({ onClose }) {
+ *   useEscapeKey(onClose);
+ *   return <div>Modal Content</div>;
+ * }
+ *
+ * function App() {
+ *   useKeyboardShortcuts({
+ *     'k': { handler: openSearch, meta: true },
+ *     '/': { handler: focusSearch }
+ *   });
+ * }
+ * ```
+ */
+
 import { useEffect, useCallback } from 'react';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 type KeyboardHandler = (e: KeyboardEvent) => void;
 

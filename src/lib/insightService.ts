@@ -1,3 +1,44 @@
+/**
+ * @file insightService.ts
+ * @description Admin analytics insights service for business intelligence.
+ *
+ * This service generates actionable insights for administrators by analyzing
+ * user behavior patterns, content gaps, and engagement metrics.
+ *
+ * ## Insight Types
+ *
+ * | Type          | Purpose                                          |
+ * |---------------|--------------------------------------------------|
+ * | `conversion`  | Quiz completion/abandonment rate analysis        |
+ * | `content_gap` | Subjects with insufficient question coverage     |
+ * | `trend`       | Positive engagement signals                      |
+ * | `alert`       | Issues requiring attention (low success rates)   |
+ *
+ * ## Generated Insights
+ *
+ * The `generateInsights()` function analyzes:
+ * 1. **Conversion Gaps**: Quizzes with <50% completion rate
+ * 2. **Difficulty Issues**: Quizzes with <40% success rate
+ * 3. **Streak Engagement**: Percentage of users with active streaks
+ * 4. **Content Gaps**: Subjects with <20 questions
+ *
+ * ## Data Storage
+ *
+ * Insights are stored in `admin_insights` table with priority levels
+ * (high/medium/low) and optional expiration dates.
+ *
+ * @example
+ * ```typescript
+ * import { insightService } from '@/lib/insightService';
+ *
+ * // For admin dashboard
+ * const insights = await insightService.getActiveInsights();
+ *
+ * // Regenerate insights (typically run as scheduled job)
+ * const newInsights = await insightService.generateInsights();
+ * ```
+ */
+
 import { supabase } from './supabaseClient';
 
 // =============================================================================

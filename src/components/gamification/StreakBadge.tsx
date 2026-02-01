@@ -1,7 +1,44 @@
+/**
+ * @file StreakBadge.tsx
+ * @description Visual indicator for user's daily login streak.
+ *
+ * Displays the user's current streak count with dynamic styling:
+ * - **Active Streak**: Orange flame with glow effect
+ * - **No Streak**: Muted gray appearance
+ * - **Not Logged In**: Shows "Accedi" prompt
+ *
+ * ## Props
+ *
+ * | Prop        | Type     | Description                      |
+ * |-------------|----------|----------------------------------|
+ * | `collapsed` | boolean  | If true, show icon-only mode     |
+ * | `className` | string   | Additional CSS classes           |
+ *
+ * ## Data Source
+ *
+ * Streak is read from `AuthContext.profile.streak_current`, with a
+ * fallback query to `profiles` table if not available.
+ *
+ * ## Custom Events
+ *
+ * The component dispatches `streak_updated` event when clicked (test mode),
+ * which triggers the streak celebration animation.
+ *
+ * @example
+ * ```tsx
+ * <StreakBadge />
+ * <StreakBadge collapsed />
+ * ```
+ */
+
 import React, { useEffect, useState } from 'react';
 import { Flame } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 interface StreakBadgeProps {
     collapsed?: boolean;

@@ -1,3 +1,41 @@
+/**
+ * @file capacitor.config.ts
+ * @description Capacitor configuration for native iOS app.
+ *
+ * Capacitor wraps the web app in a native WebView container,
+ * providing access to native APIs and App Store distribution.
+ *
+ * ## Key Configuration
+ *
+ * - **appId**: Bundle identifier for App Store (com.idoneo.app)
+ * - **webDir**: Built web assets directory (dist/)
+ * - **server.iosScheme**: HTTPS for secure asset loading
+ *
+ * ## Plugin Configuration
+ *
+ * - **SplashScreen**: 2-second branded splash with auto-hide
+ * - **StatusBar**: Light text on dark background (#0F172A)
+ * - **Keyboard**: Proper resize handling for forms
+ * - **PushNotifications**: Badge, sound, and alert presentation
+ *
+ * ## iOS-Specific Settings
+ *
+ * - Content extends to screen edges (no safe area inset)
+ * - Mobile-optimized content mode
+ * - Custom URL scheme for deep linking (idoneo://)
+ * - Background color matches dark mode theme
+ *
+ * ## Building for iOS
+ *
+ * ```bash
+ * npm run build         # Build web assets
+ * npx cap sync ios      # Sync to iOS project
+ * npx cap open ios      # Open in Xcode
+ * ```
+ *
+ * @see https://capacitorjs.com/docs/config
+ */
+
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {

@@ -1,3 +1,35 @@
+/**
+ * @file tailwind.config.js
+ * @description Tailwind CSS configuration with custom design tokens.
+ *
+ * This configuration extends Tailwind with Idoneo's design system:
+ *
+ * ## Color Palette
+ *
+ * - **brand.***: Primary action colors (cyan, blue, orange, purple)
+ * - **canvas.***: Background colors (white, light gray)
+ * - **text.***: Typography colors (primary, secondary, tertiary)
+ * - **semantic.***: Feedback colors (success green, error red)
+ *
+ * ## Typography
+ *
+ * - Primary font: Inter (Google Fonts)
+ * - Fallback: San Francisco, SF Pro, system sans-serif
+ *
+ * ## Custom Utilities
+ *
+ * - **borderRadius**: squircle (22%), card (24px), pill, input (16px)
+ * - **boxShadow**: soft, card
+ * - **transitionTimingFunction**: ios (cubic-bezier for iOS-like motion)
+ *
+ * ## Dark Mode
+ *
+ * Uses class-based dark mode (`darkMode: 'class'`).
+ * The `dark` class is toggled on `<html>` by ThemeContext.
+ *
+ * @see https://tailwindcss.com/docs/configuration
+ */
+
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: 'class',

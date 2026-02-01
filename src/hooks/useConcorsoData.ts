@@ -1,6 +1,60 @@
+/**
+ * @file useConcorsoData.ts
+ * @description Data fetching hook for category (concorso) pages.
+ *
+ * This hook fetches the full hierarchy for a category page:
+ * Category → Roles → Quizzes (Contests) → Active Users
+ *
+ * ## Data Structure
+ *
+ * ```
+ * Category (e.g., "Polizia di Stato")
+ * ├── Role (e.g., "Allievo Agente")
+ * │   ├── Contest/Quiz (2024 Official)
+ * │   └── Contest/Quiz (2023 Official)
+ * └── Role (e.g., "Vice Ispettore")
+ *     └── Contest/Quiz (...)
+ * ```
+ *
+ * ## Active Users Calculation
+ *
+ * For each role, counts unique users in `concorso_leaderboard` across all
+ * quizzes for that role. This shows how many people are preparing.
+ *
+ * ## Query Flow
+ *
+ * 1. Fetch category by slug
+ * 2. Fetch all roles for category
+ * 3. Fetch all quizzes for roles
+ * 4. Fetch leaderboard entries for active user counts
+ * 5. Group and assemble response
+ *
+ * @example
+ * ```tsx
+ * import { useConcorsoData } from '@/hooks/useConcorsoData';
+ *
+ * function CategoryPage({ categorySlug }) {
+ *   const { category, roles, loading } = useConcorsoData(categorySlug);
+ *
+ *   if (loading) return <Skeleton />;
+ *
+ *   return (
+ *     <div>
+ *       <h1>{category?.title}</h1>
+ *       {roles.map(role => <RoleCard key={role.id} role={role} />)}
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Category, Role, Contest } from '@/lib/data';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 export interface ContestWithSeats extends Contest {
     available_seats?: string | null;

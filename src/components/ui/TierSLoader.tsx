@@ -1,10 +1,47 @@
+/**
+ * @file TierSLoader.tsx
+ * @description Premium full-screen loading experience.
+ *
+ * A beautifully animated loading screen used during:
+ * - Initial app load
+ * - Quiz saving/loading
+ * - Any heavy async operation
+ *
+ * ## Visual Elements
+ *
+ * | Element          | Description                        |
+ * |------------------|------------------------------------|
+ * | Background       | Rotating conic gradient            |
+ * | Outer ring       | Slow cyan rotation (3s)            |
+ * | Middle ring      | Medium emerald counter-rotation    |
+ * | Inner ring       | Fast purple rotation (1s)          |
+ * | Center dot       | Pulsing gradient orb               |
+ * | Bouncing dots    | Three sequentially animated dots   |
+ *
+ * ## Props
+ *
+ * | Prop        | Type   | Default           | Description      |
+ * |-------------|--------|-------------------|------------------|
+ * | `message`   | string | "Caricamento..."  | Main text        |
+ * | `submessage`| string | undefined         | Secondary text   |
+ *
+ * @example
+ * ```tsx
+ * import TierSLoader from '@/components/ui/TierSLoader';
+ *
+ * if (loading) {
+ *   return <TierSLoader message="Salvataggio..." submessage="Attendere" />;
+ * }
+ * ```
+ */
+
 "use client";
 
 import React from 'react';
 import { motion } from 'framer-motion';
 
 // ============================================================================
-// TIER S LOADER - Premium Full-Screen Loading Experience
+// COMPONENT
 // ============================================================================
 
 interface LoaderProps {

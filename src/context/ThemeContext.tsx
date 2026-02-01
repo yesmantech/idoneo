@@ -1,5 +1,40 @@
+/**
+ * @file ThemeContext.tsx
+ * @description Dark/light theme management with system preference support.
+ *
+ * This provider manages the application's color scheme with three modes:
+ * - **light**: Force light mode
+ * - **dark**: Force dark mode
+ * - **system**: Follow OS preference (default)
+ *
+ * ## How It Works
+ * - Adds/removes `dark` class on `<html>` element
+ * - Tailwind's `darkMode: 'class'` picks up the class
+ * - CSS variables in `index.css` update accordingly
+ * - Preference persisted in localStorage
+ *
+ * ## Usage
+ * ```tsx
+ * import { useTheme } from '@/context/ThemeContext';
+ *
+ * function ThemeToggle() {
+ *   const { theme, setTheme, resolvedTheme } = useTheme();
+ *   return (
+ *     <button onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
+ *       {resolvedTheme === 'dark' ? '☀️' : '🌙'}
+ *     </button>
+ *   );
+ * }
+ * ```
+ */
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/** Available theme modes */
 type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {

@@ -1,14 +1,77 @@
+/**
+ * @file friendService.ts
+ * @description Social/friend system for user connections.
+ *
+ * This service manages the friend system, including:
+ * - User search by nickname
+ * - Friend request lifecycle (send, accept, reject)
+ * - Friend list with pending requests
+ *
+ * ## Friend Sources
+ *
+ * Users can be "friends" through two mechanisms:
+ * 1. **Referrals**: Users who signed up with someone's referral code
+ * 2. **Manual Friendships**: Explicit friend requests via the `friendships` table
+ *
+ * ## Request States
+ *
+ * | Status     | Description                              |
+ * |------------|------------------------------------------|
+ * | `pending`  | Request sent, awaiting acceptance        |
+ * | `accepted` | Both users are friends                   |
+ * | `rejected` | Request was declined (cannot re-request) |
+ * | `referral` | Virtual status for referred users        |
+ *
+ * ## Database Schema
+ *
+ * The `friendships` table uses two user ID columns:
+ * - `user_id`: The user who initiated the request
+ * - `friend_id`: The user receiving the request
+ *
+ * @example
+ * ```typescript
+ * import { friendService } from '@/lib/friendService';
+ *
+ * // Search for users
+ * const results = await friendService.searchUsers('marco', currentUserId);
+ *
+ * // Send friend request
+ * await friendService.sendRequest(currentUserId, friendId);
+ *
+ * // Get all friends and pending requests
+ * const { friends, pendingReceived } = await friendService.getFriendsAndRequests(userId);
+ * ```
+ */
+
 import { supabase } from '@/lib/supabaseClient';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Friend profile data for display.
+ */
 export interface FriendProfile {
+    /** User UUID */
     id: string;
+    /** Display name */
     nickname: string;
+    /** Profile picture URL */
     avatar_url: string | null;
+    /** When the friendship/referral was created */
     created_at: string;
+    /** Relationship status */
     status?: 'accepted' | 'pending' | 'referral';
+    /** Friendship record ID (for accept/reject actions) */
     friendship_id?: string;
-    is_requester?: boolean; // True if WE sent the request
+    /** True if current user sent the request */
+    is_requester?: boolean;
 }
+
+// ============================================================================
+// FRIEND SERVICE
+// ============================================================================
 
 export const friendService = {
     /**

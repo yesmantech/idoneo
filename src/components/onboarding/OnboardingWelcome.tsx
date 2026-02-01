@@ -1,3 +1,44 @@
+/**
+ * @file OnboardingWelcome.tsx
+ * @description First-time user welcome modal with animated logo.
+ *
+ * This modal is shown to new users on their first visit to the homepage.
+ * It introduces the app's main features and offers to start a guided tour.
+ *
+ * ## Features Displayed
+ *
+ * - Search contests
+ * - Run simulations
+ * - Track progress
+ * - Climb leaderboards
+ *
+ * ## Visual Elements
+ *
+ * | Element        | Description                           |
+ * |----------------|---------------------------------------|
+ * | AnimatedLogo   | Pulsing checkmark with sparkles       |
+ * | Feature grid   | 2x2 icons with descriptions           |
+ * | CTA button     | Gradient "Start Tour" button          |
+ * | Skip link      | "I already know the app" dismiss      |
+ *
+ * ## Props
+ *
+ * | Prop         | Type       | Description                    |
+ * |--------------|------------|--------------------------------|
+ * | `onStartTour`| () => void | Called when user starts tour   |
+ * | `onSkip`     | () => void | Called when user dismisses     |
+ *
+ * @example
+ * ```tsx
+ * import OnboardingWelcome from '@/components/onboarding/OnboardingWelcome';
+ *
+ * <OnboardingWelcome
+ *   onStartTour={() => startOnboarding('homepage')}
+ *   onSkip={() => dismissWelcome()}
+ * />
+ * ```
+ */
+
 "use client";
 
 import React from 'react';
@@ -6,10 +47,9 @@ import { ChevronRight, X, Search, FileText, TrendingUp, Trophy, Sparkles } from 
 import { hapticLight, hapticSuccess } from '@/lib/haptics';
 import { useAuth } from '@/context/AuthContext';
 
-// ============================================
-// ONBOARDING WELCOME SCREEN - TIER S V2
-// Premium intro screen for first-time users
-// ============================================
+// ============================================================================
+// ANIMATED LOGO COMPONENT
+// ============================================================================
 
 interface OnboardingWelcomeProps {
     onStartTour: () => void;

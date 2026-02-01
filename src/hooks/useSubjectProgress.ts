@@ -1,6 +1,60 @@
+/**
+ * @file useSubjectProgress.ts
+ * @description Hook for tracking user's mastery progress per subject.
+ *
+ * This hook calculates how many unique questions the user has correctly
+ * answered for each subject within a quiz, enabling progress bars and
+ * completion tracking.
+ *
+ * ## Calculation Logic
+ *
+ * 1. Fetch all questions for the quiz, grouped by subject
+ * 2. Fetch user's quiz attempts with their answers
+ * 3. Count unique correct answers per subject
+ * 4. Calculate percentage: (correct / total) * 100
+ *
+ * ## Data Structure
+ *
+ * ```typescript
+ * {
+ *   [subjectId]: {
+ *     total: 50,      // Total questions in subject
+ *     completed: 35,  // Unique correct answers
+ *     percentage: 70  // Mastery percentage
+ *   }
+ * }
+ * ```
+ *
+ * ## Performance Note
+ *
+ * The hook processes the JSONB `answers` column client-side to count
+ * unique correct answers. For quizzes with many questions, this is
+ * more efficient than N separate queries.
+ *
+ * @example
+ * ```tsx
+ * import { useSubjectProgress } from '@/hooks/useSubjectProgress';
+ *
+ * function SubjectList({ quizId }) {
+ *   const { progress, loading } = useSubjectProgress(quizId);
+ *
+ *   return subjects.map(subject => (
+ *     <div key={subject.id}>
+ *       <span>{subject.name}</span>
+ *       <ProgressBar value={progress[subject.id]?.percentage || 0} />
+ *     </div>
+ *   ));
+ * }
+ * ```
+ */
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 export interface SubjectProgress {
     subjectId: string;

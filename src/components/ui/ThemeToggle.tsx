@@ -1,11 +1,53 @@
+/**
+ * @file ThemeToggle.tsx
+ * @description Theme switcher components with light/dark/system modes.
+ *
+ * This module exports two theme toggle components:
+ *
+ * ## ThemeToggle (default export)
+ *
+ * Segmented control for selecting theme mode with three options:
+ * - Light (sun icon, amber)
+ * - Dark (moon icon, indigo)
+ * - System (monitor icon, cyan)
+ *
+ * | Prop       | Type    | Default | Description                    |
+ * |------------|---------|---------|--------------------------------|
+ * | `className`| string  | ''      | Additional CSS classes         |
+ * | `compact`  | boolean | false   | Single-button cycle mode       |
+ *
+ * ## SimpleThemeToggle (named export)
+ *
+ * iOS-style toggle switch for light/dark only (no system option).
+ * Uses `resolvedTheme` to show actual mode when system is selected.
+ *
+ * | Prop       | Type   | Default | Description            |
+ * |------------|--------|---------|------------------------|
+ * | `className`| string | ''      | Additional CSS classes |
+ *
+ * @example
+ * ```tsx
+ * import ThemeToggle, { SimpleThemeToggle } from '@/components/ui/ThemeToggle';
+ *
+ * // Segmented control (full)
+ * <ThemeToggle />
+ *
+ * // Compact single-button
+ * <ThemeToggle compact />
+ *
+ * // Simple switch
+ * <SimpleThemeToggle />
+ * ```
+ */
+
 import React from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { hapticLight } from '@/lib/haptics';
 
-// =============================================================================
-// THEME TOGGLE - Beautiful segmented control for theme selection
-// =============================================================================
+// ============================================================================
+// THEME TOGGLE - Segmented Control
+// ============================================================================
 
 interface ThemeToggleProps {
     className?: string;
@@ -66,12 +108,12 @@ export default function ThemeToggle({ className = '', compact = false }: ThemeTo
                         aria-pressed={isActive}
                     >
                         <Icon className={`w-4 h-4 ${isActive
-                                ? option.value === 'light'
-                                    ? 'text-amber-500'
-                                    : option.value === 'dark'
-                                        ? 'text-indigo-400'
-                                        : 'text-[#00B1FF]'
-                                : ''
+                            ? option.value === 'light'
+                                ? 'text-amber-500'
+                                : option.value === 'dark'
+                                    ? 'text-indigo-400'
+                                    : 'text-[#00B1FF]'
+                            : ''
                             }`} />
                         <span className="hidden sm:inline">{option.label}</span>
                     </button>

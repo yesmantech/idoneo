@@ -1,6 +1,49 @@
+/**
+ * @file useRoleHubData.ts
+ * @description Data fetching hook for the Role Hub page.
+ *
+ * This hook fetches all data needed for a specific role (job position) page,
+ * including resources, quiz history, and leaderboard position.
+ *
+ * ## Data Fetched
+ *
+ * | Field            | Source                    | Description                    |
+ * |------------------|---------------------------|--------------------------------|
+ * | `role`           | `roles` table             | Role metadata (title, desc)    |
+ * | `resources`      | `role_resources` table    | Study materials, links         |
+ * | `latestQuizId`   | `quizzes` table           | Most recent official quiz      |
+ * | `history`        | `quiz_attempts` table     | User's past attempts           |
+ * | `candidatiCount` | RPC function              | Total participants count       |
+ * | `leaderboardData`| `concorso_leaderboard`    | User's score breakdown         |
+ *
+ * ## Query Optimization
+ *
+ * Uses `Promise.all` to parallelize independent queries:
+ * 1. Role + Resources + Latest Quiz + Candidate Count (parallel)
+ * 2. User History + Leaderboard Data (parallel, if authenticated)
+ *
+ * @example
+ * ```tsx
+ * import { useRoleHubData } from '@/hooks/useRoleHubData';
+ *
+ * function RoleHubPage({ categorySlug, roleSlug }) {
+ *   const { role, resources, loading, error } = useRoleHubData(categorySlug, roleSlug);
+ *
+ *   if (loading) return <Skeleton />;
+ *   if (error) return <Error message={error} />;
+ *
+ *   return <RoleHubView role={role} resources={resources} />;
+ * }
+ * ```
+ */
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 export interface RoleResource {
     id: string;

@@ -1,28 +1,117 @@
+/**
+ * @file offlineService.ts
+ * @description Offline-first quiz storage using IndexedDB.
+ *
+ * This service enables quiz functionality without network connectivity by:
+ * 1. **Downloading quizzes** - Caching questions and metadata locally
+ * 2. **Running quizzes offline** - Generating attempts from cached questions
+ * 3. **Syncing results** - Uploading completed attempts when online
+ *
+ * ## IndexedDB Schema
+ * | Store              | Key       | Contents                          |
+ * |--------------------|-----------|-----------------------------------|
+ * | questions          | id (UUID) | Question data (text, options, etc)|
+ * | quiz_meta          | id (UUID) | Quiz metadata + question ID list  |
+ * | pending_attempts   | localId   | Unsynced offline attempts         |
+ *
+ * ## Workflow
+ * ```
+ * 1. User downloads quiz → questions + meta stored in IDB
+ * 2. User starts offline quiz → local attempt created
+ * 3. User completes quiz → attempt saved to pending_attempts
+ * 4. Network available → syncAndClean() uploads to Supabase
+ * ```
+ *
+ * ## Progress Tracking
+ * The `downloadQuiz` function accepts an `onProgress` callback for UI feedback
+ * during large downloads (500+ questions per batch).
+ *
+ * @example
+ * ```typescript
+ * import { offlineService } from '@/lib/offlineService';
+ *
+ * // Download a quiz for offline use
+ * await offlineService.downloadQuiz(quizId, (percent) => {
+ *   setProgress(percent);
+ * });
+ *
+ * // Check if a quiz is available offline
+ * const isAvailable = await offlineService.isQuizDownloaded(quizId);
+ *
+ * // Start an offline quiz attempt
+ * const localAttemptId = await offlineService.createLocalAttempt(quizId);
+ *
+ * // Sync pending attempts when online
+ * const syncedCount = await offlineService.syncAndClean();
+ * ```
+ */
+
 import { supabase } from "./supabaseClient";
 
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** IndexedDB database name */
 const DB_NAME = 'idoneo-offline-db';
+
+/** Database schema version (increment to trigger migration) */
 const DB_VERSION = 1;
+
+/** Object store for question data */
 const STORE_QUESTIONS = 'questions';
-const STORE_QUIZ_META = 'quiz_meta'; // metadata + list of question IDs
+
+/** Object store for quiz metadata and question ID lists */
+const STORE_QUIZ_META = 'quiz_meta';
+
+/** Object store for unsynced quiz attempts */
 const STORE_PENDING_ATTEMPTS = 'pending_attempts';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Metadata for a downloaded quiz.
+ * Stored in the quiz_meta object store.
+ */
 interface OfflineQuizMeta {
+    /** Quiz UUID (primary key) */
     id: string;
+    /** Quiz display title */
     title: string;
+    /** Quiz description */
     description: string;
+    /** List of question IDs available for this quiz */
     questionIds: string[];
+    /** Unix timestamp when the quiz was downloaded */
     timestamp: number;
 }
 
+/**
+ * Cached question data.
+ * Stored in the questions object store.
+ */
 interface Question {
+    /** Question UUID (primary key) */
     id: string;
+    /** Question text (may contain HTML) */
     text: string;
-    options: any; // jsonb
+    /** Answer options (JSONB from database) */
+    options: any;
+    /** Correct answer key (a, b, c, or d) */
     correct_option: string;
+    /** Optional explanation for the correct answer */
     explanation?: string;
+    /** Subject UUID for categorization */
     subject_id?: string;
-    subject_name?: string; // If joined
+    /** Subject name (if joined from database) */
+    subject_name?: string;
 }
+
+// ============================================================================
+// OFFLINE SERVICE
+// ============================================================================
 
 export const offlineService = {
     async openDB(): Promise<IDBDatabase> {

@@ -1,3 +1,32 @@
+/**
+ * @file SpotlightModal.tsx
+ * @description Global command palette and search interface ("Spotlight").
+ *
+ * Accessibility-first modal that allows users to search the entire app
+ * or perform quick actions. Triggered globally via ⌘K / Ctrl+K.
+ *
+ * ## Search Capabilities
+ *
+ * Uses `fuse.js` for fuzzy searching across:
+ * - Categories (e.g. "Polizia")
+ * - Roles (e.g. "Commissario")
+ * - Quizzes (e.g. "2024 Official")
+ * - Features (via Quick Actions)
+ *
+ * ## Navigation
+ *
+ * - `↑` / `↓` keys to navigate results
+ * - `Enter` to select
+ * - `Esc` to close
+ *
+ * ## Data Sources
+ *
+ * 1. **Results**: `SearchItem` array from `getAllSearchableItems()`
+ * 2. **Recently Viewed**: Persisted in `SpotlightContext`
+ * 3. **Active Quizzes**: Recent unfinished attempts for quick resume
+ * 4. **Quick Actions**: Hardcoded shortcuts (Home, Profile, etc.)
+ */
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
@@ -28,10 +57,9 @@ import { hapticLight, hapticSelection } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import { analytics } from '@/lib/analytics';
 
-// ============================================
-// SPOTLIGHT MODAL - TIER S
-// Premium command palette / search experience
-// ============================================
+// ============================================================================
+// TYPES & CONFIG
+// ============================================================================
 
 interface SpotlightModalProps {
     items?: SearchItem[];

@@ -1,6 +1,49 @@
+/**
+ * @file SuccessBadge.tsx
+ * @description Animated success indicator badge for quiz results.
+ *
+ * Displays a floating, pulsing green checkmark badge with sparkle
+ * particles to celebrate quiz success. Used on the quiz results page
+ * when the user meets or exceeds the passing threshold.
+ *
+ * ## Animations
+ *
+ * | Animation     | Effect                        | Duration |
+ * |---------------|-------------------------------|----------|
+ * | `badge-float` | Vertical float oscillation    | 3s       |
+ * | `badge-pulse` | Outer ring scale pulse        | 2s       |
+ * | `badge-check` | Check icon pop-in w/ rotation | 0.6s     |
+ * | `sparkle`     | Rotating, fading star bursts  | 2s       |
+ *
+ * ## Sparkle Colors
+ *
+ * - Yellow (#FBBF24) - Top right
+ * - Blue (#00B1FF) - Bottom left
+ * - Pink (#F472B6) - Right side
+ *
+ * ## Props
+ *
+ * | Prop       | Type   | Description            |
+ * |------------|--------|------------------------|
+ * | `className`| string | Additional CSS classes |
+ *
+ * @example
+ * ```tsx
+ * import { SuccessBadge } from '@/components/ui/SuccessBadge';
+ *
+ * function QuizResultsPassed() {
+ *   return <SuccessBadge className="mb-4" />;
+ * }
+ * ```
+ */
+
 import React from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 interface SuccessBadgeProps {
     className?: string;
