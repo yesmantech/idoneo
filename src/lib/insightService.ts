@@ -106,9 +106,49 @@ export const insightService = {
     },
 
     /**
-     * Generate new insights based on current data
+     * Generate new insights based on current data (rule-based fallback)
      */
     async generateInsights(): Promise<Insight[]> {
+        // Try AI-powered insights first
+        try {
+            console.log('insightService: Attempting AI-powered insights...');
+            const aiInsights = await this.generateAIInsights();
+            if (aiInsights.length > 0) {
+                console.log('insightService: AI insights generated:', aiInsights.length);
+                return aiInsights;
+            }
+        } catch (err) {
+            console.warn('insightService: AI insights failed, falling back to rules:', err);
+        }
+
+        // Fallback to rule-based insights
+        return this.generateRuleBasedInsights();
+    },
+
+    /**
+     * Generate AI-powered insights via Supabase Edge Function
+     */
+    async generateAIInsights(): Promise<Insight[]> {
+        const { data, error } = await supabase.functions.invoke('generate-insights', {
+            body: {},
+        });
+
+        if (error) {
+            console.error('Edge function error:', error);
+            throw new Error(error.message || 'Edge function failed');
+        }
+
+        if (!data?.success || !data?.insights) {
+            throw new Error('Invalid response from AI service');
+        }
+
+        return data.insights;
+    },
+
+    /**
+     * Generate insights using rule-based logic (fallback)
+     */
+    async generateRuleBasedInsights(): Promise<Insight[]> {
         const insights: Omit<Insight, 'id' | 'created_at'>[] = [];
 
         // =================================================================
@@ -279,3 +319,4 @@ export const insightService = {
         return [];
     }
 };
+

@@ -78,7 +78,7 @@ export interface OnboardingStep {
     tip?: string;
 }
 
-export type OnboardingContext = 'homepage' | 'rolepage' | 'quiz' | 'profile' | 'leaderboard';
+export type OnboardingContext = 'homepage' | 'rolepage' | 'quiz' | 'profile' | 'leaderboard' | 'quizstats';
 
 interface OnboardingContextType {
     // Welcome Screen
@@ -237,6 +237,42 @@ const STEPS_BY_CONTEXT: Record<OnboardingContext, OnboardingStep[]> = {
             position: 'bottom',
             icon: '⏱️'
         }
+    ],
+    quizstats: [
+        {
+            id: 'kpi-grid',
+            targetSelector: '[data-onboarding="stats-kpi"]',
+            title: '📊 I Tuoi Numeri',
+            description: 'Qui trovi le statistiche chiave: simulazioni fatte, miglior risultato, media voti e percentuale di risposte corrette.',
+            position: 'bottom',
+            icon: '📊',
+            tip: 'Tocca ogni card per scoprire cosa significa!'
+        },
+        {
+            id: 'readiness',
+            targetSelector: '[data-onboarding="stats-readiness"]',
+            title: '🎯 Livello Preparazione',
+            description: 'Il tuo livello di preparazione calcolato in base a volume, precisione e costanza. Tocca per i dettagli!',
+            position: 'top',
+            icon: '🎯'
+        },
+        {
+            id: 'coaching',
+            targetSelector: '[data-onboarding="stats-coaching"]',
+            title: '💡 Suggerimenti Personalizzati',
+            description: 'Consigli su misura per migliorare le tue performance basati sui tuoi risultati.',
+            position: 'top',
+            icon: '💡'
+        },
+        {
+            id: 'subjects',
+            targetSelector: '[data-onboarding="stats-subjects"]',
+            title: '📚 Analisi Materie',
+            description: 'Vedi come vai in ogni materia. Le aree rosse sono quelle da ripassare!',
+            position: 'top',
+            icon: '📚',
+            tip: 'Tocca una materia per vedere gli errori frequenti'
+        }
     ]
 };
 
@@ -268,11 +304,24 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [completedContexts, setCompletedContexts] = useState<Set<OnboardingContext>>(new Set());
     const [showCelebration, setShowCelebration] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
+
+    // Helper to update onboarding_completed in DB
+    const markOnboardingCompleted = useCallback(async (uid: string) => {
+        try {
+            await supabase
+                .from('profiles')
+                .update({ onboarding_completed: true })
+                .eq('id', uid);
+        } catch (error) {
+            console.warn('Failed to update onboarding_completed in DB:', error);
+        }
+    }, []);
 
     // Load completed contexts and check for new user
     useEffect(() => {
         const completed = new Set<OnboardingContext>();
-        (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard'] as OnboardingContext[]).forEach(ctx => {
+        (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
             if (localStorage.getItem(STORAGE_PREFIX + ctx) === 'true') {
                 completed.add(ctx);
             }
@@ -281,22 +330,47 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
         // Check if welcome should be shown (new user)
         const checkNewUser = async () => {
-            const welcomeShown = localStorage.getItem(WELCOME_KEY);
-            if (welcomeShown === 'true') return;
-
             // Give a small delay for auth to settle
             setTimeout(async () => {
                 try {
                     const { data } = await supabase.auth.getSession();
-                    // Show welcome for authenticated users who haven't seen it
-                    if (!localStorage.getItem(WELCOME_KEY) && data.session) {
-                        // Only show on homepage (check URL)
+
+                    if (data.session?.user) {
+                        const uid = data.session.user.id;
+                        setUserId(uid);
+
+                        // Check DB for onboarding_completed status
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('onboarding_completed')
+                            .eq('id', uid)
+                            .single();
+
+                        // If already completed in DB, sync to localStorage and don't show
+                        if (profile?.onboarding_completed) {
+                            localStorage.setItem(WELCOME_KEY, 'true');
+                            return;
+                        }
+
+                        // Also check localStorage as fallback
+                        if (localStorage.getItem(WELCOME_KEY) === 'true') {
+                            // Sync to DB if localStorage says completed but DB doesn't
+                            markOnboardingCompleted(uid);
+                            return;
+                        }
+
+                        // Show welcome on homepage for users who haven't completed
                         if (window.location.pathname === '/') {
+                            setShowWelcome(true);
+                        }
+                    } else {
+                        // Non-authenticated user: use localStorage only
+                        if (!localStorage.getItem(WELCOME_KEY) && window.location.pathname === '/') {
                             setShowWelcome(true);
                         }
                     }
                 } catch {
-                    // If no auth, still show welcome for any users on homepage
+                    // Fallback to localStorage on error
                     if (!localStorage.getItem(WELCOME_KEY) && window.location.pathname === '/') {
                         setShowWelcome(true);
                     }
@@ -305,7 +379,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         };
 
         checkNewUser();
-    }, []);
+    }, [markOnboardingCompleted]);
 
     const hasCompletedContext = useCallback((context: OnboardingContext) => {
         return completedContexts.has(context);
@@ -314,18 +388,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const dismissWelcome = useCallback(() => {
         setShowWelcome(false);
         localStorage.setItem(WELCOME_KEY, 'true');
-    }, []);
+        // Save to DB if authenticated
+        if (userId) {
+            markOnboardingCompleted(userId);
+        }
+    }, [userId, markOnboardingCompleted]);
 
     const startTourFromWelcome = useCallback(() => {
         setShowWelcome(false);
         localStorage.setItem(WELCOME_KEY, 'true');
+        // Save to DB if authenticated
+        if (userId) {
+            markOnboardingCompleted(userId);
+        }
         // Track onboarding started
         analytics.track('onboarding_started', { context: 'homepage', source: 'welcome_screen' });
         // Start homepage tour
         setActiveContext('homepage');
         setCurrentStepIndex(0);
         setIsActive(true);
-    }, []);
+    }, [userId, markOnboardingCompleted]);
 
     const startOnboarding = useCallback((context: OnboardingContext) => {
         if (completedContexts.has(context)) return;
@@ -370,10 +452,25 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         }
         setIsActive(false);
         setActiveContext(null);
-        // Show celebration!
-        setShowCelebration(true);
-        setTimeout(() => setShowCelebration(false), 3000);
-    }, [activeContext, steps.length]);
+
+        // Show celebration only when all 3 core tours are completed (homepage, rolepage, quiz)
+        // Check if this was the last core tour to complete
+        const CORE_TOURS: OnboardingContext[] = ['homepage', 'rolepage', 'quiz'];
+        const isCoreTour = activeContext && CORE_TOURS.includes(activeContext);
+
+        if (isCoreTour) {
+            // Check if all core tours are now complete (including the one we just finished)
+            const updatedCompleted = new Set([...completedContexts, activeContext]);
+            const allCoreComplete = CORE_TOURS.every(tour =>
+                updatedCompleted.has(tour) || localStorage.getItem(STORAGE_PREFIX + tour) === 'true'
+            );
+
+            if (allCoreComplete) {
+                setShowCelebration(true);
+                setTimeout(() => setShowCelebration(false), 3000);
+            }
+        }
+    }, [activeContext, steps.length, completedContexts]);
 
     const dismissCelebration = useCallback(() => {
         setShowCelebration(false);
@@ -381,7 +478,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
     const resetOnboarding = useCallback(() => {
         // Clear all onboarding state (for testing)
-        (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard'] as OnboardingContext[]).forEach(ctx => {
+        (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
             localStorage.removeItem(STORAGE_PREFIX + ctx);
         });
         localStorage.removeItem(WELCOME_KEY);

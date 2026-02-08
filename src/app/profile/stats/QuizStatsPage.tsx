@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { supabase } from "@/lib/supabaseClient";
 import { ChevronLeft } from 'lucide-react';
+import { useOnboarding } from "@/context/OnboardingProvider";
 
 // Info System
 import InfoModal from '@/components/leaderboard/InfoModal';
@@ -69,9 +70,20 @@ export default function QuizStatsPage() {
     const [trendData, setTrendData] = useState<any[]>([]);
     const [quizTitle, setQuizTitle] = useState("Statistiche Corso");
 
+    // Onboarding Tour
+    const { startOnboarding, hasCompletedContext } = useOnboarding();
+
     useEffect(() => {
         if (quizId) loadStats();
     }, [quizId]);
+
+    // Auto-start quizstats onboarding
+    useEffect(() => {
+        if (!loading && stats.totalTests > 0 && !hasCompletedContext('quizstats')) {
+            const timer = setTimeout(() => startOnboarding('quizstats'), 600);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, stats.totalTests, hasCompletedContext, startOnboarding]);
 
     const loadStats = async () => {
         setLoading(true);
@@ -82,11 +94,11 @@ export default function QuizStatsPage() {
         }
 
         try {
-            // Fetch Quiz, Attempts, and Goal in parallel
-            const [quizRes, attemptsRes, goalRes] = await Promise.all([
+            // Fetch ALL data in parallel for maximum speed
+            const [quizRes, attemptsRes, goalRes, leaderboardRes] = await Promise.all([
                 supabase
                     .from('quizzes')
-                    .select('title, total_questions, points_correct, rule_id')
+                    .select('title, total_questions, points_correct, rule_id, simulation_rule:simulation_rules(total_questions, points_correct)')
                     .eq('id', quizId)
                     .single(),
                 supabase
@@ -101,6 +113,12 @@ export default function QuizStatsPage() {
                     .eq("user_id", user.id)
                     .eq("quiz_id", quizId)
                     .eq("status", "active")
+                    .maybeSingle(),
+                supabase
+                    .from('concorso_leaderboard')
+                    .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+                    .eq('user_id', user.id)
+                    .eq('quiz_id', quizId)
                     .maybeSingle()
             ]);
 
@@ -108,22 +126,17 @@ export default function QuizStatsPage() {
             const data = attemptsRes.data;
             const error = attemptsRes.error;
             const goalData = goalRes.data;
+            const leaderboardData = leaderboardRes.data;
 
             let maxCalc = 0;
 
             if (quizData) {
                 setQuizTitle(quizData.title);
 
-                if (quizData.rule_id) {
-                    const { data: rule } = await supabase
-                        .from('simulation_rules')
-                        .select('total_questions, points_correct')
-                        .eq('id', quizData.rule_id)
-                        .single();
-
-                    if (rule && rule.total_questions && rule.points_correct) {
-                        maxCalc = rule.total_questions * rule.points_correct;
-                    }
+                // Use JOIN data directly - no extra query needed!
+                const rule = quizData.simulation_rule as { total_questions?: number; points_correct?: number } | null;
+                if (rule && rule.total_questions && rule.points_correct) {
+                    maxCalc = rule.total_questions * rule.points_correct;
                 }
 
                 if (maxCalc === 0 && quizData.total_questions && quizData.points_correct) {
@@ -144,13 +157,6 @@ export default function QuizStatsPage() {
             if (error) {
                 console.error(error);
             } else if (data) {
-                const { data: leaderboardData } = await supabase
-                    .from('concorso_leaderboard')
-                    .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
-                    .eq('user_id', user.id)
-                    .eq('quiz_id', quizId)
-                    .maybeSingle();
-
                 processData(data as AttemptWithDetails[], maxCalc, leaderboardData);
             }
 
@@ -307,10 +313,12 @@ export default function QuizStatsPage() {
 
                 {/* 2. Coaching Block */}
                 {recommendations.length > 0 && (
-                    <CoachingBlock
-                        recommendations={recommendations}
-                        onSetGoal={handleSetGoal}
-                    />
+                    <div data-onboarding="stats-coaching">
+                        <CoachingBlock
+                            recommendations={recommendations}
+                            onSetGoal={handleSetGoal}
+                        />
+                    </div>
                 )}
 
                 {/* 3. Main Performance Area (Grid) */}
@@ -318,7 +326,7 @@ export default function QuizStatsPage() {
 
                     {/* Left: Radar Chart + Goals */}
                     <div className="lg:col-span-5 space-y-6">
-                        <div className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft flex flex-col items-center">
+                        <div data-onboarding="stats-subjects" className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft flex flex-col items-center">
                             <h3 className="text-lg font-bold text-text-primary mb-6 w-full">Performance per Materia</h3>
                             <SubjectRadarChart data={subjectData} />
 

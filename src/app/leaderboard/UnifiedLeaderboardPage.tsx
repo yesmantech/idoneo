@@ -264,6 +264,13 @@ export default function UnifiedLeaderboardPage() {
         localStorage.setItem('idoneo_leaderboard_onboarding', 'true');
     };
 
+    // Close InfoModal when onboarding tour becomes active (fixes race condition)
+    useEffect(() => {
+        if (isTourActive && activeContext === 'leaderboard' && showInfoModal) {
+            setShowInfoModal(false);
+        }
+    }, [isTourActive, activeContext, showInfoModal]);
+
     const handleOpenInfo = () => {
         setInfoType(isXP ? 'xp' : 'prep');
         setShowInfoModal(true);

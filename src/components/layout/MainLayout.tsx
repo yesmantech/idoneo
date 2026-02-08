@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import { useSidebar } from '@/context/SidebarContext';
 import AdminSidebar from '../admin/AdminSidebar';
 import InstallPrompt from '../pwa/InstallPrompt';
-import { Home, Search, BookOpen, BarChart3, User, Trophy, Newspaper } from 'lucide-react';
+import { Home, Search, BookOpen, BarChart3, User, Trophy, Newspaper, Scroll, Sparkles } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 interface MainLayoutProps {
@@ -45,7 +45,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // Bottom Nav Items - Updated for Idoneo
     const NAV_ITEMS = [
         { Icon: Home, label: 'Home', path: '/' },
-        { Icon: Newspaper, label: 'Blog', path: '/blog' },
+        { Icon: Scroll, label: 'Bandi', path: '/bandi' },
+        { Icon: Sparkles, label: 'AI', path: '/ai-assistant', isAI: true },
         { Icon: Trophy, label: 'Classifica', path: '/leaderboard' },
         { Icon: User, label: 'Profilo', path: '/profile' },
     ];
@@ -53,13 +54,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // Check if running as native app
     const isNativeApp = Capacitor.isNativePlatform();
 
-    // Check if on pages where bottom nav should be hidden (blog, concorsi, quiz)
+    // Check if on pages where bottom nav should be hidden (blog, concorsi, quiz, bandi detail)
     const hideBottomNav = location.pathname.startsWith('/blog') ||
         location.pathname.startsWith('/concorsi') ||
         location.pathname.startsWith('/quiz') ||
         location.pathname === '/profile/settings' ||
         location.pathname.startsWith('/profile/stats') ||
-        location.pathname.startsWith('/preparazione');
+        location.pathname.startsWith('/preparazione') ||
+        (location.pathname.startsWith('/bandi/') && location.pathname !== '/bandi/watchlist');
 
     // Pages that handle their own safe area in their headers
     const hasOwnSafeArea = location.pathname === '/' ||
@@ -113,21 +115,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
                                 {NAV_ITEMS.map(item => {
                                     const isActive = location.pathname === item.path ||
                                         (item.path !== '/' && location.pathname.startsWith(item.path));
+                                    const isAI = (item as any).isAI;
                                     return (
                                         <Link
                                             key={item.path}
                                             to={item.path}
                                             className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full transition-all
                                                         ${isActive
-                                                    ? 'bg-white dark:bg-slate-700 shadow-sm'
+                                                    ? isAI
+                                                        ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 shadow-sm'
+                                                        : 'bg-white dark:bg-slate-700 shadow-sm'
                                                     : ''
                                                 }`}
                                         >
                                             <item.Icon
-                                                className={`w-5 h-5 transition-all ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
+                                                className={`w-5 h-5 transition-all ${isAI
+                                                        ? 'text-purple-500'
+                                                        : isActive
+                                                            ? 'text-slate-900 dark:text-white'
+                                                            : 'text-slate-500 dark:text-slate-400'
+                                                    }`}
                                                 strokeWidth={isActive ? 2.5 : 1.5}
                                             />
-                                            <span className={`text-[10px] font-semibold ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+                                            <span className={`text-[10px] font-semibold ${isAI
+                                                    ? 'bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent'
+                                                    : isActive
+                                                        ? 'text-slate-900 dark:text-white'
+                                                        : 'text-slate-500 dark:text-slate-400'
+                                                }`}>
                                                 {item.label}
                                             </span>
                                         </Link>

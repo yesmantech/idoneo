@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
+import { AdminLayout } from "@/components/admin";
 import { AlertTriangle, CheckCircle, XCircle, Search, Filter, MoreHorizontal, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -25,6 +26,10 @@ export default function AdminReportsPage() {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState("");
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const fetchReports = async () => {
         setLoading(true);
@@ -97,159 +102,199 @@ export default function AdminReportsPage() {
         return matchesStatus && matchesSearch;
     });
 
+    // Pagination logic
+    const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedReports = filteredReports.slice(startIndex, startIndex + itemsPerPage);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterStatus, searchTerm]);
+
     return (
-        <div className="p-8 max-w-[1600px] mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-                        <AlertTriangle className="w-8 h-8 text-amber-500" />
-                        Segnalazioni Errori
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">
-                        Gestisci le segnalazioni inviate dagli utenti
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-mono text-sm">
-                        Totale: {reports.length}
+        <AdminLayout>
+            <div className="max-w-[1600px] mx-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                            <AlertTriangle className="w-8 h-8 text-amber-500" />
+                            Segnalazioni Errori
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1">
+                            Gestisci le segnalazioni inviate dagli utenti
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-mono text-sm">
+                            Totale: {reports.length}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Cerca per motivo, testo domanda, email..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#00B1FF]"
-                    />
+                {/* Filters */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Cerca per motivo, testo domanda, email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#00B1FF]"
+                        />
+                    </div>
+                    <div className="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1">
+                        {['all', 'pending', 'resolved', 'dismissed'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setFilterStatus(status)}
+                                className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${filterStatus === status
+                                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    }`}
+                            >
+                                {status === 'all' ? 'Tutti' : status}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <div className="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1">
-                    {['all', 'pending', 'resolved', 'dismissed'].map(status => (
-                        <button
-                            key={status}
-                            onClick={() => setFilterStatus(status)}
-                            className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${filterStatus === status
-                                ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                }`}
-                        >
-                            {status === 'all' ? 'Tutti' : status}
-                        </button>
-                    ))}
-                </div>
-            </div>
 
-            {/* Table */}
-            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-                                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[120px]">Data</th>
-                                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[100px]">Stato</th>
-                                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[200px]">Utente</th>
-                                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[200px]">Motivo</th>
-                                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Domanda / Dettagli</th>
-                                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right w-[150px]">Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                            {loading ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">Caricamento...</td></tr>
-                            ) : filteredReports.length === 0 ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nessuna segnalazione trovata</td></tr>
-                            ) : (
-                                filteredReports.map(report => (
-                                    <tr key={report.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                                        <td className="p-4 align-top text-sm text-slate-500 font-mono">
-                                            {format(new Date(report.created_at), 'dd MMM yyyy', { locale: it })}<br />
-                                            {format(new Date(report.created_at), 'HH:mm', { locale: it })}
-                                        </td>
-                                        <td className="p-4 align-top">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${report.status === 'pending'
-                                                ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
-                                                : report.status === 'resolved'
-                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-                                                    : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                                                }`}>
-                                                {report.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 align-top">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                                    {report.profiles?.nickname || 'Utente'}
+                {/* Table */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[120px]">Data</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[100px]">Stato</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[200px]">Utente</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[200px]">Motivo</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Domanda / Dettagli</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right w-[150px]">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                {loading ? (
+                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Caricamento...</td></tr>
+                                ) : filteredReports.length === 0 ? (
+                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nessuna segnalazione trovata</td></tr>
+                                ) : (
+                                    paginatedReports.map(report => (
+                                        <tr key={report.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                                            <td className="p-4 align-top text-sm text-slate-500 font-mono">
+                                                {format(new Date(report.created_at), 'dd MMM yyyy', { locale: it })}<br />
+                                                {format(new Date(report.created_at), 'HH:mm', { locale: it })}
+                                            </td>
+                                            <td className="p-4 align-top">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${report.status === 'pending'
+                                                    ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
+                                                    : report.status === 'resolved'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
+                                                        : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                                                    }`}>
+                                                    {report.status}
                                                 </span>
-                                                <span className="text-xs text-slate-500 truncate max-w-[180px]">
-                                                    {report.profiles?.email || report.user_id}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 align-top">
-                                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                {report.reason}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 align-top">
-                                            <div className="flex flex-col gap-2">
-                                                <div className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 font-medium">
-                                                    {report.questionText || <span className="italic opacity-50">Testo domanda non disponibile</span>}
+                                            </td>
+                                            <td className="p-4 align-top">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-medium text-slate-900 dark:text-white">
+                                                        {report.profiles?.nickname || 'Utente'}
+                                                    </span>
+                                                    <span className="text-xs text-slate-500 truncate max-w-[180px]">
+                                                        {report.profiles?.email || report.user_id}
+                                                    </span>
                                                 </div>
-                                                {report.description && (
-                                                    <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
-                                                        "{report.description}"
+                                            </td>
+                                            <td className="p-4 align-top">
+                                                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                                    {report.reason}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 align-top">
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 font-medium">
+                                                        {report.questionText || <span className="italic opacity-50">Testo domanda non disponibile</span>}
                                                     </div>
-                                                )}
-                                                <div className="text-[10px] text-slate-400 font-mono">
-                                                    ID: {report.question_id}
+                                                    {report.description && (
+                                                        <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                                                            "{report.description}"
+                                                        </div>
+                                                    )}
+                                                    <div className="text-[10px] text-slate-400 font-mono">
+                                                        ID: {report.question_id}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 align-middle text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Link
-                                                    to={`/admin/questions/${report.question_id}`}
-                                                    title="Modifica Domanda"
-                                                    className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
-                                                >
-                                                    <ExternalLink className="w-4 h-4" />
-                                                </Link>
-                                                {report.status === 'pending' && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleStatusUpdate(report.id, 'resolved')}
-                                                            title="Segna come Risolto"
-                                                            className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200"
-                                                        >
-                                                            <CheckCircle className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleStatusUpdate(report.id, 'dismissed')}
-                                                            title="Ignora"
-                                                            className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
-                                                        >
-                                                            <XCircle className="w-4 h-4" />
-                                                        </button>
-                                                    </>
+                                            </td>
+                                            <td className="p-4 align-middle text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Link
+                                                        to={`/admin/questions/${report.question_id}`}
+                                                        title="Modifica Domanda"
+                                                        className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
+                                                    >
+                                                        <ExternalLink className="w-4 h-4" />
+                                                    </Link>
+                                                    {report.status === 'pending' && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleStatusUpdate(report.id, 'resolved')}
+                                                                title="Segna come Risolto"
+                                                                className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200"
+                                                            >
+                                                                <CheckCircle className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleStatusUpdate(report.id, 'dismissed')}
+                                                                title="Ignora"
+                                                                className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
+                                                            >
+                                                                <XCircle className="w-4 h-4" />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                {report.status !== 'pending' && (
+                                                    <span className="text-xs text-slate-400 italic">No actions</span>
                                                 )}
-                                            </div>
-                                            {report.status !== 'pending' && (
-                                                <span className="text-xs text-slate-400 italic">No actions</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                            <div className="text-sm text-slate-500">
+                                Mostrando {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredReports.length)} di {filteredReports.length}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-4 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    ← Precedente
+                                </button>
+                                <span className="px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+                                    Pagina {currentPage} di {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-4 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    Successiva →
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
-        </div>
+        </AdminLayout>
     );
 }

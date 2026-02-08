@@ -42,9 +42,9 @@ import { AdminLayout } from "@/components/admin";
 // ============================================================================
 
 // --- Types Local to this Admin Page ---
-type Category = { id: string; slug: string; title: string; description: string; is_featured: boolean };
-type Role = { id: string; category_id: string; slug: string; title: string; order_index: number };
-type Quiz = { id: string; title: string; slug: string; year: number; is_official: boolean; role_id: string };
+type Category = { id: string; slug: string; title: string; description: string; is_featured: boolean; is_archived?: boolean };
+type Role = { id: string; category_id: string; slug: string; title: string; order_index: number; is_archived?: boolean };
+type Quiz = { id: string; title: string; slug: string; year: number; is_official: boolean; role_id: string; is_archived?: boolean };
 
 // ============================================================================
 // UTILITIES
@@ -67,6 +67,11 @@ export default function AdminStructurePage() {
     const [selectedCatId, setSelectedCatId] = useState<string | null>(null);
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 
+    // Archive Toggle States
+    const [showArchivedCats, setShowArchivedCats] = useState(false);
+    const [showArchivedRoles, setShowArchivedRoles] = useState(false);
+    const [showArchivedQuizzes, setShowArchivedQuizzes] = useState(false);
+
     // Loading
     const [loading, setLoading] = useState(true);
 
@@ -87,7 +92,7 @@ export default function AdminStructurePage() {
         const [c, r, q] = await Promise.all([
             supabase.from("categories").select("*").order("title"),
             supabase.from("roles").select("*").order("order_index"),
-            supabase.from("quizzes").select("id, title, slug, year, is_official, role_id").order("created_at", { ascending: false })
+            supabase.from("quizzes").select("id, title, slug, year, is_official, role_id, is_archived").order("created_at", { ascending: false })
         ]);
 
         if (c.data) setCategories(c.data);
@@ -115,6 +120,11 @@ export default function AdminStructurePage() {
         loadData();
     };
 
+    const handleArchiveCategory = async (id: string, archive: boolean) => {
+        await supabase.from("categories").update({ is_archived: archive }).eq("id", id);
+        loadData();
+    };
+
     // --- ACTIONS: Role ---
     const handleAddRole = async () => {
         if (!roleTitle || !selectedCatId) return;
@@ -139,9 +149,30 @@ export default function AdminStructurePage() {
         loadData();
     };
 
-    // --- Filtered Lists ---
-    const visibleRoles = useMemo(() => roles.filter(r => r.category_id === selectedCatId), [roles, selectedCatId]);
-    const visibleQuizzes = useMemo(() => quizzes.filter(q => q.role_id === selectedRoleId), [quizzes, selectedRoleId]);
+    const handleArchiveRole = async (id: string, archive: boolean) => {
+        await supabase.from("roles").update({ is_archived: archive }).eq("id", id);
+        loadData();
+    };
+
+    // --- ACTIONS: Quiz ---
+    const handleArchiveQuiz = async (id: string, archive: boolean) => {
+        await supabase.from("quizzes").update({ is_archived: archive }).eq("id", id);
+        loadData();
+    };
+
+    // --- Filtered Lists (respecting archive toggle) ---
+    const visibleCategories = useMemo(() =>
+        categories.filter(c => showArchivedCats ? true : !c.is_archived),
+        [categories, showArchivedCats]
+    );
+    const visibleRoles = useMemo(() =>
+        roles.filter(r => r.category_id === selectedCatId && (showArchivedRoles ? true : !r.is_archived)),
+        [roles, selectedCatId, showArchivedRoles]
+    );
+    const visibleQuizzes = useMemo(() =>
+        quizzes.filter(q => q.role_id === selectedRoleId && (showArchivedQuizzes ? true : !q.is_archived)),
+        [quizzes, selectedRoleId, showArchivedQuizzes]
+    );
 
     const selectedCat = categories.find(c => c.id === selectedCatId);
     const selectedRole = roles.find(r => r.id === selectedRoleId);
@@ -166,19 +197,28 @@ export default function AdminStructurePage() {
                             <span className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">1</span>
                             Categorie
                         </h2>
+                        <label className="flex items-center gap-1.5 text-[10px] text-[var(--foreground)] opacity-50 cursor-pointer hover:opacity-70">
+                            <input
+                                type="checkbox"
+                                checked={showArchivedCats}
+                                onChange={(e) => setShowArchivedCats(e.target.checked)}
+                                className="w-3 h-3 rounded"
+                            />
+                            Archiviati
+                        </label>
                     </div>
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                        {categories.map(c => (
+                        {visibleCategories.map(c => (
                             <div
                                 key={c.id}
                                 onClick={() => { setSelectedCatId(c.id); setSelectedRoleId(null); }}
-                                className={`p-4 rounded-2xl cursor-pointer border transition-all flex justify-between group ${selectedCatId === c.id
+                                className={`p-4 rounded-2xl cursor-pointer border transition-all flex justify-between group ${c.is_archived ? 'opacity-50' : ''} ${selectedCatId === c.id
                                     ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 ring-1 ring-emerald-100 dark:ring-emerald-500/20 shadow-sm"
                                     : "bg-slate-50/50 dark:bg-slate-900/50 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
                                     }`}
                             >
                                 <div>
-                                    <div className={`font-semibold text-sm ${selectedCatId === c.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-[var(--foreground)] opacity-70'}`}>{c.title}</div>
+                                    <div className={`font-semibold text-sm ${c.is_archived ? 'line-through' : ''} ${selectedCatId === c.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-[var(--foreground)] opacity-70'}`}>{c.title}</div>
                                     <div className="text-[10px] text-[var(--foreground)] opacity-30 font-mono mt-0.5">/{c.slug}</div>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -189,6 +229,13 @@ export default function AdminStructurePage() {
                                     >
                                         EDIT
                                     </Link>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleArchiveCategory(c.id, !c.is_archived); }}
+                                        className={`opacity-0 group-hover:opacity-100 p-1.5 rounded-lg transition-all text-xs ${c.is_archived ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' : 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'}`}
+                                        title={c.is_archived ? "Ripristina" : "Archivia"}
+                                    >
+                                        {c.is_archived ? '↩' : '📦'}
+                                    </button>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleDeleteCategory(c.id); }}
                                         className="text-rose-500 opacity-0 group-hover:opacity-100 hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-1.5 rounded-lg transition-all"
@@ -230,7 +277,18 @@ export default function AdminStructurePage() {
                             <span className="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xs font-bold">2</span>
                             Ruoli
                         </h2>
-                        {selectedCat && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-[var(--foreground)] opacity-60 font-medium px-2 py-1 rounded-full">{selectedCat.title}</span>}
+                        <div className="flex items-center gap-2">
+                            {selectedCat && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-[var(--foreground)] opacity-60 font-medium px-2 py-1 rounded-full">{selectedCat.title}</span>}
+                            <label className="flex items-center gap-1.5 text-[10px] text-[var(--foreground)] opacity-50 cursor-pointer hover:opacity-70">
+                                <input
+                                    type="checkbox"
+                                    checked={showArchivedRoles}
+                                    onChange={(e) => setShowArchivedRoles(e.target.checked)}
+                                    className="w-3 h-3 rounded"
+                                />
+                                Archiviati
+                            </label>
+                        </div>
                     </div>
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                         {visibleRoles.length === 0 && (
@@ -243,13 +301,13 @@ export default function AdminStructurePage() {
                             <div
                                 key={r.id}
                                 onClick={() => setSelectedRoleId(r.id)}
-                                className={`p-4 rounded-2xl cursor-pointer border transition-all flex justify-between group ${selectedRoleId === r.id
+                                className={`p-4 rounded-2xl cursor-pointer border transition-all flex justify-between group ${r.is_archived ? 'opacity-50' : ''} ${selectedRoleId === r.id
                                     ? "bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/30 ring-1 ring-sky-100 dark:ring-sky-500/20 shadow-sm"
                                     : "bg-slate-50/50 dark:bg-slate-900/50 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
                                     }`}
                             >
                                 <div>
-                                    <div className={`font-semibold text-sm ${selectedRoleId === r.id ? 'text-sky-700 dark:text-sky-400' : 'text-[var(--foreground)] opacity-70'}`}>{r.title}</div>
+                                    <div className={`font-semibold text-sm ${r.is_archived ? 'line-through' : ''} ${selectedRoleId === r.id ? 'text-sky-700 dark:text-sky-400' : 'text-[var(--foreground)] opacity-70'}`}>{r.title}</div>
                                     <div className="text-[10px] text-[var(--foreground)] opacity-30 font-mono mt-0.5">/{r.slug}</div>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -260,6 +318,13 @@ export default function AdminStructurePage() {
                                     >
                                         EDIT
                                     </Link>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleArchiveRole(r.id, !r.is_archived); }}
+                                        className={`opacity-0 group-hover:opacity-100 p-1.5 rounded-lg transition-all text-xs ${r.is_archived ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' : 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'}`}
+                                        title={r.is_archived ? "Ripristina" : "Archivia"}
+                                    >
+                                        {r.is_archived ? '↩' : '📦'}
+                                    </button>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleDeleteRole(r.id); }}
                                         className="text-rose-500 opacity-0 group-hover:opacity-100 hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-1.5 rounded-lg transition-all"
@@ -301,7 +366,18 @@ export default function AdminStructurePage() {
                             <span className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-bold">3</span>
                             Concorsi
                         </h2>
-                        {selectedRole && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-[var(--foreground)] opacity-60 font-medium px-2 py-1 rounded-full">{selectedRole.title}</span>}
+                        <div className="flex items-center gap-2">
+                            {selectedRole && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-[var(--foreground)] opacity-60 font-medium px-2 py-1 rounded-full">{selectedRole.title}</span>}
+                            <label className="flex items-center gap-1.5 text-[10px] text-[var(--foreground)] opacity-50 cursor-pointer hover:opacity-70">
+                                <input
+                                    type="checkbox"
+                                    checked={showArchivedQuizzes}
+                                    onChange={(e) => setShowArchivedQuizzes(e.target.checked)}
+                                    className="w-3 h-3 rounded"
+                                />
+                                Archiviati
+                            </label>
+                        </div>
                     </div>
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                         {visibleQuizzes.length === 0 && (
@@ -311,10 +387,19 @@ export default function AdminStructurePage() {
                             </div>
                         )}
                         {visibleQuizzes.map(q => (
-                            <div key={q.id} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shadow-sm flex flex-col gap-2 hover:border-amber-300 dark:hover:border-amber-500/30 hover:bg-amber-50/30 dark:hover:bg-amber-500/5 transition-all group">
+                            <div key={q.id} className={`p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shadow-sm flex flex-col gap-2 hover:border-amber-300 dark:hover:border-amber-500/30 hover:bg-amber-50/30 dark:hover:bg-amber-500/5 transition-all group ${q.is_archived ? 'opacity-50' : ''}`}>
                                 <div className="flex justify-between items-start">
-                                    <h4 className="font-semibold text-sm text-[var(--foreground)] opacity-80 leading-tight group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">{q.title}</h4>
-                                    {q.year && <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-[var(--foreground)] opacity-50 font-bold px-1.5 py-0.5 rounded-md">{q.year}</span>}
+                                    <h4 className={`font-semibold text-sm text-[var(--foreground)] opacity-80 leading-tight group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors ${q.is_archived ? 'line-through' : ''}`}>{q.title}</h4>
+                                    <div className="flex items-center gap-1.5">
+                                        {q.year && <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-[var(--foreground)] opacity-50 font-bold px-1.5 py-0.5 rounded-md">{q.year}</span>}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleArchiveQuiz(q.id, !q.is_archived); }}
+                                            className={`opacity-0 group-hover:opacity-100 p-1 rounded-lg transition-all text-xs ${q.is_archived ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' : 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'}`}
+                                            title={q.is_archived ? "Ripristina" : "Archivia"}
+                                        >
+                                            {q.is_archived ? '↩' : '📦'}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="flex justify-between items-end mt-1">
                                     <span className="text-[10px] text-[var(--foreground)] opacity-30 font-mono">{q.slug || "no-slug"}</span>

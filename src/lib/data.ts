@@ -82,6 +82,7 @@ export const getCategories = async (): Promise<Category[]> => {
   const { data, error } = await supabase
     .from("categories")
     .select("*")
+    .eq("is_archived", false)
     .order("title");
 
   if (error) {
@@ -110,6 +111,7 @@ export const getCategoryBySlug = async (
     .from("categories")
     .select("*")
     .eq("slug", slug)
+    .eq("is_archived", false)
     .single();
 
   if (error || !data) {
@@ -143,11 +145,12 @@ export const getRolesByCategory = async (
     return [];
   }
 
-  // 2. Get Roles
+  // 2. Get Roles (excluding archived)
   const { data, error } = await supabase
     .from("roles")
     .select("*")
     .eq("category_id", cat.id)
+    .eq("is_archived", false)
     .order("title");
 
   if (error) {
@@ -247,8 +250,8 @@ export interface SearchItem {
 export const getAllSearchableItems = async (): Promise<SearchItem[]> => {
   const items: SearchItem[] = [];
 
-  // 1. Categories
-  const { data: cats } = await supabase.from('categories').select('id, title, slug');
+  // 1. Categories (excluding archived)
+  const { data: cats } = await supabase.from('categories').select('id, title, slug').eq('is_archived', false);
   if (cats) {
     cats.forEach((c: any) => items.push({
       id: c.id,
@@ -258,13 +261,14 @@ export const getAllSearchableItems = async (): Promise<SearchItem[]> => {
     }));
   }
 
-  // 2. Roles (NEW - Fix for navigation mismatch)
+  // 2. Roles (excluding archived)
   const { data: roles } = await supabase
     .from('roles')
     .select(`
       id, title, slug,
       category:categories(slug)
-    `);
+    `)
+    .eq('is_archived', false);
 
   if (roles) {
     roles.forEach((r: any) => {

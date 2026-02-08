@@ -91,6 +91,7 @@ export default function OnboardingSpotlight() {
         currentStep,
         currentStepIndex,
         steps,
+        activeContext,
         nextStep,
         previousStep,
         skipOnboarding,
@@ -287,7 +288,6 @@ export default function OnboardingSpotlight() {
                                     )`
                                     : 'rgba(15, 23, 42, 0.92)'
                             }}
-                            onClick={handleSkip}
                         />
 
                         {/* Pulsing highlight ring around target */}
@@ -427,7 +427,8 @@ export default function OnboardingSpotlight() {
                                         onClick={handleNext}
                                         className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-gradient-to-r from-[#00B1FF] to-[#00B1FF] hover:from-[#00A0E8] hover:to-[#00A0E8] transition-all shadow-lg shadow-[#00B1FF]/25 flex items-center gap-1"
                                     >
-                                        {currentStepIndex === steps.length - 1 ? (
+                                        {/* Show "Fine" only on last step of quiz tour (completes the 3 core tours) */}
+                                        {currentStepIndex === steps.length - 1 && activeContext === 'quiz' ? (
                                             <>
                                                 <PartyPopper className="w-4 h-4" />
                                                 Fine

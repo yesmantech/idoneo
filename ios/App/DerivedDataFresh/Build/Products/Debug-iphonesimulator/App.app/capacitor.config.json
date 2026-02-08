@@ -18,7 +18,8 @@
 		},
 		"StatusBar": {
 			"style": "LIGHT",
-			"backgroundColor": "#00B1FF"
+			"backgroundColor": "#0F172A",
+			"overlaysWebView": true
 		},
 		"Keyboard": {
 			"resizeOnFullScreen": true
@@ -32,10 +33,11 @@
 		}
 	},
 	"ios": {
-		"contentInset": "automatic",
+		"contentInset": "never",
 		"preferredContentMode": "mobile",
 		"allowsLinkPreview": false,
-		"scheme": "idoneo"
+		"scheme": "idoneo",
+		"backgroundColor": "#0F172A"
 	},
 	"packageClassList": [
 		"AppPlugin",

@@ -46,7 +46,11 @@ import {
     Zap,
     TrendingUp,
     ArrowRight,
-    Sparkles
+    Sparkles,
+    Shield,
+    MapPin,
+    Briefcase,
+    Activity
 } from 'lucide-react';
 import Fuse from 'fuse.js';
 import { useSpotlight } from '@/context/SpotlightContext';
@@ -571,54 +575,81 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                     </div>
                                 )}
 
-                                {/* Quick Actions */}
+                                {/* Smart Browse Section (Tier S) */}
                                 <div className="px-3">
-                                    <div className="px-4 py-2 flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4 text-violet-500" />
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                            Azioni rapide
-                                        </span>
+                                    <div className="px-4 py-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Sparkles className="w-4 h-4 text-brand-cyan" />
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                Esplora Concorsi
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                        {QUICK_ACTIONS.map((action) => {
-                                            const itemIndex = currentIndex++;
-                                            return (
-                                                <button
-                                                    key={action.id}
-                                                    data-index={itemIndex}
-                                                    onClick={() => handleSelectItem({ type: 'action', data: action })}
-                                                    className={cn(
-                                                        "text-left px-4 py-4 rounded-2xl flex flex-col gap-2 transition-all duration-150 group",
-                                                        selectedIndex === itemIndex
-                                                            ? "bg-gradient-to-br " + action.color + " text-white shadow-lg"
-                                                            : "bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                    )}
-                                                >
-                                                    <div className={cn(
-                                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                                                        selectedIndex === itemIndex
-                                                            ? "bg-white/20"
-                                                            : "bg-gradient-to-br " + action.color + " text-white"
-                                                    )}>
-                                                        {action.icon}
-                                                    </div>
-                                                    <div>
-                                                        <div className={cn(
-                                                            "text-[13px] font-bold",
-                                                            selectedIndex === itemIndex ? "text-white" : "text-slate-700 dark:text-slate-200"
-                                                        )}>
-                                                            {action.label}
-                                                        </div>
-                                                        <div className={cn(
-                                                            "text-[11px] line-clamp-1",
-                                                            selectedIndex === itemIndex ? "text-white/70" : "text-slate-400"
-                                                        )}>
-                                                            {action.description}
-                                                        </div>
-                                                    </div>
-                                                </button>
-                                            );
-                                        })}
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {/* Advanced Search - Tier S Button */}
+                                        <button
+                                            onClick={() => {
+                                                close();
+                                                navigate('/concorsi/search');
+                                            }}
+                                            className="col-span-2 p-4 rounded-2xl bg-gradient-to-br from-brand-blue via-brand-cyan to-brand-blue text-white shadow-lg shadow-brand-blue/25 flex items-center justify-between group relative overflow-hidden"
+                                        >
+                                            {/* Animated shine effect */}
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+
+                                            <div className="flex items-center gap-3 relative z-10">
+                                                <div className="w-10 h-10 rounded-[18%] bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                                    <Search className="w-5 h-5 text-white" />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="font-bold text-lg">Ricerca Avanzata</div>
+                                                    <div className="text-white/80 text-xs font-medium">Trova il tuo concorso ideale</div>
+                                                </div>
+                                            </div>
+                                            <ArrowRight className="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform relative z-10" />
+                                        </button>
+
+                                        {/* Quick Category Filters - Updated style */}
+                                        <button
+                                            onClick={() => { close(); navigate('/concorsi/forze-armate'); }}
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-brand-blue/50 hover:shadow-md hover:shadow-brand-blue/5 transition-all text-left flex items-center gap-3 group"
+                                        >
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 text-blue-600 flex items-center justify-center group-hover:from-blue-500 group-hover:to-blue-600 group-hover:text-white transition-all">
+                                                <Shield className="w-4 h-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Militari</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => { close(); navigate('/concorsi/amministrativi'); }}
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-brand-purple/50 hover:shadow-md hover:shadow-brand-purple/5 transition-all text-left flex items-center gap-3 group"
+                                        >
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/10 text-purple-600 flex items-center justify-center group-hover:from-purple-500 group-hover:to-purple-600 group-hover:text-white transition-all">
+                                                <Briefcase className="w-4 h-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Amministrativi</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => { close(); navigate('/concorsi/enti-locali'); }}
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-brand-orange/50 hover:shadow-md hover:shadow-brand-orange/5 transition-all text-left flex items-center gap-3 group"
+                                        >
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 text-orange-600 flex items-center justify-center group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all">
+                                                <MapPin className="w-4 h-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Enti Locali</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => { close(); navigate('/concorsi/sanita'); }}
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-rose-500/50 hover:shadow-md hover:shadow-rose-500/5 transition-all text-left flex items-center gap-3 group"
+                                        >
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-600/10 text-rose-600 flex items-center justify-center group-hover:from-rose-500 group-hover:to-rose-600 group-hover:text-white transition-all">
+                                                <Activity className="w-4 h-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Sanità</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>

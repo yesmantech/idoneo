@@ -110,7 +110,7 @@ export default function StatsKPIGrid({
         <div className="space-y-6 mb-8">
 
             {/* 2x2 Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div data-onboarding="stats-kpi" className="grid grid-cols-2 gap-4">
 
                 {/* 1. Total Tests */}
                 <StatsCard
@@ -161,6 +161,7 @@ export default function StatsKPIGrid({
             {/* Preparation Level Banner - Now navigates to page */}
             {readiness && (
                 <div
+                    data-onboarding="stats-readiness"
                     onClick={handleReadinessClick}
                     className="group relative bg-[var(--card)] p-6 rounded-[32px] shadow-soft flex items-center justify-between overflow-hidden border border-[var(--card-border)] cursor-pointer hover:border-[#00B1FF]/30 transition-all"
                 >

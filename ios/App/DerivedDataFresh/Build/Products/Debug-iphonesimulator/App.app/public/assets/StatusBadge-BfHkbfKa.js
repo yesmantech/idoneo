@@ -1,0 +1,4 @@
+import{j as t}from"./framer-CcO5Kjcw.js";const d={success:{bg:"bg-emerald-500/10",text:"text-emerald-400",border:"border-emerald-500/20"},warning:{bg:"bg-amber-500/10",text:"text-amber-400",border:"border-amber-500/20"},error:{bg:"bg-rose-500/10",text:"text-rose-400",border:"border-rose-500/20"},info:{bg:"bg-sky-500/10",text:"text-sky-400",border:"border-sky-500/20"},neutral:{bg:"bg-slate-100 dark:bg-slate-800",text:"text-slate-600 dark:text-slate-400",border:"border-slate-200 dark:border-slate-700"}};function l({label:s,variant:a="neutral",icon:r,size:b="sm"}){const e=d[a],o=b==="sm"?"px-2 py-0.5 text-[10px]":"px-3 py-1 text-xs";return t.jsxs("span",{className:`
+            inline-flex items-center gap-1 rounded-full font-medium border
+            ${e.bg} ${e.text} ${e.border} ${o}
+        `,children:[r&&t.jsx("span",{children:r}),s]})}export{l as S};

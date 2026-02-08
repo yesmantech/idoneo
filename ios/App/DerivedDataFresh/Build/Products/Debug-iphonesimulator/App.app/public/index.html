@@ -36,10 +36,10 @@
   <meta name="twitter:image" content="https://idoneo.ai/icon-512x512.png" />
 
   <!-- PWA Meta Tags -->
-  <meta name="theme-color" content="#00B1FF" />
+  <meta name="theme-color" content="#0F172A" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Idoneo" />
 
   <!-- Icons -->
@@ -76,16 +76,60 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script type="module" crossorigin src="/assets/index-DBMi1b3R.js"></script>
+  <script type="module" crossorigin src="/assets/index-BcNl-kiB.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/react-vendor-B--z-fyW.js">
   <link rel="modulepreload" crossorigin href="/assets/router-ClfHAwMg.js">
-  <link rel="modulepreload" crossorigin href="/assets/framer-BdaCTGm4.js">
+  <link rel="modulepreload" crossorigin href="/assets/framer-CcO5Kjcw.js">
   <link rel="modulepreload" crossorigin href="/assets/supabase-CIvuJI4W.js">
-  <link rel="modulepreload" crossorigin href="/assets/icons-DIoLbN6D.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-De5lFwue.css">
+  <link rel="modulepreload" crossorigin href="/assets/icons-Dvxa2Qho.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-DCbiI3LR.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
+  <!-- iOS Overscroll Prevention (allows horizontal swipes) -->
+  <script>
+    (function () {
+      var startX = 0;
+      var startY = 0;
+
+      document.addEventListener('touchstart', function (e) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+
+      document.addEventListener('touchmove', function (e) {
+        var root = document.getElementById('root');
+        if (!root) return;
+
+        var currentX = e.touches[0].clientX;
+        var currentY = e.touches[0].clientY;
+        var deltaX = Math.abs(currentX - startX);
+        var deltaY = Math.abs(currentY - startY);
+
+        // If this is primarily a HORIZONTAL swipe, allow it completely
+        if (deltaX > deltaY) {
+          return; // Let horizontal swipes through
+        }
+
+        // For VERTICAL swipes, prevent overscroll at edges
+        var scrollTop = root.scrollTop;
+        var scrollHeight = root.scrollHeight;
+        var clientHeight = root.clientHeight;
+        var isScrollingUp = currentY > startY;
+        var isScrollingDown = currentY < startY;
+
+        // Prevent overscroll at top (trying to scroll up when already at top)
+        if (scrollTop <= 0 && isScrollingUp) {
+          e.preventDefault();
+        }
+        // Prevent overscroll at bottom (trying to scroll down when already at bottom)
+        if (scrollTop + clientHeight >= scrollHeight - 1 && isScrollingDown) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    })();
+  </script>
+
   <!-- Contenitore React -->
   <div id="root"></div>
 

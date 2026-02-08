@@ -2,8 +2,9 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
-import { Home, User, Trophy, Newspaper, Shield, Heart, Briefcase, X, LogIn } from 'lucide-react';
+import { Home, User, Trophy, Newspaper, Shield, Heart, Briefcase, X, LogIn, Folder, Sparkles } from 'lucide-react';
 import { StreakBadge } from '../gamification/StreakBadge';
+import { type Category } from '@/lib/data';
 
 const MENU_ITEMS = [
     { icon: Home, label: 'Home', path: '/' },
@@ -12,13 +13,18 @@ const MENU_ITEMS = [
     { icon: Newspaper, label: 'Blog & News', path: '/blog' },
 ];
 
-const SECONDARY_ITEMS = [
-    { icon: Shield, label: 'Forze Armate', path: '/concorsi/forze-armate' },
-    { icon: Heart, label: 'Sanità', path: '/concorsi/sanita' },
-    { icon: Briefcase, label: 'Amministrativi', path: '/concorsi/amministrativi' },
-];
+// Map category slugs to icons
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+    'forze-armate': Shield,
+    'sanita': Heart,
+    'amministrativi': Briefcase,
+};
 
-export default function MobileDrawer() {
+interface MobileDrawerProps {
+    categories: Category[];
+}
+
+export default function MobileDrawer({ categories }: MobileDrawerProps) {
     const { isMobileOpen, setMobileOpen } = useSidebar();
     const { user, profile } = useAuth();
     const location = useLocation();
@@ -81,31 +87,57 @@ export default function MobileDrawer() {
                         })}
                     </div>
 
-                    {/* Categories */}
+                    {/* AI Section */}
                     <div>
-                        <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Categorie</h3>
-                        <div className="space-y-1">
-                            {SECONDARY_ITEMS.map((item) => {
-                                const isActive = location.pathname === item.path;
-                                const Icon = item.icon;
-                                return (
-                                    <Link
-                                        key={item.path}
-                                        to={item.path}
-                                        onClick={() => setMobileOpen(false)}
-                                        className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${isActive
-                                            ? 'bg-white text-slate-900 font-bold shadow-sm'
-                                            : 'text-slate-500 font-medium hover:text-slate-700 hover:bg-white/60'
-                                            }`}
-                                    >
-                                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#00B1FF] rounded-full" />}
-                                        <Icon className={`w-5 h-5 ${isActive ? 'text-[#00B1FF]' : 'text-slate-400'}`} />
-                                        <span>{item.label}</span>
-                                    </Link>
-                                );
-                            })}
-                        </div>
+                        <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Assistente AI</h3>
+                        <Link
+                            to="/ai-assistant"
+                            onClick={() => setMobileOpen(false)}
+                            className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${location.pathname === '/ai-assistant'
+                                    ? 'bg-gradient-to-r from-purple-500/10 to-cyan-500/10 text-slate-900 font-bold shadow-sm border border-purple-500/20'
+                                    : 'text-slate-500 font-medium hover:bg-gradient-to-r hover:from-purple-500/5 hover:to-cyan-500/5'
+                                }`}
+                        >
+                            {location.pathname === '/ai-assistant' && (
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-purple-500 to-cyan-500 rounded-full" />
+                            )}
+                            <Sparkles className={`w-5 h-5 ${location.pathname === '/ai-assistant' ? 'text-purple-500' : 'text-slate-400'
+                                }`} />
+                            <span className="bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent font-bold">
+                                Chiedi all'AI
+                            </span>
+                            {location.pathname === '/ai-assistant' && (
+                                <div className="ml-auto w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                            )}
+                        </Link>
                     </div>
+                    {categories.length > 0 && (
+                        <div>
+                            <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Categorie</h3>
+                            <div className="space-y-1">
+                                {categories.map((cat) => {
+                                    const path = `/concorsi/${cat.slug}`;
+                                    const isActive = location.pathname === path || location.pathname.startsWith(path);
+                                    const Icon = CATEGORY_ICONS[cat.slug] || Folder;
+                                    return (
+                                        <Link
+                                            key={cat.id}
+                                            to={path}
+                                            onClick={() => setMobileOpen(false)}
+                                            className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${isActive
+                                                ? 'bg-white text-slate-900 font-bold shadow-sm'
+                                                : 'text-slate-500 font-medium hover:text-slate-700 hover:bg-white/60'
+                                                }`}
+                                        >
+                                            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#00B1FF] rounded-full" />}
+                                            <Icon className={`w-5 h-5 ${isActive ? 'text-[#00B1FF]' : 'text-slate-400'}`} />
+                                            <span>{cat.title}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer / User */}
@@ -143,3 +175,4 @@ export default function MobileDrawer() {
         </>
     );
 }
+

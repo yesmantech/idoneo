@@ -18,6 +18,7 @@ const ProfileSetupPage = React.lazy(() => import('./app/profile/setup/page'));
 const QuizStatsPage = React.lazy(() => import('./app/profile/stats/QuizStatsPage'));
 
 // Concorsi Flow
+const ConcorsiSearchPage = React.lazy(() => import('./app/concorsi/search/page'));
 const ConcorsoHubPage = React.lazy(() => import('./app/concorsi/[category]/page'));
 const RolePage = React.lazy(() => import('./app/concorsi/[category]/[role]/page'));
 const ContestPage = React.lazy(() => import('./app/concorsi/[category]/[role]/[contestSlug]/page'));
@@ -42,6 +43,12 @@ const LeaderboardPage = React.lazy(() => import('./app/leaderboard/page'));
 // Informational Pages
 const PunteggiPage = React.lazy(() => import('./app/come-funziona/punteggi/page'));
 const PreparazionePage = React.lazy(() => import('./app/preparazione/page'));
+
+// Bandi Pages
+const BandiListPage = React.lazy(() => import('./app/bandi/BandiListPage'));
+const BandoDetailPage = React.lazy(() => import('./app/bandi/BandoDetailPage'));
+const BandiWatchlistPage = React.lazy(() => import('./app/bandi/BandiWatchlistPage'));
+const BandiAlertsPage = React.lazy(() => import('./app/bandi/alerts/page'));
 
 // Demo Pages
 const FlamesDemoPage = React.lazy(() => import('./app/demo/flames/page'));
@@ -68,6 +75,13 @@ const AdminBlogListPage = React.lazy(() => import('./app/admin/blog/page'));
 const AdminBlogEditorPage = React.lazy(() => import('./app/admin/blog/editor/page'));
 const AdminBlogCategoriesPage = React.lazy(() => import('./app/admin/blog/categories/page'));
 const AdminBlogTagsPage = React.lazy(() => import('./app/admin/blog/tags/page'));
+
+// Bandi Admin
+const AdminBandiListPage = React.lazy(() => import('./app/admin/bandi/page'));
+const AdminBandoEditorPage = React.lazy(() => import('./app/admin/bandi/[id]/page'));
+const AdminBandiImportPage = React.lazy(() => import('./app/admin/bandi/import/page'));
+const AdminBandiCategoriesPage = React.lazy(() => import('./app/admin/bandi/categorie/page'));
+const AdminEntiListPage = React.lazy(() => import('./app/admin/enti/page'));
 
 // ============================================================================
 // STATIC IMPORTS (Required at startup, cannot be lazy)
@@ -162,6 +176,7 @@ export default function App() {
                                                 } />
 
                                                 {/* Concorsi Flow (Wrapped) */}
+                                                <Route path="/concorsi/search" element={<MainLayout><ConcorsiSearchPage /></MainLayout>} />
                                                 <Route path="/concorsi/:category" element={<MainLayout><ConcorsoHubPage /></MainLayout>} />
                                                 <Route path="/concorsi/:category/:role" element={<MainLayout><RolePage /></MainLayout>} />
                                                 <Route path="/concorsi/:category/:role/:contestSlug" element={<MainLayout><ContestPage /></MainLayout>} />
@@ -177,6 +192,12 @@ export default function App() {
                                                 <Route path="/quiz/results/:attemptId" element={<MainLayout><QuizResultsPage /></MainLayout>} />
                                                 <Route path="/quiz/explanations/:attemptId/:questionId" element={<MainLayout><ExplanationPage /></MainLayout>} />
                                                 {/* <Route path="/stats" element={<MainLayout><StatsPage /></MainLayout>} /> */}
+
+                                                {/* Bandi (Public Tenders) */}
+                                                <Route path="/bandi" element={<MainLayout><BandiListPage /></MainLayout>} />
+                                                <Route path="/bandi/watchlist" element={<MainLayout><BandiWatchlistPage /></MainLayout>} />
+                                                <Route path="/bandi/alerts" element={<MainLayout><BandiAlertsPage /></MainLayout>} />
+                                                <Route path="/bandi/:slug" element={<MainLayout><BandoDetailPage /></MainLayout>} />
 
                                                 {/* Blog (User-facing) (Wrapped) */}
                                                 <Route path="/blog" element={<MainLayout><BlogIndexPage /></MainLayout>} />
@@ -221,6 +242,16 @@ export default function App() {
                                                     <Route path="/admin/blog/tag" element={<AdminBlogTagsPage />} />
                                                     <Route path="/admin/blog/nuovo" element={<AdminBlogEditorPage />} />
                                                     <Route path="/admin/blog/:id" element={<AdminBlogEditorPage />} />
+
+                                                    {/* Admin Bandi */}
+                                                    <Route path="/admin/bandi" element={<AdminBandiListPage />} />
+                                                    <Route path="/admin/bandi/nuovo" element={<AdminBandoEditorPage />} />
+                                                    <Route path="/admin/bandi/import" element={<AdminBandiImportPage />} />
+                                                    <Route path="/admin/bandi/categorie" element={<AdminBandiCategoriesPage />} />
+                                                    <Route path="/admin/bandi/:id" element={<AdminBandoEditorPage />} />
+
+                                                    {/* Admin Enti */}
+                                                    <Route path="/admin/enti" element={<AdminEntiListPage />} />
                                                 </Route>
                                             </Routes>
                                         </Suspense>

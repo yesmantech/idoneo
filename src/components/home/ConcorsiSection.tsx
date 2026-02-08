@@ -51,15 +51,14 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
     return (
         <Link
             to={`/concorsi/${contest.slug}`}
-            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)]"
+            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[220px]"
             style={{
                 width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
-                height: 'clamp(210px, 24vh, 280px)',
             }}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
             <div
-                className="relative overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-slate-700"
+                className="relative overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-slate-700 shrink-0"
                 style={{ aspectRatio: '2 / 1', width: '100%' }}
             >
                 {contest.home_banner_url ? (
@@ -112,7 +111,7 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                     )}
                 </div>
 
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center justify-between mt-4 md:mt-auto pt-2">
                     {contest.year ? (
                         <div className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-md">
                             <span className="text-[var(--foreground)] opacity-50 font-bold text-[10px] lg:text-[11px] uppercase tracking-wider">
@@ -180,21 +179,19 @@ export default function ConcorsiSection({ title, contests }: { title: string; co
                 </div>
             </div>
 
-            {/* Carousel Container */}
+            {/* Carousel Container - uses padding for alignment instead of spacer divs */}
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide py-2 -my-2 gap-3 lg:gap-4"
-                style={{ alignItems: 'flex-start' }}
+                className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-2 -my-2 pl-4 lg:pl-8 gap-3 lg:gap-4 items-stretch"
             >
-                {/* Left spacer */}
-                <div className="w-4 lg:w-8 flex-shrink-0" />
                 {contests.map((contest, idx) => (
                     <div key={idx} className="snap-start flex-shrink-0">
                         <ConcorsoCard contest={contest} index={idx} />
                     </div>
                 ))}
-                {/* Right spacer */}
-                <div className="w-4 lg:w-8 flex-shrink-0" />
+
+                {/* Right spacer for scroll end padding */}
+                <div className="min-w-[4px] lg:min-w-[16px] flex-shrink-0" aria-hidden="true" />
             </div>
         </div>
     );

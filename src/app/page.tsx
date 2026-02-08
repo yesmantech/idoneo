@@ -6,15 +6,11 @@
  *
  * 1. **BlogHero**: Immersive top section with latest news/articles
  * 2. **SearchSection**: Prominent search bar triggering Spotlight
- * 3. **ConcorsiSection (Recommended)**: Personalized suggestions based on user interests
- * 4. **ConcorsiSection (All)**: Carousel of all available competitions
- *
- * ## Features
- *
- * - **Onboarding Trigger**: Automatically starts tour for new users
- * - **Data Pre-fetching**: Loads categories and search index on mount
- * - **Offline Sync**: Triggers background sync of pending attempts
- * - **SEO**: configured with main meta tags
+ * 3. **RecentlyUsedSection**: Last practiced roles (if logged in)
+ * 4. **BandiScadenzaSection**: Bandi expiring soon
+ * 5. **ConcorsiSection (Recommended)**: Personalized suggestions
+ * 6. **NewArrivalsSection**: Recently added quizzes
+ * 7. **PopularSection**: Community favorites
  */
 
 import React, { useEffect, useState } from "react";
@@ -24,17 +20,29 @@ import { useOnboarding } from "@/context/OnboardingProvider";
 import BlogHero from "@/components/home/BlogHero";
 import SearchSection from "@/components/home/SearchSection";
 import ConcorsiSection from "@/components/home/ConcorsiSection";
+import RecentlyUsedSection from "@/components/home/RecentlyUsedSection";
+import BandiScadenzaSection from "@/components/home/BandiScadenzaSection";
+import NewArrivalsSection from "@/components/home/NewArrivalsSection";
+import PopularSection from "@/components/home/PopularSection";
 import SEOHead from "@/components/seo/SEOHead";
+import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, type RecentlyUsedItem, type NewArrivalQuiz, type PopularRole } from "@/lib/homeSectionsService";
+import { fetchClosingSoonBandi, type Bando } from "@/lib/bandiService";
 
 // =============================================================================
 // MAIN HOME PAGE
 // =============================================================================
 export default function HomePage() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { hasCompletedOnboarding, startOnboarding } = useOnboarding();
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchItems, setSearchItems] = useState<SearchItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // New section states
+  const [recentlyUsed, setRecentlyUsed] = useState<RecentlyUsedItem[]>([]);
+  const [closingSoonBandi, setClosingSoonBandi] = useState<Bando[]>([]);
+  const [newArrivals, setNewArrivals] = useState<NewArrivalQuiz[]>([]);
+  const [popularRoles, setPopularRoles] = useState<PopularRole[]>([]);
 
   // Auto-start onboarding for first-time users
   useEffect(() => {
@@ -48,6 +56,7 @@ export default function HomePage() {
   }, [loading, hasCompletedOnboarding, startOnboarding]);
 
   useEffect(() => {
+    // Core data
     Promise.all([
       getCategories(),
       getAllSearchableItems()
@@ -56,6 +65,11 @@ export default function HomePage() {
       setSearchItems(items);
       setLoading(false);
     });
+
+    // New sections data (non-blocking)
+    fetchClosingSoonBandi(7, 8).then(setClosingSoonBandi);
+    fetchNewArrivals(30, 10).then(setNewArrivals);
+    fetchMostPopular(5).then(setPopularRoles);
 
     // Offline Sync Trigger
     import("@/lib/offlineService").then(({ offlineService }) => {
@@ -67,8 +81,14 @@ export default function HomePage() {
     });
   }, []);
 
+  // Fetch recently used when user is available
+  useEffect(() => {
+    if (user?.id) {
+      fetchRecentlyUsed(user.id, 5).then(setRecentlyUsed);
+    }
+  }, [user?.id]);
+
   const consigliati = categories.slice(0, 8);
-  const tuttiConcorsi = categories.slice(2, 12);
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 transition-colors duration-300">
@@ -83,26 +103,46 @@ export default function HomePage() {
           <BlogHero />
         </section>
 
-        {/* 2. SEARCH BAR - Spotlight Trigger */}
-        <section className="px-4 lg:px-8 -mt-4 lg:-mt-6 max-w-7xl lg:mx-auto lg:w-full relative z-20">
+        {/* 2. SEARCH BAR - Overlaps hero for visual continuity */}
+        <section className="px-4 lg:px-8 -mt-6 lg:-mt-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20">
           <SearchSection items={searchItems} />
         </section>
 
-        {/* 3. CONCORSI SECTIONS - Recommended */}
-        <section className="mt-10 lg:mt-14">
+        {/* 3. RECENTLY USED - Quick access for returning users */}
+        {recentlyUsed.length > 0 && (
+          <section className="mb-8 lg:mb-10">
+            <RecentlyUsedSection items={recentlyUsed} />
+          </section>
+        )}
+
+        {/* 4. BANDI IN SCADENZA - Urgency section */}
+        {closingSoonBandi.length > 0 && (
+          <section className="mb-8 lg:mb-10">
+            <BandiScadenzaSection bandi={closingSoonBandi} />
+          </section>
+        )}
+
+        {/* 5. CONCORSI SECTIONS - Recommended */}
+        <section className="mb-8 lg:mb-10">
           <ConcorsiSection
             title="Consigliati per te"
             contests={consigliati}
           />
         </section>
 
-        {/* 4. TUTTI CONCORSI - Grid/Carousel */}
-        <section className="mt-10 lg:mt-14">
-          <ConcorsiSection
-            title="Esplora concorsi"
-            contests={tuttiConcorsi}
-          />
-        </section>
+        {/* 6. NEW ARRIVALS - Fresh content */}
+        {newArrivals.length > 0 && (
+          <section className="mb-8 lg:mb-10">
+            <NewArrivalsSection quizzes={newArrivals} />
+          </section>
+        )}
+
+        {/* 7. POPULAR - Community favorites */}
+        {popularRoles.length > 0 && (
+          <section className="mb-8 lg:mb-10">
+            <PopularSection roles={popularRoles} />
+          </section>
+        )}
 
       </main>
     </div>

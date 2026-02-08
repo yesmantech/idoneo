@@ -9,7 +9,12 @@ import {
     Settings,
     ArrowLeft,
     ChevronDown,
-    AlertTriangle
+    ChevronLeft,
+    ChevronRight,
+    AlertTriangle,
+    Scroll,
+    Building2,
+    Sparkles
 } from 'lucide-react';
 
 // ================== TYPES ==================
@@ -30,6 +35,11 @@ const MENU_ITEMS: NavItem[] = [
         label: 'Dashboard',
         path: '/admin',
         exact: true,
+    },
+    {
+        icon: Sparkles,
+        label: 'AI Analytics',
+        path: '/admin/analytics',
     },
     {
         icon: Newspaper,
@@ -61,6 +71,21 @@ const MENU_ITEMS: NavItem[] = [
         ],
     },
     {
+        icon: Scroll,
+        label: 'Bandi',
+        path: '/admin/bandi',
+        children: [
+            { label: 'Lista', path: '/admin/bandi' },
+            { label: 'Categorie', path: '/admin/bandi/categorie' },
+            { label: 'Import/Export', path: '/admin/bandi/import' },
+        ],
+    },
+    {
+        icon: Building2,
+        label: 'Enti',
+        path: '/admin/enti',
+    },
+    {
         icon: Users,
         label: 'Utenti',
         path: '/admin/users',
@@ -77,6 +102,7 @@ const MENU_ITEMS: NavItem[] = [
 export default function AdminSidebar() {
     const location = useLocation();
     const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+    const [isCollapsed, setIsCollapsed] = React.useState(false);
 
     // Check if a nav item is active
     const isItemActive = (item: NavItem): boolean => {
@@ -113,27 +139,67 @@ export default function AdminSidebar() {
     };
 
     return (
-        <aside className="w-[280px] bg-[#E9EEF4] dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-800 hidden lg:flex flex-col h-screen sticky top-0 z-20 transition-colors">
+        <aside className={`${isCollapsed ? 'w-[72px]' : 'w-[280px]'} bg-[#E9EEF4] dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-800 hidden lg:flex flex-col h-screen sticky top-0 z-20 transition-all duration-300`}>
             {/* Logo / Brand */}
-            <div className="p-6 pb-8">
-                <Link to="/admin" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#00B1FF] to-[#0091D5] rounded-[14px] flex items-center justify-center font-black text-white text-xl shadow-md shadow-[#00B1FF]/20">
+            <div className={`p-4 ${isCollapsed ? 'pb-4' : 'p-6 pb-8'}`}>
+                <Link to="/admin" className="flex items-center gap-3 hover:opacity-80 transition-opacity justify-center lg:justify-start">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#00B1FF] to-[#0091D5] rounded-[14px] flex items-center justify-center font-black text-white text-xl shadow-md shadow-[#00B1FF]/20 flex-shrink-0">
                         I
                     </div>
-                    <div>
-                        <div className="font-black text-slate-900 dark:text-white text-base tracking-tight leading-none">IDONEO</div>
-                        <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">Admin Panel</div>
-                    </div>
+                    {!isCollapsed && (
+                        <div>
+                            <div className="font-black text-slate-900 dark:text-white text-base tracking-tight leading-none">IDONEO</div>
+                            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">Admin Panel</div>
+                        </div>
+                    )}
                 </Link>
             </div>
 
+            {/* Collapse Toggle */}
+            <div className={`px-4 ${isCollapsed ? 'flex justify-center' : ''}`}>
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all ${isCollapsed ? 'w-10 h-10' : 'w-full'}`}
+                    title={isCollapsed ? 'Espandi sidebar' : 'Riduci sidebar'}
+                >
+                    {isCollapsed ? (
+                        <ChevronRight className="w-4 h-4" />
+                    ) : (
+                        <>
+                            <ChevronLeft className="w-4 h-4" />
+                            <span>Riduci</span>
+                        </>
+                    )}
+                </button>
+            </div>
+
             {/* Navigation */}
-            <nav className="flex-1 px-4 space-y-1 overflow-y-auto scrollbar-hide pb-4">
+            <nav className={`flex-1 px-3 space-y-1 overflow-y-auto scrollbar-hide pb-4 mt-4 ${isCollapsed ? 'px-2' : 'px-4'}`}>
                 {MENU_ITEMS.map(item => {
                     const Icon = item.icon;
                     const isActive = isItemActive(item) || isChildActive(item);
                     const isExpanded = expandedItems.includes(item.path);
 
+                    // Collapsed mode - show only icons
+                    if (isCollapsed) {
+                        return (
+                            <div key={item.path} className="mb-1">
+                                <Link
+                                    to={item.children ? item.children[0].path : item.path}
+                                    className={`w-full flex items-center justify-center p-3 rounded-2xl text-sm font-semibold transition-all duration-200 group
+                                        ${isActive
+                                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                                            : 'text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
+                                        }`}
+                                    title={item.label}
+                                >
+                                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#00B1FF]' : 'text-slate-400 group-hover:text-slate-500'}`} />
+                                </Link>
+                            </div>
+                        );
+                    }
+
+                    // Expanded mode - show full menu
                     if (item.children && item.children.length > 0) {
                         return (
                             <div key={item.path} className="mb-1">
@@ -202,10 +268,11 @@ export default function AdminSidebar() {
             <div className="p-4 border-t border-slate-200/50">
                 <Link
                     to="/"
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-500 hover:text-[#00B1FF] rounded-2xl hover:bg-white/50 transition-all group"
+                    className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-500 hover:text-[#00B1FF] rounded-2xl hover:bg-white/50 transition-all group ${isCollapsed ? 'justify-center px-3' : ''}`}
+                    title="Torna al sito"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
-                    <span>Torna al sito</span>
+                    {!isCollapsed && <span>Torna al sito</span>}
                 </Link>
             </div>
         </aside>

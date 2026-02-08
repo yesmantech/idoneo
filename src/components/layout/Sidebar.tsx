@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
 import MobileDrawer from './MobileDrawer';
-import { Home, User, Trophy, Newspaper, Shield, Heart, Briefcase, ChevronLeft, ChevronRight, LogIn } from 'lucide-react';
+import { Home, User, Trophy, Newspaper, Shield, Heart, Briefcase, ChevronLeft, ChevronRight, LogIn, Folder, Sparkles } from 'lucide-react';
 import { StreakBadge } from '../gamification/StreakBadge';
+import { getCategories, type Category } from '@/lib/data';
 
 const MENU_ITEMS = [
     { icon: Home, label: 'Home', path: '/' },
@@ -13,11 +14,12 @@ const MENU_ITEMS = [
     { icon: Newspaper, label: 'Blog & News', path: '/blog' },
 ];
 
-const SECONDARY_ITEMS = [
-    { icon: Shield, label: 'Forze Armate', path: '/concorsi/forze-armate' },
-    { icon: Heart, label: 'Sanità', path: '/concorsi/sanita' },
-    { icon: Briefcase, label: 'Amministrativi', path: '/concorsi/amministrativi' },
-];
+// Map category slugs to icons
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+    'forze-armate': Shield,
+    'sanita': Heart,
+    'amministrativi': Briefcase,
+};
 
 function NavItem({ item, collapsed }: { item: typeof MENU_ITEMS[0]; collapsed: boolean; key?: React.Key }) {
     const location = useLocation();
@@ -55,9 +57,10 @@ function NavItem({ item, collapsed }: { item: typeof MENU_ITEMS[0]; collapsed: b
     );
 }
 
-function SidebarContent({ collapsed }: { collapsed: boolean }) {
+function SidebarContent({ collapsed, categories }: { collapsed: boolean; categories: Category[] }) {
     const { toggleCollapse, setMobileOpen } = useSidebar();
     const { user, profile } = useAuth();
+    const location = useLocation();
 
     return (
         <div className="flex flex-col h-full bg-[#F5F5F7]">
@@ -103,18 +106,87 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                         {MENU_ITEMS.map(item => <NavItem key={item.path} item={item} collapsed={collapsed} />)}
                     </div>
 
-                    {/* Secondary */}
+                    {/* AI Section */}
                     <div>
                         {!collapsed && (
                             <h3 className="px-4 text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-3">
-                                Categorie
+                                Assistente AI
                             </h3>
                         )}
                         {collapsed && <div className="h-4"></div>}
-                        <div className="space-y-1">
-                            {SECONDARY_ITEMS.map(item => <NavItem key={item.path} item={item as any} collapsed={collapsed} />)}
-                        </div>
+                        <Link
+                            to="/ai-assistant"
+                            className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${location.pathname === '/ai-assistant'
+                                    ? 'bg-gradient-to-r from-purple-500/10 to-cyan-500/10 text-slate-900 shadow-sm border border-purple-500/20'
+                                    : 'text-slate-500 hover:bg-gradient-to-r hover:from-purple-500/5 hover:to-cyan-500/5 hover:text-slate-700'
+                                }`}
+                            title={collapsed ? 'Assistente AI' : undefined}
+                            onClick={() => setMobileOpen(false)}
+                        >
+                            {location.pathname === '/ai-assistant' && (
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-purple-500 to-cyan-500 rounded-full" />
+                            )}
+                            <span className={`flex justify-center transition-all ${collapsed ? 'w-full' : 'w-5'}`}>
+                                <Sparkles className={`w-5 h-5 ${location.pathname === '/ai-assistant'
+                                        ? 'text-purple-500'
+                                        : 'text-slate-400 group-hover:text-purple-400'
+                                    }`} />
+                            </span>
+                            {!collapsed && (
+                                <span className="whitespace-nowrap overflow-hidden text-ellipsis bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent font-bold">
+                                    Chiedi all'AI
+                                </span>
+                            )}
+                            {location.pathname === '/ai-assistant' && !collapsed && (
+                                <div className="ml-auto w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                            )}
+                        </Link>
                     </div>
+
+                    {/* Categories (Dynamic) */}
+                    {categories.length > 0 && (
+                        <div>
+                            {!collapsed && (
+                                <h3 className="px-4 text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-3">
+                                    Categorie
+                                </h3>
+                            )}
+                            {collapsed && <div className="h-4"></div>}
+                            <div className="space-y-1">
+                                {categories.map(cat => {
+                                    const Icon = CATEGORY_ICONS[cat.slug] || Folder;
+                                    const path = `/concorsi/${cat.slug}`;
+                                    const isActive = location.pathname === path || location.pathname.startsWith(path);
+
+                                    return (
+                                        <Link
+                                            key={cat.id}
+                                            to={path}
+                                            className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${isActive
+                                                ? 'bg-white text-slate-900 shadow-sm'
+                                                : 'text-slate-500 hover:bg-white/60 hover:text-slate-700'
+                                                }`}
+                                            title={collapsed ? cat.title : undefined}
+                                            onClick={() => setMobileOpen(false)}
+                                        >
+                                            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#00B1FF] rounded-full" />}
+                                            <span className={`flex justify-center transition-all ${collapsed ? 'w-full' : 'w-5'}`}>
+                                                <Icon className={`w-5 h-5 ${isActive ? 'text-[#00B1FF]' : 'text-slate-400 group-hover:text-slate-500'}`} />
+                                            </span>
+                                            {!collapsed && (
+                                                <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+                                                    {cat.title}
+                                                </span>
+                                            )}
+                                            {isActive && !collapsed && (
+                                                <div className="ml-auto w-2 h-2 rounded-full bg-[#00B1FF] shadow-[0_0_8px_rgba(0,177,255,0.5)]" />
+                                            )}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -157,6 +229,11 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
 
 export default function Sidebar() {
     const { isCollapsed, setMobileOpen } = useSidebar();
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        getCategories().then(setCategories);
+    }, []);
 
     return (
         <>
@@ -164,11 +241,12 @@ export default function Sidebar() {
             <aside
                 className={`hidden lg:flex flex-col bg-[#F5F5F7] border-r border-slate-200/50 h-screen sticky top-0 flex-shrink-0 transition-[width] duration-300 ease-in-out ${isCollapsed ? 'w-24' : 'w-72'}`}
             >
-                <SidebarContent collapsed={isCollapsed} />
+                <SidebarContent collapsed={isCollapsed} categories={categories} />
             </aside>
 
             {/* Mobile Drawer */}
-            <MobileDrawer />
+            <MobileDrawer categories={categories} />
         </>
     );
 }
+
