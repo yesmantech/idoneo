@@ -128,20 +128,16 @@ export default function ConcorsiSearchPage() {
     ].filter(Boolean).length;
 
     return (
-        <div className="min-h-screen bg-[var(--background)] pb-24 relative overflow-hidden">
+        <div className="min-h-screen bg-[var(--background)] pb-24">
             <SEOHead
                 title="Ricerca Avanzata Concorsi | Idoneo"
                 description="Trova il tuo concorso ideale tra centinaia di simulatori ufficiali e quiz commentati."
             />
 
-            {/* Background Decorative Mesh */}
-            <div className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none overflow-hidden">
-                <div className="absolute -top-24 -left-24 w-96 h-96 bg-brand-blue/10 rounded-full blur-[100px] animate-pulse" />
-                <div className="absolute top-48 -right-24 w-96 h-96 bg-brand-cyan/10 rounded-full blur-[100px] animate-pulse duration-5000" />
-            </div>
+
 
             {/* Desktop / Mobile Header */}
-            <header className="sticky top-0 z-40 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--card-border)] pt-safe">
+            <header className="sticky top-0 z-40 bg-[var(--background)] backdrop-blur-xl border-b border-[var(--card-border)] pt-safe">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}

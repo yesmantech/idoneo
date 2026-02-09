@@ -13,13 +13,13 @@
           "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
           "name" : "capacitor-swift-pm"
         },
-        "path" : "/Users/alessandrovalenza/Dev/idoneo/ios/App/DerivedDataFresh/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework",
+        "path" : "/Users/alessandrovalenza/Dev/idoneo/ios/App/DerivedDataFresh/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework",
         "source" : {
-          "checksum" : "1d866a3cecf8b3f78b9543d2ccde8d72625e6fe1102a8451566306a346db6143",
+          "checksum" : "70205fdc6cf9cf2ef544d7d8542b7cd1f62d44c843863683b51987c502f6daac",
           "type" : "remote",
-          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/8.0.0/Capacitor.xcframework.zip"
+          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/8.0.0/Cordova.xcframework.zip"
         },
-        "targetName" : "Capacitor"
+        "targetName" : "Cordova"
       },
       {
         "kind" : {
@@ -33,13 +33,13 @@
           "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
           "name" : "capacitor-swift-pm"
         },
-        "path" : "/Users/alessandrovalenza/Dev/idoneo/ios/App/DerivedDataFresh/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework",
+        "path" : "/Users/alessandrovalenza/Dev/idoneo/ios/App/DerivedDataFresh/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework",
         "source" : {
-          "checksum" : "70205fdc6cf9cf2ef544d7d8542b7cd1f62d44c843863683b51987c502f6daac",
+          "checksum" : "1d866a3cecf8b3f78b9543d2ccde8d72625e6fe1102a8451566306a346db6143",
           "type" : "remote",
-          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/8.0.0/Cordova.xcframework.zip"
+          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/8.0.0/Capacitor.xcframework.zip"
         },
-        "targetName" : "Cordova"
+        "targetName" : "Capacitor"
       }
     ],
     "dependencies" : [
