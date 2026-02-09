@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, ChevronRight } from 'lucide-react';
+import { Bell, Bookmark, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
     fetchBandi,
@@ -128,29 +128,35 @@ export default function BandiListPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
-            {/* Header */}
-            <div className="bg-white dark:bg-slate-900 sticky top-0 z-30 border-b border-slate-100 dark:border-slate-800">
-                <div className="px-4 py-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Bandi</h1>
-                    <div className="flex items-center gap-2">
+        <div className="min-h-screen bg-[var(--background)] pb-24">
+            {/* Tier S Header */}
+            <div className="bg-[var(--background)] sticky top-0 z-30 border-b border-[var(--card-border)] pt-safe">
+                <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-[22px] font-black text-[var(--foreground)] tracking-tight">Bandi</h1>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                            Concorsi pubblici
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2.5">
                         <Link
                             to="/bandi/alerts"
-                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--card)] border border-[var(--card-border)] text-slate-400 hover:text-brand-blue hover:border-brand-blue/30 transition-all shadow-sm"
                             title="Gestisci notifiche"
                         >
-                            <Bell className="w-5 h-5" />
+                            <Bell className="w-[18px] h-[18px]" />
                         </Link>
                         <Link
                             to="/bandi/watchlist"
-                            className="px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-brand-blue to-brand-cyan text-white text-[13px] font-bold shadow-lg shadow-brand-blue/20 hover:scale-[1.03] active:scale-[0.97] transition-all"
                         >
+                            <Bookmark className="w-4 h-4" fill="currentColor" />
                             Salvati
                         </Link>
                     </div>
                 </div>
 
-                <div className="px-4 pb-4">
+                <div className="max-w-7xl mx-auto px-4 lg:px-8 pb-4">
                     <BandiFiltersBar
                         filters={filters}
                         onFiltersChange={handleFiltersChange}
@@ -160,7 +166,9 @@ export default function BandiListPage() {
             </div>
 
             {/* Content */}
-            <div className="px-4 py-4 space-y-6">
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6">
+
+
                 {loading ? (
                     <BandoCardSkeletonList count={6} />
                 ) : error ? (
@@ -176,13 +184,13 @@ export default function BandiListPage() {
                         {/* Closing soon carousel (only on first page with no active search) */}
                         {!filters.search && filters.offset === 0 && closingSoon.length > 0 && (
                             <section>
-                                <div className="flex items-center justify-between mb-3">
-                                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-[17px] font-black text-[var(--foreground)] tracking-tight flex items-center gap-2">
                                         🔥 In scadenza
                                     </h2>
                                     <Link
                                         to="/bandi?deadline_within_days=7"
-                                        className="text-sm text-emerald-500 font-medium flex items-center"
+                                        className="text-[13px] text-brand-blue font-bold flex items-center hover:opacity-80 transition-opacity"
                                     >
                                         Vedi tutti <ChevronRight className="w-4 h-4" />
                                     </Link>
@@ -208,7 +216,7 @@ export default function BandiListPage() {
                         {/* Main list */}
                         <section>
                             {!filters.search && filters.offset === 0 && closingSoon.length > 0 && (
-                                <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
+                                <h2 className="text-[17px] font-black text-[var(--foreground)] tracking-tight mb-4">
                                     Tutti i bandi
                                 </h2>
                             )}
@@ -240,7 +248,7 @@ export default function BandiListPage() {
                                     whileTap={{ scale: 0.98 }}
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="w-full mt-4 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-200"
+                                    className="w-full mt-6 py-4 rounded-[20px] bg-[var(--card)] border border-[var(--card-border)] font-bold text-[14px] text-slate-500 shadow-sm hover:shadow-md transition-all"
                                 >
                                     {loadingMore ? 'Caricamento...' : `Carica altri (${totalCount - bandi.length} rimasti)`}
                                 </motion.button>

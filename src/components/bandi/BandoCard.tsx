@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Users, Clock, Heart, Building2, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -164,8 +165,8 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                             whileTap={{ scale: 0.9 }}
                             onClick={handleSaveClick}
                             className={`p-2 rounded-xl transition-colors ${isSaved
-                                    ? 'bg-red-50 dark:bg-red-500/20 text-red-500'
-                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500'
+                                ? 'bg-red-50 dark:bg-red-500/20 text-red-500'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500'
                                 }`}
                         >
                             <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
@@ -187,38 +188,55 @@ interface BandoStatusBadgeProps {
 }
 
 function BandoStatusBadge({ daysRemaining, size = 'md' }: BandoStatusBadgeProps) {
-    const isClosed = daysRemaining <= 0;
-    const isClosingSoon = daysRemaining <= 3;
-    const isClosingThisWeek = daysRemaining <= 7;
-
-    let bgColor = 'bg-emerald-100 dark:bg-emerald-500/20';
-    let textColor = 'text-emerald-700 dark:text-emerald-400';
+    let bgColor: string;
+    let textColor: string;
     let label = `${daysRemaining}gg`;
+    let pulse = false;
 
-    if (isClosed) {
-        bgColor = 'bg-slate-100 dark:bg-slate-700';
+    if (daysRemaining <= 0) {
+        // Closed
+        bgColor = 'bg-slate-200/80 dark:bg-slate-700';
         textColor = 'text-slate-500 dark:text-slate-400';
         label = 'Chiuso';
-    } else if (isClosingSoon) {
+    } else if (daysRemaining <= 1) {
+        // TODAY / TOMORROW — critical red with pulse
+        bgColor = 'bg-red-500';
+        textColor = 'text-white';
+        label = daysRemaining === 0 ? 'OGGI' : 'DOMANI';
+        pulse = true;
+    } else if (daysRemaining <= 3) {
+        // 2-3 days — red
         bgColor = 'bg-red-100 dark:bg-red-500/20';
         textColor = 'text-red-600 dark:text-red-400';
-        label = daysRemaining === 0 ? 'OGGI' : daysRemaining === 1 ? 'DOMANI' : `${daysRemaining}gg`;
-    } else if (isClosingThisWeek) {
-        bgColor = 'bg-amber-100 dark:bg-amber-500/20';
+    } else if (daysRemaining <= 7) {
+        // 4-7 days — orange
+        bgColor = 'bg-orange-100 dark:bg-orange-500/20';
+        textColor = 'text-orange-600 dark:text-orange-400';
+    } else if (daysRemaining <= 14) {
+        // 8-14 days — amber/yellow
+        bgColor = 'bg-amber-100 dark:bg-amber-500/15';
         textColor = 'text-amber-600 dark:text-amber-400';
+    } else if (daysRemaining <= 30) {
+        // 15-30 days — sky blue (plenty of time)
+        bgColor = 'bg-sky-100 dark:bg-sky-500/15';
+        textColor = 'text-sky-600 dark:text-sky-400';
+    } else {
+        // 30+ days — green (lots of time)
+        bgColor = 'bg-emerald-100 dark:bg-emerald-500/15';
+        textColor = 'text-emerald-600 dark:text-emerald-400';
     }
 
     const sizeClasses = size === 'sm'
-        ? 'px-2 py-0.5 text-xs'
-        : 'px-3 py-1 text-sm';
+        ? 'px-2.5 py-1 text-[11px]'
+        : 'px-3 py-1.5 text-[12px]';
 
     return (
         <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`${bgColor} ${textColor} ${sizeClasses} rounded-lg font-semibold flex items-center gap-1`}
+            className={`${bgColor} ${textColor} ${sizeClasses} rounded-xl font-black tracking-tight flex items-center gap-1.5 ${pulse ? 'animate-pulse' : ''}`}
         >
-            <Clock className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} />
+            <Clock className={size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
             {label}
         </motion.div>
     );

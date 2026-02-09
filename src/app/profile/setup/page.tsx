@@ -210,14 +210,14 @@ export default function ProfileSetupPage() {
             // Refresh context to reflect changes
             await refreshProfile();
 
-            // Redirect to waitlist success page
-            navigate('/waitlist/success');
+            // Redirect to homepage after profile setup
+            navigate('/');
 
         } catch (error: any) {
             console.error("DEBUG: Full error object:", error);
             // BYPASS: Proceed to success even on error (temporary workaround)
             console.warn("Bypassing profile save error, proceeding to success page...");
-            navigate('/waitlist/success');
+            navigate('/');
         } finally {
             setSaving(false);
         }

@@ -95,7 +95,7 @@ function LeagueCountdown() {
 
 export default function UnifiedLeaderboardPage() {
 
-    const { user, profile } = useAuth();
+    const { user, profile, refreshProfile } = useAuth();
     // Use role-based check instead of hardcoded emails
     const isAdmin = profile?.role === 'admin';
 
@@ -232,36 +232,56 @@ export default function UnifiedLeaderboardPage() {
     const [showInfoPage, setShowInfoPage] = useState(false);
     const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
 
+    // Helper: Check if a modal has been dismissed (DB-backed)
+    const isModalDismissed = (key: string) => {
+        return profile?.dismissed_modals?.includes(key) ?? false;
+    };
+
+    // Helper: Dismiss a modal and persist to DB
+    const dismissModal = async (key: string) => {
+        if (!user || !profile) return;
+        const current = profile.dismissed_modals || [];
+        if (current.includes(key)) return;
+        const updated = [...current, key];
+        await supabase
+            .from('profiles')
+            .update({ dismissed_modals: updated })
+            .eq('id', user.id);
+        // Also update localStorage as fallback
+        localStorage.setItem(`idoneo_${key}_onboarding`, 'true');
+        // Refresh profile to sync state
+        refreshProfile();
+    };
+
     // Auto-Onboarding Check for Global XP
     // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
-        const hasSeen = localStorage.getItem('idoneo_leaderboard_onboarding');
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
+        const hasSeen = isModalDismissed('xp_info') || localStorage.getItem('idoneo_leaderboard_onboarding');
         if (!hasSeen && selection === 'xp' && !tourIsActive) {
             setInfoType('xp');
             setTimeout(() => setShowInfoModal(true), 500);
         }
-    }, [selection, isTourActive, activeContext]);
+    }, [selection, isTourActive, activeContext, profile?.dismissed_modals]);
 
     // Auto-Onboarding Check for Contest specific leaderboard
     // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
         if (selection !== 'xp' && !tourIsActive) {
-            // It's a contest/quiz leaderboard
-            const hasSeenContestInfo = localStorage.getItem('idoneo_contest_leaderboard_onboarding');
-            if (!hasSeenContestInfo) {
+            const hasSeen = isModalDismissed('prep_info') || localStorage.getItem('idoneo_contest_leaderboard_onboarding');
+            if (!hasSeen) {
                 setInfoType('prep');
                 setTimeout(() => setShowInfoModal(true), 500);
-                localStorage.setItem('idoneo_contest_leaderboard_onboarding', 'true');
             }
         }
-    }, [selection, isTourActive, activeContext]);
+    }, [selection, isTourActive, activeContext, profile?.dismissed_modals]);
 
 
     const handleCloseModal = () => {
         setShowInfoModal(false);
-        localStorage.setItem('idoneo_leaderboard_onboarding', 'true');
+        const key = infoType === 'xp' ? 'xp_info' : 'prep_info';
+        dismissModal(key);
     };
 
     // Close InfoModal when onboarding tour becomes active (fixes race condition)
@@ -393,7 +413,8 @@ export default function UnifiedLeaderboardPage() {
                 onMoreInfo={() => {
                     setShowInfoModal(false);
                     setShowInfoPage(true);
-                    localStorage.setItem('idoneo_leaderboard_onboarding', 'true');
+                    const key = infoType === 'xp' ? 'xp_info' : 'prep_info';
+                    dismissModal(key);
                 }}
             />
 

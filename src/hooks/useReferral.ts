@@ -124,7 +124,7 @@ export function useReferral() {
 
             setStats({
                 referralCode,
-                referralLink: `${baseUrl}/waitlist?ref=${referralCode}`,
+                referralLink: `${baseUrl}/?ref=${referralCode}`,
                 referralCount: profile.referral_count || 0,
                 priorityLevel,
                 loading: false,
@@ -150,12 +150,12 @@ export function useReferral() {
 
     const shareVia = (channel: 'whatsapp' | 'telegram' | 'email') => {
         const message = encodeURIComponent(
-            `🎓 Sto preparando il mio prossimo concorso con Idoneo! Iscriviti anche tu alla waitlist: ${stats.referralLink}`
+            `🎓 Sto preparando il mio prossimo concorso con Idoneo! Unisciti anche tu: ${stats.referralLink}`
         );
 
         const urls: Record<string, string> = {
             whatsapp: `https://wa.me/?text=${message}`,
-            telegram: `https://t.me/share/url?url=${encodeURIComponent(stats.referralLink)}&text=${encodeURIComponent('🎓 Sto preparando il mio prossimo concorso con Idoneo! Iscriviti anche tu alla waitlist:')}`,
+            telegram: `https://t.me/share/url?url=${encodeURIComponent(stats.referralLink)}&text=${encodeURIComponent('🎓 Sto preparando il mio prossimo concorso con Idoneo! Unisciti anche tu:')}`,
             email: `mailto:?subject=${encodeURIComponent('Preparati al concorso con Idoneo!')}&body=${message}`,
         };
 
@@ -164,7 +164,7 @@ export function useReferral() {
 
     const nativeShare = async () => {
         const title = 'Idoneo - Preparati al concorso';
-        const text = '🎓 Sto preparando il mio prossimo concorso con Idoneo! Iscriviti anche tu alla waitlist:';
+        const text = '🎓 Sto preparando il mio prossimo concorso con Idoneo! Unisciti anche tu:';
         const url = stats.referralLink;
 
         if (Capacitor.isNativePlatform()) {

@@ -305,6 +305,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const [completedContexts, setCompletedContexts] = useState<Set<OnboardingContext>>(new Set());
     const [showCelebration, setShowCelebration] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+    const [dismissedModals, setDismissedModals] = useState<string[]>([]);
 
     // Helper to update onboarding_completed in DB
     const markOnboardingCompleted = useCallback(async (uid: string) => {
@@ -318,15 +319,31 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Load completed contexts and check for new user
+    // Helper: persist a tour context completion to DB via dismissed_modals
+    const persistTourToDb = useCallback(async (uid: string, context: OnboardingContext, currentDismissed: string[]) => {
+        const key = `tour_${context}`;
+        if (currentDismissed.includes(key)) return currentDismissed;
+        const updated = [...currentDismissed, key];
+        try {
+            await supabase
+                .from('profiles')
+                .update({ dismissed_modals: updated })
+                .eq('id', uid);
+        } catch (error) {
+            console.warn('Failed to persist tour completion to DB:', error);
+        }
+        return updated;
+    }, []);
+
+    // Load completed contexts from DB + localStorage
     useEffect(() => {
         const completed = new Set<OnboardingContext>();
+        // Start with localStorage
         (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
             if (localStorage.getItem(STORAGE_PREFIX + ctx) === 'true') {
                 completed.add(ctx);
             }
         });
-        setCompletedContexts(completed);
 
         // Check if welcome should be shown (new user)
         const checkNewUser = async () => {
@@ -339,12 +356,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         const uid = data.session.user.id;
                         setUserId(uid);
 
-                        // Check DB for onboarding_completed status
+                        // Fetch profile with both onboarding_completed and dismissed_modals
                         const { data: profile } = await supabase
                             .from('profiles')
-                            .select('onboarding_completed')
+                            .select('onboarding_completed, dismissed_modals')
                             .eq('id', uid)
                             .single();
+
+                        // Sync dismissed_modals from DB → load tour completions
+                        const dbDismissed: string[] = profile?.dismissed_modals || [];
+                        setDismissedModals(dbDismissed);
+
+                        // Merge DB tour completions into completedContexts
+                        (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
+                            if (dbDismissed.includes(`tour_${ctx}`)) {
+                                completed.add(ctx);
+                                // Sync to localStorage for consistency
+                                localStorage.setItem(STORAGE_PREFIX + ctx, 'true');
+                            }
+                        });
+                        setCompletedContexts(completed);
 
                         // If already completed in DB, sync to localStorage and don't show
                         if (profile?.onboarding_completed) {
@@ -365,12 +396,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         }
                     } else {
                         // Non-authenticated user: use localStorage only
+                        setCompletedContexts(completed);
                         if (!localStorage.getItem(WELCOME_KEY) && window.location.pathname === '/') {
                             setShowWelcome(true);
                         }
                     }
                 } catch {
                     // Fallback to localStorage on error
+                    setCompletedContexts(completed);
                     if (!localStorage.getItem(WELCOME_KEY) && window.location.pathname === '/') {
                         setShowWelcome(true);
                     }
@@ -436,17 +469,25 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         if (activeContext) {
             localStorage.setItem(STORAGE_PREFIX + activeContext, 'true');
             setCompletedContexts(prev => new Set([...prev, activeContext]));
+            // Persist to DB
+            if (userId) {
+                persistTourToDb(userId, activeContext, dismissedModals).then(updated => setDismissedModals(updated));
+            }
             // Track onboarding skipped
             analytics.track('onboarding_skipped', { context: activeContext, step: currentStepIndex });
         }
         setIsActive(false);
         setActiveContext(null);
-    }, [activeContext, currentStepIndex]);
+    }, [activeContext, currentStepIndex, userId, dismissedModals, persistTourToDb]);
 
     const completeOnboarding = useCallback(() => {
         if (activeContext) {
             localStorage.setItem(STORAGE_PREFIX + activeContext, 'true');
             setCompletedContexts(prev => new Set([...prev, activeContext]));
+            // Persist to DB
+            if (userId) {
+                persistTourToDb(userId, activeContext, dismissedModals).then(updated => setDismissedModals(updated));
+            }
             // Track onboarding completed
             analytics.track('onboarding_completed', { context: activeContext, steps_count: steps.length });
         }
@@ -470,21 +511,35 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 setTimeout(() => setShowCelebration(false), 3000);
             }
         }
-    }, [activeContext, steps.length, completedContexts]);
+    }, [activeContext, steps.length, completedContexts, userId, dismissedModals, persistTourToDb]);
 
     const dismissCelebration = useCallback(() => {
         setShowCelebration(false);
     }, []);
 
-    const resetOnboarding = useCallback(() => {
-        // Clear all onboarding state (for testing)
+    const resetOnboarding = useCallback(async () => {
+        // Clear all onboarding state (for testing / re-showing tours)
         (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
             localStorage.removeItem(STORAGE_PREFIX + ctx);
         });
         localStorage.removeItem(WELCOME_KEY);
         setCompletedContexts(new Set());
         setShowWelcome(true);
-    }, []);
+        // Also clear from DB
+        if (userId) {
+            const tourKeys = ['tour_homepage', 'tour_rolepage', 'tour_quiz', 'tour_profile', 'tour_leaderboard', 'tour_quizstats'];
+            const cleaned = dismissedModals.filter(k => !tourKeys.includes(k));
+            setDismissedModals(cleaned);
+            try {
+                await supabase
+                    .from('profiles')
+                    .update({ dismissed_modals: cleaned, onboarding_completed: false })
+                    .eq('id', userId);
+            } catch (error) {
+                console.warn('Failed to reset onboarding in DB:', error);
+            }
+        }
+    }, [userId, dismissedModals]);
 
     const currentStep = isActive && activeContext ? steps[currentStepIndex] : null;
 

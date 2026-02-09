@@ -59,6 +59,8 @@ interface Profile {
     streak_current?: number;
     /** Highest streak ever achieved */
     streak_max?: number;
+    /** Array of modal keys the user has dismissed */
+    dismissed_modals?: string[];
 }
 
 /**
