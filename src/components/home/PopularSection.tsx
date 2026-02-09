@@ -90,8 +90,11 @@ function PopularCard({ role, rank }: { key?: string; role: PopularRole; rank: nu
             className="snap-start flex-shrink-0 group"
         >
             <div
-                className="bg-[var(--card)] rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] shadow-soft overflow-hidden transition-all duration-500 hover:-translate-y-1.5 hover:shadow-lg relative flex flex-col h-full min-h-[220px]"
-                style={{ width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)' }}
+                className="bg-[var(--card)] rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] shadow-soft overflow-hidden transition-all duration-500 hover:-translate-y-1.5 hover:shadow-lg relative flex flex-col"
+                style={{
+                    width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
+                    height: 'clamp(210px, 24vh, 280px)',
+                }}
             >
                 {/* Rank Badge */}
                 <div className={`absolute top-3.5 left-3.5 z-10 w-9 h-9 rounded-full ${rankStyle.bg} ${rankStyle.shadow} shadow-lg flex items-center justify-center`}>
