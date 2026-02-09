@@ -90,31 +90,40 @@ function PopularCard({ role, rank }: { key?: string; role: PopularRole; rank: nu
             className="snap-start flex-shrink-0 group"
         >
             <div
-                className="bg-[var(--card)] rounded-[24px] border border-[var(--card-border)] shadow-soft overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg relative"
-                style={{ width: '180px' }}
+                className="bg-[var(--card)] rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] shadow-soft overflow-hidden transition-all duration-500 hover:-translate-y-1.5 hover:shadow-lg relative flex flex-col h-full min-h-[220px]"
+                style={{ width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)' }}
             >
                 {/* Rank Badge */}
-                <div className={`absolute top-3 left-3 z-10 w-8 h-8 rounded-full ${rankStyle.bg} ${rankStyle.shadow} shadow-lg flex items-center justify-center`}>
-                    <span className={`text-[14px] font-black ${rankStyle.text}`}>{rank}</span>
+                <div className={`absolute top-3.5 left-3.5 z-10 w-9 h-9 rounded-full ${rankStyle.bg} ${rankStyle.shadow} shadow-lg flex items-center justify-center`}>
+                    <span className={`text-[16px] font-black ${rankStyle.text}`}>{rank}</span>
                 </div>
 
-                {/* Top Gradient */}
-                <div className="h-16 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 relative overflow-hidden">
+                {/* Top Gradient - 2:1 aspect ratio like ConcorsoCard */}
+                <div
+                    className="relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 shrink-0"
+                    style={{ aspectRatio: '2 / 1', width: '100%' }}
+                >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    <TrendingUp className="absolute bottom-2 right-2 w-8 h-8 text-white/30" strokeWidth={1.5} />
+                    <div
+                        className="absolute inset-0"
+                        style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
+                    />
+                    <TrendingUp className="absolute bottom-3 right-3 w-10 h-10 text-white/30" strokeWidth={1.5} />
                 </div>
 
                 {/* Content */}
-                <div className="p-3">
-                    <p className="text-[10px] font-bold text-brand-blue uppercase tracking-wider mb-1 truncate">
-                        {role.categoryTitle}
-                    </p>
-                    <h3 className="text-[13px] font-black text-[var(--foreground)] leading-tight line-clamp-2 mb-2 group-hover:text-brand-blue transition-colors">
-                        {role.roleTitle}
-                    </h3>
-                    <div className="flex items-center gap-1 text-slate-400">
-                        <Users className="w-3 h-3" />
-                        <span className="text-[10px] font-medium">{role.totalAttempts.toLocaleString()} tentativi</span>
+                <div className="flex flex-col justify-between p-4 lg:p-5 flex-1">
+                    <div className="space-y-1.5">
+                        <p className="text-[10px] lg:text-[11px] font-bold text-brand-blue uppercase tracking-wider truncate">
+                            {role.categoryTitle}
+                        </p>
+                        <h3 className="text-[14px] lg:text-[16px] font-extrabold text-[var(--foreground)] leading-[1.3] line-clamp-2 group-hover:text-brand-blue transition-colors tracking-tight">
+                            {role.roleTitle}
+                        </h3>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-400 mt-4">
+                        <Users className="w-3.5 h-3.5" />
+                        <span className="text-[11px] font-medium">{role.totalAttempts.toLocaleString()} tentativi</span>
                     </div>
                 </div>
             </div>
