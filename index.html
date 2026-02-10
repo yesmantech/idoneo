@@ -165,11 +165,68 @@
     })();
   </script>
 
+  <style>
+    #boot-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #F5F5F7;
+      /* Light mode default */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999998;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      transition: opacity 0.5s ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #boot-loader {
+        background: #0F172A;
+        color: white;
+      }
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 177, 255, 0.1);
+      border-top: 4px solid #00B1FF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .boot-text {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-size: 18px;
+    }
+  </style>
+
+  <div id="boot-loader">
+    <div class="spinner"></div>
+    <div class="boot-text">IDONEO</div>
+    <div style="font-size: 14px; opacity: 0.6; margin-top: 8px;">Caricamento applicazione...</div>
+  </div>
+
   <!-- Contenitore React -->
   <div id="root"></div>
 
-  <!-- ENTRYPOINT LOCALE: parte da index.tsx -->
-  <script type="module" src="/index.tsx"></script>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>
