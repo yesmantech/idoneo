@@ -232,31 +232,20 @@ export default function UnifiedLeaderboardPage() {
     const [showInfoPage, setShowInfoPage] = useState(false);
     const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
 
-    // Consistent localStorage keys for dismiss persistence
-    const INFO_DISMISSED_XP_KEY = 'idoneo_dismissed_xp_info';
-    const INFO_DISMISSED_PREP_KEY = 'idoneo_dismissed_prep_info';
-
-    // Helper: Check if a modal has been dismissed (localStorage first, then DB)
+    // Helper: Check if a modal has been dismissed (DB ONLY)
     const isInfoDismissed = (type: 'xp' | 'prep') => {
-        const lsKey = type === 'xp' ? INFO_DISMISSED_XP_KEY : INFO_DISMISSED_PREP_KEY;
-        // Synchronous localStorage check (always up-to-date, no race condition)
-        if (localStorage.getItem(lsKey) === 'true') return true;
-        // DB check as fallback
         const dbKey = type === 'xp' ? 'xp_info' : 'prep_info';
         return profile?.dismissed_modals?.includes(dbKey) ?? false;
     };
 
-    // Helper: Dismiss a modal and persist to both localStorage (instant) and DB
+    // Helper: Dismiss a modal and persist to DB ONLY
     const dismissInfoModal = async (type: 'xp' | 'prep') => {
-        // Persist to localStorage immediately (synchronous, no race condition)
-        const lsKey = type === 'xp' ? INFO_DISMISSED_XP_KEY : INFO_DISMISSED_PREP_KEY;
-        localStorage.setItem(lsKey, 'true');
-
-        // Also persist to DB
         if (!user || !profile) return;
         const dbKey = type === 'xp' ? 'xp_info' : 'prep_info';
         const current = profile.dismissed_modals || [];
         if (current.includes(dbKey)) return;
+
+        // Optimistic update to UI state / local profile cache could be good, but for now we trust refresh
         const updated = [...current, dbKey];
         await supabase
             .from('profiles')
@@ -266,20 +255,18 @@ export default function UnifiedLeaderboardPage() {
     };
 
     // Auto-Onboarding Check for Global XP
-    // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
-        if (loading) return; // Wait for data to load
+        if (loading || !profile) return; // strict wait for profile
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
         if (!isInfoDismissed('xp') && selection === 'xp' && !tourIsActive) {
             setInfoType('xp');
             setTimeout(() => setShowInfoModal(true), 500);
         }
-    }, [selection, loading, isTourActive, activeContext, profile?.dismissed_modals]);
+    }, [selection, loading, isTourActive, activeContext, profile, profile?.dismissed_modals]);
 
     // Auto-Onboarding Check for Contest specific leaderboard
-    // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
-        if (loading) return; // Wait for data to load
+        if (loading || !profile) return; // strict wait for profile
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
         if (selection !== 'xp' && !tourIsActive) {
             if (!isInfoDismissed('prep')) {
@@ -287,7 +274,7 @@ export default function UnifiedLeaderboardPage() {
                 setTimeout(() => setShowInfoModal(true), 500);
             }
         }
-    }, [selection, loading, isTourActive, activeContext, profile?.dismissed_modals]);
+    }, [selection, loading, isTourActive, activeContext, profile, profile?.dismissed_modals]);
 
 
     const handleCloseModal = () => {
