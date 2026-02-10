@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 
 // Auth & Onboarding
 const LoginPage = React.lazy(() => import('./app/login/page'));
+const WaitlistPage = React.lazy(() => import('./app/waitlist/page'));
+const WaitlistSuccessPage = React.lazy(() => import('./app/waitlist/success/page'));
 
 // Home & Profile
 const HomePage = React.lazy(() => import('./app/page'));
@@ -85,6 +87,7 @@ const AdminEntiListPage = React.lazy(() => import('./app/admin/enti/page'));
 // STATIC IMPORTS (Required at startup, cannot be lazy)
 // ============================================================================
 import AdminGuard from './components/auth/AdminGuard';
+import WaitlistGuard from './components/auth/WaitlistGuard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -143,6 +146,8 @@ export default function App() {
                                     <Suspense fallback={<AdminLoading />}>
                                         <Routes>
                                             <Route path="/login" element={<LoginPage />} />
+                                            <Route path="/waitlist" element={<WaitlistPage />} />
+                                            <Route path="/waitlist/success" element={<WaitlistSuccessPage />} />
 
                                             {/* Main App Layout */}
                                             <Route path="/" element={

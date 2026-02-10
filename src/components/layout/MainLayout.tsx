@@ -24,10 +24,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const { user, profile, loading } = useAuth();
     const isSuperUser = user?.email === 'alessandro.valenza22@gmail.com';
 
-    // DEV MODE: Skip waitlist lock on localhost
-    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    // DEV MODE: Skip waitlist lock on localhost (REMOVED)
+    // const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
-    // IMMEDIATE UNLOCK FOR SUPERUSER
+    // IMMEDIATE UNLOCK FOR ALL USERS
+    /* 
     if (isSuperUser) {
         // No checks. Just render.
     } else if (!loading && !isLocalhost) {
@@ -41,6 +42,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             return <Navigate to="/waitlist/success" replace />;
         }
     }
+    */
 
     // Bottom Nav Items - Updated for Idoneo
     const NAV_ITEMS = [
@@ -130,18 +132,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
                                         >
                                             <item.Icon
                                                 className={`w-5 h-5 transition-all ${isAI
-                                                        ? 'text-purple-500'
-                                                        : isActive
-                                                            ? 'text-slate-900 dark:text-white'
-                                                            : 'text-slate-500 dark:text-slate-400'
+                                                    ? 'text-purple-500'
+                                                    : isActive
+                                                        ? 'text-slate-900 dark:text-white'
+                                                        : 'text-slate-500 dark:text-slate-400'
                                                     }`}
                                                 strokeWidth={isActive ? 2.5 : 1.5}
                                             />
                                             <span className={`text-[10px] font-semibold ${isAI
-                                                    ? 'bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent'
-                                                    : isActive
-                                                        ? 'text-slate-900 dark:text-white'
-                                                        : 'text-slate-500 dark:text-slate-400'
+                                                ? 'bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent'
+                                                : isActive
+                                                    ? 'text-slate-900 dark:text-white'
+                                                    : 'text-slate-500 dark:text-slate-400'
                                                 }`}>
                                                 {item.label}
                                             </span>
