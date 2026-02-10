@@ -210,13 +210,13 @@ export default function ProfileSetupPage() {
             // Refresh context to reflect changes
             await refreshProfile();
 
-            // Success -> Waitlist Success or Onboarding
-            navigate('/waitlist/success');
+            // Success -> Home Page
+            navigate('/');
         } catch (err) {
             console.error('Error saving profile:', err);
             // BYPASS: Proceed to success even on error (temporary workaround)
-            console.warn("Bypassing profile save error, proceeding to success page...");
-            navigate('/waitlist/success');
+            console.warn("Bypassing profile save error, proceeding to home page...");
+            navigate('/');
         } finally {
             setSaving(false);
         }

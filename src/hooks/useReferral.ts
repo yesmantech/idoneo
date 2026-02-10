@@ -124,7 +124,7 @@ export function useReferral() {
 
             setStats({
                 referralCode,
-                referralLink: `${baseUrl}/waitlist?ref=${referralCode}`,
+                referralLink: `${window.location.origin}/?ref=${referralCode}`,
                 referralCount: profile.referral_count || 0,
                 priorityLevel,
                 loading: false,

@@ -7,8 +7,6 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 
 // Auth & Onboarding
 const LoginPage = React.lazy(() => import('./app/login/page'));
-const WaitlistPage = React.lazy(() => import('./app/waitlist/page'));
-const WaitlistSuccessPage = React.lazy(() => import('./app/waitlist/success/page'));
 
 // Home & Profile
 const HomePage = React.lazy(() => import('./app/page'));
@@ -87,7 +85,6 @@ const AdminEntiListPage = React.lazy(() => import('./app/admin/enti/page'));
 // STATIC IMPORTS (Required at startup, cannot be lazy)
 // ============================================================================
 import AdminGuard from './components/auth/AdminGuard';
-import WaitlistGuard from './components/auth/WaitlistGuard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -146,72 +143,62 @@ export default function App() {
                                     <Suspense fallback={<AdminLoading />}>
                                         <Routes>
                                             <Route path="/login" element={<LoginPage />} />
-                                            <Route path="/waitlist" element={<WaitlistPage />} />
-                                            <Route path="/waitlist/success" element={<WaitlistSuccessPage />} />
 
                                             {/* Main App Layout */}
                                             <Route path="/" element={
-                                                <WaitlistGuard>
-                                                    <MainLayout>
-                                                        <HomePage />
-                                                    </MainLayout>
-                                                </WaitlistGuard>
+                                                <MainLayout>
+                                                    <HomePage />
+                                                </MainLayout>
                                             } />
 
                                             <Route path="/profile" element={
-                                                <WaitlistGuard>
-                                                    <MainLayout>
-                                                        <ProfilePage />
-                                                    </MainLayout>
-                                                </WaitlistGuard>
+                                                <MainLayout>
+                                                    <ProfilePage />
+                                                </MainLayout>
                                             } />
                                             <Route path="/profile/setup" element={<ProfileSetupPage />} />
                                             <Route path="/profile/settings" element={
-                                                <WaitlistGuard>
-                                                    <MainLayout>
-                                                        <ProfileSettingsPage />
-                                                    </MainLayout>
-                                                </WaitlistGuard>
+                                                <MainLayout>
+                                                    <ProfileSettingsPage />
+                                                </MainLayout>
                                             } />
                                             <Route path="/profile/stats/:quizId" element={
-                                                <WaitlistGuard>
-                                                    <MainLayout>
-                                                        <QuizStatsPage />
-                                                    </MainLayout>
-                                                </WaitlistGuard>
+                                                <MainLayout>
+                                                    <QuizStatsPage />
+                                                </MainLayout>
                                             } />
 
                                             {/* Concorsi Flow (Wrapped) */}
-                                            <Route path="/concorsi/search" element={<WaitlistGuard><MainLayout><ConcorsiSearchPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/concorsi/:category" element={<WaitlistGuard><MainLayout><ConcorsoHubPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/concorsi/:category/:role" element={<WaitlistGuard><MainLayout><RolePage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug" element={<WaitlistGuard><MainLayout><ContestPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug/simulazione" element={<WaitlistGuard><MainLayout><SimulationTypePage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug/simulazione/:type/regole" element={<WaitlistGuard><MainLayout><QuizRulesPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug/custom" element={<WaitlistGuard><CustomQuizWizardPage /></WaitlistGuard>} />
+                                            <Route path="/concorsi/search" element={<MainLayout><ConcorsiSearchPage /></MainLayout>} />
+                                            <Route path="/concorsi/:category" element={<MainLayout><ConcorsoHubPage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:role" element={<MainLayout><RolePage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:role/:contestSlug" element={<MainLayout><ContestPage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:role/:contestSlug/simulazione" element={<MainLayout><SimulationTypePage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:role/:contestSlug/simulazione/:type/regole" element={<MainLayout><QuizRulesPage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:role/:contestSlug/custom" element={<CustomQuizWizardPage />} />
 
                                             {/* Quiz Engine (Wrapped) */}
-                                            <Route path="/quiz/:id/official" element={<WaitlistGuard><OfficialQuizStarterPage /></WaitlistGuard>} />
-                                            <Route path="/quiz/:quizId/practice" element={<WaitlistGuard><MainLayout><PracticeStartPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/quiz/:quizId/review" element={<WaitlistGuard><MainLayout><ReviewPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/quiz/run/:attemptId" element={<WaitlistGuard><QuizRunnerPage /></WaitlistGuard>} />
-                                            <Route path="/quiz/results/:attemptId" element={<WaitlistGuard><MainLayout><QuizResultsPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/quiz/explanations/:attemptId/:questionId" element={<WaitlistGuard><MainLayout><ExplanationPage /></MainLayout></WaitlistGuard>} />
+                                            <Route path="/quiz/:id/official" element={<OfficialQuizStarterPage />} />
+                                            <Route path="/quiz/:quizId/practice" element={<MainLayout><PracticeStartPage /></MainLayout>} />
+                                            <Route path="/quiz/:quizId/review" element={<MainLayout><ReviewPage /></MainLayout>} />
+                                            <Route path="/quiz/run/:attemptId" element={<QuizRunnerPage />} />
+                                            <Route path="/quiz/results/:attemptId" element={<MainLayout><QuizResultsPage /></MainLayout>} />
+                                            <Route path="/quiz/explanations/:attemptId/:questionId" element={<MainLayout><ExplanationPage /></MainLayout>} />
                                             {/* <Route path="/stats" element={<MainLayout><StatsPage /></MainLayout>} /> */}
 
                                             {/* Bandi (Public Tenders) */}
-                                            <Route path="/bandi" element={<WaitlistGuard><MainLayout><BandiListPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/bandi/watchlist" element={<WaitlistGuard><MainLayout><BandiWatchlistPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/bandi/alerts" element={<WaitlistGuard><MainLayout><BandiAlertsPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/bandi/:slug" element={<WaitlistGuard><MainLayout><BandoDetailPage /></MainLayout></WaitlistGuard>} />
+                                            <Route path="/bandi" element={<MainLayout><BandiListPage /></MainLayout>} />
+                                            <Route path="/bandi/watchlist" element={<MainLayout><BandiWatchlistPage /></MainLayout>} />
+                                            <Route path="/bandi/alerts" element={<MainLayout><BandiAlertsPage /></MainLayout>} />
+                                            <Route path="/bandi/:slug" element={<MainLayout><BandoDetailPage /></MainLayout>} />
 
                                             {/* Blog (User-facing) (Wrapped) */}
-                                            <Route path="/blog" element={<WaitlistGuard><MainLayout><BlogIndexPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/blog/:slug" element={<WaitlistGuard><MainLayout><BlogPostPage /></MainLayout></WaitlistGuard>} />
-                                            <Route path="/leaderboard" element={<WaitlistGuard><MainLayout><LeaderboardPage /></MainLayout></WaitlistGuard>} />
+                                            <Route path="/blog" element={<MainLayout><BlogIndexPage /></MainLayout>} />
+                                            <Route path="/blog/:slug" element={<MainLayout><BlogPostPage /></MainLayout>} />
+                                            <Route path="/leaderboard" element={<MainLayout><LeaderboardPage /></MainLayout>} />
 
                                             {/* Informational Pages */}
-                                            <Route path="/come-funziona/punteggi" element={<WaitlistGuard><MainLayout><PunteggiPage /></MainLayout></WaitlistGuard>} />
+                                            <Route path="/come-funziona/punteggi" element={<MainLayout><PunteggiPage /></MainLayout>} />
                                             <Route path="/preparazione" element={<PreparazionePage />} />
 
                                             {/* Demo Pages */}
