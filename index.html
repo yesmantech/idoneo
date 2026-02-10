@@ -79,6 +79,48 @@
 </head>
 
 <body>
+  <!-- Global Error Handler for Mobile Debugging -->
+  <script>
+    window.onerror = function (message, source, lineno, colno, error) {
+      var el = document.createElement('div');
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.background = 'white';
+      el.style.color = 'black';
+      el.style.zIndex = '999999';
+      el.style.padding = '20px';
+      el.style.overflow = 'auto';
+      el.style.fontFamily = 'monospace';
+      el.style.fontSize = '12px';
+      el.innerHTML = '<h2 style="color:red; font-size:16px;">Errore Critico</h2>' +
+        '<p><strong>Message:</strong> ' + message + '</p>' +
+        '<p><strong>Source:</strong> ' + source + ':' + lineno + ':' + colno + '</p>' +
+        '<pre style="white-space:pre-wrap;"><strong>Stack:</strong> ' + (error ? error.stack : 'N/A') + '</pre>';
+      document.body.appendChild(el);
+    };
+    window.addEventListener('unhandledrejection', function (event) {
+      var el = document.createElement('div');
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.background = 'white';
+      el.style.color = 'black';
+      el.style.zIndex = '999999';
+      el.style.padding = '20px';
+      el.style.overflow = 'auto';
+      el.style.fontFamily = 'monospace';
+      el.style.fontSize = '12px';
+      el.innerHTML = '<h2 style="color:red; font-size:16px;">Promessa Fallita</h2>' +
+        '<p><strong>Reason:</strong> ' + event.reason + '</p>';
+      document.body.appendChild(el);
+    });
+  </script>
+
   <!-- iOS Overscroll Prevention (allows horizontal swipes) -->
   <script>
     (function () {

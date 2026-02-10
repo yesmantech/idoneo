@@ -114,6 +114,7 @@ export default defineConfig(({ mode }) => {
       },
       // Increase chunk size warning to avoid noise
       chunkSizeWarningLimit: 600,
+      target: 'es2015',
     },
     define: {
       'process.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
