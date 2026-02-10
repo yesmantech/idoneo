@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useOnboarding } from '@/context/OnboardingProvider';
 import { useTheme } from '@/context/ThemeContext';
 import { supabase } from '@/lib/supabaseClient';
 import { deleteUserAccount } from '@/lib/accountService';
@@ -10,11 +11,14 @@ import { hapticLight } from '@/lib/haptics';
 
 export default function ProfileSettingsPage() {
     const { user, profile, loading, refreshProfile } = useAuth();
-    const { theme, setTheme } = useTheme();
+    const { theme: currentTheme, setTheme, persistTheme } = useTheme();
     const navigate = useNavigate();
+    const { resetOnboarding } = useOnboarding();
 
     const [nickname, setNickname] = useState('');
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [selectedTheme, setSelectedTheme] = useState(currentTheme);
+    const [hasSaved, setHasSaved] = useState(false);
 
     // Form States
     const [saving, setSaving] = useState(false);
@@ -37,6 +41,16 @@ export default function ProfileSettingsPage() {
             setAvatarUrl(profile.avatar_url);
         }
     }, [user, profile, loading, navigate]);
+
+    // Cleanup: Reset to actual persisted theme if user leaves without saving
+    useEffect(() => {
+        return () => {
+            if (!hasSaved) {
+                const persistedTheme = (localStorage.getItem('theme') as any) || 'light';
+                setTheme(persistedTheme);
+            }
+        };
+    }, [hasSaved, setTheme]);
 
     // Handle File Upload
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,6 +87,9 @@ export default function ProfileSettingsPage() {
         setMsg(null);
 
         try {
+            // Persist theme selection
+            persistTheme(selectedTheme);
+
             const { error } = await supabase
                 .from('profiles')
                 .upsert({
@@ -86,8 +103,12 @@ export default function ProfileSettingsPage() {
             if (error) throw error;
 
             await refreshProfile();
+            setHasSaved(true);
             setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 2000);
+            setTimeout(() => {
+                setShowSuccess(false);
+                setHasSaved(false);
+            }, 2000);
         } catch (err: any) {
             console.error(err);
             setMsg({ type: 'error', text: `Errore: ${err.message || 'Salvataggio fallito'}` });
@@ -190,8 +211,9 @@ export default function ProfileSettingsPage() {
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                         <button
-                            onClick={() => { hapticLight(); setTheme('light'); }}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'light'
+                            type="button"
+                            onClick={() => { hapticLight(); setSelectedTheme('light'); setTheme('light'); }}
+                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${selectedTheme === 'light'
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                 }`}
@@ -200,8 +222,9 @@ export default function ProfileSettingsPage() {
                             <span className="text-[11px] font-bold">Chiaro</span>
                         </button>
                         <button
-                            onClick={() => { hapticLight(); setTheme('dark'); }}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'dark'
+                            type="button"
+                            onClick={() => { hapticLight(); setSelectedTheme('dark'); setTheme('dark'); }}
+                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${selectedTheme === 'dark'
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                 }`}
@@ -210,8 +233,9 @@ export default function ProfileSettingsPage() {
                             <span className="text-[11px] font-bold">Scuro</span>
                         </button>
                         <button
-                            onClick={() => { hapticLight(); setTheme('system'); }}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${theme === 'system'
+                            type="button"
+                            onClick={() => { hapticLight(); setSelectedTheme('system'); setTheme('system'); }}
+                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${selectedTheme === 'system'
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                 }`}
@@ -275,6 +299,18 @@ export default function ProfileSettingsPage() {
                         className="w-full py-3.5 bg-[var(--card)] border-2 border-rose-200 dark:border-rose-800 text-rose-500 font-bold rounded-2xl hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all active:scale-[0.98]"
                     >
                         Elimina account
+                    </button>
+                    <button
+                        onClick={async () => {
+                            if (window.confirm('Vuoi davvero ripristinare il tutorial iniziale?')) {
+                                await resetOnboarding();
+                                alert('Tutorial ripristinato! Torna alla Home per vederlo.');
+                                navigate('/');
+                            }
+                        }}
+                        className="w-full mt-4 py-3.5 bg-[var(--card)] border-2 border-slate-200 dark:border-slate-700 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-[0.98]"
+                    >
+                        Ripristina Tutorial
                     </button>
                 </div>
 

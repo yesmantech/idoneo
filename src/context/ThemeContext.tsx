@@ -41,6 +41,7 @@ interface ThemeContextType {
     theme: Theme;
     resolvedTheme: 'light' | 'dark';
     setTheme: (theme: Theme) => void;
+    persistTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -48,9 +49,9 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setThemeState] = useState<Theme>(() => {
         if (typeof window !== 'undefined') {
-            return (localStorage.getItem('theme') as Theme) || 'system';
+            return (localStorage.getItem('theme') as Theme) || 'light';
         }
-        return 'system';
+        return 'light';
     });
 
     const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
@@ -82,11 +83,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const setTheme = (newTheme: Theme) => {
         setThemeState(newTheme);
+    };
+
+    const persistTheme = (newTheme: Theme) => {
+        setThemeState(newTheme);
         localStorage.setItem('theme', newTheme);
     };
 
     return (
-        <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme }}>
+        <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, persistTheme }}>
             {children}
         </ThemeContext.Provider>
     );
