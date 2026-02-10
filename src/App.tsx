@@ -112,6 +112,8 @@ const AdminLoading = () => (
 );
 
 
+import { removeBootLoader } from './main';
+
 // Component to handle side effects that require AuthContext
 function AppEffects() {
     const { user } = useAuth();
@@ -129,6 +131,7 @@ export default function App() {
     // Initialize native app features on mount
     useEffect(() => {
         initializeNativeApp();
+        removeBootLoader();
     }, []);
 
     return (

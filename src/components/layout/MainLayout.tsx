@@ -27,22 +27,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // DEV MODE: Skip waitlist lock on localhost (REMOVED)
     // const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
-    // IMMEDIATE UNLOCK FOR ALL USERS
-    /* 
+    // IMMEDIATE UNLOCK FOR ALL USERS (Except Guests)
     if (isSuperUser) {
         // No checks. Just render.
-    } else if (!loading && !isLocalhost) {
+    } else if (!loading) {
         if (!user && !isAdmin) {
-            // Guest in App -> Waitlist
+            // Guest -> Force Waitlist Landing
             return <Navigate to="/waitlist" replace />;
         }
-        // Allow if: Admin Role OR Admin Route. SuperUser is handled above (falls through).
-        if (user && profile?.role !== 'admin' && !isAdmin) {
-            // User in App -> Success Page
-            return <Navigate to="/waitlist/success" replace />;
-        }
+        // NOTE: Logged in users are no longer redirected to /waitlist/success
+        // They proceed directly to the app routes.
     }
-    */
 
     // Bottom Nav Items - Updated for Idoneo
     const NAV_ITEMS = [

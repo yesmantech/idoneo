@@ -13,16 +13,18 @@ import App from "./App";
 // Global console log for production verification
 console.log("🚀 IDONEO: App Booting...");
 
-// Remove the boot loader when React starts
-const bootLoader = document.getElementById('boot-loader');
-if (bootLoader) {
-  bootLoader.style.opacity = '0';
-  setTimeout(() => {
-    if (bootLoader.parentNode) {
-      bootLoader.parentNode.removeChild(bootLoader);
-    }
-  }, 500);
-}
+// Function to remove the boot loader
+export const removeBootLoader = () => {
+  const bootLoader = document.getElementById('boot-loader');
+  if (bootLoader) {
+    bootLoader.style.opacity = '0';
+    setTimeout(() => {
+      if (bootLoader.parentNode) {
+        bootLoader.parentNode.removeChild(bootLoader);
+      }
+    }, 500);
+  }
+};
 
 const rootElement = document.getElementById("root") as HTMLElement;
 

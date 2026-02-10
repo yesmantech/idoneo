@@ -16,6 +16,7 @@ import BandiFiltersBar from '@/components/bandi/BandiFilters';
 import BandiEmptyState from '@/components/bandi/BandiEmptyState';
 import { BandoCardSkeletonList } from '@/components/bandi/BandoSkeleton';
 import { useAuth } from '@/context/AuthContext';
+import SEOHead from '@/components/seo/SEOHead';
 
 export default function BandiListPage() {
     const { user } = useAuth();
@@ -129,6 +130,11 @@ export default function BandiListPage() {
 
     return (
         <div className="min-h-screen bg-[var(--background)] pb-24">
+            <SEOHead
+                title="Bandi e Concorsi Pubblici"
+                description="Scopri tutti i bandi e concorsi pubblici attivi. Cerca per categoria, ente e scadenza. Preparati con Idoneo."
+                url="/bandi"
+            />
             {/* Tier S Header */}
             <div className="bg-[var(--background)] sticky top-0 z-30 border-b border-[var(--card-border)] pt-safe">
                 <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
