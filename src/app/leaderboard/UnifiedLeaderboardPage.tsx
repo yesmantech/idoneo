@@ -232,56 +232,67 @@ export default function UnifiedLeaderboardPage() {
     const [showInfoPage, setShowInfoPage] = useState(false);
     const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
 
-    // Helper: Check if a modal has been dismissed (DB-backed)
-    const isModalDismissed = (key: string) => {
-        return profile?.dismissed_modals?.includes(key) ?? false;
+    // Consistent localStorage keys for dismiss persistence
+    const INFO_DISMISSED_XP_KEY = 'idoneo_dismissed_xp_info';
+    const INFO_DISMISSED_PREP_KEY = 'idoneo_dismissed_prep_info';
+
+    // Helper: Check if a modal has been dismissed (localStorage first, then DB)
+    const isInfoDismissed = (type: 'xp' | 'prep') => {
+        const lsKey = type === 'xp' ? INFO_DISMISSED_XP_KEY : INFO_DISMISSED_PREP_KEY;
+        // Synchronous localStorage check (always up-to-date, no race condition)
+        if (localStorage.getItem(lsKey) === 'true') return true;
+        // DB check as fallback
+        const dbKey = type === 'xp' ? 'xp_info' : 'prep_info';
+        return profile?.dismissed_modals?.includes(dbKey) ?? false;
     };
 
-    // Helper: Dismiss a modal and persist to DB
-    const dismissModal = async (key: string) => {
+    // Helper: Dismiss a modal and persist to both localStorage (instant) and DB
+    const dismissInfoModal = async (type: 'xp' | 'prep') => {
+        // Persist to localStorage immediately (synchronous, no race condition)
+        const lsKey = type === 'xp' ? INFO_DISMISSED_XP_KEY : INFO_DISMISSED_PREP_KEY;
+        localStorage.setItem(lsKey, 'true');
+
+        // Also persist to DB
         if (!user || !profile) return;
+        const dbKey = type === 'xp' ? 'xp_info' : 'prep_info';
         const current = profile.dismissed_modals || [];
-        if (current.includes(key)) return;
-        const updated = [...current, key];
+        if (current.includes(dbKey)) return;
+        const updated = [...current, dbKey];
         await supabase
             .from('profiles')
             .update({ dismissed_modals: updated })
             .eq('id', user.id);
-        // Also update localStorage as fallback
-        localStorage.setItem(`idoneo_${key}_onboarding`, 'true');
-        // Refresh profile to sync state
         refreshProfile();
     };
 
     // Auto-Onboarding Check for Global XP
     // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
+        if (loading) return; // Wait for data to load
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
-        const hasSeen = isModalDismissed('xp_info') || localStorage.getItem('idoneo_leaderboard_onboarding');
-        if (!hasSeen && selection === 'xp' && !tourIsActive) {
+        if (!isInfoDismissed('xp') && selection === 'xp' && !tourIsActive) {
             setInfoType('xp');
             setTimeout(() => setShowInfoModal(true), 500);
         }
-    }, [selection, isTourActive, activeContext, profile?.dismissed_modals]);
+    }, [selection, loading, isTourActive, activeContext, profile?.dismissed_modals]);
 
     // Auto-Onboarding Check for Contest specific leaderboard
     // Don't show InfoModal if onboarding tour is active (would cover the tour)
     useEffect(() => {
+        if (loading) return; // Wait for data to load
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
         if (selection !== 'xp' && !tourIsActive) {
-            const hasSeen = isModalDismissed('prep_info') || localStorage.getItem('idoneo_contest_leaderboard_onboarding');
-            if (!hasSeen) {
+            if (!isInfoDismissed('prep')) {
                 setInfoType('prep');
                 setTimeout(() => setShowInfoModal(true), 500);
             }
         }
-    }, [selection, isTourActive, activeContext, profile?.dismissed_modals]);
+    }, [selection, loading, isTourActive, activeContext, profile?.dismissed_modals]);
 
 
     const handleCloseModal = () => {
         setShowInfoModal(false);
-        const key = infoType === 'xp' ? 'xp_info' : 'prep_info';
-        dismissModal(key);
+        dismissInfoModal(infoType);
     };
 
     // Close InfoModal when onboarding tour becomes active (fixes race condition)
@@ -413,8 +424,7 @@ export default function UnifiedLeaderboardPage() {
                 onMoreInfo={() => {
                     setShowInfoModal(false);
                     setShowInfoPage(true);
-                    const key = infoType === 'xp' ? 'xp_info' : 'prep_info';
-                    dismissModal(key);
+                    dismissInfoModal(infoType);
                 }}
             />
 
