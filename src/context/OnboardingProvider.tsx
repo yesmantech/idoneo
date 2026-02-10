@@ -443,11 +443,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }, [userId, markOnboardingCompleted]);
 
     const startOnboarding = useCallback((context: OnboardingContext) => {
+        // Guard 1: React state (may be empty if DB hasn't loaded yet)
         if (completedContexts.has(context)) return;
+        // Guard 2: Synchronous localStorage check (always up-to-date, no race condition)
+        if (localStorage.getItem(STORAGE_PREFIX + context) === 'true') return;
+        // Guard 3: Don't start a new tour if one is already active
+        if (isActive) return;
         setActiveContext(context);
         setCurrentStepIndex(0);
         setIsActive(true);
-    }, [completedContexts]);
+    }, [completedContexts, isActive]);
 
     const steps = activeContext ? STEPS_BY_CONTEXT[activeContext] : [];
 
