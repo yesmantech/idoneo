@@ -148,7 +148,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: Carous
         >
             <Link
                 to={`/blog/${post.slug}`}
-                className="block w-full relative overflow-hidden rounded-[40px] md:rounded-[48px] shadow-xl transition-all duration-700 ease-out hover:shadow-[0_20px_60px_-15px_rgba(0,177,255,0.4)] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 group"
+                className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] shadow-xl transition-all duration-700 ease-out hover:shadow-[0_20px_60px_-15px_rgba(0,177,255,0.4)] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 group"
                 style={{
                     aspectRatio: '16 / 9',
                     perspective: '1200px',
