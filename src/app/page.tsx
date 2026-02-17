@@ -105,8 +105,8 @@ export default function HomePage() {
           <BlogHero />
         </section>
 
-        {/* 2. SEARCH BAR - Overlaps hero for visual continuity */}
-        <section className="px-4 lg:px-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20 -mt-6 lg:-mt-8">
+        {/* 2. SEARCH BAR - Overlaps hero for visual continuity with better spacing */}
+        <section className="px-4 lg:px-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20 -mt-4 lg:-mt-6">
           <SearchSection items={searchItems} />
         </section>
 
