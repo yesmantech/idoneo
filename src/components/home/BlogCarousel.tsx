@@ -6,21 +6,17 @@ interface BlogCarouselProps {
     posts: BlogPost[];
 }
 
-// Configuration handles responsive alignment to match other sections
-const GAP_MOBILE = 12;
-const GAP_DESKTOP = 24;
-
 export default function BlogCarousel({ posts }: BlogCarouselProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(0);
-    const [isMobile, setIsMobile] = useState(false);
 
     // Update dimensions on mount and resize
     useEffect(() => {
         const updateDimensions = () => {
             if (containerRef.current) {
+                // We measure the scroll container's width.
+                // This includes the padding if we use box-sizing border-box.
                 setContainerWidth(containerRef.current.offsetWidth);
-                setIsMobile(window.innerWidth < 768);
             }
         };
 
@@ -29,47 +25,30 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
         return () => window.removeEventListener('resize', updateDimensions);
     }, []);
 
-    const gap = isMobile ? GAP_MOBILE : GAP_DESKTOP;
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
 
-    // "Native Alignment" Logic:
-    // We synchronize the carousel's start with the app's global container (max-w-7xl).
-    // Search Bar and RecentlyUsed use px-4 (16px) on mobile and px-8 (32px) on desktop.
-
-    const leftMargin = useMemo(() => {
-        if (isMobile) return 16;
-
-        // On desktop, Sections are max-w-7xl (1280px) and centered.
-        // We calculate the gutter and add the 32px inner padding.
-        const gutter = Math.max(0, (containerWidth - 1280) / 2);
-        return gutter + 32;
-    }, [containerWidth, isMobile]);
-
-    // Peek defines how much of the next card is visible (sliver peek)
+    // We use the same constants as RecentlyUsedSection for perfect sync
+    const gap = isMobile ? 12 : 24;
+    const padding = isMobile ? 16 : 32; // Matches px-4 and px-8
     const rightPeek = isMobile ? 28 : (containerWidth > 1440 ? 400 : 200);
 
     const cardWidth = useMemo(() => {
-        if (containerWidth === 0) return 300; // SSR/Initial fallback
+        if (containerWidth === 0) return 300;
 
-        if (isMobile) {
-            // Width = Viewport - Margin - Gap - SliverPeek
-            return containerWidth - leftMargin - gap - rightPeek;
-        }
-
-        // On desktop, it fills the remaining container space or a fixed max
-        const available = containerWidth - leftMargin - rightPeek;
-        return Math.min(1000, Math.max(280, available));
-    }, [containerWidth, isMobile, leftMargin, rightPeek, gap]);
+        // Width Calculation:
+        // Card must fill the viewport less the left padding, the gap to the next card, and the peek.
+        // Formula: CardWidth = TotalWidth - PaddingLeft - Gap - Peek
+        return containerWidth - padding - gap - rightPeek;
+    }, [containerWidth, padding, gap, rightPeek]);
 
     return (
-        <div className="relative w-full group/carousel">
+        <div className="w-full max-w-7xl lg:mx-auto overflow-hidden">
             <div
                 ref={containerRef}
-                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-6 pt-2 relative z-10"
+                className="flex overflow-x-auto snap-x snap-mandatory scroll-pl-4 lg:scroll-pl-8 scrollbar-hide pb-8 pt-2 relative z-10 pl-4 lg:pl-8"
                 style={{
                     scrollBehavior: 'smooth',
                     gap: `${gap}px`,
-                    paddingLeft: `${leftMargin}px`,
-                    paddingRight: `${leftMargin}px`,
                     WebkitOverflowScrolling: 'touch',
                 }}
             >
@@ -81,6 +60,9 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
                         priority={index < 4}
                     />
                 ))}
+
+                {/* Right spacer to allow scrolling padding at the end */}
+                <div className="min-w-[16px] lg:min-w-[32px] flex-shrink-0" aria-hidden="true" />
             </div>
         </div>
     );
@@ -103,7 +85,7 @@ function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
             <Link
                 to={`/blog/${post.slug}`}
                 className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] 
-                           shadow-lg transition-all duration-300 ease-out 
+                           shadow-lg transition-transform duration-500 ease-out 
                            active:scale-[0.98] bg-white dark:bg-slate-800 
                            border border-slate-100 dark:border-slate-700/50 group"
                 style={{ aspectRatio: '16 / 9' }}
@@ -121,15 +103,14 @@ function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
                             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         />
                     ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
+                        <div className="w-full h-full bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900" />
                     )}
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                 </div>
 
-                {/* Content Overlay - Aligned to reference */}
+                {/* Content Overlay */}
                 <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end items-start gap-1 md:gap-3">
-                    {/* Optional Tag (e.g., Refreshed!) */}
                     {post.category?.name && (
                         <span className="px-2.5 py-0.5 rounded-full bg-slate-900/40 backdrop-blur-md text-white text-[10px] md:text-xs font-black uppercase tracking-wider mb-1 border border-white/20">
                             {post.category.name}
