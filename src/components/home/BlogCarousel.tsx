@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
-import { motion, useScroll, useTransform, useSpring, MotionValue } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '@/types/blog';
 
@@ -16,17 +15,6 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
     const [containerWidth, setContainerWidth] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Aggressive preloading of first few images to avoid transition lag
-    useEffect(() => {
-        const preloadLimit = Math.min(posts.length, 5);
-        for (let i = 0; i < preloadLimit; i++) {
-            if (posts[i].cover_image_url) {
-                const img = new Image();
-                img.src = posts[i].cover_image_url!;
-            }
-        }
-    }, [posts]);
-
     // Update container width on mount/resize
     useEffect(() => {
         const updateDimensions = () => {
@@ -41,32 +29,20 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
         return () => window.removeEventListener('resize', updateDimensions);
     }, []);
 
-    // Scroll progress with Spring smoothing
-    const { scrollX } = useScroll({ container: containerRef });
-
-    // Physics tuned for "Tier S" smoothness
-    const scrollXSpring = useSpring(scrollX, {
-        stiffness: 100,
-        damping: 30,
-        mass: 1,
-        restDelta: 0.001
-    });
-
     const gap = isMobile ? GAP_MOBILE : GAP_DESKTOP;
 
-    // Giant-Left Strategy:
+    // "Native Giant" Strategy:
     // We start from the left with a branding-defined margin (24px).
-    // Peek is visible on the right (~60px).
+    // Peek is visible on the right (~28px).
     const leftMargin = isMobile ? 24 : 160;
     const rightPeek = isMobile ? 28 : 160;
 
     const cardWidth = useMemo(() => {
         if (isMobile) {
-            // "Ultra-Giant but Contained" Logic:
-            // Absolute dominance (1.4x) matching the reference sliver.
-            // BaseWidth * 1.4 = Viewport - LeftMargin - Gap - Peek
-            const availableSpace = containerWidth - leftMargin - gap - rightPeek;
-            return availableSpace / 1.4;
+            // "Native Giant" Logic:
+            // Calculate the exact width needed to fit the viewport with margin, gap, and peek.
+            // Width = Viewport - LeftPadding - Gap - RightPeek
+            return containerWidth - leftMargin - gap - rightPeek;
         }
 
         const maxWidth = containerWidth - leftMargin - rightPeek;
@@ -88,14 +64,11 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
             >
                 {posts.map((post, index) => (
                     <CarouselItem
-                        // key is handled by React parent map
+                        key={post.id}
                         post={post}
                         index={index}
-                        scrollX={scrollXSpring}
                         cardWidth={cardWidth}
-                        gap={gap}
                         priority={index < 4}
-                        isMobile={isMobile}
                     />
                 ))}
             </div>
@@ -108,84 +81,24 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
 interface CarouselItemProps {
     post: BlogPost;
     index: number;
-    scrollX: MotionValue<number>;
     cardWidth: number;
-    gap: number;
     priority: boolean;
-    isMobile: boolean;
 }
 
-function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile }: CarouselItemProps) {
-    // For snap-start, the item position is simply its cumulative offset
-    // Note: We need to account for the dynamic margin in the scroll position logic if we want perfect syncing,
-    // but standard index-based position works well enough for the visual effect in a snap container.
-    const itemPosition = (cardWidth + gap) * index;
-    const distance = cardWidth + gap;
-
-    // "Tier S" Ultra Giant-Left Scaling
-    // Pushed to 1.4x for "Masterpiece" level dominance.
-    const scale = useTransform(
-        scrollX,
-        [
-            itemPosition - distance,
-            itemPosition,
-            itemPosition + distance
-        ],
-        [0.85, 1.4, 0.85]
-    );
-
-    const opacity = useTransform(
-        scrollX,
-        [
-            itemPosition - distance,
-            itemPosition,
-            itemPosition + distance
-        ],
-        [0.4, 1, 0.4]
-    );
-
-    const zIndex = useTransform(
-        scrollX,
-        [
-            itemPosition - distance * 0.5,
-            itemPosition,
-            itemPosition + distance * 0.5
-        ],
-        [1, 10, 1]
-    );
-
-    // Dynamic Margin Compensation (Mobile Only)
-    // Scale 1.4 = 0.4 growth.
-    const extraMargin = cardWidth * 0.4;
-    const marginRight = useTransform(
-        scrollX,
-        [
-            itemPosition - distance,
-            itemPosition,
-            itemPosition + distance
-        ],
-        [0, isMobile ? extraMargin : 0, 0]
-    );
-
+function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
     return (
-        <motion.div
-            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-4 transition-all"
+        <div
+            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-0 transition-all"
             style={{
                 width: `${cardWidth}px`,
-                scale,
-                opacity,
-                zIndex,
-                marginRight, // Pushes the next card away when this one expands
-                willChange: 'transform, opacity, margin-right',
-                transformOrigin: isMobile ? 'center left' : 'center center',
+                // No scaling, no dynamic margins. Pure native layout.
             }}
         >
             <Link
                 to={`/blog/${post.slug}`}
-                className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] shadow-xl transition-all duration-700 ease-out hover:shadow-[0_20px_60px_-15px_rgba(0,177,255,0.4)] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 group"
+                className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] shadow-lg transition-transform duration-500 ease-out active:scale-[0.98] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 group"
                 style={{
                     aspectRatio: '16 / 9',
-                    perspective: '1200px',
                 }}
             >
                 {/* Image */}
@@ -198,33 +111,32 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
                             decoding="async"
                             // @ts-ignore
                             fetchpriority={priority ? "high" : "auto"}
-                            className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-105"
+                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         />
                     ) : (
                         <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600" />
                     )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-300" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-transparent opacity-60" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                 </div>
 
                 {/* Content Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 flex flex-col items-start gap-2 md:gap-4">
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col items-start gap-1 md:gap-3">
                     {post.category?.name && (
-                        <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-xl text-white text-[8px] md:text-xs font-bold uppercase tracking-widest mb-1 border border-white/20">
+                        <span className="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1 border border-white/20">
                             {post.category.name}
                         </span>
                     )}
 
-                    <h3 className="text-xl md:text-3xl lg:text-4xl font-extrabold text-white line-clamp-2 leading-tight tracking-tight drop-shadow-2xl">
+                    <h3 className="text-xl md:text-3xl font-bold text-white line-clamp-2 leading-tight drop-shadow-lg">
                         {post.title}
                     </h3>
 
-                    <p className="hidden md:block text-xs md:text-base text-slate-200/90 line-clamp-2 max-w-2xl mt-1 font-medium">
+                    <p className="hidden md:block text-sm text-slate-200/90 line-clamp-2 mt-1">
                         {post.subtitle}
                     </p>
                 </div>
             </Link>
-        </motion.div>
+        </div>
     );
 }
