@@ -8,7 +8,7 @@ interface BlogCarouselProps {
 }
 
 // Configuration handles responsive visual tuning
-const GAP_MOBILE = 12; // Slightly wider for better separation of massive cards
+const GAP_MOBILE = 16;
 const GAP_DESKTOP = 24;
 
 export default function BlogCarousel({ posts }: BlogCarouselProps) {
@@ -54,18 +54,16 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
 
     const gap = isMobile ? GAP_MOBILE : GAP_DESKTOP;
 
-    // sidePadding is the margin between viewport edge and card edge when centered.
-    // Peek = sidePadding - gap.
-    // To get a very prominent peek (~58px): sidePadding = 70px.
-    const sidePadding = isMobile ? 70 : 160;
+    // Giant-Left Strategy:
+    // We start from the left with a branding-defined margin (24px).
+    // Peek is visible on the right (~60px).
+    const leftMargin = isMobile ? 24 : 160;
+    const rightPeek = isMobile ? 60 : 160;
 
     const cardWidth = useMemo(() => {
-        const maxWidth = containerWidth - (sidePadding * 2);
+        const maxWidth = containerWidth - leftMargin - rightPeek;
         return Math.min(1200, Math.max(240, maxWidth));
-    }, [containerWidth, isMobile, sidePadding]);
-
-    // Symmetrical padding for perfect centering
-    const centerPadding = Math.max(0, (containerWidth - cardWidth) / 2);
+    }, [containerWidth, isMobile, leftMargin, rightPeek]);
 
     return (
         <div className="relative w-full group/carousel">
@@ -75,8 +73,8 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
                 style={{
                     scrollBehavior: 'smooth',
                     gap: `${gap}px`,
-                    paddingLeft: `${centerPadding}px`,
-                    paddingRight: `${centerPadding}px`,
+                    paddingLeft: `${leftMargin}px`,
+                    paddingRight: `${leftMargin}px`,
                     WebkitOverflowScrolling: 'touch',
                 }}
             >
@@ -89,6 +87,7 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
                         cardWidth={cardWidth}
                         gap={gap}
                         priority={index < 4}
+                        isMobile={isMobile}
                     />
                 ))}
             </div>
@@ -105,16 +104,17 @@ interface CarouselItemProps {
     cardWidth: number;
     gap: number;
     priority: boolean;
+    isMobile: boolean;
 }
 
-function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: CarouselItemProps) {
-    // Exact center position for this item in the scroll view
+function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile }: CarouselItemProps) {
+    // For snap-start, the item position is simply its cumulative offset
     const itemPosition = (cardWidth + gap) * index;
     const distance = cardWidth + gap;
 
-    // "Tier S" Ultra-Dominant Scaling (match reference)
-    // We boost the scale to 1.25x to make the centered card fill much of the viewport 
-    // while maintaining the large layout "peek" signal.
+    // "Tier S" Giant-Left Scaling
+    // We boost the scale to 1.25x for massive presence.
+    // Origin is left for clean alignment with the branding margin.
     const scale = useTransform(
         scrollX,
         [
@@ -122,7 +122,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: Carous
             itemPosition,
             itemPosition + distance
         ],
-        [0.8, 1.25, 0.8]
+        [0.85, 1.25, 0.85]
     );
 
     const opacity = useTransform(
@@ -132,18 +132,19 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: Carous
             itemPosition,
             itemPosition + distance
         ],
-        [0.3, 1, 0.3]
+        [0.4, 1, 0.4]
     );
 
     return (
         <motion.div
-            className="snap-center shrink-0 relative flex flex-col items-center justify-center p-4"
+            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-4"
             style={{
                 width: `${cardWidth}px`,
                 scale,
                 opacity,
                 zIndex: 1,
                 willChange: 'transform, opacity',
+                transformOrigin: isMobile ? 'center left' : 'center center',
             }}
         >
             <Link
