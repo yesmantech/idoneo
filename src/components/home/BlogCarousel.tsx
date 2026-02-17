@@ -6,7 +6,7 @@ interface BlogCarouselProps {
     posts: BlogPost[];
 }
 
-// Configuration handles responsive visual tuning
+// Configuration handles responsive alignment to match other sections
 const GAP_MOBILE = 12;
 const GAP_DESKTOP = 24;
 
@@ -15,7 +15,7 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
     const [containerWidth, setContainerWidth] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Update container width on mount/resize
+    // Update dimensions on mount and resize
     useEffect(() => {
         const updateDimensions = () => {
             if (containerRef.current) {
@@ -31,29 +31,33 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
 
     const gap = isMobile ? GAP_MOBILE : GAP_DESKTOP;
 
-    // "Native Giant" Strategy:
-    // We start from the left aligned with the SearchBar and other sections.
-    // SearchBar has px-4 (16px) on mobile and px-8 (32px) on desktop.
-    // For desktop, we need to account for the max-w-7xl centering if we want true alignment on large screens,
-    // but for now, we'll stick to the base container padding of 32px to match the `lg:px-8` class.
+    // "Native Alignment" Logic:
+    // We synchronize the carousel's start with the app's global container (max-w-7xl).
+    // Search Bar and RecentlyUsed use px-4 (16px) on mobile and px-8 (32px) on desktop.
 
-    // Mobile: 16px (matches px-4)
-    // Desktop: 32px (matches lg:px-8)
-    const leftMargin = isMobile ? 16 : Math.max(32, (containerWidth - 1280) / 2 + 32);
+    const leftMargin = useMemo(() => {
+        if (isMobile) return 16;
 
-    // Peek is visible on the right (~28px on mobile for the "sliver" effect).
-    const rightPeek = isMobile ? 28 : 200;
+        // On desktop, Sections are max-w-7xl (1280px) and centered.
+        // We calculate the gutter and add the 32px inner padding.
+        const gutter = Math.max(0, (containerWidth - 1280) / 2);
+        return gutter + 32;
+    }, [containerWidth, isMobile]);
+
+    // Peek defines how much of the next card is visible (sliver peek)
+    const rightPeek = isMobile ? 28 : (containerWidth > 1440 ? 400 : 200);
 
     const cardWidth = useMemo(() => {
+        if (containerWidth === 0) return 300; // SSR/Initial fallback
+
         if (isMobile) {
-            // "Native Giant" Logic:
-            // Calculate the exact width needed to fit the viewport with margin, gap, and peek.
-            // Width = Viewport - LeftPadding - Gap - RightPeek
+            // Width = Viewport - Margin - Gap - SliverPeek
             return containerWidth - leftMargin - gap - rightPeek;
         }
 
-        const maxWidth = containerWidth - leftMargin - rightPeek;
-        return Math.min(1200, Math.max(240, maxWidth));
+        // On desktop, it fills the remaining container space or a fixed max
+        const available = containerWidth - leftMargin - rightPeek;
+        return Math.min(1000, Math.max(280, available));
     }, [containerWidth, isMobile, leftMargin, rightPeek, gap]);
 
     return (
@@ -73,7 +77,6 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
                     <CarouselItem
                         key={post.id}
                         post={post}
-                        index={index}
                         cardWidth={cardWidth}
                         priority={index < 4}
                     />
@@ -87,7 +90,6 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
 
 interface CarouselItemProps {
     post: BlogPost;
-    index: number;
     cardWidth: number;
     priority: boolean;
 }
@@ -95,18 +97,16 @@ interface CarouselItemProps {
 function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
     return (
         <div
-            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-0 transition-all"
-            style={{
-                width: `${cardWidth}px`,
-                // No scaling, no dynamic margins. Pure native layout.
-            }}
+            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-0"
+            style={{ width: `${cardWidth}px` }}
         >
             <Link
                 to={`/blog/${post.slug}`}
-                className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] shadow-lg transition-transform duration-500 ease-out active:scale-[0.98] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 group"
-                style={{
-                    aspectRatio: '16 / 9',
-                }}
+                className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] 
+                           shadow-lg transition-all duration-300 ease-out 
+                           active:scale-[0.98] bg-white dark:bg-slate-800 
+                           border border-slate-100 dark:border-slate-700/50 group"
+                style={{ aspectRatio: '16 / 9' }}
             >
                 {/* Image */}
                 <div className="absolute inset-0 w-full h-full">
@@ -121,25 +121,26 @@ function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
                             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         />
                     ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600" />
+                        <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
                     )}
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                 </div>
 
-                {/* Content Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col items-start gap-1 md:gap-3">
+                {/* Content Overlay - Aligned to reference */}
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end items-start gap-1 md:gap-3">
+                    {/* Optional Tag (e.g., Refreshed!) */}
                     {post.category?.name && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1 border border-white/20">
+                        <span className="px-2.5 py-0.5 rounded-full bg-slate-900/40 backdrop-blur-md text-white text-[10px] md:text-xs font-black uppercase tracking-wider mb-1 border border-white/20">
                             {post.category.name}
                         </span>
                     )}
 
-                    <h3 className="text-xl md:text-3xl font-bold text-white line-clamp-2 leading-tight drop-shadow-lg">
+                    <h3 className="text-xl md:text-3xl font-extrabold text-white line-clamp-2 leading-tight drop-shadow-lg">
                         {post.title}
                     </h3>
 
-                    <p className="hidden md:block text-sm text-slate-200/90 line-clamp-2 mt-1">
+                    <p className="hidden md:block text-slate-200/90 text-sm font-medium line-clamp-2 mt-1">
                         {post.subtitle}
                     </p>
                 </div>
