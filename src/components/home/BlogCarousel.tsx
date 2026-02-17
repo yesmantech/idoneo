@@ -123,7 +123,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
     const distance = cardWidth + gap;
 
     // "Tier S" True Giant-Left Scaling
-    // Increased to 1.28x for maximum dominance.
+    // Increased to 1.35x for maximum dominance.
     const scale = useTransform(
         scrollX,
         [
@@ -131,7 +131,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
             itemPosition,
             itemPosition + distance
         ],
-        [0.85, 1.28, 0.85]
+        [0.85, 1.35, 0.85]
     );
 
     const opacity = useTransform(
@@ -155,8 +155,8 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
     );
 
     // Dynamic Margin Compensation (Mobile Only)
-    // Scale 1.28 = 0.28 growth.
-    const extraMargin = cardWidth * 0.28;
+    // Scale 1.35 = 0.35 growth.
+    const extraMargin = cardWidth * 0.35;
     const marginRight = useTransform(
         scrollX,
         [
