@@ -58,16 +58,15 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
     // We start from the left with a branding-defined margin (24px).
     // Peek is visible on the right (~60px).
     const leftMargin = isMobile ? 24 : 160;
-    const rightPeek = isMobile ? 60 : 160;
+    const rightPeek = isMobile ? 40 : 160;
 
     const cardWidth = useMemo(() => {
         if (isMobile) {
-            // "Giant but Contained" Logic:
-            // We want the *Expanded* card (at 1.25x scale) to fit perfectly in the available space
-            // leaving room for the gap and the peek.
-            // Formula: BaseWidth * 1.25 = Viewport - LeftMargin - Gap - Peek
+            // "True Giant but Contained" Logic:
+            // Max dominance (1.28x) fits perfectly in the viewport sliver.
+            // BaseWidth * 1.28 = Viewport - LeftMargin - Gap - Peek
             const availableSpace = containerWidth - leftMargin - gap - rightPeek;
-            return availableSpace / 1.25;
+            return availableSpace / 1.28;
         }
 
         const maxWidth = containerWidth - leftMargin - rightPeek;
