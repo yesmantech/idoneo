@@ -32,10 +32,17 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
     const gap = isMobile ? GAP_MOBILE : GAP_DESKTOP;
 
     // "Native Giant" Strategy:
-    // We start from the left with a branding-defined margin (24px).
-    // Peek is visible on the right (~28px).
-    const leftMargin = isMobile ? 24 : 160;
-    const rightPeek = isMobile ? 28 : 160;
+    // We start from the left aligned with the SearchBar and other sections.
+    // SearchBar has px-4 (16px) on mobile and px-8 (32px) on desktop.
+    // For desktop, we need to account for the max-w-7xl centering if we want true alignment on large screens,
+    // but for now, we'll stick to the base container padding of 32px to match the `lg:px-8` class.
+
+    // Mobile: 16px (matches px-4)
+    // Desktop: 32px (matches lg:px-8)
+    const leftMargin = isMobile ? 16 : Math.max(32, (containerWidth - 1280) / 2 + 32);
+
+    // Peek is visible on the right (~28px on mobile for the "sliver" effect).
+    const rightPeek = isMobile ? 28 : 200;
 
     const cardWidth = useMemo(() => {
         if (isMobile) {
