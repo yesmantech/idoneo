@@ -8,7 +8,7 @@ interface BlogCarouselProps {
 }
 
 // Configuration handles responsive visual tuning
-const GAP_MOBILE = 16;
+const GAP_MOBILE = 12;
 const GAP_DESKTOP = 24;
 
 export default function BlogCarousel({ posts }: BlogCarouselProps) {
@@ -122,8 +122,8 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
     const itemPosition = (cardWidth + gap) * index;
     const distance = cardWidth + gap;
 
-    // "Tier S" True Giant-Left Scaling
-    // Increased to 1.35x for maximum dominance.
+    // "Tier S" Ultra Giant-Left Scaling
+    // Pushed to 1.4x for "Masterpiece" level dominance.
     const scale = useTransform(
         scrollX,
         [
@@ -131,7 +131,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
             itemPosition,
             itemPosition + distance
         ],
-        [0.85, 1.35, 0.85]
+        [0.85, 1.4, 0.85]
     );
 
     const opacity = useTransform(
@@ -155,8 +155,8 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
     );
 
     // Dynamic Margin Compensation (Mobile Only)
-    // Scale 1.35 = 0.35 growth.
-    const extraMargin = cardWidth * 0.35;
+    // Scale 1.4 = 0.4 growth.
+    const extraMargin = cardWidth * 0.4;
     const marginRight = useTransform(
         scrollX,
         [
