@@ -67,10 +67,11 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
                             <div className="space-y-2.5">
                                 {isPrep ? (
                                     <>
-                                        <BulletRow icon={<Layers className="w-4 h-4" />} title="Volume di quiz" text="Più quiz diversi svolgi, più il punteggio è affidabile." color="cyan" />
-                                        <BulletRow icon={<Target className="w-4 h-4" />} title="Accuracy" text="La percentuale di risposte corrette influenza il voto." color="cyan" />
-                                        <BulletRow icon={<Clock className="w-4 h-4" />} title="Recenza" text="I risultati recenti valgono più di quelli vecchi." color="cyan" />
-                                        <BulletRow icon={<FileText className="w-4 h-4" />} title="Copertura" text="Premia chi si allena su tutta la banca dati." color="cyan" />
+                                        <BulletRow icon={<Layers className="w-4 h-4" />} title="Volume" text="Quantità di domande risposte correttamente." color="cyan" />
+                                        <BulletRow icon={<Target className="w-4 h-4" />} title="Precisione" text="Percentuale di risposte esatte sui tentativi." color="cyan" />
+                                        <BulletRow icon={<Clock className="w-4 h-4" />} title="Recency" text="Peso maggiore ai quiz svolti recentemente." color="cyan" />
+                                        <BulletRow icon={<FileText className="w-4 h-4" />} title="Copertura" text="Esplorazione di tutta la banca dati." color="cyan" />
+                                        <BulletRow icon={<Shield className="w-4 h-4" />} title="Affidabilità" text="Costanza e stabilità dei tuoi risultati." color="cyan" />
                                     </>
                                 ) : (
                                     <>

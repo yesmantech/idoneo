@@ -22,10 +22,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, Rocket, Clock, HelpCircle, CheckCircle2, XCircle, MinusCircle } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import TierSLoader from "@/components/ui/TierSLoader";
+import { hapticLight, hapticSuccess } from "@/lib/haptics";
 
 export default function RulesPage() {
-  const { contestSlug, type } = useParams<{ category: string; role: string; contestSlug: string; type: string }>();
+  const { contestSlug } = useParams<{ category: string; role: string; contestSlug: string; type: string }>();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -33,6 +37,7 @@ export default function RulesPage() {
   const [canStart, setCanStart] = useState(false);
 
   const [config, setConfig] = useState<{
+    id: string;
     title: string;
     time_limit: number;
     total_questions: number;
@@ -68,141 +73,232 @@ export default function RulesPage() {
       const totalQuestions = rules?.reduce((a, b) => a + b.question_count, 0) || 0;
 
       setConfig({
+        id: quiz.id,
         title: quiz.title,
         time_limit: quiz.time_limit || 60,
         total_questions: totalQuestions,
         points_correct: quiz.points_correct ?? 1,
         points_wrong: quiz.points_wrong ?? -0.25,
         points_blank: quiz.points_blank ?? 0,
-        is_official: quiz.is_official ?? false // Check field name consistency
+        is_official: quiz.is_official ?? false
       });
 
-      // Only allow start if official is enabled (or if we are testing)
-      // For now, if "is_official" is false, we might want to block.
       setCanStart(!!quiz.is_official);
 
     } catch (err: any) {
       console.error(err);
       setError(err.message);
     } finally {
-      setLoading(false);
+      // Small artificial delay for premium feel
+      setTimeout(() => setLoading(false), 800);
     }
   };
 
   const handleStart = () => {
     if (!canStart) return;
+    hapticSuccess();
     navigate(`/quiz/${contestSlug}/official`);
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
-    </div>
-  );
+  if (loading) return <TierSLoader message="Preparazione simulazione..." submessage="Il tempo è prezioso, stiamo configurando tutto." />;
 
   if (error) return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-xl font-bold text-rose-600 mb-2">Errore caricamento</h1>
-      <p className="text-slate-500">{error}</p>
+    <div className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-6 text-center">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-[var(--card)] border border-semantic-error/20 p-8 rounded-[32px] shadow-card max-w-sm"
+      >
+        <div className="w-16 h-16 bg-semantic-error/10 text-semantic-error rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✕</div>
+        <h1 className="text-xl font-bold text-[var(--foreground)] mb-2">Errore caricamento</h1>
+        <p className="text-[var(--foreground)] opacity-60 mb-6 text-sm">{error}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="w-full py-3 bg-brand-blue text-white font-bold rounded-pill shadow-lg shadow-brand-blue/20"
+        >
+          Torna indietro
+        </button>
+      </motion.div>
     </div>
   );
 
-  if (!config) return <div className="min-h-screen flex items-center justify-center">Impossibile caricare configurazione.</div>;
+  if (!config) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
-      {/* Simple Top Bar */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            <span className="text-sm font-medium">Torna indietro</span>
-          </button>
-          <div className="font-bold text-slate-900 truncate max-w-[200px] md:max-w-md">
-            Regole della simulazione
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-brand-blue/20 pb-12 overflow-x-hidden relative">
+
+      {/* Tier S Mesh Gradient Background */}
+      <div className="fixed inset-0 pointer-events-none transition-colors duration-1000" style={{
+        background: `
+              radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.08), transparent 40%),
+              radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.08), transparent 40%)
+          `
+      }} />
+
+      {/* Glass Navigation Bar */}
+      <div className="sticky top-0 z-50 bg-white/60 dark:bg-[#0A0A0B]/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 pt-safe">
+        <div className="px-4 h-16 flex items-center justify-between max-w-lg mx-auto">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => { hapticLight(); navigate(-1); }}
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 shadow-soft border border-slate-200/50 dark:border-white/10 text-slate-600 dark:text-slate-300 active:scale-90 transition-transform"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </motion.button>
+          <div className="font-black text-xs uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+            Briefing
           </div>
-          <div className="w-8"></div>
+          <div className="w-10"></div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-lg mt-8">
+      <div className="relative z-10 px-6 py-8 md:py-10 max-w-lg mx-auto">
+        {/* Header Hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-10"
+        >
+          <motion.div
+            initial={{ scale: 0, rotate: -15 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", damping: 15, delay: 0.1 }}
+            className="w-24 h-24 bg-gradient-to-br from-brand-blue to-cyan-400 rounded-[32px] mx-auto flex items-center justify-center mb-6 shadow-2xl shadow-brand-blue/30 text-white relative group"
+          >
+            <div className="absolute inset-0 bg-white/20 rounded-[32px] blur-xl opacity-0 group-hover:opacity-50 transition-opacity" />
+            <Rocket className="w-12 h-12 relative z-10" />
 
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-slate-900 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-6 shadow-xl shadow-slate-200">
-            🚀
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Pronto a iniziare?</h1>
-          <p className="text-slate-500">
-            Stai per avviare la simulazione ufficiale per <strong>{config.title}</strong>. Ecco le regole che dovrai seguire.
+            {/* Decorative glint */}
+            <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-white/30 to-transparent rounded-[32px] pointer-events-none" />
+          </motion.div>
+
+          <h1 className="text-3xl font-black tracking-tight text-[var(--foreground)] mb-3 leading-tight">Pronto a iniziare?</h1>
+          <p className="text-[var(--foreground)] opacity-60 leading-relaxed px-4 font-medium">
+            Stai per avviare la simulazione ufficiale per <span className="text-[var(--foreground)] font-black opacity-100">{config.title}</span>.
           </p>
-        </div>
+        </motion.div>
 
+        {/* Info Banner if unavailable */}
         {!config.is_official && (
-          <div className="w-full bg-rose-50 border border-rose-200 p-4 rounded-xl mb-6 flex items-start gap-3">
-            <span className="text-xl">⚠️</span>
-            <div>
-              <p className="text-rose-800 text-sm font-bold">Simulazione non disponibile</p>
-              <p className="text-rose-700 text-xs">Questa simulazione è attualmente chiusa o in manutenzione.</p>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-red-500/5 border border-red-500/10 p-5 rounded-[24px] mb-8 flex items-start gap-4"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0 text-red-500">
+              <XCircle className="w-5 h-5" />
             </div>
-          </div>
+            <div>
+              <p className="text-red-500 text-sm font-black mb-0.5">Simulazione non disponibile</p>
+              <p className="text-[var(--foreground)] text-xs opacity-60 font-medium">Questa simulazione è attualmente chiusa o in manutenzione.</p>
+            </div>
+          </motion.div>
         )}
 
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm mb-6 space-y-6">
-          {/* Key Stats */}
-          <div className="grid grid-cols-2 gap-4 pb-6 border-b border-slate-100">
-            <div className="text-center p-4 bg-slate-50 rounded-2xl">
-              <div className="text-2xl font-bold text-slate-900">{config.time_limit}</div>
-              <div className="text-xs uppercase font-bold text-slate-400 tracking-wider">Minuti</div>
-            </div>
-            <div className="text-center p-4 bg-slate-50 rounded-2xl">
-              <div className="text-2xl font-bold text-slate-900">{config.total_questions}</div>
-              <div className="text-xs uppercase font-bold text-slate-400 tracking-wider">Domande</div>
-            </div>
-          </div>
-
-          {/* Scoring Rules */}
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide">Punteggi</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">✓</div>
-                  <span className="font-medium text-slate-700">Risposta Esatta</span>
-                </div>
-                <span className="font-bold text-emerald-600">+{config.points_correct}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-bold text-sm">✕</div>
-                  <span className="font-medium text-slate-700">Risposta Errata</span>
-                </div>
-                <span className="font-bold text-rose-600">{config.points_wrong}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-sm">-</div>
-                  <span className="font-medium text-slate-700">Risposta Omessa</span>
-                </div>
-                <span className="font-bold text-slate-500">{config.points_blank}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center text-xs text-slate-400 mb-8 px-8">
-          Il tempo inizierà a scorrere non appena cliccherai sul pulsante qui sotto. Buona fortuna! 🍀
-        </div>
-
-        <button
-          onClick={handleStart}
-          disabled={!canStart}
-          className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-xl shadow-slate-900/20 hover:shadow-slate-900/40 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        {/* Rules Glass Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white/60 dark:bg-white/5 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-[40px] p-2 shadow-2xl shadow-indigo-500/5 mb-8 overflow-visible"
         >
-          {canStart ? "Inizia la prova" : "Attualmente non disponibile"}
-        </button>
+          <div className="p-6 space-y-8">
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col items-center justify-center p-5 bg-slate-50 dark:bg-white/5 rounded-[28px] border border-slate-100 dark:border-white/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-brand-blue/10 blur-2xl rounded-full -mr-8 -mt-8 transition-opacity group-hover:opacity-100 opacity-0" />
 
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-brand-blue flex items-center justify-center mb-3">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div className="text-3xl font-black text-[var(--foreground)] tracking-tight mb-1">{config.time_limit}</div>
+                <div className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Minuti</div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center p-5 bg-slate-50 dark:bg-white/5 rounded-[28px] border border-slate-100 dark:border-white/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-400/10 blur-2xl rounded-full -mr-8 -mt-8 transition-opacity group-hover:opacity-100 opacity-0" />
+
+                <div className="w-10 h-10 rounded-2xl bg-cyan-50 dark:bg-cyan-500/10 text-cyan-500 flex items-center justify-center mb-3">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <div className="text-3xl font-black text-[var(--foreground)] tracking-tight mb-1">{config.total_questions}</div>
+                <div className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Domande</div>
+              </div>
+            </div>
+
+            {/* Scoring System */}
+            <div>
+              <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-5 px-2 uppercase tracking-[0.2em] text-center">Punteggi Ufficiali</h3>
+              <div className="space-y-3">
+                <motion.div
+                  initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 }}
+                  className="flex items-center justify-between p-4 pl-5 rounded-[24px] bg-emerald-500/[0.03] dark:bg-emerald-500/10 border border-emerald-500/10"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm shadow-emerald-500/10">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                    <span className="font-bold text-[var(--foreground)] text-sm">Risposta Esatta</span>
+                  </div>
+                  <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">+{config.points_correct}</span>
+                </motion.div>
+
+                <motion.div
+                  initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.5 }}
+                  className="flex items-center justify-between p-4 pl-5 rounded-[24px] bg-red-500/[0.03] dark:bg-red-500/10 border border-red-500/10"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-red-500/10 dark:bg-red-500/20 flex items-center justify-center text-red-500 dark:text-red-400 shadow-sm shadow-red-500/10">
+                      <XCircle className="w-5 h-5" />
+                    </div>
+                    <span className="font-bold text-[var(--foreground)] text-sm">Risposta Errata</span>
+                  </div>
+                  <span className="text-xl font-black text-red-500 dark:text-red-400 tracking-tight">{config.points_wrong}</span>
+                </motion.div>
+
+                <motion.div
+                  initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.6 }}
+                  className="flex items-center justify-between p-4 pl-5 rounded-[24px] bg-slate-100/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-slate-200/50 dark:bg-white/10 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                      <MinusCircle className="w-5 h-5" />
+                    </div>
+                    <span className="font-bold text-[var(--foreground)] text-sm">Non Risposta</span>
+                  </div>
+                  <span className="text-xl font-black text-slate-400 dark:text-slate-500 tracking-tight">{config.points_blank}</span>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Warning Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="px-4 text-center"
+        >
+          <div className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest mb-8 leading-relaxed">
+            Il timer startà automaticamente al click. <br /> Concentrazione massima. 🍀
+          </div>
+
+          <button
+            onClick={handleStart}
+            disabled={!canStart}
+            className="group w-full relative overflow-hidden py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-lg rounded-[24px] shadow-2xl shadow-slate-900/20 dark:shadow-white/10 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {canStart ? (
+                <>
+                  Inizia Simulazione <Rocket className="w-5 h-5" />
+                </>
+              ) : "Non disponibile"}
+            </span>
+          </button>
+        </motion.div>
       </div>
     </div>
   );

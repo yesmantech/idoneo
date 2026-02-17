@@ -29,7 +29,7 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import {
     Star, Shield, Zap, Heart,
@@ -209,6 +209,16 @@ export default function LoginPage() {
                                 required
                                 className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 dark:focus:bg-slate-700 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none border border-transparent dark:border-slate-700"
                             />
+                            {isLogin && (
+                                <div className="flex justify-end px-2">
+                                    <Link
+                                        to="/recover-password"
+                                        className="text-sm font-medium text-[#00B1FF] hover:underline opacity-90 hover:opacity-100 transition-opacity"
+                                    >
+                                        Password dimenticata?
+                                    </Link>
+                                </div>
+                            )}
                         </div>
 
                         {error && (

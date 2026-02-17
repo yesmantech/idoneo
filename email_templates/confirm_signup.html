@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benvenuto in Idoneo</title>
+    <style>
+        /* Base Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        img {
+            border: 0;
+            outline: none;
+            text-decoration: none;
+            -ms-interpolation-mode: bicubic;
+        }
+
+        /* Font */
+        body,
+        td,
+        th {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            .body-bg {
+                background-color: #0f172a !important;
+            }
+
+            .card-bg {
+                background-color: #1e293b !important;
+            }
+
+            .text-primary {
+                color: #f8fafc !important;
+            }
+
+            .text-secondary {
+                color: #94a3b8 !important;
+            }
+        }
+    </style>
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #0f172a; color: #f8fafc;">
+
+    <!-- Main Container -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+        style="background-color: #0f172a; min-height: 100vh;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+
+                <!-- Content Area (Max Width 600px) -->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                    style="max-width: 600px;">
+
+                    <!-- Logo -->
+                    <tr>
+                        <td align="center" style="padding-bottom: 40px;">
+                            <img src="https://app.idoneo.ai/icon-192x192.png" alt="Idoneo" width="60" height="60"
+                                style="display: block; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 177, 255, 0.1), 0 2px 4px -1px rgba(0, 177, 255, 0.06);">
+                        </td>
+                    </tr>
+
+                    <!-- Card -->
+                    <tr>
+                        <td align="center"
+                            style="background-color: #1e293b; border-radius: 24px; padding: 48px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid #334155;">
+                            <!-- Icon -->
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center"
+                                        style="background-color: rgba(34, 197, 94, 0.1); border-radius: 50%; width: 64px; height: 64px;">
+                                        <img src="https://app.idoneo.ai/icon-192x192.png" width="32" height="32"
+                                            style="display: block; opacity: 0.8;"> <!-- Ideally a check/sparkle icon -->
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Title -->
+                            <h1
+                                style="margin: 24px 0 16px 0; font-size: 24px; font-weight: 700; color: #f8fafc; letter-spacing: -0.025em;">
+                                Benvenuto in Idoneo!
+                            </h1>
+
+                            <!-- Message -->
+                            <p
+                                style="margin: 0 0 32px 0; font-size: 16px; line-height: 26px; color: #94a3b8; text-align: center;">
+                                Grazie per esserti registrato. Per iniziare il tuo percorso di preparazione, conferma il
+                                tuo indirizzo email cliccando il pulsante qui sotto.
+                            </p>
+
+                            <!-- Button -->
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ .ConfirmationURL }}"
+                                            style="display: inline-block; background-color: #00B1FF; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 32px; border-radius: 99px; box-shadow: 0 10px 15px -3px rgba(0, 177, 255, 0.3), 0 4px 6px -2px rgba(0, 177, 255, 0.1); transition: all 0.2s;">
+                                            Conferma Email
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Small Note -->
+                            <p style="margin: 32px 0 0 0; font-size: 13px; color: #64748b; text-align: center;">
+                                Se non ti sei registrato su Idoneo, puoi ignorare questa email.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="padding-top: 32px;">
+                            <p
+                                style="margin: 0; font-size: 12px; color: #475569; letter-spacing: 0.05em; font-weight: 600;">
+                                IDONEO
+                            </p>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #475569;">
+                                © 2026 Idoneo. Tutti i diritti riservati.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

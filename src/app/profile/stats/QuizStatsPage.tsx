@@ -4,6 +4,7 @@ import TierSLoader from "@/components/ui/TierSLoader";
 import { supabase } from "@/lib/supabaseClient";
 import { ChevronLeft } from 'lucide-react';
 import { useOnboarding } from "@/context/OnboardingProvider";
+import { useAuth } from "@/context/AuthContext";
 
 // Info System
 import InfoModal from '@/components/leaderboard/InfoModal';
@@ -72,18 +73,27 @@ export default function QuizStatsPage() {
 
     // Onboarding Tour
     const { startOnboarding, hasCompletedContext } = useOnboarding();
+    const { isModalDismissed, dismissModal, profile } = useAuth();
 
     useEffect(() => {
         if (quizId) loadStats();
     }, [quizId]);
 
-    // Auto-start quizstats onboarding
+    // Effect: Show Info Modal (Predictive Algorithm) if not dismissed
     useEffect(() => {
-        if (!loading && stats.totalTests > 0 && !hasCompletedContext('quizstats')) {
+        if (!loading && !isModalDismissed('prep_info') && !hasCompletedContext('quizstats')) {
+            const timer = setTimeout(() => setShowInfoModal(true), 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, isModalDismissed, hasCompletedContext]);
+
+    // Auto-start quizstats onboarding (only if modal is NOT shown or after it's dismissed)
+    useEffect(() => {
+        if (!loading && stats.totalTests > 0 && !hasCompletedContext('quizstats') && !showInfoModal) {
             const timer = setTimeout(() => startOnboarding('quizstats'), 600);
             return () => clearTimeout(timer);
         }
-    }, [loading, stats.totalTests, hasCompletedContext, startOnboarding]);
+    }, [loading, stats.totalTests, hasCompletedContext, startOnboarding, showInfoModal]);
 
     const loadStats = async () => {
         setLoading(true);
@@ -310,6 +320,28 @@ export default function QuizStatsPage() {
                     readiness={readiness}
                     onOpenInfo={() => setShowInfoModal(true)}
                 />
+
+                {/* Score Info Overlay */}
+                <InfoModal
+                    isOpen={showInfoModal}
+                    onClose={() => {
+                        setShowInfoModal(false);
+                        dismissModal('prep_info');
+                    }}
+                    type="prep"
+                    onMoreInfo={() => {
+                        setShowInfoModal(false);
+                        setShowInfoPage(true);
+                        dismissModal('prep_info');
+                    }}
+                />
+
+                {showInfoPage && (
+                    <ScoreInfoPage
+                        onBack={() => setShowInfoPage(false)}
+                        initialTab="prep"
+                    />
+                )}
 
                 {/* 2. Coaching Block */}
                 {recommendations.length > 0 && (

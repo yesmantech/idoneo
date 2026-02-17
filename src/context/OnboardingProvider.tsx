@@ -63,6 +63,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { analytics } from '@/lib/analytics';
+import { useAuth } from '@/context/AuthContext';
 
 // ============================================================================
 // TYPES
@@ -304,155 +305,77 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [completedContexts, setCompletedContexts] = useState<Set<OnboardingContext>>(new Set());
     const [showCelebration, setShowCelebration] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-    const [dismissedModals, setDismissedModals] = useState<string[]>([]);
+
+    const { user, profile, loading: authLoading, isModalDismissed, dismissModal } = useAuth();
 
     // Helper to update onboarding_completed in DB
-    const markOnboardingCompleted = useCallback(async (uid: string) => {
+    const markOnboardingCompleted = useCallback(async () => {
+        if (!user) return;
         try {
             await supabase
                 .from('profiles')
                 .update({ onboarding_completed: true })
-                .eq('id', uid);
+                .eq('id', user.id);
         } catch (error) {
             console.warn('Failed to update onboarding_completed in DB:', error);
         }
-    }, []);
+    }, [user]);
 
-    // Helper: persist a tour context completion to DB via dismissed_modals
-    const persistTourToDb = useCallback(async (uid: string, context: OnboardingContext, currentDismissed: string[]) => {
-        const key = `tour_${context}`;
-        if (currentDismissed.includes(key)) return currentDismissed;
-        const updated = [...currentDismissed, key];
-        try {
-            await supabase
-                .from('profiles')
-                .update({ dismissed_modals: updated })
-                .eq('id', uid);
-        } catch (error) {
-            console.warn('Failed to persist tour completion to DB:', error);
-        }
-        return updated;
-    }, []);
-
-    // Load completed contexts from DB + localStorage
+    // Check if Welcome should be shown
     useEffect(() => {
-        const completed = new Set<OnboardingContext>();
-        // Start with localStorage
-        (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
-            if (localStorage.getItem(STORAGE_PREFIX + ctx) === 'true') {
-                completed.add(ctx);
-            }
-        });
+        if (!profile || authLoading) return;
 
-        // Check if welcome should be shown (new user)
-        const checkNewUser = async () => {
-            // Give a small delay for auth to settle
-            setTimeout(async () => {
-                try {
-                    const { data } = await supabase.auth.getSession();
+        // If already completed in DB, don't show welcome
+        if (profile.onboarding_completed) {
+            localStorage.setItem(WELCOME_KEY, 'true');
+            return;
+        }
 
-                    if (data.session?.user) {
-                        const uid = data.session.user.id;
-                        setUserId(uid);
-
-                        // Fetch profile with both onboarding_completed and dismissed_modals
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('onboarding_completed, dismissed_modals')
-                            .eq('id', uid)
-                            .single();
-
-                        // Sync dismissed_modals from DB → load tour completions
-                        const dbDismissed: string[] = profile?.dismissed_modals || [];
-                        setDismissedModals(dbDismissed);
-
-                        // Merge DB tour completions into completedContexts
-                        (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
-                            if (dbDismissed.includes(`tour_${ctx}`)) {
-                                completed.add(ctx);
-                                // Sync to localStorage for consistency
-                                localStorage.setItem(STORAGE_PREFIX + ctx, 'true');
-                            }
-                        });
-                        setCompletedContexts(completed);
-
-                        // If already completed in DB, sync to localStorage and don't show
-                        if (profile?.onboarding_completed) {
-                            localStorage.setItem(WELCOME_KEY, 'true');
-                            return;
-                        }
-
-                        // Also check localStorage as fallback
-                        if (localStorage.getItem(WELCOME_KEY) === 'true') {
-                            // Sync to DB if localStorage says completed but DB doesn't
-                            markOnboardingCompleted(uid);
-                            return;
-                        }
-
-                        // Show welcome on homepage for users who haven't completed
-                        if (window.location.pathname === '/') {
-                            setShowWelcome(true);
-                        }
-                    } else {
-                        // Non-authenticated user: use localStorage only
-                        setCompletedContexts(completed);
-                        if (!localStorage.getItem(WELCOME_KEY) && window.location.pathname === '/') {
-                            setShowWelcome(true);
-                        }
-                    }
-                } catch {
-                    // Fallback to localStorage on error
-                    setCompletedContexts(completed);
-                    if (!localStorage.getItem(WELCOME_KEY) && window.location.pathname === '/') {
-                        setShowWelcome(true);
-                    }
-                }
-            }, 1000);
-        };
-
-        checkNewUser();
-    }, [markOnboardingCompleted]);
+        // Show welcome on homepage for users who haven't completed
+        if (window.location.pathname === '/' && !localStorage.getItem(WELCOME_KEY)) {
+            setShowWelcome(true);
+        }
+    }, [profile, authLoading]);
 
     const hasCompletedContext = useCallback((context: OnboardingContext) => {
-        return completedContexts.has(context);
-    }, [completedContexts]);
+        // If auth is still loading, assume completed to prevent flicker/race start
+        if (authLoading) return true;
+
+        // Fast path: localStorage
+        if (localStorage.getItem(STORAGE_PREFIX + context) === 'true') return true;
+        // Source of truth: DB (via AuthContext)
+        return isModalDismissed(`tour_${context}`);
+    }, [isModalDismissed, authLoading]);
 
     const dismissWelcome = useCallback(() => {
         setShowWelcome(false);
         localStorage.setItem(WELCOME_KEY, 'true');
-        // Save to DB if authenticated
-        if (userId) {
-            markOnboardingCompleted(userId);
-        }
-    }, [userId, markOnboardingCompleted]);
+        markOnboardingCompleted();
+    }, [markOnboardingCompleted]);
 
     const startTourFromWelcome = useCallback(() => {
         setShowWelcome(false);
         localStorage.setItem(WELCOME_KEY, 'true');
-        // Save to DB if authenticated
-        if (userId) {
-            markOnboardingCompleted(userId);
-        }
+        markOnboardingCompleted();
         // Track onboarding started
         analytics.track('onboarding_started', { context: 'homepage', source: 'welcome_screen' });
         // Start homepage tour
         setActiveContext('homepage');
         setCurrentStepIndex(0);
         setIsActive(true);
-    }, [userId, markOnboardingCompleted]);
+    }, [markOnboardingCompleted]);
 
     const startOnboarding = useCallback((context: OnboardingContext) => {
-        // Guard 1: React state (may be empty if DB hasn't loaded yet)
-        if (completedContexts.has(context)) return;
-        // Guard 2: Synchronous localStorage check (always up-to-date, no race condition)
-        if (localStorage.getItem(STORAGE_PREFIX + context) === 'true') return;
-        // Guard 3: Don't start a new tour if one is already active
+        // Guard 0: Don't start if auth is loading (we don't know dismissal state yet)
+        if (authLoading) return;
+        // Guard 1: Use centralized helper
+        if (hasCompletedContext(context)) return;
+        // Guard 2: Don't start a new tour if one is already active
         if (isActive) return;
         setActiveContext(context);
         setCurrentStepIndex(0);
         setIsActive(true);
-    }, [completedContexts, isActive]);
+    }, [hasCompletedContext, isActive, authLoading]);
 
     const steps = activeContext ? STEPS_BY_CONTEXT[activeContext] : [];
 
@@ -473,26 +396,20 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const skipOnboarding = useCallback(() => {
         if (activeContext) {
             localStorage.setItem(STORAGE_PREFIX + activeContext, 'true');
-            setCompletedContexts(prev => new Set([...prev, activeContext]));
-            // Persist to DB
-            if (userId) {
-                persistTourToDb(userId, activeContext, dismissedModals).then(updated => setDismissedModals(updated));
-            }
+            // Persist to DB via AuthContext
+            dismissModal(`tour_${activeContext}`);
             // Track onboarding skipped
             analytics.track('onboarding_skipped', { context: activeContext, step: currentStepIndex });
         }
         setIsActive(false);
         setActiveContext(null);
-    }, [activeContext, currentStepIndex, userId, dismissedModals, persistTourToDb]);
+    }, [activeContext, currentStepIndex, dismissModal]);
 
     const completeOnboarding = useCallback(() => {
         if (activeContext) {
             localStorage.setItem(STORAGE_PREFIX + activeContext, 'true');
-            setCompletedContexts(prev => new Set([...prev, activeContext]));
-            // Persist to DB
-            if (userId) {
-                persistTourToDb(userId, activeContext, dismissedModals).then(updated => setDismissedModals(updated));
-            }
+            // Persist to DB via AuthContext
+            dismissModal(`tour_${activeContext}`);
             // Track onboarding completed
             analytics.track('onboarding_completed', { context: activeContext, steps_count: steps.length });
         }
@@ -500,51 +417,48 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         setActiveContext(null);
 
         // Show celebration only when all 3 core tours are completed (homepage, rolepage, quiz)
-        // Check if this was the last core tour to complete
         const CORE_TOURS: OnboardingContext[] = ['homepage', 'rolepage', 'quiz'];
         const isCoreTour = activeContext && CORE_TOURS.includes(activeContext);
 
         if (isCoreTour) {
-            // Check if all core tours are now complete (including the one we just finished)
-            const updatedCompleted = new Set([...completedContexts, activeContext]);
-            const allCoreComplete = CORE_TOURS.every(tour =>
-                updatedCompleted.has(tour) || localStorage.getItem(STORAGE_PREFIX + tour) === 'true'
-            );
+            const allCoreComplete = CORE_TOURS.every(tour => hasCompletedContext(tour));
 
             if (allCoreComplete) {
                 setShowCelebration(true);
                 setTimeout(() => setShowCelebration(false), 3000);
             }
         }
-    }, [activeContext, steps.length, completedContexts, userId, dismissedModals, persistTourToDb]);
+    }, [activeContext, steps.length, dismissModal, hasCompletedContext]);
 
     const dismissCelebration = useCallback(() => {
         setShowCelebration(false);
     }, []);
 
     const resetOnboarding = useCallback(async () => {
-        // Clear all onboarding state (for testing / re-showing tours)
+        // Clear all onboarding state
         (['homepage', 'rolepage', 'quiz', 'profile', 'leaderboard', 'quizstats'] as OnboardingContext[]).forEach(ctx => {
             localStorage.removeItem(STORAGE_PREFIX + ctx);
         });
         localStorage.removeItem(WELCOME_KEY);
-        setCompletedContexts(new Set());
         setShowWelcome(true);
-        // Also clear from DB
-        if (userId) {
+
+        // Clearing from DB requires custom logic since we don't have a "bulk undismiss"
+        // For now, we manually update the array to remove tour keys
+        if (user && profile) {
             const tourKeys = ['tour_homepage', 'tour_rolepage', 'tour_quiz', 'tour_profile', 'tour_leaderboard', 'tour_quizstats'];
-            const cleaned = dismissedModals.filter(k => !tourKeys.includes(k));
-            setDismissedModals(cleaned);
+            const cleaned = (profile.dismissed_modals || []).filter(k => !tourKeys.includes(k));
+
             try {
                 await supabase
                     .from('profiles')
                     .update({ dismissed_modals: cleaned, onboarding_completed: false })
-                    .eq('id', userId);
+                    .eq('id', user.id);
+                // AuthContext will eventually refresh, but we can call it manually
             } catch (error) {
                 console.warn('Failed to reset onboarding in DB:', error);
             }
         }
-    }, [userId, dismissedModals]);
+    }, [user, profile]);
 
     const currentStep = isActive && activeContext ? steps[currentStepIndex] : null;
 

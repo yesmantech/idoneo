@@ -39,6 +39,7 @@
 
 import { supabase } from './supabaseClient';
 import { analytics } from './analytics';
+import { TIER_THRESHOLDS } from '@/components/gamification/AnimatedFlame';
 
 // ============================================================================
 // STREAK SERVICE
@@ -114,14 +115,14 @@ export const streakService = {
             if (streakUpdated && newStreak > 1) {
                 analytics.track('streak_extended', {
                     new_streak: newStreak,
-                    is_milestone: newStreak % 7 === 0 // Weekly milestones
+                    is_milestone: newStreak % 7 === 0 || TIER_THRESHOLDS.includes(newStreak)
                 });
 
                 // Dispatch event for UI
                 window.dispatchEvent(new CustomEvent('streak_updated', {
                     detail: {
                         streak: newStreak,
-                        isMilestone: newStreak % 7 === 0
+                        isMilestone: newStreak % 7 === 0 || TIER_THRESHOLDS.includes(newStreak)
                     }
                 }));
             }
@@ -130,7 +131,7 @@ export const streakService = {
                 streak: newStreak,
                 streakUpdated,
                 isBroken,
-                isMilestone: streakUpdated && newStreak % 7 === 0
+                isMilestone: streakUpdated && (newStreak % 7 === 0 || TIER_THRESHOLDS.includes(newStreak))
             };
 
         } catch (err) {

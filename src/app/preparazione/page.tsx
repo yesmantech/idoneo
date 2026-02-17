@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -196,7 +197,7 @@ export default function PreparazionePage() {
                                 { label: 'Accuratezza', value: accuracy, color: 'bg-emerald-500' },
                                 { label: 'Volume (Risposte Corrette)', value: volume, color: 'bg-blue-500' },
                                 { label: 'Copertura Banca Dati', value: coverage, color: 'bg-purple-500' },
-                                { label: 'Costanza (Reliability)', value: reliability, color: 'bg-amber-500' },
+                                { label: 'Costanza (Reliability)', value: stats.breakdown.reliability, color: 'bg-amber-500' },
                             ].map((factor) => (
                                 <div key={factor.label} className="space-y-2">
                                     <div className="flex justify-between text-sm font-semibold">

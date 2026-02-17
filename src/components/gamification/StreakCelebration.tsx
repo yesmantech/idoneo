@@ -12,13 +12,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { X, Share2, ArrowRight, Check } from 'lucide-react';
+import { Share2, ArrowRight, Check } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AnimatedFlame, getTierFromStreak } from './AnimatedFlame';
+import { AnimatedFlame, getTierFromStreak, TIER_THRESHOLDS } from './AnimatedFlame';
 import { Share } from '@capacitor/share';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { useTheme } from '@/context/ThemeContext';
+import { hapticSuccess, hapticLight, hapticHeavy } from '@/lib/haptics';
 
 // We rely on global CSS variables for colors (var(--background), var(--foreground))
 // and standard Capacitor StatusBar configuration (which follows system theme).
@@ -29,6 +30,7 @@ export function StreakCelebration() {
     const [isMilestone, setIsMilestone] = useState(false);
     const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
     const [shareState, setShareState] = useState<'idle' | 'success'>('idle');
+    const [isTierUnlock, setIsTierUnlock] = useState(false);
 
     const { resolvedTheme, theme } = useTheme();
 
@@ -39,10 +41,19 @@ export function StreakCelebration() {
 
         const handleStreakUpdate = (e: any) => {
             const { streak: newStreak, isMilestone: milestone } = e.detail;
+            const tierUnlock = TIER_THRESHOLDS.includes(newStreak);
+
             setStreak(newStreak);
             setIsMilestone(milestone);
+            setIsTierUnlock(tierUnlock);
             setShow(true);
             setShareState('idle');
+
+            if (tierUnlock) {
+                hapticHeavy();
+            } else {
+                hapticSuccess();
+            }
         };
 
         window.addEventListener('resize', handleResize);
@@ -164,23 +175,7 @@ export function StreakCelebration() {
                         }}
                         className="relative w-full max-w-sm px-6 text-center"
                     >
-                        {/* Close Button - Adaptive Color */}
-                        <motion.button
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.8 }}
-                            onClick={() => setShow(false)}
-                            className="absolute -top-16 right-4 p-3 rounded-full transition-colors backdrop-blur-md
-                                     bg-slate-200/50 hover:bg-slate-300/50 text-slate-700
-                                     dark:bg-white/10 dark:hover:bg-white/20 dark:text-white"
-                        >
-                            <X className="w-6 h-6" />
-                        </motion.button>
 
-                        {/* DEBUG: THEME STATE */}
-                        <div className="absolute -top-24 left-0 w-full text-center text-xs text-red-500 font-mono bg-black/80 p-1 rounded pointer-events-none">
-                            Theme: {theme} | Resolved: {resolvedTheme}
-                        </div>
 
                         {/* Flame Animation Container */}
                         <div className="relative mb-10 flex justify-center">
@@ -205,7 +200,7 @@ export function StreakCelebration() {
                             transition={{ delay: 0.3, ease: "easeOut" }}
                         >
                             <h2 className="text-xl font-bold text-brand-orange uppercase tracking-widest mb-2">
-                                {isMilestone ? "Traguardo Raggiunto!" : "Streak Aggiornata!"}
+                                {isTierUnlock ? "Nuovo Grado Sbloccato!" : (isMilestone ? "Traguardo Raggiunto!" : "Streak Aggiornata!")}
                             </h2>
                             <div className="flex items-center justify-center gap-3 mb-6">
                                 {/* Adaptive Text Color */}
@@ -234,7 +229,10 @@ export function StreakCelebration() {
                         >
                             {/* Primary Action - Brand Blue */}
                             <button
-                                onClick={() => setShow(false)}
+                                onClick={() => {
+                                    hapticLight();
+                                    setShow(false);
+                                }}
                                 className="w-full py-4 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white text-lg font-bold rounded-full shadow-lg shadow-[#00B1FF]/25 transition-all flex items-center justify-center gap-2 group duration-200"
                             >
                                 Continua
@@ -243,7 +241,10 @@ export function StreakCelebration() {
 
                             {/* Secondary Action - Share (Adaptive) */}
                             <button
-                                onClick={(e) => handleShare(e)}
+                                onClick={(e) => {
+                                    hapticLight();
+                                    handleShare(e);
+                                }}
                                 className={`w-full py-4 font-bold rounded-full transition-all flex items-center justify-center gap-2 border backdrop-blur-sm duration-200 active:scale-[0.98]
                                     ${shareState === 'success'
                                         ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/50 dark:bg-emerald-500/20 dark:text-emerald-400'

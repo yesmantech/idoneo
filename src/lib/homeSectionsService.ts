@@ -200,3 +200,38 @@ export async function fetchMostPopular(limit = 5): Promise<PopularRole[]> {
         return [];
     }
 }
+// ============================================
+// RECENT CATEGORIES (Recently Added)
+// ============================================
+
+export async function fetchRecentCategories(limit = 8): Promise<any[]> {
+    try {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('is_archived', false)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (error) {
+            console.error('Error fetching recent categories:', error);
+            return [];
+        }
+
+        return (data || []).map((c: any) => ({
+            id: c.id,
+            slug: c.slug,
+            title: c.title,
+            subtitle: c.subtitle || undefined,
+            description: c.description || "",
+            home_banner_url: c.home_banner_url || undefined,
+            inner_banner_url: c.inner_banner_url || undefined,
+            is_new: c.is_new || false,
+            year: c.year || undefined,
+            available_seats: c.available_seats || undefined,
+        }));
+    } catch (err) {
+        console.error('fetchRecentCategories error:', err);
+        return [];
+    }
+}

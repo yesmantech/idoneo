@@ -16,6 +16,7 @@ import {
     Users,
     RotateCcw
 } from 'lucide-react';
+import { hapticLight, hapticSuccess, hapticSelection } from '@/lib/haptics';
 import {
     BandiFilters,
     ITALIAN_REGIONS,
@@ -122,7 +123,10 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
                 <motion.button
                     type="button"
                     whileTap={{ scale: 0.96 }}
-                    onClick={() => setShowAdvanced(true)}
+                    onClick={() => {
+                        hapticLight();
+                        setShowAdvanced(true);
+                    }}
                     className={`
                         md:w-auto w-full px-6 py-3.5 rounded-[22px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px]
                         ${activeFiltersCount > 0
@@ -184,7 +188,10 @@ function SortDropdown({ value, onChange }: { value: string; onChange: (v: any) =
     return (
         <div className="relative">
             <button
-                onClick={() => setOpen(!open)}
+                onClick={() => {
+                    hapticLight();
+                    setOpen(!open);
+                }}
                 className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-400 hover:text-[var(--foreground)] transition-colors"
             >
                 Ordina per: <span className="text-[var(--foreground)]">{current?.label}</span>
@@ -204,7 +211,11 @@ function SortDropdown({ value, onChange }: { value: string; onChange: (v: any) =
                             {options.map(opt => (
                                 <button
                                     key={opt.val}
-                                    onClick={() => { onChange(opt.val); setOpen(false); }}
+                                    onClick={() => {
+                                        hapticSelection();
+                                        onChange(opt.val);
+                                        setOpen(false);
+                                    }}
                                     className={`w-full text-left px-4 py-3 text-[13px] font-semibold flex items-center justify-between rounded-[14px] transition-all ${value === opt.val
                                         ? 'bg-brand-blue/10 text-brand-blue'
                                         : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'
@@ -368,7 +379,10 @@ function TierSFilterModal({
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => setLocal({ ...local, isRemote: !local.isRemote ? true : undefined })}
+                                    onClick={() => {
+                                        hapticSelection();
+                                        setLocal({ ...local, isRemote: !local.isRemote ? true : undefined });
+                                    }}
                                     className={`w-14 h-8 rounded-full transition-all duration-300 relative ${local.isRemote ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}`}
                                 >
                                     <motion.div
@@ -417,6 +431,7 @@ function TierSFilterModal({
                     <div className="flex gap-3">
                         <button
                             onClick={() => {
+                                hapticLight();
                                 onFiltersChange({
                                     sortBy: 'deadline',
                                     limit: 20,
@@ -431,6 +446,7 @@ function TierSFilterModal({
                         </button>
                         <button
                             onClick={() => {
+                                hapticSuccess();
                                 onFiltersChange({ ...local, offset: 0 });
                                 onClose();
                             }}
@@ -468,11 +484,14 @@ function FilterSection({ title, icon, children }: { title: string; icon: React.R
     );
 }
 
-function TierSChip({ label, active, onClick }: { label: string; active?: boolean; onClick: () => void }) {
+function TierSChip({ label, active, onClick }: { label: string; active?: boolean; onClick: () => void; key?: string | number }) {
     return (
         <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={onClick}
+            onClick={() => {
+                hapticSelection();
+                onClick();
+            }}
             className={`px-4 py-2.5 rounded-[14px] text-[12px] font-bold transition-all border ${active
                 ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
                 : 'bg-[var(--card)] text-slate-500 border-[var(--card-border)] hover:border-brand-blue/30'
@@ -483,11 +502,14 @@ function TierSChip({ label, active, onClick }: { label: string; active?: boolean
     );
 }
 
-function TierSCheckbox({ label, emoji, checked, onChange }: { label: string; emoji?: string; checked?: boolean; onChange: () => void }) {
+function TierSCheckbox({ label, emoji, checked, onChange }: { label: string; emoji?: string; checked?: boolean; onChange: () => void; key?: string | number }) {
     return (
         <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={onChange}
+            onClick={() => {
+                hapticSelection();
+                onChange();
+            }}
             className={`flex items-center gap-3 p-3.5 rounded-[16px] border transition-all text-left w-full group ${checked
                 ? 'border-brand-blue bg-brand-blue/5 dark:bg-brand-blue/10'
                 : 'border-[var(--card-border)] bg-[var(--card)] hover:border-brand-blue/30'

@@ -35,9 +35,12 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                             <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                                 {bando.ente?.name || 'Ente non specificato'}
                             </p>
-                            <h4 className="font-semibold text-slate-900 dark:text-white text-sm mt-1 line-clamp-2">
+                            <motion.h4
+                                layoutId={`bando-title-${bando.id}`}
+                                className="font-semibold text-slate-900 dark:text-white text-sm mt-1 line-clamp-2"
+                            >
                                 {bando.title}
-                            </h4>
+                            </motion.h4>
                             <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
                                 {bando.seats_total && (
                                     <span className="flex items-center gap-1">
@@ -78,9 +81,12 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                             <span className="text-sm opacity-90 truncate">{bando.ente?.name}</span>
                         </div>
 
-                        <h3 className="font-bold text-lg leading-tight line-clamp-2 mb-3">
+                        <motion.h3
+                            layoutId={`bando-title-${bando.id}`}
+                            className="font-bold text-lg leading-tight line-clamp-2 mb-3"
+                        >
                             {bando.title}
-                        </h3>
+                        </motion.h3>
 
                         <div className="flex items-center gap-4 text-sm opacity-90">
                             {bando.region && (
@@ -125,9 +131,12 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                         </div>
 
                         {/* Title */}
-                        <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 leading-tight">
+                        <motion.h3
+                            layoutId={`bando-title-${bando.id}`}
+                            className="font-semibold text-slate-900 dark:text-white line-clamp-2 leading-tight"
+                        >
                             {bando.title}
-                        </h3>
+                        </motion.h3>
 
                         {/* Meta info */}
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-sm text-slate-500 dark:text-slate-400">

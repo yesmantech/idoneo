@@ -283,8 +283,14 @@ export function calculateReadinessLevel(
     avgScore: number,
     avgAccuracy: number,
     attemptCount: number,
-    leaderboardData?: any
+    leaderboardData?: any,
+    history: AttemptWithDetails[] = [] // Added history parameter
 ): ReadinessDetail {
+    // Calculate recency for all paths
+    const lastDate = history.length > 0 ? new Date(history[0].created_at) : new Date();
+    const daysSince = Math.floor((new Date().getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+    const recency = Math.max(0, 100 - (daysSince * 10));
+
     // If we have official leaderboard data, use it!
     if (leaderboardData && leaderboardData.score !== undefined) {
         const score = leaderboardData.score;
@@ -302,6 +308,9 @@ export function calculateReadinessLevel(
             color = 'brand-orange';
         }
 
+        // 6. Recency (Time since last test)
+        // Calculated at top of function
+
         return {
             level,
             label,
@@ -312,7 +321,7 @@ export function calculateReadinessLevel(
                 volume: (leaderboardData.volume_factor || 0) * 100,
                 coverage: (leaderboardData.coverage_score || 0) * 100,
                 reliability: (leaderboardData.reliability || 0) * 100,
-                recency: (leaderboardData.recency_score || 0) * 100
+                recency: Math.round(recency) // Use the calculated recency
             }
         };
     }
@@ -328,17 +337,17 @@ export function calculateReadinessLevel(
     if (total >= 5) {
         return {
             level: 'high', label: 'Pronto', color: 'semantic-success', score: scoreEstimate,
-            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: 100 }
+            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: Math.round(recency) }
         };
     } else if (total >= 3) {
         return {
             level: 'medium', label: 'In progresso', color: 'brand-orange', score: scoreEstimate,
-            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: 100 }
+            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: Math.round(recency) }
         };
     } else {
         return {
             level: 'low', label: 'Da migliorare', color: 'semantic-error', score: scoreEstimate,
-            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: 100 }
+            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: Math.round(recency) }
         };
     }
 }

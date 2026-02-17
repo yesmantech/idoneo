@@ -8,6 +8,8 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 // Auth & Onboarding
 const LoginPage = React.lazy(() => import('./app/login/page'));
 const WaitlistPage = React.lazy(() => import('./app/waitlist/page'));
+const RecoverPasswordPage = React.lazy(() => import('./app/recover-password/page'));
+const UpdatePasswordPage = React.lazy(() => import('./app/update-password/page'));
 
 // Home & Profile
 const HomePage = React.lazy(() => import('./app/page'));
@@ -42,6 +44,8 @@ const LeaderboardPage = React.lazy(() => import('./app/leaderboard/page'));
 // Informational Pages
 const PunteggiPage = React.lazy(() => import('./app/come-funziona/punteggi/page'));
 const PreparazionePage = React.lazy(() => import('./app/preparazione/page'));
+
+// Skitla Integration
 
 // Bandi Pages
 const BandiListPage = React.lazy(() => import('./app/bandi/BandiListPage'));
@@ -147,6 +151,8 @@ export default function App() {
                                     <Suspense fallback={<AdminLoading />}>
                                         <Routes>
                                             <Route path="/login" element={<LoginPage />} />
+                                            <Route path="/recover-password" element={<RecoverPasswordPage />} />
+                                            <Route path="/update-password" element={<UpdatePasswordPage />} />
                                             <Route path="/waitlist" element={<WaitlistPage />} />
 
                                             {/* Main App Layout */}
@@ -208,6 +214,8 @@ export default function App() {
 
                                             {/* Demo Pages */}
                                             <Route path="/demo/flames" element={<FlamesDemoPage />} />
+
+                                            {/* Skitla Landing Page */}
 
                                             {/* Admin - Protected with AdminGuard + Lazy loaded */}
                                             <Route element={

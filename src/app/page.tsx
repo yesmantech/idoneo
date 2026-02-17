@@ -25,7 +25,7 @@ import BandiScadenzaSection from "@/components/home/BandiScadenzaSection";
 import NewArrivalsSection from "@/components/home/NewArrivalsSection";
 import PopularSection from "@/components/home/PopularSection";
 import SEOHead from "@/components/seo/SEOHead";
-import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, type RecentlyUsedItem, type NewArrivalQuiz, type PopularRole } from "@/lib/homeSectionsService";
+import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, fetchRecentCategories, type RecentlyUsedItem, type NewArrivalQuiz, type PopularRole } from "@/lib/homeSectionsService";
 import { fetchClosingSoonBandi, type Bando } from "@/lib/bandiService";
 
 // =============================================================================
@@ -43,6 +43,7 @@ export default function HomePage() {
   const [closingSoonBandi, setClosingSoonBandi] = useState<Bando[]>([]);
   const [newArrivals, setNewArrivals] = useState<NewArrivalQuiz[]>([]);
   const [popularRoles, setPopularRoles] = useState<PopularRole[]>([]);
+  const [recentCategories, setRecentCategories] = useState<Category[]>([]);
 
   // Auto-start onboarding for first-time users
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function HomePage() {
     fetchClosingSoonBandi(7, 8).then(setClosingSoonBandi);
     fetchNewArrivals(30, 10).then(setNewArrivals);
     fetchMostPopular(5).then(setPopularRoles);
+    fetchRecentCategories(8).then(setRecentCategories);
 
     // Offline Sync Trigger
     import("@/lib/offlineService").then(({ offlineService }) => {
@@ -104,7 +106,7 @@ export default function HomePage() {
         </section>
 
         {/* 2. SEARCH BAR - Overlaps hero for visual continuity */}
-        <section className="px-4 lg:px-8 -mt-6 lg:-mt-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20">
+        <section className="px-4 lg:px-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20 -mt-6 lg:-mt-8">
           <SearchSection items={searchItems} />
         </section>
 
@@ -129,6 +131,16 @@ export default function HomePage() {
             contests={consigliati}
           />
         </section>
+
+        {/* 5b. RECENTLY ADDED - Fresh content */}
+        {recentCategories.length > 0 && (
+          <section className="mb-8 lg:mb-10">
+            <ConcorsiSection
+              title="Aggiunti di recente"
+              contests={recentCategories}
+            />
+          </section>
+        )}
 
         {/* 6. NEW ARRIVALS - Fresh content */}
         {newArrivals.length > 0 && (

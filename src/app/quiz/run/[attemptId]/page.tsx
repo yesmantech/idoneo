@@ -61,6 +61,8 @@ import { statsService } from "@/lib/statsService";
 import { leaderboardService } from "@/lib/leaderboardService";
 import { badgeService } from "@/lib/badgeService";
 import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
+import { hapticLight, hapticSuccess, hapticError, hapticSelection } from "@/lib/haptics";
+import { analytics } from "@/lib/analytics";
 import { useOnboarding } from "@/context/OnboardingProvider";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { AnimatePresence } from "framer-motion";
@@ -401,11 +403,20 @@ export default function QuizRunnerPage() {
         const nextList = [...currentList];
         const normalizedCorrect = normalizeDBAnswer(currentQ.correctOption);
         const shouldLock = instantCheck;
+        const isCorrect = opt === normalizedCorrect;
+
+        // TIER S: Haptic Feedback
+        if (shouldLock) {
+            if (isCorrect) hapticSuccess();
+            else hapticError();
+        } else {
+            hapticSelection();
+        }
 
         nextList[currentIndex] = {
             ...currentQ,
             selectedOption: opt,
-            isCorrect: opt === normalizedCorrect,
+            isCorrect: isCorrect,
             isSkipped: false,
             isLocked: shouldLock
         };
@@ -832,7 +843,10 @@ export default function QuizRunnerPage() {
                                         <button
                                             key={idx}
                                             id={`question-nav-${idx}`}
-                                            onClick={() => setCurrentIndex(idx)}
+                                            onClick={() => {
+                                                hapticSelection();
+                                                setCurrentIndex(idx);
+                                            }}
                                             className={`w-9 h-9 rounded-squircle flex-shrink-0 font-semibold text-[13px] transition-all flex items-center justify-center ${buttonClass}`}
                                         >
                                             {idx + 1}
@@ -859,7 +873,10 @@ export default function QuizRunnerPage() {
                         ) : (
                             <>
                                 <button
-                                    onClick={() => setCurrentIndex(p => Math.max(0, p - 1))}
+                                    onClick={() => {
+                                        hapticLight();
+                                        setCurrentIndex(p => Math.max(0, p - 1));
+                                    }}
                                     disabled={currentIndex === 0}
                                     className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
                                         ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
@@ -879,7 +896,10 @@ export default function QuizRunnerPage() {
                                     </button>
                                 ) : (
                                     <button
-                                        onClick={() => setCurrentIndex(p => Math.min(answering.length - 1, p + 1))}
+                                        onClick={() => {
+                                            hapticLight();
+                                            setCurrentIndex(p => Math.min(answering.length - 1, p + 1));
+                                        }}
                                         className="flex-1 py-3 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                     >
                                         Successiva

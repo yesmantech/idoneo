@@ -9,6 +9,7 @@ import TierSLoader from "@/components/ui/TierSLoader";
 import ReadinessCard from "@/components/role/ReadinessCard";
 import AttemptCard from "@/components/stats/AttemptCard";
 import SEOHead from "@/components/seo/SEOHead";
+import Counter from "@/components/ui/Counter";
 
 // =============================================================================
 // ROLE DETAIL PAGE - Tier S Redesign
@@ -346,9 +347,12 @@ function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, c
   return (
     <>
       <section className="flex md:grid md:grid-cols-3 gap-2.5 md:gap-4 overflow-x-auto md:overflow-visible pb-1 md:pb-0 -mx-4 md:mx-0 px-4 md:px-0 scrollbar-hide snap-x md:snap-none">
-        {stats.map((stat) => (
-          <div
+        {stats.map((stat, idx) => (
+          <motion.div
             key={stat.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 * idx }}
             onClick={() => setSelectedStat({
               title: stat.label,
               desc: stat.description,
@@ -362,10 +366,12 @@ function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, c
               <stat.icon className={`w-4 h-4 ${stat.themeText}`} />
             </div>
             <div className="text-center">
-              <span className="block text-lg md:text-xl font-bold text-slate-900 dark:text-[var(--foreground)] leading-none mb-1">{stat.value}</span>
+              <span className="block text-lg md:text-xl font-bold text-slate-900 dark:text-[var(--foreground)] leading-none mb-1">
+                {typeof stat.value === 'number' ? <Counter value={stat.value} /> : stat.value}
+              </span>
               <span className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">{stat.label}</span>
             </div>
-          </div>
+          </motion.div>
         ))}
       </section>
 

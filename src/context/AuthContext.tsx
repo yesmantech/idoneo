@@ -61,6 +61,8 @@ interface Profile {
     streak_max?: number;
     /** Array of modal keys the user has dismissed */
     dismissed_modals?: string[];
+    /** Lifetime total XP across all seasons */
+    total_xp?: number;
 }
 
 /**
@@ -75,6 +77,10 @@ interface AuthContextType {
     loading: boolean;
     /** Manually refresh profile data after updates */
     refreshProfile: () => Promise<void>;
+    /** Check if a modal has been dismissed */
+    isModalDismissed: (key: string) => boolean;
+    /** Persist modal dismissal to DB */
+    dismissModal: (key: string) => Promise<void>;
 }
 
 // ============================================================================
@@ -86,6 +92,8 @@ const AuthContext = createContext<AuthContextType>({
     profile: null,
     loading: true,
     refreshProfile: async () => { },
+    isModalDismissed: () => false,
+    dismissModal: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -136,8 +144,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return () => subscription.unsubscribe();
     }, []);
 
+    const isModalDismissed = (key: string) => {
+        return profile?.dismissed_modals?.includes(key) ?? false;
+    };
+
+    const dismissModal = async (key: string) => {
+        if (!user || !profile) return;
+        const current = profile.dismissed_modals || [];
+        if (current.includes(key)) return;
+
+        const updated = [...current, key];
+
+        // Optimistic update
+        setProfile({ ...profile, dismissed_modals: updated });
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({ dismissed_modals: updated })
+            .eq('id', user.id);
+
+        if (error) {
+            console.error("Error persisting modal dismissal:", error);
+            // Rollback on error
+            await refreshProfile();
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, profile, loading, refreshProfile }}>
+        <AuthContext.Provider value={{ user, profile, loading, refreshProfile, isModalDismissed, dismissModal }}>
             {children}
         </AuthContext.Provider>
     );

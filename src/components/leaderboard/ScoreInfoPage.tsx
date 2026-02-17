@@ -88,44 +88,52 @@ function PrepContent() {
                 </div>
                 <h2 className="text-2xl font-black text-[var(--foreground)]">Punteggio di Preparazione</h2>
                 <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed">
-                    Misuriamo la tua preparazione da 0 a 100 basandoci sui quiz svolti, la qualità delle risposte e la costanza.
+                    Misuriamo la tua preparazione da 0 a 100 basandoci su 5 fattori chiave che analizzano la tua banca dati.
                 </p>
             </div>
 
             {/* Factors */}
             <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider pl-1">I 4 Fattori</h3>
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider pl-1">I 5 Fattori</h3>
 
                 <InfoCard
                     icon={<Layers className="w-5 h-5" />}
-                    title="Volume di Quiz"
-                    subtitle="Il fattore principale (45%)"
+                    title="Volume"
+                    subtitle="Quantità (20%)"
                     text="Più domande diverse affronti, più il sistema ha dati per valutarti. I punteggi alti richiedono un volume consistente."
                     color="cyan"
                 />
 
                 <InfoCard
                     icon={<CheckCircle2 className="w-5 h-5" />}
-                    title="Accuracy"
-                    subtitle="Precisione (30%)"
+                    title="Precisione"
+                    subtitle="Accuracy (25%)"
                     text="È la tua percentuale di risposte corrette. Il sistema pesa maggiormente le risposte date recentemente."
                     color="emerald"
                 />
 
                 <InfoCard
                     icon={<Clock className="w-5 h-5" />}
-                    title="Recenza"
-                    subtitle="Costanza (15%)"
+                    title="Recency"
+                    subtitle="Freschezza (20%)"
                     text="Se non ti alleni da tempo, il punteggio scende. Per mantenerlo alto, devi esercitarti con regolarità."
-                    color="amber"
+                    color="rose"
                 />
 
                 <InfoCard
                     icon={<FileText className="w-5 h-5" />}
                     title="Copertura"
-                    subtitle="Profondità (10%)"
+                    subtitle="Profondità (20%)"
                     text="Premia chi esplora tutta la banca dati invece di ripetere sempre le stesse domande."
                     color="purple"
+                />
+
+                <InfoCard
+                    icon={<Zap className="w-5 h-5" />}
+                    title="Affidabilità"
+                    subtitle="Costanza (15%)"
+                    text="Valuta quanto sono stabili i tuoi risultati nel tempo. Poca varianza significa una preparazione solida."
+                    color="amber"
                 />
             </div>
 
@@ -231,7 +239,8 @@ function InfoCard({ icon, title, subtitle, text, color }: { icon: React.ReactNod
         emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500',
         amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-500',
         purple: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500',
-        blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-500'
+        blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-500',
+        rose: 'bg-rose-50 dark:bg-rose-900/20 text-rose-500'
     };
 
     return (

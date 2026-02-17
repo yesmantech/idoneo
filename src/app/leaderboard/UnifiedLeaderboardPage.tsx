@@ -95,7 +95,7 @@ function LeagueCountdown() {
 
 export default function UnifiedLeaderboardPage() {
 
-    const { user, profile, refreshProfile } = useAuth();
+    const { user, profile, isModalDismissed, dismissModal } = useAuth();
     // Use role-based check instead of hardcoded emails
     const isAdmin = profile?.role === 'admin';
 
@@ -232,33 +232,11 @@ export default function UnifiedLeaderboardPage() {
     const [showInfoPage, setShowInfoPage] = useState(false);
     const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
 
-    // Helper: Check if a modal has been dismissed (DB ONLY)
-    const isInfoDismissed = (type: 'xp' | 'prep') => {
-        const dbKey = type === 'xp' ? 'xp_info' : 'prep_info';
-        return profile?.dismissed_modals?.includes(dbKey) ?? false;
-    };
-
-    // Helper: Dismiss a modal and persist to DB ONLY
-    const dismissInfoModal = async (type: 'xp' | 'prep') => {
-        if (!user || !profile) return;
-        const dbKey = type === 'xp' ? 'xp_info' : 'prep_info';
-        const current = profile.dismissed_modals || [];
-        if (current.includes(dbKey)) return;
-
-        // Optimistic update to UI state / local profile cache could be good, but for now we trust refresh
-        const updated = [...current, dbKey];
-        await supabase
-            .from('profiles')
-            .update({ dismissed_modals: updated })
-            .eq('id', user.id);
-        refreshProfile();
-    };
-
     // Auto-Onboarding Check for Global XP
     useEffect(() => {
         if (loading || !profile) return; // strict wait for profile
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
-        if (!isInfoDismissed('xp') && selection === 'xp' && !tourIsActive) {
+        if (!isModalDismissed('xp_info') && selection === 'xp' && !tourIsActive) {
             setInfoType('xp');
             setTimeout(() => setShowInfoModal(true), 500);
         }
@@ -269,7 +247,7 @@ export default function UnifiedLeaderboardPage() {
         if (loading || !profile) return; // strict wait for profile
         const tourIsActive = isTourActive && activeContext === 'leaderboard';
         if (selection !== 'xp' && !tourIsActive) {
-            if (!isInfoDismissed('prep')) {
+            if (!isModalDismissed('prep_info')) {
                 setInfoType('prep');
                 setTimeout(() => setShowInfoModal(true), 500);
             }
@@ -279,7 +257,7 @@ export default function UnifiedLeaderboardPage() {
 
     const handleCloseModal = () => {
         setShowInfoModal(false);
-        dismissInfoModal(infoType);
+        dismissModal(infoType === 'xp' ? 'xp_info' : 'prep_info');
     };
 
     // Close InfoModal when onboarding tour becomes active (fixes race condition)
@@ -411,7 +389,7 @@ export default function UnifiedLeaderboardPage() {
                 onMoreInfo={() => {
                     setShowInfoModal(false);
                     setShowInfoPage(true);
-                    dismissInfoModal(infoType);
+                    dismissModal(infoType === 'xp' ? 'xp_info' : 'prep_info');
                 }}
             />
 

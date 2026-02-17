@@ -87,6 +87,12 @@ const TIER_CONFIG = {
 };
 
 /**
+ * Tier thresholds for game progression.
+ * These are the points where the visual flame changes its appearance.
+ */
+export const TIER_THRESHOLDS = [7, 14, 30, 60, 100];
+
+/**
  * Helper to get tier from streak count
  */
 export function getTierFromStreak(streak: number): FlameTier {
