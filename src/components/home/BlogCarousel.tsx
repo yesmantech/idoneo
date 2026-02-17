@@ -123,9 +123,8 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
     const itemPosition = (cardWidth + gap) * index;
     const distance = cardWidth + gap;
 
-    // "Tier S" Giant-Left Scaling
-    // We boost the scale to 1.25x for massive presence.
-    // Origin is left for clean alignment with the branding margin.
+    // "Tier S" True Giant-Left Scaling
+    // Increased to 1.28x for maximum dominance.
     const scale = useTransform(
         scrollX,
         [
@@ -133,7 +132,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
             itemPosition,
             itemPosition + distance
         ],
-        [0.85, 1.25, 0.85]
+        [0.85, 1.28, 0.85]
     );
 
     const opacity = useTransform(
@@ -157,9 +156,8 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
     );
 
     // Dynamic Margin Compensation (Mobile Only)
-    // When the card scales up by 0.25 (to 1.25), it grows to the right by cardWidth * 0.25.
-    // We animate marginRight to push the next sibling away by exactly that amount.
-    const extraMargin = cardWidth * 0.25;
+    // Scale 1.28 = 0.28 growth.
+    const extraMargin = cardWidth * 0.28;
     const marginRight = useTransform(
         scrollX,
         [
