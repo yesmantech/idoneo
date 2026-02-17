@@ -28,7 +28,7 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
     const isMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
 
     // We use the same constants as RecentlyUsedSection for perfect sync
-    const gap = isMobile ? 12 : 24;
+    const gap = isMobile ? 16 : 24;
     const padding = isMobile ? 16 : 32; // Matches px-4 and px-8
     const rightPeek = isMobile ? 28 : (containerWidth > 1440 ? 400 : 200);
 
