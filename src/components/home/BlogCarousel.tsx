@@ -8,7 +8,7 @@ interface BlogCarouselProps {
 }
 
 // Configuration handles responsive visual tuning
-const GAP_MOBILE = 8; // Tighter gap for better "peek" signal
+const GAP_MOBILE = 12; // Slightly wider for better separation of massive cards
 const GAP_DESKTOP = 24;
 
 export default function BlogCarousel({ posts }: BlogCarouselProps) {
@@ -56,14 +56,12 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
 
     // sidePadding is the margin between viewport edge and card edge when centered.
     // Peek = sidePadding - gap.
-    // Previous: 58px sidePadding (50px peek).
-    // New: 62px sidePadding (54px peek) for "slightly more visible" signal.
-    const sidePadding = isMobile ? 62 : 160;
+    // To get a very prominent peek (~58px): sidePadding = 70px.
+    const sidePadding = isMobile ? 70 : 160;
 
     const cardWidth = useMemo(() => {
-        // Layout width is slightly smaller to allow the peek
         const maxWidth = containerWidth - (sidePadding * 2);
-        return Math.min(1200, Math.max(260, maxWidth));
+        return Math.min(1200, Math.max(240, maxWidth));
     }, [containerWidth, isMobile, sidePadding]);
 
     // Symmetrical padding for perfect centering
@@ -114,9 +112,9 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: Carous
     const itemPosition = (cardWidth + gap) * index;
     const distance = cardWidth + gap;
 
-    // "Tier S" Composite Scaling
-    // We increase the scale to 1.15x to make the centered card 'feel' even bigger 
-    // despite the layout width being optimized for the peek.
+    // "Tier S" Ultra-Dominant Scaling (match reference)
+    // We boost the scale to 1.25x to make the centered card fill much of the viewport 
+    // while maintaining the large layout "peek" signal.
     const scale = useTransform(
         scrollX,
         [
@@ -124,7 +122,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: Carous
             itemPosition,
             itemPosition + distance
         ],
-        [0.85, 1.15, 0.85]
+        [0.8, 1.25, 0.8]
     );
 
     const opacity = useTransform(
@@ -134,7 +132,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: Carous
             itemPosition,
             itemPosition + distance
         ],
-        [0.4, 1, 0.4]
+        [0.3, 1, 0.3]
     );
 
     return (
@@ -150,7 +148,7 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority }: Carous
         >
             <Link
                 to={`/blog/${post.slug}`}
-                className="block w-full relative overflow-hidden rounded-[32px] md:rounded-[48px] shadow-xl transition-all duration-700 ease-out hover:shadow-[0_20px_60px_-15px_rgba(0,177,255,0.4)] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 group"
+                className="block w-full relative overflow-hidden rounded-[40px] md:rounded-[48px] shadow-xl transition-all duration-700 ease-out hover:shadow-[0_20px_60px_-15px_rgba(0,177,255,0.4)] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 group"
                 style={{
                     aspectRatio: '16 / 9',
                     perspective: '1200px',
