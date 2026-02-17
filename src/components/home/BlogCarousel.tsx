@@ -61,9 +61,18 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
     const rightPeek = isMobile ? 60 : 160;
 
     const cardWidth = useMemo(() => {
+        if (isMobile) {
+            // "Giant but Contained" Logic:
+            // We want the *Expanded* card (at 1.25x scale) to fit perfectly in the available space
+            // leaving room for the gap and the peek.
+            // Formula: BaseWidth * 1.25 = Viewport - LeftMargin - Gap - Peek
+            const availableSpace = containerWidth - leftMargin - gap - rightPeek;
+            return availableSpace / 1.25;
+        }
+
         const maxWidth = containerWidth - leftMargin - rightPeek;
         return Math.min(1200, Math.max(240, maxWidth));
-    }, [containerWidth, isMobile, leftMargin, rightPeek]);
+    }, [containerWidth, isMobile, leftMargin, rightPeek, gap]);
 
     return (
         <div className="relative w-full group/carousel">
@@ -80,7 +89,7 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
             >
                 {posts.map((post, index) => (
                     <CarouselItem
-                        key={post.id}
+                        // key is handled by React parent map
                         post={post}
                         index={index}
                         scrollX={scrollXSpring}
@@ -109,6 +118,8 @@ interface CarouselItemProps {
 
 function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile }: CarouselItemProps) {
     // For snap-start, the item position is simply its cumulative offset
+    // Note: We need to account for the dynamic margin in the scroll position logic if we want perfect syncing,
+    // but standard index-based position works well enough for the visual effect in a snap container.
     const itemPosition = (cardWidth + gap) * index;
     const distance = cardWidth + gap;
 
@@ -135,15 +146,40 @@ function CarouselItem({ post, index, scrollX, cardWidth, gap, priority, isMobile
         [0.4, 1, 0.4]
     );
 
+    const zIndex = useTransform(
+        scrollX,
+        [
+            itemPosition - distance * 0.5,
+            itemPosition,
+            itemPosition + distance * 0.5
+        ],
+        [1, 10, 1]
+    );
+
+    // Dynamic Margin Compensation (Mobile Only)
+    // When the card scales up by 0.25 (to 1.25), it grows to the right by cardWidth * 0.25.
+    // We animate marginRight to push the next sibling away by exactly that amount.
+    const extraMargin = cardWidth * 0.25;
+    const marginRight = useTransform(
+        scrollX,
+        [
+            itemPosition - distance,
+            itemPosition,
+            itemPosition + distance
+        ],
+        [0, isMobile ? extraMargin : 0, 0]
+    );
+
     return (
         <motion.div
-            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-4"
+            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-4 transition-all"
             style={{
                 width: `${cardWidth}px`,
                 scale,
                 opacity,
-                zIndex: 1,
-                willChange: 'transform, opacity',
+                zIndex,
+                marginRight, // Pushes the next card away when this one expands
+                willChange: 'transform, opacity, margin-right',
                 transformOrigin: isMobile ? 'center left' : 'center center',
             }}
         >
