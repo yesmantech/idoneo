@@ -75,7 +75,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const isLeaderboard = location.pathname.startsWith('/leaderboard');
 
     return (
-        <div className="flex min-h-screen bg-[var(--background)] font-sans text-[var(--foreground)] transition-colors duration-300">
+        <div className="flex min-h-screen bg-[var(--background)] font-sans text-[var(--foreground)] transition-colors duration-300 overflow-hidden">
+            {/* Cinematic Global Texture */}
+            <div className="grain-overlay" aria-hidden="true" />
+
             {/* Fixed top safe area cover to prevent overscroll showing empty area */}
             {isNativeApp && !isAdmin && (
                 <div
