@@ -17,8 +17,7 @@ export default function AdminUsersPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             const { data, error } = await supabase
-                .from('profiles')
-                .select('*');
+                .rpc('get_admin_profiles');
 
             if (data) setUsers(data);
             if (error) console.error('Error fetching users:', error);
