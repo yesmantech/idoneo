@@ -25,9 +25,8 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
             return;
         }
 
-        // Logged in but not admin (Bypass for SuperUser)
-        const isSuperUser = user.email === 'alessandro.valenza22@gmail.com';
-        if (profile?.role !== 'admin' && !isSuperUser) {
+        // Logged in but not admin
+        if (profile?.role !== 'admin') {
             console.warn('AdminGuard: Unauthorized access attempt by user:', user.email);
             navigate('/', { replace: true });
             return;

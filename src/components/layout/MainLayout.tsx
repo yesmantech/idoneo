@@ -22,21 +22,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // REDUNDANT WAITLIST LOCK:
     // Ensure only Admins can see the MainLayout (App).
     const { user, profile, loading } = useAuth();
-    const isSuperUser = user?.email === 'alessandro.valenza22@gmail.com';
-
-    // DEV MODE: Skip waitlist lock on localhost (REMOVED)
-    // const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
     // IMMEDIATE UNLOCK FOR ALL USERS (Except Guests)
-    if (isSuperUser) {
-        // No checks. Just render.
-    } else if (!loading) {
+    if (!loading) {
         if (!user && !isAdmin) {
             // Guest -> Force Waitlist Landing
             return <Navigate to="/waitlist" replace />;
         }
-        // NOTE: Logged in users are no longer redirected to /waitlist/success
-        // They proceed directly to the app routes.
     }
 
     // Bottom Nav Items - Updated for Idoneo
