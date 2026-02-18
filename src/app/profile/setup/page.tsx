@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { Plus, User, Loader2 } from 'lucide-react';
@@ -173,12 +174,15 @@ export default function ProfileSetupPage() {
                 localStorage.removeItem('referral_code');
             }
 
+            // Sanitization: Clean the nickname to prevent XSS
+            const cleanNickname = DOMPurify.sanitize(nickname.trim());
+
             // Use UPDATE instead of UPSERT to avoid INSERT RLS issues
             // The profile should already exist (created by trigger on signup)
             const { error: updateError, data } = await supabase
                 .from('profiles')
                 .update({
-                    nickname,
+                    nickname: cleanNickname,
                     avatar_url: avatarUrl,
                     email: currentUser.email,
                     referred_by: referredBy,
@@ -195,7 +199,7 @@ export default function ProfileSetupPage() {
                     .from('profiles')
                     .insert({
                         id: user.id,
-                        nickname,
+                        nickname: cleanNickname,
                         avatar_url: avatarUrl,
                         email: user.email,
                         referred_by: referredBy, // FIX: Include referral attribution in INSERT too!

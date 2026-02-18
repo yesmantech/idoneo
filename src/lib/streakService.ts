@@ -81,8 +81,13 @@ export const streakService = {
                 const lastActiveDate = new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate());
 
                 if (lastActiveDate.getTime() === today.getTime()) {
-                    // Already active today, do nothing (unless we want to just update the timestamp)
-                    // We'll update timestamp anyway to keep it fresh
+                    // Already active today, ABORT increment to prevent double-claim exploit
+                    return {
+                        streak: newStreak,
+                        streakUpdated: false,
+                        isBroken: false,
+                        isMilestone: false
+                    };
                 } else if (lastActiveDate.getTime() === yesterday.getTime()) {
                     // Was active yesterday, increment streak!
                     newStreak += 1;
@@ -101,15 +106,17 @@ export const streakService = {
                 newMax = newStreak;
             }
 
-            // 2. Update Database
-            await supabase
-                .from('profiles')
-                .update({
-                    streak_current: newStreak,
-                    streak_max: newMax,
-                    last_active_at: now.toISOString(),
-                })
-                .eq('id', userId);
+            // 2. Update Database (ONLY if legitimately updated)
+            if (streakUpdated) {
+                await supabase
+                    .from('profiles')
+                    .update({
+                        streak_current: newStreak,
+                        streak_max: newMax,
+                        last_active_at: now.toISOString(),
+                    })
+                    .eq('id', userId);
+            }
 
             // 3. Track Event if streak increased
             if (streakUpdated && newStreak > 1) {

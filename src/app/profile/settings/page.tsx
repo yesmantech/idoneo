@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingProvider';
 import { useTheme } from '@/context/ThemeContext';
@@ -90,12 +91,15 @@ export default function ProfileSettingsPage() {
             // Persist theme selection
             persistTheme(selectedTheme);
 
+            // Sanitization: Clean the nickname to prevent XSS
+            const cleanNickname = DOMPurify.sanitize(nickname.trim());
+
             const { error } = await supabase
                 .from('profiles')
                 .upsert({
                     id: user?.id,
                     email: user?.email,
-                    nickname: nickname,
+                    nickname: cleanNickname,
                     avatar_url: avatarUrl,
                     updated_at: new Date().toISOString()
                 });
