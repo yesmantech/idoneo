@@ -143,18 +143,35 @@ export default function QuizStatsPage() {
             if (quizData) {
                 setQuizTitle(quizData.title);
 
-                // Use JOIN data directly - no extra query needed!
-                const rule = quizData.simulation_rule as { total_questions?: number; points_correct?: number } | null;
-                if (rule && rule.total_questions && rule.points_correct) {
-                    maxCalc = rule.total_questions * rule.points_correct;
+                // 1. Check if there are specific subject rules (highest priority)
+                const { data: rules } = await supabase
+                    .from('quiz_subject_rules')
+                    .select('question_count')
+                    .eq('quiz_id', quizId);
+
+                if (rules && rules.length > 0) {
+                    const totalFromRules = rules.reduce((acc, r) => acc + (r.question_count || 0), 0);
+                    if (totalFromRules > 0) {
+                        maxCalc = totalFromRules * (quizData.points_correct || 1);
+                    }
                 }
 
+                // 2. Fallback to simulation_rule join (legacy)
+                if (maxCalc === 0) {
+                    const rule = quizData.simulation_rule as { total_questions?: number; points_correct?: number } | null;
+                    if (rule && rule.total_questions && rule.points_correct) {
+                        maxCalc = rule.total_questions * rule.points_correct;
+                    }
+                }
+
+                // 3. Fallback to total_questions column
                 if (maxCalc === 0 && quizData.total_questions && quizData.points_correct) {
                     maxCalc = quizData.total_questions * quizData.points_correct;
                 }
             }
 
-            if (!quizData?.rule_id && data && data.length > 0) {
+            // 4. Fallback to max questions in attempts (if still 0)
+            if (maxCalc === 0 && data && data.length > 0) {
                 const maxQuestionsInAttempts = Math.max(...data.map(d => d.total_questions || 0));
                 if (maxQuestionsInAttempts > 0) {
                     const pointsPerQuestion = quizData?.points_correct || 1;
@@ -194,12 +211,13 @@ export default function QuizStatsPage() {
             return acc + ((curr.correct || 0) / curr.total_questions);
         }, 0);
 
-        const avgScore = totalTests ? totalScore / totalTests : 0;
+        const avgScoreRaw = totalTests ? totalScore / totalTests : 0;
+        const avgScoreNormalized = maxPossible > 0 ? (avgScoreRaw / maxPossible) * 100 : avgScoreRaw;
         const avgAccuracy = validAccuracyCount ? (totalAccuracy / validAccuracyCount) * 100 : 0;
 
         setStats({
             totalTests,
-            avgScore,
+            avgScore: avgScoreNormalized,
             avgAccuracy,
             bestScore: maxScore,
             maxPossibleScore: maxPossible
@@ -214,7 +232,7 @@ export default function QuizStatsPage() {
 
         // 3. Calculate Readiness (Prioritize official leaderboard score if available)
         if (totalTests >= 1) { // Show it even with 1 test if we have leaderboard data
-            const readinessData = calculateReadinessLevel(avgScore, avgAccuracy, totalTests, leaderboardData);
+            const readinessData = calculateReadinessLevel(avgScoreNormalized, avgAccuracy, totalTests, leaderboardData);
             setReadiness(readinessData);
         }
 
