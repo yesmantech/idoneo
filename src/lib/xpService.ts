@@ -103,7 +103,6 @@ export const xpService = {
         }
 
         // 3. Calculate XP (1 XP per correct answer)
-        // If 'correct' column is reliable use it, otherwise recount from answers JSON
         let xpAmount = attempt.correct || 0;
 
         // Fallback calculation if correct is null/0 but answers exist
@@ -111,53 +110,15 @@ export const xpService = {
             xpAmount = attempt.answers.filter((a: any) => a.isCorrect).length;
         }
 
-        if (xpAmount <= 0) {
-            // Mark as awarded even if 0 to prevent retries
-            await supabase.from('quiz_attempts').update({ xp_awarded: true }).eq('id', attemptId);
-            return 0;
-        }
+        // SECURITY UPDATE: XP is now handled by a Database Trigger (tr_award_xp_on_completion).
+        // We do NOT write to profiles/user_xp/xp_events from the client anymore.
+        // The trigger listens for updates to 'quiz_attempts' where 'correct' is set.
 
-        // 4. Record XP Event
-        const { error: eventError } = await supabase.from('xp_events').insert({
-            user_id: userId,
-            xp_amount: xpAmount,
-            source_type: 'attempt_completion',
-            attempt_id: attemptId
-        });
+        // If the attempt is just being finished now, the 'correct' field update
+        // (which usually happens just before this call in the app flow)
+        // will have fired the trigger.
 
-        if (eventError) {
-            console.error("XP: Failed to insert event", eventError);
-            // Don't duplicate logic, just return
-            return 0;
-        }
-
-        // 5. Update Global Profile Balance (Atomic via RPC)
-        const { error: profileXpError } = await supabase.rpc('increment_profile_xp', {
-            p_user_id: userId,
-            p_amount: xpAmount
-        });
-
-        if (profileXpError) {
-            console.error("XP: Failed to increment profile XP", profileXpError);
-        }
-
-        // 6. Update Seasonal Balance (Atomic via RPC)
-        const seasonId = await this.getActiveSeasonId();
-        if (seasonId) {
-            const { error: seasonXpError } = await supabase.rpc('upsert_user_xp', {
-                p_user_id: userId,
-                p_season_id: seasonId,
-                p_amount: xpAmount
-            });
-
-            if (seasonXpError) {
-                console.error("XP: Failed to upsert seasonal XP", seasonXpError);
-            }
-        }
-
-        // 7. Mark Attempt as Awarded
-        await supabase.from('quiz_attempts').update({ xp_awarded: true }).eq('id', attemptId);
-
+        // We return the amount purely for UI feedback.
         return xpAmount;
     },
 

@@ -115,16 +115,27 @@ export default function AdminUploadCsvPage() {
         continue;
       }
 
+      // Helper to sanitize CSV Injection (Formula Injection)
+      // If a field starts with =, +, -, @, it can execute code in Excel.
+      const sanitize = (val: string | undefined) => {
+        if (!val) return val;
+        // If it starts with a dangerous char, prepend a single quote to force text mode
+        if (/^[\=\+\-\@]/.test(val)) {
+          return "'" + val;
+        }
+        return val;
+      };
+
       result.push({
-        question_text: cols[idxText] ?? "",
-        option_a: cols[idxA] ?? "",
-        option_b: cols[idxB] ?? "",
-        option_c: cols[idxC] ?? "",
-        option_d: cols[idxD] ?? "",
+        question_text: sanitize(cols[idxText] ?? "")!,
+        option_a: sanitize(cols[idxA] ?? "")!,
+        option_b: sanitize(cols[idxB] ?? "")!,
+        option_c: sanitize(cols[idxC] ?? "")!,
+        option_d: sanitize(cols[idxD] ?? "")!,
         correct_option: cleanCorrect,
         subject_id: idxSubj > -1 ? cols[idxSubj] : undefined,
         image_name: idxImg > -1 ? cols[idxImg] : undefined,
-        explanation: idxExp > -1 ? cols[idxExp] : undefined,
+        explanation: sanitize(idxExp > -1 ? cols[idxExp] : undefined),
       });
     }
 
