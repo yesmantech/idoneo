@@ -19,9 +19,9 @@ BEGIN
 
   -- 2. Build result object
   SELECT jsonb_build_object(
-    'profile', (SELECT row_to_json(p) FROM profiles p WHERE id = target_user_id),
-    'attempts', (
-      SELECT json_agg(a) FROM (
+    'profile', (SELECT to_jsonb(p) FROM profiles p WHERE id = target_user_id),
+    'attempts', COALESCE((
+      SELECT jsonb_agg(a) FROM (
         SELECT 
           qa.id, 
           qa.created_at, 
@@ -37,7 +37,7 @@ BEGIN
         ORDER BY qa.created_at DESC
         LIMIT 50
       ) a
-    )
+    ), '[]'::jsonb)
   ) INTO v_result;
 
   RETURN v_result;
