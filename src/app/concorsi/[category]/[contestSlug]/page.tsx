@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 export default function ContestPage() {
-  const { category, role, contestSlug } = useParams<{ category: string; role: string; contestSlug: string }>();
+  const { category, contestSlug } = useParams<{ category: string; contestSlug: string }>();
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -70,7 +70,7 @@ export default function ContestPage() {
         >
           <ChevronLeft className="w-6 h-6" />
           <span className="text-[15px] font-medium uppercase tracking-wide ml-1">
-            {contest.roleSlug?.replace(/-/g, ' ') || "Indietro"}
+            Indietro
           </span>
         </button>
       </div>
@@ -129,7 +129,7 @@ export default function ContestPage() {
               </div>
             </div>
             <button
-              onClick={() => navigate(`/concorsi/${category}/${role}/${contestSlug}/custom`)}
+              onClick={() => navigate(`/concorsi/${category}/${contestSlug}/custom`)}
               className="w-full bg-[#A855F7] hover:bg-[#9333EA] text-white font-bold text-[16px] py-4 rounded-[18px] shadow-lg shadow-purple-200/50 transition-all flex items-center justify-center gap-2"
             >
               Configura Prova <span className="text-lg">→</span>

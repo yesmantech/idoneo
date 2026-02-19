@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import RoleSimulationSection from "@/components/concorsi/RoleSimulationSection";
 
 export default function SimulationTypePage() {
-  const { category, role, contestSlug } = useParams<{ category: string; role: string; contestSlug: string }>();
+  const { category, contestSlug } = useParams<{ category: string; contestSlug: string }>();
   const navigate = useNavigate();
 
   // State
@@ -13,7 +13,7 @@ export default function SimulationTypePage() {
   useEffect(() => {
     const loadData = async () => {
       // 1. Fetch Contest to get title
-      const { data: contest } = await supabase.from('quizzes').select('title, role:roles(title)').eq('slug', contestSlug).single();
+      const { data: contest } = await supabase.from('quizzes').select('title').eq('slug', contestSlug).single();
 
       if (contest) {
         setHeaderTitle(`Allenati per ${contest.title} `);
@@ -41,7 +41,6 @@ export default function SimulationTypePage() {
       <main className="container mx-auto px-5 md:px-6 py-8 max-w-4xl">
         <RoleSimulationSection
           category={category || ""}
-          role={role || ""}
           contestSlug={contestSlug || ""}
         />
       </main>

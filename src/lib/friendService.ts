@@ -108,10 +108,42 @@ export const friendService = {
 
         if (existing) {
             if (existing.status === 'rejected') {
-                // Optional: Allow re-requesting?
-                return { error: 'Request previously rejected.' };
+                // Check Max Attempts (3)
+                const attempts = existing.request_attempts || 1;
+
+                if (attempts >= 3) {
+                    return { error: 'Hai raggiunto il limite massimo di 3 richieste per questo utente.' };
+                }
+
+                // Revive request
+                const { error } = await supabase
+                    .from('friendships')
+                    .update({
+                        status: 'pending',
+                        request_attempts: attempts + 1,
+                        created_at: new Date().toISOString() // Bump timestamp to show as new
+                    })
+                    .eq('id', existing.id);
+
+                return { error };
             }
             return { error: 'Friendship already exists or is pending.' };
+        }
+
+        // 2. Check Daily Limit (Antispam)
+        const ONE_DAY_AGO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { count, error: countError } = await supabase
+            .from('friendships')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', currentUserId)
+            .eq('status', 'pending') // Count pending requests sent
+            .gte('created_at', ONE_DAY_AGO);
+
+        if (countError) {
+            console.error('Error checking limit:', countError);
+            // Default to allow if check fails, or block? Let's allow to avoid blocking legitimate users on errors, but log it.
+        } else if (count !== null && count >= 10) {
+            return { error: 'Hai raggiunto il limite giornaliero di 10 richieste. Riprova domani!' };
         }
 
         const { error } = await supabase
@@ -119,7 +151,8 @@ export const friendService = {
             .insert({
                 user_id: currentUserId,
                 friend_id: friendId,
-                status: 'pending'
+                status: 'pending',
+                request_attempts: 1
             });
 
         return { error };
@@ -137,12 +170,13 @@ export const friendService = {
     },
 
     /**
-     * Reject/Cancel a friend request
+     * Reject a friend request (Soft Delete)
+     * Sets status to 'rejected' so we can track attempts.
      */
     async removeFriendship(friendshipId: string) {
         const { error } = await supabase
             .from('friendships')
-            .delete()
+            .update({ status: 'rejected' })
             .eq('id', friendshipId);
         return { error };
     },
@@ -210,6 +244,7 @@ export const friendService = {
                     pendingReceived.push(profile);
                 }
             }
+            // Explicitly ignore 'rejected' here so they don't show up in lists
         });
 
         // 3. Merge Referred + Accepted (Avoid duplicates if logic changes later)

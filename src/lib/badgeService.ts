@@ -130,7 +130,7 @@ export const badgeService = {
             // 1. Fetch User Profile Stats
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
-                .select('total_xp, referral_count, current_streak')
+                .select('total_xp, referral_count, streak_current')
                 .eq('id', userId)
                 .single();
 
@@ -146,7 +146,7 @@ export const badgeService = {
 
             console.log('Badge Check: Data fetched', profile);
             console.log('Badge Check: Total XP:', profile.total_xp);
-            console.log('Badge Check: Current Streak:', profile.current_streak);
+            console.log('Badge Check: Current Streak:', profile.streak_current);
 
             // 2. veterano: 1000+ total XP (assuming 1 XP per correct answer)
             if ((profile.total_xp || 0) >= 1000) {
@@ -161,31 +161,31 @@ export const badgeService = {
             }
 
             // 4. costanza: 7 day streak
-            if ((profile.current_streak || 0) >= 7) {
+            if ((profile.streak_current || 0) >= 7) {
                 console.log('Badge Check: Awarding costanza');
                 await this.awardBadge(userId, 'costanza');
             }
 
             // 5. maratona: 14 day streak (Gold tier)
-            if ((profile.current_streak || 0) >= 14) {
+            if ((profile.streak_current || 0) >= 14) {
                 console.log('Badge Check: Awarding maratona');
                 await this.awardBadge(userId, 'maratona');
             }
 
             // 6. inarrestabile: 30 day streak
-            if ((profile.current_streak || 0) >= 30) {
+            if ((profile.streak_current || 0) >= 30) {
                 console.log('Badge Check: Awarding inarrestabile');
                 await this.awardBadge(userId, 'inarrestabile');
             }
 
             // 7. diamante: 60 day streak (Sapphire tier)
-            if ((profile.current_streak || 0) >= 60) {
+            if ((profile.streak_current || 0) >= 60) {
                 console.log('Badge Check: Awarding diamante');
                 await this.awardBadge(userId, 'diamante');
             }
 
             // 8. immortale: 100 day streak (Diamond tier)
-            if ((profile.current_streak || 0) >= 100) {
+            if ((profile.streak_current || 0) >= 100) {
                 console.log('Badge Check: Awarding immortale');
                 await this.awardBadge(userId, 'immortale');
             }

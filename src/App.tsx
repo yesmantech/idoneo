@@ -21,11 +21,10 @@ const QuizStatsPage = React.lazy(() => import('./app/profile/stats/QuizStatsPage
 // Concorsi Flow
 const ConcorsiSearchPage = React.lazy(() => import('./app/concorsi/search/page'));
 const ConcorsoHubPage = React.lazy(() => import('./app/concorsi/[category]/page'));
-const RolePage = React.lazy(() => import('./app/concorsi/[category]/[role]/page'));
-const ContestPage = React.lazy(() => import('./app/concorsi/[category]/[role]/[contestSlug]/page'));
-const SimulationTypePage = React.lazy(() => import('./app/concorsi/[category]/[role]/[contestSlug]/simulazione/page'));
-const QuizRulesPage = React.lazy(() => import('./app/concorsi/[category]/[role]/[contestSlug]/simulazione/[type]/regole/page'));
-const CustomQuizWizardPage = React.lazy(() => import('./app/concorsi/[category]/[role]/[contestSlug]/custom/page'));
+const ContestPage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/page'));
+const SimulationTypePage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/simulazione/page'));
+const QuizRulesPage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/simulazione/[type]/regole/page'));
+const CustomQuizWizardPage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/custom/page'));
 
 // Quiz Engine
 const QuizRunnerPage = React.lazy(() => import('./app/quiz/run/[attemptId]/page'));
@@ -61,7 +60,6 @@ const AdminDashboardPage = React.lazy(() => import('./app/admin/dashboard/page')
 const AdminQuestionsPage = React.lazy(() => import('./app/admin/page'));
 const AdminStructurePage = React.lazy(() => import('./app/admin/structure/page'));
 const AdminCategoryEditPage = React.lazy(() => import('./app/admin/structure/categories/[id]/page'));
-const AdminRoleEditPage = React.lazy(() => import('./app/admin/structure/roles/[id]/page'));
 const AdminQuizListPage = React.lazy(() => import('./app/admin/quiz/QuizListPage'));
 const AdminSubjectsListPage = React.lazy(() => import('./app/admin/quiz/SubjectsListPage'));
 const AdminQuestionEditPage = React.lazy(() => import('./app/admin/questions/[id]/page'));
@@ -70,6 +68,7 @@ const AdminUploadCsvPage = React.lazy(() => import('./app/admin/upload-csv/page'
 const AdminRulesPage = React.lazy(() => import('./app/admin/rules/page'));
 const AdminLeaderboardPage = React.lazy(() => import('./app/admin/leaderboard/page'));
 const AdminUsersPage = React.lazy(() => import('./app/admin/users/page'));
+const AdminUserDetailPage = React.lazy(() => import('./app/admin/users/[id]/page'));
 const AdminReportsPage = React.lazy(() => import('./app/admin/reports/page'));
 const AdminAnalyticsPage = React.lazy(() => import('./app/admin/analytics/page'));
 
@@ -102,6 +101,7 @@ import OnboardingSpotlight from './components/onboarding/OnboardingSpotlight';
 import SpotlightModal from './components/spotlight/SpotlightModal';
 import { StreakCelebration } from './components/gamification/StreakCelebration';
 import { streakService } from './lib/streakService';
+import { CinematicGrain } from './components/ui/CinematicGrain';
 
 // Loading fallback for lazy-loaded components
 const AdminLoading = () => (
@@ -145,6 +145,7 @@ export default function App() {
                             <OnboardingProvider>
                                 <SpotlightProvider>
                                     <AppEffects />
+                                    <CinematicGrain />
                                     <OnboardingSpotlight />
                                     <SpotlightModal />
                                     <StreakCelebration />
@@ -182,11 +183,10 @@ export default function App() {
                                             {/* Concorsi Flow (Wrapped) */}
                                             <Route path="/concorsi/search" element={<MainLayout><ConcorsiSearchPage /></MainLayout>} />
                                             <Route path="/concorsi/:category" element={<MainLayout><ConcorsoHubPage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:role" element={<MainLayout><RolePage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug" element={<MainLayout><ContestPage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug/simulazione" element={<MainLayout><SimulationTypePage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug/simulazione/:type/regole" element={<MainLayout><QuizRulesPage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:role/:contestSlug/custom" element={<CustomQuizWizardPage />} />
+                                            <Route path="/concorsi/:category/:contestSlug" element={<MainLayout><ContestPage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:contestSlug/simulazione" element={<MainLayout><SimulationTypePage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:contestSlug/simulazione/:type/regole" element={<MainLayout><QuizRulesPage /></MainLayout>} />
+                                            <Route path="/concorsi/:category/:contestSlug/custom" element={<CustomQuizWizardPage />} />
 
                                             {/* Quiz Engine (Wrapped) */}
                                             <Route path="/quiz/:id/official" element={<OfficialQuizStarterPage />} />
@@ -229,7 +229,6 @@ export default function App() {
                                                 <Route path="/admin/questions" element={<AdminQuestionsPage />} />
                                                 <Route path="/admin/structure" element={<AdminStructurePage />} />
                                                 <Route path="/admin/structure/categories/:id" element={<AdminCategoryEditPage />} />
-                                                <Route path="/admin/structure/roles/:id" element={<AdminRoleEditPage />} />
                                                 <Route path="/admin/quiz" element={<AdminQuizListPage />} />
                                                 <Route path="/admin/quiz/materie" element={<AdminSubjectsListPage />} />
                                                 <Route path="/admin/questions/:id" element={<AdminQuestionEditPage />} />
@@ -239,6 +238,7 @@ export default function App() {
                                                 <Route path="/admin/stats" element={<StatsPage />} />
                                                 <Route path="/admin/leaderboard" element={<AdminLeaderboardPage />} />
                                                 <Route path="/admin/users" element={<AdminUsersPage />} />
+                                                <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
                                                 <Route path="/admin/reports" element={<AdminReportsPage />} />
                                                 <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
 

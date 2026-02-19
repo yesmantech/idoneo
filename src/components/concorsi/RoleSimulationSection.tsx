@@ -11,12 +11,11 @@ interface Subject {
 
 interface RoleSimulationSectionProps {
     category: string;
-    role: string;
     contestSlug: string;
     contestId?: string; // Optional optimization to avoid re-fetching ID if known
 }
 
-export default function RoleSimulationSection({ category, role, contestSlug, contestId }: RoleSimulationSectionProps) {
+export default function RoleSimulationSection({ category, contestSlug, contestId }: RoleSimulationSectionProps) {
     const navigate = useNavigate();
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [resolvedContestId, setResolvedContestId] = useState<string | undefined>(contestId);
@@ -63,7 +62,7 @@ export default function RoleSimulationSection({ category, role, contestSlug, con
     };
 
     const handleCustom = () => {
-        navigate(`/concorsi/${category}/${role}/${contestSlug}/custom`);
+        navigate(`/concorsi/${category}/${contestSlug}/custom`);
     };
 
     if (metaLoading) {
@@ -137,7 +136,7 @@ export default function RoleSimulationSection({ category, role, contestSlug, con
                                     subjectName={subject.name}
                                     totalQuestions={stat.total}
                                     completedQuestions={stat.completed}
-                                    onClick={() => navigate(`/concorsi/${category}/${role}/${contestSlug}/custom?subject=${subject.id}`)}
+                                    onClick={() => navigate(`/concorsi/${category}/${contestSlug}/custom?subject=${subject.id}`)}
                                 />
                             );
                         })}

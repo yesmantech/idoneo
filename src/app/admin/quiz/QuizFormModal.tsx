@@ -15,7 +15,7 @@ interface QuizFormModalProps {
     formSaving: boolean;
     formError: string | null;
     formSuccess: string | null;
-    roles: { id: string; title: string }[];
+    categories: { id: string; title: string }[];
     subjects: SubjectRow[];
     updateFormField: <K extends keyof QuizFormData>(field: K, value: QuizFormData[K]) => void;
     onSave: () => void;
@@ -31,7 +31,7 @@ export default function QuizFormModal({
     formSaving,
     formError,
     formSuccess,
-    roles,
+    categories,
     subjects,
     updateFormField,
     onSave,
@@ -146,14 +146,15 @@ export default function QuizFormModal({
                                     Ruolo / Categoria
                                 </label>
                                 <select
-                                    value={formData.roleId}
-                                    onChange={(e) => updateFormField('roleId', e.target.value)}
+                                    value={formData.categoryId}
+                                    onChange={(e) => updateFormField('categoryId', e.target.value)}
                                     className={inputClass}
+                                    required
                                 >
-                                    <option value="">Nessun ruolo</option>
-                                    {roles.map(role => (
-                                        <option key={role.id} value={role.id}>
-                                            {role.title}
+                                    <option value="">Seleziona categoria...</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.title}
                                         </option>
                                     ))}
                                 </select>

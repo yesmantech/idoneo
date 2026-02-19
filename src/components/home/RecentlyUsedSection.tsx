@@ -59,7 +59,7 @@ export default function RecentlyUsedSection({ items }: RecentlyUsedSectionProps)
                 className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-2 -my-2 pl-4 lg:pl-8 gap-3 lg:gap-4"
             >
                 {items.map((item, idx) => (
-                    <div key={item.roleId} className="snap-start flex-shrink-0">
+                    <div key={item.quizId} className="snap-start flex-shrink-0">
                         <RecentlyUsedCard item={item} index={idx} />
                     </div>
                 ))}
@@ -109,7 +109,7 @@ function RecentlyUsedCard({ item, index }: { key?: string; item: RecentlyUsedIte
 
     return (
         <Link
-            to={`/concorsi/${item.categorySlug}/${item.roleSlug}`}
+            to={`/concorsi/${item.categorySlug}/${item.quizSlug}`}
             className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] border border-[var(--card-border)]"
             style={{
                 width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
@@ -151,7 +151,7 @@ function RecentlyUsedCard({ item, index }: { key?: string; item: RecentlyUsedIte
             <div className="flex flex-col justify-between bg-[var(--card)] relative z-10 p-4 flex-1">
                 <div className="space-y-1.5">
                     <h3 className="font-extrabold text-[var(--foreground)] leading-[1.3] line-clamp-2 group-hover:text-brand-blue transition-colors text-[14px] tracking-tight">
-                        {item.roleTitle}
+                        {item.quizTitle}
                     </h3>
                     <p className="text-[var(--foreground)] opacity-60 line-clamp-1 text-[11px] font-medium">
                         {item.categoryTitle}

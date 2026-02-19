@@ -58,21 +58,12 @@ export interface Category {
   available_seats?: number;
 }
 
-// ... (Role and Contest types restored)
-export interface Role {
-  id: string;
-  slug: string;
-  title: string;
-  categorySlug: string;
-}
-
 export interface Contest {
   id: string;
   slug: string;
   title: string;
   year: number | string;
   description: string;
-  roleSlug: string;
   categorySlug: string;
 }
 
@@ -129,9 +120,9 @@ export const getCategoryBySlug = async (
   };
 };
 
-export const getRolesByCategory = async (
+export const getQuizzesByCategory = async (
   categorySlug: string
-): Promise<Role[]> => {
+): Promise<Contest[]> => {
   // 1. Get Category ID
   const { data: cat, error: catError } = await supabase
     .from("categories")
@@ -141,27 +132,29 @@ export const getRolesByCategory = async (
 
   if (catError || !cat) {
     if (catError)
-      console.error("Supabase getRolesByCategory (cat) error:", catError.message);
+      console.error("Supabase getQuizzesByCategory (cat) error:", catError.message);
     return [];
   }
 
-  // 2. Get Roles (excluding archived)
+  // 2. Get Quizzes (excluding archived)
   const { data, error } = await supabase
-    .from("roles")
+    .from("quizzes")
     .select("*")
     .eq("category_id", cat.id)
     .eq("is_archived", false)
     .order("title");
 
   if (error) {
-    console.error("Supabase getRolesByCategory error:", error.message);
+    console.error("Supabase getQuizzesByCategory error:", error.message);
     return [];
   }
 
-  return (data || []).map((r: any) => ({
-    id: r.id,
-    slug: r.slug,
-    title: r.title,
+  return (data || []).map((q: any) => ({
+    id: q.id,
+    slug: q.slug || q.id,
+    title: q.title,
+    year: q.year,
+    description: q.description || "",
     categorySlug: categorySlug,
   }));
 };
@@ -174,10 +167,7 @@ export const getContestBySlug = async (
     .select(
       `
       *,
-      role:roles (
-        slug,
-        category:categories (slug)
-      )
+      category:categories (slug)
     `
     )
     .eq("slug", slug)
@@ -188,62 +178,23 @@ export const getContestBySlug = async (
     return null;
   }
 
-  const anyQ = quiz as any;
   return {
-    id: anyQ.id,
-    slug: anyQ.slug,
-    title: anyQ.title,
-    year: anyQ.year || "",
-    description: anyQ.description || "",
-    roleSlug: anyQ.role?.slug || "",
-    categorySlug: anyQ.role?.category?.slug || "",
+    id: quiz.id,
+    slug: quiz.slug || quiz.id,
+    title: quiz.title,
+    year: quiz.year || "",
+    description: quiz.description || "",
+    categorySlug: (quiz as any).category?.slug || "",
   };
 };
 
-export const getContestsByRole = async (
-  roleSlug: string
-): Promise<Contest[]> => {
-  const { data: role, error: roleError } = await supabase
-    .from("roles")
-    .select("id, category:categories(slug)")
-    .eq("slug", roleSlug)
-    .single();
-
-  if (roleError || !role) {
-    if (roleError)
-      console.error("Supabase getContestsByRole (role) error:", roleError.message);
-    return [];
-  }
-
-  const { data, error } = await supabase
-    .from("quizzes")
-    .select("*")
-    .eq("role_id", (role as any).id)
-    .eq("is_archived", false)
-    .order("year", { ascending: false });
-
-  if (error) {
-    console.error("Supabase getContestsByRole error:", error.message);
-    return [];
-  }
-
-  const anyRole = role as any;
-
-  return (data || []).map((q: any) => ({
-    id: q.id,
-    slug: q.slug || q.id,
-    title: q.title,
-    year: q.year,
-    description: q.description,
-    roleSlug: roleSlug,
-    categorySlug: anyRole.category?.slug || "",
-  }));
-};
+// [REMOVED] getContestsByRole as roles no longer exist.
+// Replaced by getQuizzesByCategory above.
 
 export interface SearchItem {
   id: string;
   title: string;
-  type: 'category' | 'contest' | 'role';
+  type: 'category' | 'contest';
   url: string;
 }
 
@@ -261,52 +212,25 @@ export const getAllSearchableItems = async (): Promise<SearchItem[]> => {
     }));
   }
 
-  // 2. Roles (excluding archived)
-  const { data: roles } = await supabase
-    .from('roles')
-    .select(`
-      id, title, slug,
-      category:categories(slug)
-    `)
-    .eq('is_archived', false);
-
-  if (roles) {
-    roles.forEach((r: any) => {
-      const catSlug = r.category?.slug;
-      if (catSlug) {
-        items.push({
-          id: r.id,
-          title: r.title,
-          type: 'role',
-          url: `/concorsi/${catSlug}/${r.slug}`
-        });
-      }
-    });
-  }
-
-  // 3. Quizzes
+  // 2. Quizzes (excluding archived)
   const { data: quizzes } = await supabase
     .from('quizzes')
     .select(`
       id, title, slug,
-      role:roles (
-        slug,
-        category:categories (slug)
-      )
+      category:categories (slug)
     `)
     .eq('is_archived', false)
     .limit(100);
 
   if (quizzes) {
     quizzes.forEach((q: any) => {
-      const roleSlug = q.role?.slug;
-      const catSlug = q.role?.category?.slug;
-      if (roleSlug && catSlug) {
+      const catSlug = (q as any).category?.slug;
+      if (catSlug) {
         items.push({
           id: q.id,
           title: q.title,
           type: 'contest',
-          url: `/concorsi/${catSlug}/${roleSlug}` // Redirect to Role Hub (Tier S) instead of legacy Contest Page
+          url: `/concorsi/${catSlug}/${q.slug}`
         });
       }
     });

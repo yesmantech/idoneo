@@ -1,46 +1,44 @@
 /**
  * @file ConcorsoHubPage.tsx
  * @description The main landing page for a specific competition category (e.g. "Polizia").
- *           "The Destination" for users interested in a specific force.
- *
- * ## Features
- *
- * - **Immersive Header**: Dynamic background image and theming based on category title
- * - **Stats Section**: Live data on candidates and available seats
- * - **Role Selection**: Grid of available roles (profiles) within this category
- * - **Dynamic Theming**: Color schemes adapt to the force (Police=Blue, Army=Green, etc.)
- *
- * ## Dynamic Themes
- *
- * | Category Keyword | Theme Colors          |
- * |------------------|-----------------------|
- * | Polizia          | Cyan/Blue             |
- * | Carabinieri      | Blue/Indigo           |
- * | Finanza          | Amber/Orange          |
- * | Esercito         | Emerald/Green         |
- * | Sanità           | Rose/Pink             |
- *
- * ## Route
- * `/concorsi/:category` (e.g. `/concorsi/polizia-di-stato`)
  */
 
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useConcorsoData } from '@/hooks/useConcorsoData';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Shield, Sparkles, X, ChevronRight, Stethoscope, Briefcase, Scale, Gavel, GraduationCap, Car } from 'lucide-react';
+import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Shield, Sparkles, X, ChevronRight, Stethoscope, Briefcase, Scale, Gavel, GraduationCap, Car, Search, Filter } from 'lucide-react';
 import TierSLoader from '@/components/ui/TierSLoader';
 import SEOHead from '@/components/seo/SEOHead';
-
-// ============================================
-// CONCORSO HUB PAGE - Tier S Redesign
-// "The Destination"
-// ============================================
 
 export default function ConcorsoHubPage() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
-  const { category: categoryData, roles, candidatiCount, loading, error } = useConcorsoData(category || '');
+  const { category: categoryData, quizzes: allQuizzes, candidatiCount, loading, error } = useConcorsoData(category || '');
+
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [isOfficialOnly, setIsOfficialOnly] = React.useState(false);
+  const [selectedYear, setSelectedYear] = React.useState<number | null>(null);
+
+  // Derived filtered results
+  const filteredQuizzes = React.useMemo(() => {
+    return allQuizzes.filter(q => {
+      const matchesSearch = q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (q.year && q.year.toString().includes(searchTerm));
+      const matchesOfficial = !isOfficialOnly || q.is_official;
+      const matchesYear = !selectedYear || q.year === selectedYear;
+      return matchesSearch && matchesOfficial && matchesYear;
+    });
+  }, [allQuizzes, searchTerm, isOfficialOnly, selectedYear]);
+
+  // Extract unique years for filter
+  const availableYears = React.useMemo(() => {
+    const years = allQuizzes
+      .map(q => typeof q.year === 'string' ? parseInt(q.year, 10) : q.year)
+      .filter((y): y is number => !!y && !isNaN(y));
+    return Array.from(new Set(years)).sort((a, b) => (b as number) - (a as number));
+  }, [allQuizzes]);
 
   if (loading) {
     return <TierSLoader message="Caricamento concorso..." />;
@@ -57,7 +55,6 @@ export default function ConcorsoHubPage() {
     );
   }
 
-  // Helper for dynamic gradients based on category
   const getCategoryTheme = (title: string) => {
     const lower = title.toLowerCase();
     if (lower.includes('polizia')) return { gradient: 'from-cyan-400 to-blue-500', shadow: 'shadow-cyan-500/20', text: 'text-cyan-600', bg: 'bg-cyan-50' };
@@ -77,11 +74,7 @@ export default function ConcorsoHubPage() {
         description={`Scopri tutti i concorsi per ${categoryData.title}. Preparati con simulatori ufficiali e statistiche avanzate.`}
         url={`/concorsi/${category}`}
       />
-      {/* ===================================================================== */}
-      {/* 1. IMMERSIVE HEADER */}
-      {/* ===================================================================== */}
       <div className="relative h-[35vh] min-h-[300px] md:h-[45vh] md:min-h-[380px] overflow-hidden">
-        {/* Background Image with Zoom Effect */}
         <div className="absolute inset-0">
           {categoryData.inner_banner_url ? (
             <img
@@ -92,12 +85,10 @@ export default function ConcorsoHubPage() {
           ) : (
             <div className={`w-full h-full bg-gradient-to-br ${theme.gradient}`} />
           )}
-          {/* Gradients overlays for text readability */}
           <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/80 to-transparent" />
           <div className="absolute inset-0 bg-black/10" />
         </div>
 
-        {/* Navigation Bar (Absolute) */}
         <div className="absolute top-0 left-0 right-0 z-20 pt-safe px-4">
           <div className="h-14 flex items-center justify-between">
             <button
@@ -106,11 +97,9 @@ export default function ConcorsoHubPage() {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            {/* Optional: Add search or share button right */}
           </div>
         </div>
 
-        {/* Header Content */}
         <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-12 text-center">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--card)]/60 backdrop-blur-md border border-[var(--card-border)] shadow-sm mb-4">
             <Sparkles className={`w-3.5 h-3.5 ${theme.text}`} fill="currentColor" />
@@ -118,11 +107,9 @@ export default function ConcorsoHubPage() {
               Concorsi Pubblici 2025
             </span>
           </div>
-
           <h1 className="text-3xl md:text-5xl font-black text-[var(--foreground)] tracking-tight leading-[1.1] mb-3 drop-shadow-sm">
             {categoryData.title}
           </h1>
-
           <p className="text-[14px] md:text-[15px] font-medium text-[var(--foreground)] opacity-60 max-w-md mx-auto leading-relaxed line-clamp-2">
             {categoryData.description || "Preparati al meglio per i concorsi di questa categoria con simulazioni ufficiali e materiali dedicati."}
           </p>
@@ -130,44 +117,82 @@ export default function ConcorsoHubPage() {
       </div>
 
       <main className="px-4 md:px-8 max-w-7xl mx-auto -mt-6 relative z-20 space-y-8">
-
-        {/* ===================================================================== */}
-        {/* 2. STATS AT A GLANCE (Responsive: Scroll Mobile / Grid Desktop) */}
-        {/* ===================================================================== */}
         <StatsSection
           theme={theme}
           candidatiCount={candidatiCount}
           availableSeats={categoryData.available_seats}
         />
 
-        {/* ===================================================================== */}
-        {/* 3. ROLES GRID (Organic) */}
-        {/* ===================================================================== */}
         <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-[17px] md:text-[19px] font-bold text-[var(--foreground)] flex items-center gap-2">
-              <GridIcon />
-              Scegli il tuo profilo
-            </h2>
-            <span className="text-[11px] md:text-[13px] font-medium text-[var(--foreground)] opacity-50 bg-[var(--card)] px-2.5 py-1 rounded-full shadow-sm border border-[var(--card-border)]">
-              {roles.length} disponibili
-            </span>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[17px] md:text-[19px] font-bold text-[var(--foreground)] flex items-center gap-2">
+                <GridIcon />
+                Scegli il tuo concorso
+              </h2>
+              <span className="text-[11px] md:text-[13px] font-medium text-[var(--foreground)] opacity-50 bg-[var(--card)] px-2.5 py-1 rounded-full shadow-sm border border-[var(--card-border)]">
+                {filteredQuizzes.length} di {allQuizzes.length}
+              </span>
+            </div>
+
+            {/* SEARCH & FILTERS BAR */}
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="relative flex-1 group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="w-4 h-4 text-slate-400 group-focus-within:text-brand-blue transition-colors" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cerca per titolo o anno..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full h-[48px] pl-11 pr-4 bg-[var(--card)] border border-[var(--card-border)] rounded-2xl text-[14px] font-medium text-[var(--foreground)] placeholder:text-slate-400 outline-none focus:border-brand-blue/30 focus:shadow-sm transition-all"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+                <button
+                  onClick={() => setIsOfficialOnly(!isOfficialOnly)}
+                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 ${isOfficialOnly
+                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/10'
+                    : 'bg-[var(--card)] text-slate-500 border-[var(--card-border)] hover:bg-slate-50'
+                    }`}
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  Solo Ufficiali
+                </button>
+
+                {availableYears.length > 0 && (
+                  <div className="flex items-center gap-2 border-l border-[var(--card-border)] pl-2 ml-1">
+                    {availableYears.slice(0, 3).map(year => (
+                      <button
+                        key={year}
+                        onClick={() => setSelectedYear(selectedYear === year ? null : year)}
+                        className={`flex-shrink-0 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${selectedYear === year
+                          ? 'bg-brand-blue text-white border-brand-blue shadow-md shadow-brand-blue/10'
+                          : 'bg-[var(--card)] text-slate-500 border-[var(--card-border)] hover:bg-slate-50'
+                          }`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col gap-3">
-            {roles.length > 0 ? (
-              roles.map(role => {
-                // Initial helper
-                const initials = role.title
-                  .split(' ')
-                  .map(n => n[0])
-                  .join('')
-                  .substring(0, 2)
-                  .toUpperCase();
-
-
-
-                // Dynamic Icon Helper
+            {filteredQuizzes.length > 0 ? (
+              filteredQuizzes.map(quiz => {
                 const getCategoryIcon = (title: string) => {
                   const lower = title.toLowerCase();
                   if (lower.includes('sanità') || lower.includes('infermier') || lower.includes('medic')) return Stethoscope;
@@ -176,61 +201,49 @@ export default function ConcorsoHubPage() {
                   if (lower.includes('giustizia') || lower.includes('magistrat')) return Gavel;
                   if (lower.includes('scuola') || lower.includes('docent')) return GraduationCap;
                   if (lower.includes('patente') || lower.includes('guida')) return Car;
-                  return Shield; // Default for Police/Military
+                  return Shield;
                 };
 
                 const CategoryIcon = getCategoryIcon(categoryData.title);
 
                 return (
                   <Link
-                    key={role.id}
-                    to={`/concorsi/${category}/${role.slug}`}
+                    key={quiz.id}
+                    to={`/concorsi/${category}/${quiz.slug}`}
                     className="group relative bg-white dark:bg-[#1e2330] p-4 rounded-[24px] shadow-sm border border-slate-200/60 dark:border-[var(--card-border)] transition-all duration-300 hover:shadow-md dark:hover:bg-[#252b3b] overflow-hidden flex items-center gap-4"
                   >
-                    {/* Icon Avatar */}
                     <div className="w-12 h-12 rounded-full border border-sky-100 dark:border-sky-500/20 bg-sky-50 dark:bg-[#141820] flex items-center justify-center shrink-0">
                       <CategoryIcon className="w-5 h-5 text-sky-500 dark:text-sky-400" />
                     </div>
-
-                    {/* Text Content */}
                     <div className="flex-1 min-w-0">
                       <h3 className="text-[16px] font-bold text-slate-900 dark:text-white mb-2 leading-snug truncate">
-                        {role.title}
+                        {quiz.title}
                       </h3>
-
-                      {/* Badge Row */}
                       <div className="flex flex-wrap items-center gap-2">
-                        {/* Active Users Badge */}
                         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-[#141820] border border-slate-200 dark:border-white/5">
                           <Users className="w-3.5 h-3.5 text-slate-400" />
                           <span className="text-[12px] font-medium text-slate-600 dark:text-slate-300">
-                            {role.activeUsers || 0} <span className="hidden sm:inline text-slate-400 dark:text-slate-500">attivi</span>
+                            {(quiz as any).activeUsers || 0} <span className="hidden sm:inline text-slate-400 dark:text-slate-500">attivi</span>
                           </span>
                         </div>
-
-                        {/* Seats Badge (if available) - Taking first active contest's seats */}
-                        {role.contests[0]?.available_seats && (
+                        {quiz.available_seats && (
                           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
                             <Trophy className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                             <span className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400">
-                              {role.contests[0].available_seats} <span className="hidden sm:inline">posti</span>
+                              {quiz.available_seats} <span className="hidden sm:inline">posti</span>
                             </span>
                           </div>
                         )}
-
-                        {/* Year Badge */}
-                        {role.contests[0]?.year && (
+                        {quiz.year && (
                           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20">
                             <Calendar className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
                             <span className="text-[12px] font-medium text-purple-600 dark:text-purple-400">
-                              {role.contests[0].year}
+                              {quiz.year}
                             </span>
                           </div>
                         )}
                       </div>
                     </div>
-
-                    {/* Chevy */}
                     <div className="text-slate-300 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-white transition-colors">
                       <ChevronRight className="w-5 h-5" />
                     </div>
@@ -241,22 +254,18 @@ export default function ConcorsoHubPage() {
               <div className="py-12 text-center bg-[var(--card)] rounded-[32px] border border-[var(--card-border)] border-dashed">
                 <div className="text-4xl mb-4 opacity-50">📭</div>
                 <p className="text-[var(--foreground)] opacity-60 font-medium">
-                  Nessun ruolo disponibile per questa categoria al momento.
+                  Nessun concorso disponibile per questa categoria al momento.
                 </p>
               </div>
             )}
           </div>
         </section>
-
       </main>
     </div>
   );
 }
 
-
-
-// Stats Section Component with Popups
-function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, candidatiCount: number, availableSeats: string | null }) {
+function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, candidatiCount: number, availableSeats: string | undefined }) {
   const [selectedStat, setSelectedStat] = React.useState<{ title: string, desc: string, icon: any, themeBg: string, themeText: string } | null>(null);
 
   const stats = [
@@ -315,7 +324,6 @@ function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, c
         ))}
       </section>
 
-      {/* Popup Modal */}
       <AnimatePresence>
         {selectedStat && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 px-8">
@@ -362,7 +370,6 @@ function StatsSection({ theme, candidatiCount, availableSeats }: { theme: any, c
   );
 }
 
-// Simple Grid Icon Component
 function GridIcon() {
   return (
     <svg className="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

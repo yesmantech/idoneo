@@ -4,7 +4,8 @@ import ReferralModal from '@/components/referral/ReferralModal';
 import AddFriendModal from './AddFriendModal';
 import { friendService, FriendProfile } from '@/lib/friendService';
 import { useReferral } from '@/hooks/useReferral';
-import { Capacitor } from '@capacitor/core';
+import { Link } from 'react-router-dom';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface FriendsBlockProps {
     userId: string;
@@ -87,12 +88,12 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                         {pendingReceived.map(req => (
                             <div key={req.id} className="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                                        {req.avatar_url ? (
-                                            <img src={req.avatar_url} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <span className="flex items-center justify-center w-full h-full">👤</span>
-                                        )}
+                                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                                        <UserAvatar
+                                            src={req.avatar_url}
+                                            name={req.nickname}
+                                            size="sm"
+                                        />
                                     </div>
                                     <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{req.nickname}</span>
                                 </div>
@@ -159,12 +160,12 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                     {friends.map(friend => (
                         <div key={friend.id} className="flex gap-4 items-center group">
-                            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-100 dark:border-slate-700">
-                                {friend.avatar_url ? (
-                                    <img src={friend.avatar_url} alt={friend.nickname} className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="text-lg">👤</span>
-                                )}
+                            <div className="flex-shrink-0">
+                                <UserAvatar
+                                    src={friend.avatar_url}
+                                    name={friend.nickname}
+                                    size="md"
+                                />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">

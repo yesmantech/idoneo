@@ -139,8 +139,7 @@ export default function UnifiedLeaderboardPage() {
                         id: a.id,
                         title: a.title,
                         slug: a.slug,
-                        category: a.category_id,
-                        roleTitle: a.role?.title
+                        category: a.category_id
                     }));
                     myIds = new Set(myQuizzes.map(q => q.id));
                     setActiveQuizzes(myQuizzes);
@@ -148,8 +147,8 @@ export default function UnifiedLeaderboardPage() {
 
                 const { data: allQuizzes } = await supabase
                     .from('quizzes')
-                    .select('id, title, slug, role_id, role:roles(title)')
-                    .not('role_id', 'is', null)
+                    .select('id, title, slug, category_id')
+                    .eq('is_archived', false)
                     .order('title', { ascending: true })
                     .limit(100);
 
@@ -159,7 +158,6 @@ export default function UnifiedLeaderboardPage() {
                             id: q.id,
                             title: q.title,
                             slug: (q as any).slug || 'no-slug',
-                            roleTitle: (q as any).role?.title
                         }))
                         .filter(q => !myIds.has(q.id));
 

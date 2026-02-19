@@ -3,6 +3,7 @@ import { User } from '@supabase/supabase-js';
 import { Share2, Settings, Trophy, Zap, Flame, X, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface ProfileIdentityCardProps {
     user: User | null;
@@ -103,12 +104,13 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
 
                     {/* Avatar */}
                     <div className="relative mb-3">
-                        <div className="w-20 h-20 rounded-[20px] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 shadow-inner relative overflow-hidden ring-[3px] ring-[var(--card)]">
-                            {avatarUrl ? (
-                                <img src={avatarUrl} alt={nickname} className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="w-full h-full flex items-center justify-center text-4xl">👤</span>
-                            )}
+                        <div className="rounded-[20px] shadow-inner relative ring-[3px] ring-[var(--card)]">
+                            <UserAvatar
+                                src={avatarUrl}
+                                name={nickname}
+                                size="2xl"
+                                className="!rounded-[20px]" // Override full rounded for identity card style
+                            />
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 p-0.5 bg-[var(--card)] rounded-full">
                             <div className="w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-[var(--card)]"></div>

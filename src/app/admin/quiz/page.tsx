@@ -34,7 +34,6 @@ type QuizRow = Database["public"]["Tables"]["quizzes"]["Row"];
 type SubjectRow = Database["public"]["Tables"]["subjects"]["Row"];
 type RuleRow = Database["public"]["Tables"]["simulation_rules"]["Row"];
 type QuizSubjectRuleRow = Database["public"]["Tables"]["quiz_subject_rules"]["Row"];
-type RoleRow = { id: string; title: string; category_id: string; slug: string };
 type CategoryRow = { id: string; title: string };
 
 type JoinedSubject = SubjectRow & {
@@ -48,7 +47,6 @@ type JoinedSubject = SubjectRow & {
 export default function AdminQuizzesPage() {
   const [quizzes, setQuizzes] = useState<QuizRow[]>([]);
   const [subjects, setSubjects] = useState<JoinedSubject[]>([]);
-  const [roles, setRoles] = useState<RoleRow[]>([]);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [rules, setRules] = useState<RuleRow[]>([]);
   const [quizSubjectRules, setQuizSubjectRules] = useState<QuizSubjectRuleRow[]>([]);
@@ -68,10 +66,9 @@ export default function AdminQuizzesPage() {
     setLoading(true);
     setGlobalError(null);
     try {
-      const [qRes, sRes, rRes, cRes, ruleRes, qsrRes] = await Promise.all([
+      const [qRes, sRes, cRes, ruleRes, qsrRes] = await Promise.all([
         supabase.from("quizzes").select("*").order("created_at", { ascending: false }),
         supabase.from("subjects").select("*").order("name"),
-        supabase.from("roles").select("*"),
         supabase.from("categories").select("*"),
         supabase.from("simulation_rules").select("*").order("title"),
         supabase.from("quiz_subject_rules").select("*")
@@ -82,7 +79,6 @@ export default function AdminQuizzesPage() {
 
       setQuizzes(qRes.data || []);
       setSubjects(sRes.data || []);
-      setRoles((rRes.data || []) as RoleRow[]);
       setCategories((cRes.data || []) as CategoryRow[]);
       setRules((ruleRes.data || []) as RuleRow[]);
       setQuizSubjectRules((qsrRes.data || []) as QuizSubjectRuleRow[]);
@@ -194,7 +190,6 @@ export default function AdminQuizzesPage() {
       {/* ─── QUIZ FORM ─── */}
       <QuizForm
         initialData={editingQuiz}
-        roles={roles}
         categories={categories}
         rules={rules}
         availableSubjects={activeSubjectsForEditingQuiz}
@@ -206,7 +201,7 @@ export default function AdminQuizzesPage() {
       {/* ─── QUIZ LIST ─── */}
       <QuizList
         quizzes={quizzes}
-        roles={roles}
+        categories={categories}
         showArchived={showArchivedQuizzes}
         onToggleShowArchived={setShowArchivedQuizzes}
         onEditQuiz={(q) => {

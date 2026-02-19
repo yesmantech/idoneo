@@ -1,0 +1,10 @@
+[{"id":"c4c8788d-5f2c-4e31-8da6-0d1a4d0d167a","name":"Forze Armate","slug":"forze-armate","is_active":true}, 
+ {"id":"d3d920cf-f3b3-4647-b053-9b95ef00ea5d","name":"Forze dell'Ordine","slug":"forze-ordine","is_active":true}, 
+ {"id":"b90ee9e4-adeb-40cc-bf55-77e1f5448041","name":"Pubblica Amministrazione","slug":"pubblica-amministrazione","is_active":true}, 
+ {"id":"1873e26b-7e81-4732-8c99-63fc3ee4c786","name":"Sanità","slug":"sanita","is_active":true}, 
+ {"id":"9fd8ee4d-46d6-46bc-a005-26a6f61d5a9c","name":"Istruzione","slug":"istruzione","is_active":true}, 
+ {"id":"553b2506-a1ea-42ba-90a1-ab48fc11dacf","name":"Giustizia","slug":"giustizia","is_active":true}, 
+ {"id":"2ce8c724-3792-4fa6-9f46-1a97278e10ca","name":"Enti Locali","slug":"enti-locali","is_active":true}, 
+ {"id":"2a14f905-cbd2-4047-be7e-69cf311d2502","name":"Agenzia delle Entrate","slug":"agenzia-entrate","is_active":true}, 
+ {"id":"9c6984e0-5856-48a4-be93-6c2586c5d0b6","name":"Università","slug":"universita","is_active":true}, 
+ {"id":"99990364-9ceb-4833-921b-b03b48856ff1","name":"Infrastrutture e Trasporti","slug":"infrastrutture-trasporti","is_active":true}]

@@ -6,9 +6,9 @@ import { supabase } from './supabaseClient';
 // ============================================
 
 export interface RecentlyUsedItem {
-    roleId: string;
-    roleSlug: string;
-    roleTitle: string;
+    quizId: string;
+    quizSlug: string;
+    quizTitle: string;
     categorySlug: string;
     categoryTitle: string;
     lastAttemptAt: string;
@@ -21,20 +21,17 @@ export interface NewArrivalQuiz {
     title: string;
     year: number;
     createdAt: string;
-    roleSlug: string;
-    roleTitle: string;
     categorySlug: string;
     categoryTitle: string;
 }
 
-export interface PopularRole {
-    roleId: string;
-    roleSlug: string;
-    roleTitle: string;
+export interface PopularQuiz {
+    quizId: string;
+    quizSlug: string;
+    quizTitle: string;
     categorySlug: string;
     categoryTitle: string;
     totalAttempts: number;
-    uniqueUsers: number;
 }
 
 // ============================================
@@ -45,15 +42,13 @@ export async function fetchRecentlyUsed(userId: string, limit = 5): Promise<Rece
     if (!userId) return [];
 
     try {
-        // Get recent quiz attempts grouped by role
+        // Get recent quiz attempts grouped by quiz
         const { data, error } = await supabase
             .from('quiz_attempts')
             .select(`
                 quiz:quizzes (
-                    role:roles (
-                        id, slug, title, is_archived,
-                        category:categories (slug, title, is_archived)
-                    )
+                    id, slug, title, is_archived,
+                    category:categories (slug, title, is_archived)
                 ),
                 created_at
             `)
@@ -66,31 +61,31 @@ export async function fetchRecentlyUsed(userId: string, limit = 5): Promise<Rece
             return [];
         }
 
-        // Deduplicate by role and keep most recent
-        const roleMap = new Map<string, RecentlyUsedItem>();
+        // Deduplicate by quiz and keep most recent
+        const quizMap = new Map<string, RecentlyUsedItem>();
 
         (data || []).forEach((attempt: any) => {
-            const role = attempt.quiz?.role;
-            const category = role?.category;
-            // Skip archived roles or categories
-            if (!role?.id || role.is_archived || category?.is_archived) return;
+            const quiz = attempt.quiz;
+            const category = quiz?.category;
+            // Skip archived quizzes or categories
+            if (!quiz?.id || quiz.is_archived || category?.is_archived) return;
 
-            if (!roleMap.has(role.id)) {
-                roleMap.set(role.id, {
-                    roleId: role.id,
-                    roleSlug: role.slug,
-                    roleTitle: role.title,
-                    categorySlug: role.category?.slug || '',
-                    categoryTitle: role.category?.title || '',
+            if (!quizMap.has(quiz.id)) {
+                quizMap.set(quiz.id, {
+                    quizId: quiz.id,
+                    quizSlug: quiz.slug,
+                    quizTitle: quiz.title,
+                    categorySlug: quiz.category?.slug || '',
+                    categoryTitle: quiz.category?.title || '',
                     lastAttemptAt: attempt.created_at,
                     attemptCount: 1
                 });
             } else {
-                roleMap.get(role.id)!.attemptCount++;
+                quizMap.get(quiz.id)!.attemptCount++;
             }
         });
 
-        return Array.from(roleMap.values()).slice(0, limit);
+        return Array.from(quizMap.values()).slice(0, limit);
     } catch (err) {
         console.error('fetchRecentlyUsed error:', err);
         return [];
@@ -110,10 +105,7 @@ export async function fetchNewArrivals(days = 30, limit = 10): Promise<NewArriva
             .from('quizzes')
             .select(`
                 id, slug, title, year, created_at,
-                role:roles (
-                    slug, title,
-                    category:categories (slug, title)
-                )
+                category:categories (slug, title)
             `)
             .eq('is_archived', false)
             .gte('created_at', since.toISOString())
@@ -131,10 +123,8 @@ export async function fetchNewArrivals(days = 30, limit = 10): Promise<NewArriva
             title: q.title,
             year: q.year,
             createdAt: q.created_at,
-            roleSlug: q.role?.slug || '',
-            roleTitle: q.role?.title || '',
-            categorySlug: q.role?.category?.slug || '',
-            categoryTitle: q.role?.category?.title || ''
+            categorySlug: q.category?.slug || '',
+            categoryTitle: q.category?.title || ''
         }));
     } catch (err) {
         console.error('fetchNewArrivals error:', err);
@@ -146,54 +136,50 @@ export async function fetchNewArrivals(days = 30, limit = 10): Promise<NewArriva
 // MOST POPULAR (by leaderboard entries)
 // ============================================
 
-export async function fetchMostPopular(limit = 5): Promise<PopularRole[]> {
+export async function fetchMostPopular(limit = 5): Promise<PopularQuiz[]> {
     try {
-        // Get roles with most leaderboard entries (indicates popularity)
-        // concorso_leaderboard has quiz_id, so we need to go through quizzes -> roles
+        // Get quizzes with most leaderboard entries
         const { data, error } = await supabase
             .from('concorso_leaderboard')
             .select(`
                 quiz:quizzes (
-                    role:roles (
-                        id, slug, title, is_archived,
-                        category:categories (slug, title, is_archived)
-                    )
+                    id, slug, title, is_archived,
+                    category:categories (slug, title, is_archived)
                 )
             `)
             .limit(500);
 
         if (error) {
-            console.error('Error fetching popular roles:', error);
+            console.error('Error fetching popular quizzes:', error);
             return [];
         }
 
-        // Count by role
-        const roleCount = new Map<string, { role: any; count: number; users: Set<string> }>();
+        // Count by quiz
+        const quizCount = new Map<string, { quiz: any; count: number }>();
 
         (data || []).forEach((entry: any) => {
-            const role = entry.quiz?.role;
-            const category = role?.category;
-            // Skip archived roles or categories
-            if (!role?.id || role.is_archived || category?.is_archived) return;
+            const quiz = entry.quiz;
+            const category = quiz?.category;
+            // Skip archived
+            if (!quiz?.id || quiz.is_archived || category?.is_archived) return;
 
-            if (!roleCount.has(role.id)) {
-                roleCount.set(role.id, { role, count: 0, users: new Set() });
+            if (!quizCount.has(quiz.id)) {
+                quizCount.set(quiz.id, { quiz, count: 0 });
             }
-            roleCount.get(role.id)!.count++;
+            quizCount.get(quiz.id)!.count++;
         });
 
         // Sort by count and return top N
-        return Array.from(roleCount.entries())
+        return Array.from(quizCount.entries())
             .sort((a, b) => b[1].count - a[1].count)
             .slice(0, limit)
-            .map(([_, { role, count, users }]) => ({
-                roleId: role.id,
-                roleSlug: role.slug,
-                roleTitle: role.title,
-                categorySlug: role.category?.slug || '',
-                categoryTitle: role.category?.title || '',
-                totalAttempts: count,
-                uniqueUsers: users.size
+            .map(([_, { quiz, count }]) => ({
+                quizId: quiz.id,
+                quizSlug: quiz.slug,
+                quizTitle: quiz.title,
+                categorySlug: quiz.category?.slug || '',
+                categoryTitle: quiz.category?.title || '',
+                totalAttempts: count
             }));
     } catch (err) {
         console.error('fetchMostPopular error:', err);

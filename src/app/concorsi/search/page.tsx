@@ -309,11 +309,11 @@ function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
         return 'from-brand-blue to-brand-cyan';
     };
 
-    const gradient = getStyle(quiz.role?.category?.slug);
+    const gradient = getStyle(quiz.category?.slug);
 
     return (
         <Link
-            to={`/concorsi/${quiz.role?.category?.slug || 'unknown'}/${quiz.role?.slug || 'unknown'}`}
+            to={`/concorsi/${quiz.category?.slug || 'unknown'}/${quiz.slug}`}
             className="group block bg-[var(--card)] rounded-[32px] border border-[var(--card-border)] overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-300"
         >
             <div className="p-5 flex gap-4">
@@ -326,7 +326,7 @@ function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-black text-brand-blue uppercase tracking-widest">
-                            {quiz.role?.category?.title || 'Concorso'}
+                            {quiz.category?.title || 'Concorso'}
                         </span>
                         {quiz.is_official && (
                             <div className="flex items-center gap-1 bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded-full text-[9px] font-bold">
@@ -359,7 +359,7 @@ function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
             {/* Bottom Section */}
             <div className="px-5 py-3 bg-slate-50 dark:bg-white/5 border-t border-[var(--card-border)] flex items-center justify-between">
                 <span className="text-[12px] font-medium text-slate-500 truncate pr-4">
-                    {quiz.role?.title || 'Ruolo non specificato'}
+                    {quiz.title}
                 </span>
                 <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-brand-blue shadow-sm transition-all group-hover:translate-x-1">
                     <ArrowRight className="w-4 h-4" />

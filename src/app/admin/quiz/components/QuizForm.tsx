@@ -13,7 +13,6 @@ type JoinedSubject = SubjectRow & {
 
 interface QuizFormProps {
     initialData: QuizRow | null;
-    roles: RoleRow[];
     categories: CategoryRow[];
     rules: RuleRow[];
     availableSubjects: JoinedSubject[];
@@ -24,7 +23,6 @@ interface QuizFormProps {
 
 export default function QuizForm({
     initialData,
-    roles,
     categories,
     rules,
     availableSubjects,
@@ -35,7 +33,7 @@ export default function QuizForm({
     // Form State
     const [quizTitle, setQuizTitle] = useState("");
     const [quizSlug, setQuizSlug] = useState("");
-    const [quizRoleId, setQuizRoleId] = useState("");
+    const [quizCategoryId, setQuizCategoryId] = useState("");
     const [selectedPresetId, setSelectedPresetId] = useState("");
     const [quizYear, setQuizYear] = useState("");
     const [quizDescription, setQuizDescription] = useState("");
@@ -60,7 +58,7 @@ export default function QuizForm({
         if (initialData) {
             setQuizTitle(initialData.title || "");
             setQuizSlug((initialData as any).slug || "");
-            setQuizRoleId(initialData.role_id || "");
+            setQuizCategoryId((initialData as any).category_id || "");
             setSelectedPresetId(""); // Reset preset
             setQuizYear(initialData.year !== null ? String(initialData.year) : "");
             setQuizDescription(initialData.description || "");
@@ -76,7 +74,7 @@ export default function QuizForm({
             // Reset for "New Quiz"
             setQuizTitle("");
             setQuizSlug("");
-            setQuizRoleId("");
+            setQuizCategoryId("");
             setSelectedPresetId("");
             setQuizYear("");
             setQuizDescription("");
@@ -126,6 +124,7 @@ export default function QuizForm({
 
         try {
             if (!quizTitle.trim()) throw new Error("Titolo obbligatorio.");
+            if (!quizCategoryId) throw new Error("Categoria obbligatoria.");
 
             const totalQuestions = currentTotalQuestions; // Recalculate based on current state
 
@@ -134,7 +133,7 @@ export default function QuizForm({
             const payload = {
                 title: quizTitle.trim(),
                 slug: quizSlug.trim() || autoSlug,
-                role_id: quizRoleId || null,
+                category_id: quizCategoryId,
                 description: quizDescription.trim() || null,
                 year: parseIntOrNull(quizYear),
                 time_limit: parseIntOrNull(quizTimeLimit),
@@ -143,6 +142,7 @@ export default function QuizForm({
                 points_blank: parseFloatOrNull(quizPointsBlank),
                 total_questions: totalQuestions,
                 is_archived: quizIsArchived,
+                role_id: null // We now link to category directly
             };
 
             await onSave(payload, subjectCounts, !!initialData);
@@ -151,8 +151,6 @@ export default function QuizForm({
                 setQuizFormSuccess("Concorso e Regole aggiornati ✅");
             } else {
                 setQuizFormSuccess("Concorso creato ✅");
-                // Optional: reset form done by parent passing null initialData?
-                // But for now, just success message
             }
         } catch (err: any) {
             console.error(err);
@@ -195,17 +193,17 @@ export default function QuizForm({
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="mb-1.5 block font-bold text-[var(--foreground)] opacity-40">Ruolo</label>
+                                <label className="mb-1.5 block font-bold text-[var(--foreground)] opacity-40">Categoria *</label>
                                 <select
+                                    required
                                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-3 text-[var(--foreground)] focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none transition-all"
-                                    value={quizRoleId}
-                                    onChange={e => setQuizRoleId(e.target.value)}
+                                    value={quizCategoryId}
+                                    onChange={e => setQuizCategoryId(e.target.value)}
                                 >
                                     <option value="">Seleziona...</option>
-                                    {roles.map(r => {
-                                        const catName = categories.find(c => c.id === r.category_id)?.title || "...";
-                                        return <option key={r.id} value={r.id}>{catName} &gt; {r.title}</option>
-                                    })}
+                                    {categories.map(c => (
+                                        <option key={c.id} value={c.id}>{c.title}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>

@@ -37,6 +37,9 @@ export default function OfficialQuizStarterPage() {
         title: string;
         time_limit: number | null;
         question_count: number;
+        points_correct: number;
+        points_wrong: number;
+        points_blank: number;
     } | null>(null);
 
     // Initial fetch of Quiz Details only
@@ -62,7 +65,7 @@ export default function OfficialQuizStarterPage() {
 
                 let query = supabase
                     .from("quizzes")
-                    .select("id, title, time_limit");
+                    .select("id, title, time_limit, points_correct, points_wrong, points_blank");
 
                 if (isUUID) query = query.eq("id", quizSlug);
                 else query = query.eq("slug", quizSlug);
@@ -75,26 +78,22 @@ export default function OfficialQuizStarterPage() {
 
                 quiz = result.data;
 
-                // 3. Count available questions (estimate)
-                const { data: subjects } = await supabase
-                    .from("subjects")
-                    .select("id")
-                    .eq("quiz_id", quiz.id)
-                    .eq("is_archived", false);
+                // 3. Fetch Rules for precise count
+                const { data: rules } = await supabase
+                    .from("quiz_subject_rules")
+                    .select("question_count")
+                    .eq("quiz_id", quiz.id);
 
-                const subjectIds = subjects?.map(s => s.id) || [];
-
-                const { count } = await supabase
-                    .from("questions")
-                    .select("*", { count: 'exact', head: true })
-                    .in("subject_id", subjectIds)
-                    .eq("is_archived", false);
+                const totalQuestions = rules?.reduce((a, b) => a + b.question_count, 0) || 0;
 
                 const details = {
                     id: quiz.id,
                     title: quiz.title,
                     time_limit: quiz.time_limit,
-                    question_count: count || 0
+                    question_count: totalQuestions,
+                    points_correct: quiz.points_correct ?? 1,
+                    points_wrong: quiz.points_wrong ?? 0,
+                    points_blank: quiz.points_blank ?? 0
                 };
 
                 setQuizDetails(details);
@@ -140,26 +139,59 @@ export default function OfficialQuizStarterPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Utente non autenticato");
 
-            // 1. Fetch Subjects
-            const { data: subjects } = await supabase
-                .from("subjects")
-                .select("id")
-                .eq("quiz_id", details.id)
-                .eq("is_archived", false);
+            // 1. Fetch Rules explicitly
+            const { data: rules, error: rulesError } = await supabase
+                .from("quiz_subject_rules")
+                .select("subject_id, question_count")
+                .eq("quiz_id", details.id);
 
-            if (!subjects?.length) throw new Error("Nessuna materia trovata");
-            const subjectIds = subjects.map(s => s.id);
+            if (rulesError) {
+                console.error("Rules fetch error:", rulesError);
+                throw new Error("Errore nel caricamento delle regole: " + rulesError.message);
+            }
 
-            // 2. Fetch Questions
+            if (!rules || rules.length === 0) {
+                // STOP: Do not fallback to "all questions".
+                // Official simulations MUST have rules.
+                throw new Error("Questa simulazione non ha regole configurate. Contatta l'amministratore.");
+            }
+
+            let selectedQuestionIds: string[] = [];
+
+            // 2. Logic WITH rules
+            for (const rule of rules) {
+                if (rule.question_count <= 0) continue;
+
+                // Fetch all IDs for this subject
+                const { data: qIds } = await supabase
+                    .from("questions")
+                    .select("id")
+                    .eq("subject_id", rule.subject_id)
+                    .eq("is_archived", false);
+
+                if (qIds && qIds.length > 0) {
+                    // Shuffle using Fisher-Yates or simple sort
+                    const shuffled = qIds.sort(() => Math.random() - 0.5);
+                    // Slice to get the exact count
+                    const selected = shuffled.slice(0, rule.question_count);
+                    selectedQuestionIds.push(...selected.map(q => q.id));
+                }
+            }
+
+            if (selectedQuestionIds.length === 0) {
+                throw new Error("Nessuna domanda trovata per le materie configurate.");
+            }
+
+            // 3. Fetch Full Details for selected IDs
             const { data: questions, error: questionsError } = await supabase
                 .from("questions")
                 .select("*, subject:subjects(name)")
-                .in("subject_id", subjectIds)
+                .in("id", selectedQuestionIds)
                 .eq("is_archived", false);
 
-            if (questionsError || !questions?.length) throw new Error("Nessuna domanda disponibile");
+            if (questionsError || !questions?.length) throw new Error("Errore nel recupero delle domande.");
 
-            // 3. Shuffle & Prepare
+            // 4. Shuffle Final Set (so subjects are mixed) & Prepare
             const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
 
             const richAnswers = shuffledQuestions.map(q => ({
@@ -175,7 +207,7 @@ export default function OfficialQuizStarterPage() {
                 options: { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d }
             }));
 
-            // 4. Create Attempt
+            // 5. Create Attempt
             const { data: attempt, error: attemptError } = await supabase
                 .from("quiz_attempts")
                 .insert({
@@ -203,7 +235,7 @@ export default function OfficialQuizStarterPage() {
                 questions_count: richAnswers.length
             });
 
-            // 5. Navigate
+            // 6. Navigate
             const timeParam = details.time_limit ? `time=${details.time_limit}` : "time=0";
             navigate(`/quiz/run/${attempt.id}?mode=official&${timeParam}`);
 
@@ -346,7 +378,11 @@ export default function OfficialQuizStarterPage() {
                                     </div>
                                     <span className="font-bold text-[var(--foreground)] text-sm">Risposta Esatta</span>
                                 </div>
-                                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">+1.00</span>
+                                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+                                    {quizDetails?.points_correct !== undefined
+                                        ? (quizDetails.points_correct >= 0 ? `+${quizDetails.points_correct}` : quizDetails.points_correct)
+                                        : "+1.00"}
+                                </span>
                             </div>
 
                             <div className="flex items-center justify-between p-3.5 pl-4 rounded-2xl bg-red-500/[0.03] dark:bg-red-500/10 border border-red-500/10">
@@ -356,7 +392,11 @@ export default function OfficialQuizStarterPage() {
                                     </div>
                                     <span className="font-bold text-[var(--foreground)] text-sm">Risposta Errata</span>
                                 </div>
-                                <span className="text-lg font-black text-red-500 dark:text-red-400 tracking-tight">-0.10</span>
+                                <span className="text-lg font-black text-red-500 dark:text-red-400 tracking-tight">
+                                    {quizDetails?.points_wrong !== undefined
+                                        ? (quizDetails.points_wrong >= 0 ? `+${quizDetails.points_wrong}` : quizDetails.points_wrong)
+                                        : "-0.10"}
+                                </span>
                             </div>
 
                             <div className="flex items-center justify-between p-3.5 pl-4 rounded-2xl bg-slate-100/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5">
@@ -366,7 +406,11 @@ export default function OfficialQuizStarterPage() {
                                     </div>
                                     <span className="font-bold text-[var(--foreground)] text-sm">Non Risposta</span>
                                 </div>
-                                <span className="text-lg font-black text-slate-400 dark:text-slate-500 tracking-tight">0.00</span>
+                                <span className="text-lg font-black text-slate-400 dark:text-slate-500 tracking-tight">
+                                    {quizDetails?.points_blank !== undefined
+                                        ? (quizDetails.points_blank >= 0 ? `+${quizDetails.points_blank}` : quizDetails.points_blank)
+                                        : "0.00"}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -417,7 +461,7 @@ export default function OfficialQuizStarterPage() {
                                 <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    Avvia Simulazione <Play className="w-5 h-5 fill-current" />
+                                    Avvia Simulazione (v2.2) <Play className="w-5 h-5 fill-current" />
                                 </>
                             )}
                         </span>

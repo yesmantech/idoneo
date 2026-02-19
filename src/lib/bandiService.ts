@@ -141,7 +141,7 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
     if (search) {
         // We use ilike for immediate robustness as FTS config can be tricky with simple terms/stopwords
         const term = `%${search}%`;
-        query = query.or(`title.ilike.${term},short_description.ilike.${term},description.ilike.${term}`);
+        query = query.or(`title.ilike.${term},short_description.ilike.${term},description.ilike.${term},city.ilike.${term},province.ilike.${term}`);
     }
 
     // Categories
@@ -154,7 +154,8 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
         query = query.in('region', regions);
     }
     if (province) {
-        query = query.ilike('province', `%${province}%`);
+        // Search in both city and province matches
+        query = query.or(`province.ilike.%${province}%,city.ilike.%${province}%`);
     }
 
     // Status / Dates

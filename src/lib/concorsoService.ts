@@ -8,15 +8,10 @@ export interface ConcorsoQuiz {
     year: number;
     is_official: boolean;
     available_seats?: string;
-    role: {
+    category: {
         id: string;
         slug: string;
         title: string;
-        category: {
-            id: string;
-            slug: string;
-            title: string;
-        };
     };
 }
 
@@ -35,11 +30,8 @@ export const searchQuizzes = async (filters: ConcorsoFilters = {}) => {
             .from('quizzes')
             .select(`
                 id, slug, title, description, year, is_official,
-                role:roles!inner (
-                    id, slug, title, available_positions,
-                    category:categories!inner (
-                        id, slug, title
-                    )
+                category:categories!inner (
+                    id, slug, title
                 )
             `, { count: 'exact' })
             .eq('is_archived', false);
@@ -50,7 +42,7 @@ export const searchQuizzes = async (filters: ConcorsoFilters = {}) => {
 
         if (filters.categorySlug) {
             // Use the aliased path for filtering
-            query = query.eq('role.category.slug', filters.categorySlug);
+            query = query.eq('category.slug', filters.categorySlug);
         }
 
         if (filters.year) {
@@ -83,16 +75,10 @@ export const searchQuizzes = async (filters: ConcorsoFilters = {}) => {
                 description: q.description,
                 year: q.year,
                 is_official: !!q.is_official,
-                available_seats: q.role?.available_positions,
-                role: {
-                    id: q.role?.id || '',
-                    slug: q.role?.slug || '',
-                    title: q.role?.title || '',
-                    category: {
-                        id: q.role?.category?.id || '',
-                        slug: q.role?.category?.slug || '',
-                        title: q.role?.category?.title || ''
-                    }
+                category: {
+                    id: q.category?.id || '',
+                    slug: q.category?.slug || '',
+                    title: q.category?.title || ''
                 }
             })) as ConcorsoQuiz[],
             count: count || 0

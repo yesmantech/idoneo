@@ -7,13 +7,12 @@ import type { Database } from '@/types/database';
 type QuizRow = Database['public']['Tables']['quizzes']['Row'];
 type SubjectRow = Database['public']['Tables']['subjects']['Row'];
 type QuizSubjectRuleRow = Database['public']['Tables']['quiz_subject_rules']['Row'];
-type RoleRow = { id: string; title: string; category_id: string; slug: string };
 type CategoryRow = { id: string; title: string };
 
 export interface QuizFormData {
     title: string;
     slug: string;
-    roleId: string;
+    categoryId: string;
     year: string;
     description: string;
     timeLimit: string;
@@ -29,7 +28,7 @@ export interface QuizFormData {
 const INITIAL_FORM_DATA: QuizFormData = {
     title: '',
     slug: '',
-    roleId: '',
+    categoryId: '',
     year: '',
     description: '',
     timeLimit: '60',
@@ -67,7 +66,6 @@ export function useQuizAdmin() {
     // Data
     const [quizzes, setQuizzes] = useState<QuizRow[]>([]);
     const [subjects, setSubjects] = useState<SubjectRow[]>([]);
-    const [roles, setRoles] = useState<RoleRow[]>([]);
     const [categories, setCategories] = useState<CategoryRow[]>([]);
     const [quizSubjectRules, setQuizSubjectRules] = useState<QuizSubjectRuleRow[]>([]);
 
@@ -75,6 +73,8 @@ export function useQuizAdmin() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showArchived, setShowArchived] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCatId, setSelectedCatId] = useState<string | null>(null);
 
     // Form State
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -88,23 +88,20 @@ export function useQuizAdmin() {
         setLoading(true);
         setError(null);
         try {
-            const [qRes, sRes, rRes, cRes, rulesRes] = await Promise.all([
+            const [qRes, sRes, cRes, rulesRes] = await Promise.all([
                 supabase.from('quizzes').select('*').order('title'),
                 supabase.from('subjects').select('*').order('name'),
-                supabase.from('roles').select('id, title, category_id, slug').order('title'),
                 supabase.from('categories').select('id, title').order('title'),
                 supabase.from('quiz_subject_rules').select('*'),
             ]);
 
             if (qRes.error) throw qRes.error;
             if (sRes.error) throw sRes.error;
-            if (rRes.error) throw rRes.error;
             if (cRes.error) throw cRes.error;
             if (rulesRes.error) throw rulesRes.error;
 
             setQuizzes(qRes.data || []);
             setSubjects(sRes.data || []);
-            setRoles(rRes.data || []);
             setCategories(cRes.data || []);
             setQuizSubjectRules(rulesRes.data || []);
         } catch (err: unknown) {
@@ -142,7 +139,7 @@ export function useQuizAdmin() {
         setFormData({
             title: quiz.title || '',
             slug: quiz.slug || '',
-            roleId: quiz.role_id || '',
+            categoryId: (quiz as any).category_id || '',
             year: quiz.year !== null ? String(quiz.year) : '',
             description: quiz.description || '',
             timeLimit: quiz.time_limit !== null ? String(quiz.time_limit) : '60',
@@ -179,7 +176,7 @@ export function useQuizAdmin() {
             const payload = {
                 title: formData.title.trim(),
                 slug: formData.slug.trim() || generateSlug(formData.title),
-                role_id: formData.roleId || null,
+                category_id: formData.categoryId || null,
                 description: formData.description.trim() || null,
                 year: parseIntOrNull(formData.year),
                 time_limit: parseIntOrNull(formData.timeLimit),
@@ -252,24 +249,28 @@ export function useQuizAdmin() {
     }, []);
 
     // Computed values
-    const visibleQuizzes = showArchived
-        ? quizzes
-        : quizzes.filter(q => !q.is_archived);
+    const visibleQuizzes = quizzes.filter(q => {
+        const matchesArchive = showArchived ? true : !q.is_archived;
+        const matchesSearch = q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (q.year && String(q.year).includes(searchTerm));
+        const matchesCategory = !selectedCatId || (q as any).category_id === selectedCatId;
+
+        return matchesArchive && matchesSearch && matchesCategory;
+    });
 
     const getSubjectsForQuiz = useCallback((quizId: string) => {
         return subjects.filter(s => s.quiz_id === quizId && !s.is_archived);
     }, [subjects]);
 
-    const getRoleTitle = useCallback((roleId: string | null) => {
-        if (!roleId) return '-';
-        const role = roles.find(r => r.id === roleId);
-        return role?.title || '-';
-    }, [roles]);
+    const getCategoryTitle = useCallback((catId: string | null) => {
+        if (!catId) return '-';
+        const cat = categories.find(c => c.id === catId);
+        return cat?.title || '-';
+    }, [categories]);
 
     return {
         quizzes,
         subjects,
-        roles,
         categories,
         quizSubjectRules,
         loading,
@@ -289,6 +290,10 @@ export function useQuizAdmin() {
         toggleArchive,
         visibleQuizzes,
         getSubjectsForQuiz,
-        getRoleTitle,
+        getCategoryTitle,
+        searchTerm,
+        setSearchTerm,
+        selectedCatId,
+        setSelectedCatId,
     };
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Search, UserPlus, Check, Loader2 } from 'lucide-react';
 import { friendService, FriendProfile } from '@/lib/friendService';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface AddFriendModalProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ export default function AddFriendModal({ isOpen, onClose, currentUserId, onReque
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
     const [sentIds, setSentIds] = useState<Set<string>>(new Set());
+    const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
     if (!isOpen) return null;
 
@@ -36,10 +38,21 @@ export default function AddFriendModal({ isOpen, onClose, currentUserId, onReque
     };
 
     const handleSendRequest = async (friendId: string) => {
+        setRateLimitError(null);
+        const { error } = await friendService.sendRequest(currentUserId, friendId);
+
+        if (error) {
+            if (typeof error === 'string' && error.includes('limite')) {
+                setRateLimitError(error);
+            } else {
+                // Generic error handling if needed, presently silent or logged
+                console.error(error);
+            }
+            return;
+        }
+
         setSentIds(prev => new Set(prev).add(friendId));
-        await friendService.sendRequest(currentUserId, friendId);
-        // Don't wait strictly or handle error UI for now, straightforward feedback
-        onRequestSent(); // To trigger refresh in parent
+        onRequestSent();
     };
 
     return (
@@ -48,12 +61,18 @@ export default function AddFriendModal({ isOpen, onClose, currentUserId, onReque
 
             <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 overflow-hidden animate-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-slate-900">Aggiungi Amico</h2>
                     <button onClick={onClose} className="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
                         <X className="w-5 h-5 text-slate-500" />
                     </button>
                 </div>
+
+                {rateLimitError && (
+                    <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                        <span>🚫 {rateLimitError}</span>
+                    </div>
+                )}
 
                 {/* Search Form */}
                 <form onSubmit={handleSearch} className="mb-6">
@@ -81,12 +100,8 @@ export default function AddFriendModal({ isOpen, onClose, currentUserId, onReque
                         results.map(user => (
                             <div key={user.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden flex-shrink-0">
-                                        {user.avatar_url ? (
-                                            <img src={user.avatar_url} alt={user.nickname} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <span className="w-full h-full flex items-center justify-center text-lg">👤</span>
-                                        )}
+                                    <div className="w-10 h-10 flex-shrink-0">
+                                        <UserAvatar src={user.avatar_url} name={user.nickname} size="md" />
                                     </div>
                                     <div>
                                         <p className="font-bold text-slate-900">{user.nickname}</p>

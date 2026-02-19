@@ -54,7 +54,7 @@ export default function BadgesBlock() {
             if (isAdmin) {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('total_xp, current_streak, referral_count')
+                    .select('total_xp, streak_current, referral_count')
                     .eq('id', user.id)
                     .single();
                 setDebugData(profile);
@@ -240,7 +240,7 @@ export default function BadgesBlock() {
                         <div className="text-right font-bold text-brand-green">{debugData.total_xp || 0}</div>
 
                         <div className="text-slate-400 text-[10px] uppercase">Streak:</div>
-                        <div className="text-right font-bold text-orange-400">{debugData.current_streak || 0} giorni</div>
+                        <div className="text-right font-bold text-orange-400">{debugData.streak_current || 0} giorni</div>
 
                         <div className="text-slate-400 text-[10px] uppercase">Referrals:</div>
                         <div className="text-right font-bold text-pink-400">{debugData.referral_count || 0}</div>

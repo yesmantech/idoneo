@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { AdminLayout, AdminPageHeader } from '@/components/admin';
+import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 interface Profile {
@@ -13,6 +14,7 @@ interface Profile {
 export default function AdminUsersPage() {
     const [users, setUsers] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -45,7 +47,11 @@ export default function AdminUsersPage() {
                         </thead>
                         <tbody className="divide-y divide-[var(--card-border)]">
                             {users.map(user => (
-                                <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <tr
+                                    key={user.id}
+                                    onClick={() => navigate(`/admin/users/${user.id}`)}
+                                    className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                                >
                                     <td className="px-6 py-4 font-mono text-[10px] text-[var(--foreground)] opacity-30">{user.id.substring(0, 8)}...</td>
                                     <td className="px-6 py-4 text-[var(--foreground)] opacity-80 font-bold">{user.nickname || <span className="opacity-30 italic font-normal">Nessun nickname</span>}</td>
                                     <td className="px-6 py-4 text-[var(--foreground)] opacity-50">{user.email || <span className="opacity-30 italic">-</span>}</td>

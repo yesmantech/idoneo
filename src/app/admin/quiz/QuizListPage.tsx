@@ -18,7 +18,7 @@ export default function AdminQuizzesPage() {
     const {
         visibleQuizzes,
         subjects,
-        roles,
+        categories,
         loading,
         error,
         showArchived,
@@ -33,8 +33,12 @@ export default function AdminQuizzesPage() {
         updateFormField,
         saveQuiz,
         toggleArchive,
-        getRoleTitle,
+        getCategoryTitle,
         getSubjectsForQuiz,
+        searchTerm,
+        setSearchTerm,
+        selectedCatId,
+        setSelectedCatId,
     } = useQuizAdmin();
 
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -72,7 +76,7 @@ export default function AdminQuizzesPage() {
             label: 'Titolo',
             render: (quiz: typeof visibleQuizzes[0]) => (
                 <div>
-                    <div className="font-medium text-white">{quiz.title}</div>
+                    <div className="font-medium text-[var(--foreground)]">{quiz.title}</div>
                     {quiz.year && (
                         <div className="text-xs text-slate-500">Anno {quiz.year}</div>
                     )}
@@ -80,12 +84,12 @@ export default function AdminQuizzesPage() {
             ),
         },
         {
-            key: 'role',
-            label: 'Ruolo',
+            key: 'category',
+            label: 'Categoria',
             width: '150px',
             render: (quiz: typeof visibleQuizzes[0]) => {
-                const q = quiz as typeof quiz & { role_id?: string };
-                return <span className="text-slate-400">{getRoleTitle(q.role_id || null)}</span>;
+                const q = quiz as typeof quiz & { category_id?: string };
+                return <span className="text-slate-400">{getCategoryTitle(q.category_id || null)}</span>;
             },
         },
         {
@@ -162,18 +166,55 @@ export default function AdminQuizzesPage() {
             />
 
             {/* Filters */}
-            <div className="mb-4 flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
+            <div className="mb-6 flex flex-col md:flex-row items-center gap-4">
+                {/* Search Bar */}
+                <div className="relative flex-1 w-full">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
                     <input
-                        type="checkbox"
-                        checked={showArchived}
-                        onChange={(e) => setShowArchived(e.target.checked)}
-                        className="rounded bg-slate-800 border-slate-600"
+                        type="text"
+                        placeholder="Cerca concorso..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all"
                     />
-                    Mostra archiviati
-                </label>
-                <div className="text-sm text-slate-500">
-                    {visibleQuizzes.length} concors{visibleQuizzes.length === 1 ? 'o' : 'i'}
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                {/* Category Filter */}
+                <select
+                    value={selectedCatId || ""}
+                    onChange={(e) => setSelectedCatId(e.target.value || null)}
+                    className="w-full md:w-[220px] bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all appearance-none cursor-pointer"
+                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a1a1aa\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\' /%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '14px' }}
+                >
+                    <option value="">Tutte le categorie</option>
+                    {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.title}</option>
+                    ))}
+                </select>
+
+                {/* Counter & Archive Toggle */}
+                <div className="flex items-center gap-4 shrink-0 px-1">
+                    <label className="flex items-center gap-2 text-xs text-slate-500 font-medium cursor-pointer hover:text-slate-700 transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={showArchived}
+                            onChange={(e) => setShowArchived(e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue/20"
+                        />
+                        Archiviati
+                    </label>
+                    <div className="h-4 w-px bg-slate-200" />
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                        {visibleQuizzes.length} RISULTATI
+                    </div>
                 </div>
             </div>
 
@@ -218,7 +259,7 @@ export default function AdminQuizzesPage() {
                     formSaving={formSaving}
                     formError={formError}
                     formSuccess={formSuccess}
-                    roles={roles}
+                    categories={categories}
                     subjects={subjects}
                     updateFormField={updateFormField}
                     onSave={handleSave}

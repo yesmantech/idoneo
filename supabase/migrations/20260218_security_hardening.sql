@@ -30,28 +30,33 @@ DROP POLICY IF EXISTS "Authenticated can insert posts" ON public.blog_posts;
 DROP POLICY IF EXISTS "Authenticated can update posts" ON public.blog_posts;
 DROP POLICY IF EXISTS "Authenticated can delete posts" ON public.blog_posts;
 
+DROP POLICY IF EXISTS "Anyone can read published posts" ON public.blog_posts;
 CREATE POLICY "Anyone can read published posts" ON public.blog_posts
 FOR SELECT TO anon, authenticated
 USING (status = 'published' AND published_at <= NOW());
 
+DROP POLICY IF EXISTS "Admins can manage all posts" ON public.blog_posts;
 CREATE POLICY "Admins can manage all posts" ON public.blog_posts
 FOR ALL TO authenticated
 USING ( (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin' );
 
 -- Categories
 DROP POLICY IF EXISTS "Authenticated can manage categories" ON public.blog_categories;
+DROP POLICY IF EXISTS "Admins can manage categories" ON public.blog_categories;
 CREATE POLICY "Admins can manage categories" ON public.blog_categories
 FOR ALL TO authenticated
 USING ( (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin' );
 
 -- Tags
 DROP POLICY IF EXISTS "Authenticated can manage tags" ON public.blog_tags;
+DROP POLICY IF EXISTS "Admins can manage tags" ON public.blog_tags;
 CREATE POLICY "Admins can manage tags" ON public.blog_tags
 FOR ALL TO authenticated
 USING ( (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin' );
 
 -- Authors
 DROP POLICY IF EXISTS "Authenticated can manage authors" ON public.blog_authors;
+DROP POLICY IF EXISTS "Admins can manage authors" ON public.blog_authors;
 CREATE POLICY "Admins can manage authors" ON public.blog_authors
 FOR ALL TO authenticated
 USING ( (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin' );

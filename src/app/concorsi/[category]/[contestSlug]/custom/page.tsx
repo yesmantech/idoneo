@@ -34,7 +34,7 @@ function getCorrectOption(q: any): string | null {
 // CUSTOM QUIZ WIZARD PAGE - Tier S Redesign
 // =============================================================================
 export default function CustomQuizWizardPage() {
-    const { contestSlug } = useParams();
+    const { category, contestSlug } = useParams<{ category: string; contestSlug: string }>();
     const navigate = useNavigate();
 
     // --- State ---

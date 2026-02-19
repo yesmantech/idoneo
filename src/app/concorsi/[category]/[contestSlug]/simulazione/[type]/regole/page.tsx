@@ -29,7 +29,7 @@ import TierSLoader from "@/components/ui/TierSLoader";
 import { hapticLight, hapticSuccess } from "@/lib/haptics";
 
 export default function RulesPage() {
-  const { contestSlug } = useParams<{ category: string; role: string; contestSlug: string; type: string }>();
+  const { contestSlug } = useParams<{ category: string; contestSlug: string; type: string }>();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,7 @@ export default function RulesPage() {
       // 1. Fetch Quiz by Slug
       const { data: quiz, error: qError } = await supabase
         .from("quizzes")
-        .select("*")
+        .select("id, title, time_limit, total_questions, points_correct, points_wrong, points_blank, is_official")
         .eq("slug", contestSlug)
         .maybeSingle();
 
@@ -70,7 +70,11 @@ export default function RulesPage() {
         .select("question_count")
         .eq("quiz_id", quiz.id);
 
-      const totalQuestions = rules?.reduce((a, b) => a + b.question_count, 0) || 0;
+      // Prefer calculated from rules, fallback to configured total
+      let totalQuestions = rules?.reduce((a, b) => a + b.question_count, 0) || 0;
+      if (totalQuestions === 0 && quiz.total_questions) {
+        totalQuestions = quiz.total_questions;
+      }
 
       setConfig({
         id: quiz.id,
@@ -146,7 +150,7 @@ export default function RulesPage() {
             <ChevronLeft className="w-5 h-5" />
           </motion.button>
           <div className="font-black text-xs uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-            Briefing
+            Briefing (v2.1)
           </div>
           <div className="w-10"></div>
         </div>

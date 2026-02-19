@@ -362,9 +362,13 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: -20 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-                    className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[28px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] border border-slate-200/50 dark:border-slate-700/50 overflow-hidden flex flex-col max-h-[70vh]"
+                    className="relative w-full max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[32px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] border border-white/20 dark:border-white/10 overflow-hidden flex flex-col max-h-[75vh]"
                     onKeyDown={handleKeyDown}
                 >
+                    {/* Cinematic Grain Overlay */}
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]"
+                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+                    />
                     {/* Decorative gradient border */}
                     <div className="absolute inset-0 rounded-[28px] p-[1px] bg-gradient-to-br from-[#00B1FF]/20 via-transparent to-[#00B1FF]/10 pointer-events-none" />
 
@@ -388,7 +392,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                     setQuery(e.target.value);
                                     setSelectedIndex(0);
                                 }}
-                                className="flex-1 bg-transparent text-lg font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
+                                className="flex-1 bg-transparent text-xl font-bold tracking-tight text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-medium focus:outline-none"
                             />
                             <div className="flex items-center gap-2">
                                 {/* Keyboard hint */}

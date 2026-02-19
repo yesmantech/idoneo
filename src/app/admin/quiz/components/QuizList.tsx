@@ -6,7 +6,7 @@ type RoleRow = { id: string; title: string; category_id: string; slug: string };
 
 interface QuizListProps {
     quizzes: QuizRow[];
-    roles: RoleRow[];
+    categories: { id: string; title: string }[];
     showArchived: boolean;
     onToggleShowArchived: (value: boolean) => void;
     onEditQuiz: (quiz: QuizRow) => void;
@@ -16,7 +16,7 @@ interface QuizListProps {
 
 export default function QuizList({
     quizzes,
-    roles,
+    categories,
     showArchived,
     onToggleShowArchived,
     onEditQuiz,
@@ -56,7 +56,7 @@ export default function QuizList({
                         <thead className="bg-slate-50/50 dark:bg-slate-950 text-[var(--foreground)] opacity-40 font-bold border-b border-[var(--card-border)] uppercase tracking-widest text-[10px]">
                             <tr>
                                 <th className="px-6 py-4">Titolo</th>
-                                <th className="px-6 py-4">Ruolo</th>
+                                <th className="px-6 py-4">Categoria</th>
                                 <th className="px-6 py-4">Impostazioni</th>
                                 <th className="px-6 py-4 text-right">Azioni</th>
                             </tr>
@@ -64,7 +64,7 @@ export default function QuizList({
                         <tbody className="divide-y divide-[var(--card-border)]">
                             {visibleQuizzes.map(q => {
                                 const anyQ = q as any;
-                                const roleName = roles.find(r => r.id === anyQ.role_id)?.title || "-";
+                                const roleName = categories.find(c => c.id === anyQ.category_id)?.title || "-";
                                 const isArchived = q.is_archived;
                                 return (
                                     <tr key={q.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${isArchived ? "bg-slate-50/50 dark:bg-slate-900/50 grayscale opacity-40" : ""}`}>
@@ -72,7 +72,9 @@ export default function QuizList({
                                             <div className="font-bold text-[var(--foreground)] opacity-80 text-sm mb-0.5">{q.title}</div>
                                             <div className="text-[10px] text-[var(--foreground)] opacity-40 font-mono bg-slate-100 dark:bg-slate-950 inline-block px-1.5 rounded border border-slate-200 dark:border-slate-800">{anyQ.slug}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-[var(--foreground)] opacity-50 font-medium">{roleName}</td>
+                                        <td className="px-6 py-4 text-[var(--foreground)] opacity-50 font-medium">
+                                            {categories.find(c => c.id === anyQ.category_id)?.title || "-"}
+                                        </td>
                                         <td className="px-6 py-4">
                                             <div className="flex gap-2 text-[10px] font-bold">
                                                 <span className="bg-purple-500/10 text-purple-400 px-2 py-1 rounded-md border border-purple-500/20">{q.time_limit || 0} min</span>

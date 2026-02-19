@@ -25,7 +25,8 @@ import BandiScadenzaSection from "@/components/home/BandiScadenzaSection";
 import NewArrivalsSection from "@/components/home/NewArrivalsSection";
 import PopularSection from "@/components/home/PopularSection";
 import SEOHead from "@/components/seo/SEOHead";
-import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, fetchRecentCategories, type RecentlyUsedItem, type NewArrivalQuiz, type PopularRole } from "@/lib/homeSectionsService";
+import { Reveal } from "@/components/ui/Reveal";
+import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, fetchRecentCategories, type RecentlyUsedItem, type NewArrivalQuiz, type PopularQuiz } from "@/lib/homeSectionsService";
 import { fetchClosingSoonBandi, type Bando } from "@/lib/bandiService";
 
 // =============================================================================
@@ -42,7 +43,7 @@ export default function HomePage() {
   const [recentlyUsed, setRecentlyUsed] = useState<RecentlyUsedItem[]>([]);
   const [closingSoonBandi, setClosingSoonBandi] = useState<Bando[]>([]);
   const [newArrivals, setNewArrivals] = useState<NewArrivalQuiz[]>([]);
-  const [popularRoles, setPopularRoles] = useState<PopularRole[]>([]);
+  const [popularQuizzes, setPopularQuizzes] = useState<PopularQuiz[]>([]);
   const [recentCategories, setRecentCategories] = useState<Category[]>([]);
 
   // Auto-start onboarding for first-time users
@@ -70,7 +71,7 @@ export default function HomePage() {
     // New sections data (non-blocking)
     fetchClosingSoonBandi(7, 8).then(setClosingSoonBandi);
     fetchNewArrivals(30, 10).then(setNewArrivals);
-    fetchMostPopular(5).then(setPopularRoles);
+    fetchMostPopular(5).then(setPopularQuizzes);
     fetchRecentCategories(8).then(setRecentCategories);
 
     // Offline Sync Trigger
@@ -102,57 +103,73 @@ export default function HomePage() {
 
         {/* 1. BLOG HERO - Immersive Entry */}
         <section>
-          <BlogHero />
+          <Reveal width="100%" duration={0.8} delay={0.1}>
+            <BlogHero />
+          </Reveal>
         </section>
 
         {/* 2. SEARCH BAR - Overlaps hero for visual continuity with better spacing */}
         <section className="px-4 lg:px-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20 -mt-4 lg:-mt-6">
-          <SearchSection items={searchItems} />
+          <Reveal width="100%" duration={0.6} delay={0.3} y={10}>
+            <SearchSection items={searchItems} />
+          </Reveal>
         </section>
 
         {/* 3. RECENTLY USED - Quick access for returning users */}
         {recentlyUsed.length > 0 && (
           <section className="mb-8 lg:mb-10">
-            <RecentlyUsedSection items={recentlyUsed} />
+            <Reveal width="100%" delay={0.4}>
+              <RecentlyUsedSection items={recentlyUsed} />
+            </Reveal>
           </section>
         )}
 
         {/* 4. BANDI IN SCADENZA - Urgency section */}
         {closingSoonBandi.length > 0 && (
           <section className="mb-8 lg:mb-10">
-            <BandiScadenzaSection bandi={closingSoonBandi} />
+            <Reveal width="100%" delay={0.5}>
+              <BandiScadenzaSection bandi={closingSoonBandi} />
+            </Reveal>
           </section>
         )}
 
         {/* 5. CONCORSI SECTIONS - Recommended */}
         <section className="mb-8 lg:mb-10">
-          <ConcorsiSection
-            title="Consigliati per te"
-            contests={consigliati}
-          />
+          <Reveal width="100%" delay={0.6}>
+            <ConcorsiSection
+              title="Consigliati per te"
+              contests={consigliati}
+            />
+          </Reveal>
         </section>
 
         {/* 5b. RECENTLY ADDED - Fresh content */}
         {recentCategories.length > 0 && (
           <section className="mb-8 lg:mb-10">
-            <ConcorsiSection
-              title="Aggiunti di recente"
-              contests={recentCategories}
-            />
+            <Reveal width="100%" delay={0.7}>
+              <ConcorsiSection
+                title="Aggiunti di recente"
+                contests={recentCategories}
+              />
+            </Reveal>
           </section>
         )}
 
         {/* 6. NEW ARRIVALS - Fresh content */}
         {newArrivals.length > 0 && (
           <section className="mb-8 lg:mb-10">
-            <NewArrivalsSection quizzes={newArrivals} />
+            <Reveal width="100%" delay={0.8}>
+              <NewArrivalsSection quizzes={newArrivals} />
+            </Reveal>
           </section>
         )}
 
         {/* 7. POPULAR - Community favorites */}
-        {popularRoles.length > 0 && (
+        {popularQuizzes.length > 0 && (
           <section className="mb-8 lg:mb-10">
-            <PopularSection roles={popularRoles} />
+            <Reveal width="100%" delay={0.9}>
+              <PopularSection quizzes={popularQuizzes} />
+            </Reveal>
           </section>
         )}
 

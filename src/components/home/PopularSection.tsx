@@ -1,18 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, ChevronRight, ChevronLeft, Users, TrendingUp } from 'lucide-react';
-import { PopularRole } from '@/lib/homeSectionsService';
-
-// ============================================
-// POPULAR SECTION
-// Shows most attempted roles
-// ============================================
+import { PopularQuiz } from '@/lib/homeSectionsService';
 
 interface PopularSectionProps {
-    roles: PopularRole[];
+    quizzes: PopularQuiz[];
 }
 
-export default function PopularSection({ roles }: PopularSectionProps) {
+export default function PopularSection({ quizzes }: PopularSectionProps) {
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
@@ -22,7 +17,7 @@ export default function PopularSection({ roles }: PopularSectionProps) {
         }
     };
 
-    if (!roles || roles.length === 0) return null;
+    if (!quizzes || quizzes.length === 0) return null;
 
     return (
         <div className="max-w-7xl lg:mx-auto">
@@ -61,8 +56,8 @@ export default function PopularSection({ roles }: PopularSectionProps) {
                 ref={scrollRef}
                 className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-2 -my-2 pl-4 lg:pl-8 gap-3 lg:gap-4"
             >
-                {roles.map((role, idx) => (
-                    <PopularCard key={role.roleId} role={role} rank={idx + 1} />
+                {quizzes.map((quiz, idx) => (
+                    <PopularCard key={quiz.quizId} quiz={quiz} rank={idx + 1} />
                 ))}
 
                 {/* Right spacer for scroll end padding */}
@@ -72,7 +67,7 @@ export default function PopularSection({ roles }: PopularSectionProps) {
     );
 }
 
-function PopularCard({ role, rank }: { key?: string; role: PopularRole; rank: number }) {
+function PopularCard({ quiz, rank }: { key?: string; quiz: PopularQuiz; rank: number }) {
     const getRankStyle = () => {
         switch (rank) {
             case 1: return { bg: 'bg-gradient-to-br from-amber-400 to-yellow-500', text: 'text-amber-900', shadow: 'shadow-amber-400/40' };
@@ -86,7 +81,7 @@ function PopularCard({ role, rank }: { key?: string; role: PopularRole; rank: nu
 
     return (
         <Link
-            to={`/concorsi/${role.categorySlug}/${role.roleSlug}`}
+            to={`/concorsi/${quiz.categorySlug}/${quiz.quizSlug}`}
             className="snap-start flex-shrink-0 group"
         >
             <div
@@ -118,15 +113,15 @@ function PopularCard({ role, rank }: { key?: string; role: PopularRole; rank: nu
                 <div className="flex flex-col justify-between p-4 lg:p-5 flex-1">
                     <div className="space-y-1.5">
                         <p className="text-[10px] lg:text-[11px] font-bold text-brand-blue uppercase tracking-wider truncate">
-                            {role.categoryTitle}
+                            {quiz.categoryTitle}
                         </p>
                         <h3 className="text-[14px] lg:text-[16px] font-extrabold text-[var(--foreground)] leading-[1.3] line-clamp-2 group-hover:text-brand-blue transition-colors tracking-tight">
-                            {role.roleTitle}
+                            {quiz.quizTitle}
                         </h3>
                     </div>
                     <div className="flex items-center gap-1.5 text-slate-400 mt-4">
                         <Users className="w-3.5 h-3.5" />
-                        <span className="text-[11px] font-medium">{role.totalAttempts.toLocaleString()} tentativi</span>
+                        <span className="text-[11px] font-medium">{quiz.totalAttempts.toLocaleString()} tentativi</span>
                     </div>
                 </div>
             </div>

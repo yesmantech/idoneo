@@ -85,7 +85,7 @@ function NewArrivalCard({ quiz, index }: { key?: string; quiz: NewArrivalQuiz; i
 
     return (
         <Link
-            to={`/concorsi/${quiz.categorySlug}/${quiz.roleSlug}`}
+            to={`/concorsi/${quiz.categorySlug}/${quiz.slug}`}
             className="snap-start flex-shrink-0 group"
         >
             <div

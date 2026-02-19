@@ -67,7 +67,7 @@ export interface RoleWithContests extends Role {
 
 export interface ConcorsoData {
     category: Category | null;
-    roles: RoleWithContests[];
+    quizzes: ContestWithSeats[];
     candidatiCount: number;
     loading: boolean;
     error: string | null;
@@ -76,7 +76,7 @@ export interface ConcorsoData {
 export function useConcorsoData(categorySlug: string) {
     const [data, setData] = useState<ConcorsoData>({
         category: null,
-        roles: [],
+        quizzes: [],
         candidatiCount: 0,
         loading: true,
         error: null,
@@ -96,23 +96,11 @@ export function useConcorsoData(categorySlug: string) {
                     throw new Error(catError?.message || "Category not found");
                 }
 
-                // 2. Fetch Roles for this Category
-                const { data: rolesData, error: rolesError } = await supabase
-                    .from("roles")
-                    .select("*")
-                    .eq("category_id", category.id)
-                    .order("title");
-
-                if (rolesError) {
-                    throw new Error(rolesError.message);
-                }
-
-                // 3. Fetch Contests (Quizzes) for these roles
-                const roleIds = rolesData.map(r => r.id);
+                // 2. Fetch Quizzes (Contests) for this Category
                 const { data: quizzesData, error: quizzesError } = await supabase
                     .from("quizzes")
                     .select("*")
-                    .in("role_id", roleIds)
+                    .eq("category_id", category.id)
                     .eq("is_archived", false)
                     .order("year", { ascending: false });
 
@@ -120,8 +108,7 @@ export function useConcorsoData(categorySlug: string) {
                     throw new Error(quizzesError.message);
                 }
 
-                // 4. Fetch Leaderboard Data for Active Users Calculation
-                // We fetch all unique (quiz_id, user_id) pairs for the retrieved quizzes
+                // 3. Fetch Leaderboard Data for Active Users Calculation
                 const quizIds = quizzesData.map(q => q.id);
                 let allLeaderboardEntries: { quiz_id: string, user_id: string }[] = [];
 
@@ -136,38 +123,27 @@ export function useConcorsoData(categorySlug: string) {
                     }
                 }
 
-                // 5. Group Contests by Role & Calculate Active Users
-                const rolesWithContests: RoleWithContests[] = rolesData.map(role => {
-                    const roleQuizzes = quizzesData.filter(q => q.role_id === role.id);
-                    const roleQuizIds = roleQuizzes.map(q => q.id);
-
-                    // Calculate unique users for this role (set of user_ids across all quizzes of this role)
-                    const roleUniqueUsers = new Set(
+                // 4. Calculate Candidati (Active Users) per Quiz
+                const quizzesWithData = quizzesData.map(q => {
+                    const quizUsers = new Set(
                         allLeaderboardEntries
-                            .filter(entry => roleQuizIds.includes(entry.quiz_id))
+                            .filter(entry => entry.quiz_id === q.id)
                             .map(entry => entry.user_id)
                     );
 
                     return {
-                        id: role.id,
-                        slug: role.slug,
-                        title: role.title,
+                        id: q.id,
+                        slug: q.slug || q.id,
+                        title: q.title,
+                        year: q.year,
+                        available_seats: q.available_seats,
+                        description: q.description || "",
                         categorySlug: categorySlug,
-                        activeUsers: roleUniqueUsers.size,
-                        contests: roleQuizzes.map(q => ({
-                            id: q.id,
-                            slug: q.slug || q.id,
-                            title: q.title,
-                            year: q.year,
-                            available_seats: q.available_seats,
-                            description: q.description || "",
-                            roleSlug: role.slug,
-                            categorySlug: categorySlug,
-                        }))
-                    };
+                        activeUsers: quizUsers.size
+                    } as any;
                 });
 
-                // 6. Total category candidates (unique users across all roles)
+                // 5. Total category candidates (unique users across all quizzes)
                 const categoryUniqueUsers = new Set(allLeaderboardEntries.map(e => e.user_id));
                 const candidatiCount = categoryUniqueUsers.size;
 
@@ -179,8 +155,9 @@ export function useConcorsoData(categorySlug: string) {
                         description: category.description || "",
                         home_banner_url: category.home_banner_url || undefined,
                         inner_banner_url: category.inner_banner_url || undefined,
+                        available_seats: category.available_seats || undefined,
                     },
-                    roles: rolesWithContests,
+                    quizzes: quizzesWithData,
                     candidatiCount,
                     loading: false,
                     error: null,

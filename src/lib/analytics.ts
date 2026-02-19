@@ -78,7 +78,7 @@ interface UserProperties {
     email?: string;
     nickname?: string;
     total_xp?: number;
-    current_streak?: number;
+    streak_current?: number;
 }
 
 class AnalyticsService {

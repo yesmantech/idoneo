@@ -371,9 +371,8 @@ export const leaderboardService = {
                     id, 
                     title, 
                     year, 
-                    category,
-                    slug,
-                    role:roles(title)
+                    category_id,
+                    slug
                 )
             `)
             .eq("user_id", userId)

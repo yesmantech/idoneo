@@ -104,14 +104,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async (uid: string) => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('id, nickname, avatar_url, role, streak_current, streak_max, dismissed_modals, total_xp')
-            .eq('id', uid)
-            .single();
+        console.log('AuthContext: Fetching profile for', uid);
+        try {
+            // Create a timeout promise
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+            );
 
-        if (data) setProfile(data);
-        if (error) console.error("Error fetching profile:", error);
+            // Race the fetch against the timeout
+            const fetchPromise = supabase
+                .from('profiles')
+                .select('id, nickname, avatar_url, role, streak_current, streak_max, dismissed_modals, total_xp')
+                .eq('id', uid)
+                .single();
+
+            const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
+            const { data, error } = result;
+
+            if (data) {
+                console.log('AuthContext: Profile loaded', data);
+                setProfile(data);
+            }
+            if (error) {
+                console.error("AuthContext: Error fetching profile:", error);
+                throw error; // Let the catch block handle fallback
+            }
+        } catch (err) {
+            console.error('AuthContext: Fetch failed, using fallback.', err);
+            // Optimization: If fetch fails, assume user role is 'user' to unblock UI
+            // This prevents infinite loading for admin users if DB is slow, but restricts secure pages
+            // However, for admin access, this will fail open to 'user' role -> redirect to Home.
+            // Better than infinite loading.
+        }
     };
 
     const refreshProfile = async () => {
@@ -121,24 +145,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         // Initial Session Check
         supabase.auth.getSession().then(async ({ data: { session } }) => {
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                await fetchProfile(session.user.id);
+            try {
+                setUser(session?.user ?? null);
+                if (session?.user) {
+                    await fetchProfile(session.user.id);
+                }
+            } catch (err) {
+                console.error("Error initializing session:", err);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         // Listen for Auth Changes
+        // Listen for Auth Changes
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                fetchProfile(session.user.id);
-            } else {
-                setProfile(null);
+        } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            try {
+                setUser(session?.user ?? null);
+                if (session?.user) {
+                    // Ensure profile is fetched before clearing loading state
+                    await fetchProfile(session.user.id);
+                } else {
+                    setProfile(null);
+                }
+            } catch (err) {
+                console.error('AuthContext: Error in onAuthStateChange', err);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => subscription.unsubscribe();
