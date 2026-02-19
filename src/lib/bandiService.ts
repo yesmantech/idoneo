@@ -205,6 +205,10 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
 
     // Sorting
     switch (sortBy) {
+        case 'relevance':
+            query = query.order('is_featured', { ascending: false });
+            query = query.order('deadline', { ascending: true });
+            break;
         case 'deadline':
             query = query.order('deadline', { ascending: true });
             break;
@@ -215,6 +219,7 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
             query = query.order('seats_total', { ascending: false });
             break;
         default:
+            query = query.order('is_featured', { ascending: false });
             query = query.order('deadline', { ascending: true });
     }
 

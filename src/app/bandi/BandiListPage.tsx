@@ -29,7 +29,7 @@ export default function BandiListPage() {
     const [error, setError] = useState(false);
     const [filters, setFilters] = useState<BandiFilters>({
         status: 'open',
-        sortBy: 'deadline',
+        sortBy: 'relevance',
         limit: 20,
         offset: 0
     });
@@ -122,7 +122,7 @@ export default function BandiListPage() {
     const clearFilters = () => {
         setFilters({
             status: 'open',
-            sortBy: 'deadline',
+            sortBy: 'relevance',
             limit: 20,
             offset: 0
         });

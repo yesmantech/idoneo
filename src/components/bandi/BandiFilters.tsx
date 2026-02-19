@@ -150,7 +150,7 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
                     {totalResults !== undefined ? `${totalResults} risultati` : 'Caricamento...'}
                 </span>
                 <SortDropdown
-                    value={filters.sortBy || 'deadline'}
+                    value={filters.sortBy || 'relevance'}
                     onChange={(v) => onFiltersChange({ ...filters, sortBy: v, offset: 0 })}
                 />
             </div>
@@ -178,6 +178,7 @@ function SortDropdown({ value, onChange }: { value: string; onChange: (v: any) =
     const [open, setOpen] = useState(false);
 
     const options = [
+        { val: 'relevance', label: 'Più rilevanti' },
         { val: 'deadline', label: 'In scadenza' },
         { val: 'newest', label: 'Più recenti' },
         { val: 'seats', label: 'Più posti' }
@@ -433,7 +434,7 @@ function TierSFilterModal({
                             onClick={() => {
                                 hapticLight();
                                 onFiltersChange({
-                                    sortBy: 'deadline',
+                                    sortBy: 'relevance',
                                     limit: 20,
                                     offset: 0
                                 });
