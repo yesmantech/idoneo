@@ -14,7 +14,8 @@ import {
     Upload,
     Download,
     Bot,
-    Loader2
+    Loader2,
+    Star
 } from 'lucide-react';
 import {
     fetchAdminBandi,
@@ -23,7 +24,8 @@ import {
     bulkDelete,
     publishBando,
     closeBando,
-    runImportAgent
+    runImportAgent,
+    toggleFeatured
 } from '@/lib/adminBandiService';
 import { Bando } from '@/lib/bandiService';
 
@@ -163,6 +165,20 @@ export default function AdminBandiListPage() {
         }
     };
 
+    const handleToggleFeatured = async (id: string, current: boolean) => {
+        try {
+            // Optimistic update
+            setBandi(prev => prev.map(b =>
+                b.id === id ? { ...b, is_featured: !current } : b
+            ));
+            await toggleFeatured(id, !current);
+        } catch (error) {
+            console.error(error);
+            alert('Errore durante l\'aggiornamento');
+            loadBandi(); // revert on error
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
             {/* Header */}
@@ -258,6 +274,9 @@ export default function AdminBandiListPage() {
                                     className="rounded"
                                 />
                             </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-slate-500 w-10">
+                                <Star className="w-4 h-4" />
+                            </th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">Titolo</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">Ente</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">Scadenza</th>
@@ -290,6 +309,17 @@ export default function AdminBandiListPage() {
                                             className="rounded"
                                         />
                                     </td>
+                                    <td className="px-4 py-3">
+                                        <button
+                                            onClick={() => handleToggleFeatured(bando.id, !!bando.is_featured)}
+                                            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                                        >
+                                            <Star
+                                                className={`w-4 h-4 transition-colors ${bando.is_featured ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`}
+                                            />
+                                        </button>
+                                    </td>
+
                                     <td className="px-4 py-3">
                                         <div className="font-medium text-slate-900 dark:text-white line-clamp-1">
                                             {bando.title}

@@ -359,3 +359,17 @@ export async function runImportAgent(): Promise<{ imported: number; errors: numb
 
     return data;
 }
+
+export async function toggleFeatured(id: string, isFeatured: boolean): Promise<boolean> {
+    const { error } = await supabase
+        .from('bandi')
+        .update({ is_featured: isFeatured })
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error toggling featured:', error);
+        throw error;
+    }
+
+    return true;
+}
