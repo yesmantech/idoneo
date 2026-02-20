@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { supabase } from "@/lib/supabaseClient";
 import { ChevronLeft } from 'lucide-react';
+import { Button } from "@/components/ui/Button";
 import { useOnboarding } from "@/context/OnboardingProvider";
 import { useAuth } from "@/context/AuthContext";
 
@@ -22,6 +23,8 @@ import {
     type SubjectPerformance
 } from "@/lib/statsService";
 
+import { useQuery } from "@tanstack/react-query";
+
 // Components
 import StatsKPIGrid from "@/components/stats/StatsKPIGrid";
 import SubjectRadarChart from "@/components/stats/SubjectRadarChart";
@@ -35,7 +38,51 @@ import GoalCreationModal from "@/components/stats/GoalCreationModal";
 export default function QuizStatsPage() {
     const { quizId } = useParams();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+
+    // React Query for Data Fetching
+    const { data: fetchedData, isLoading: loading } = useQuery({
+        queryKey: ['quiz-stats', quizId, user?.id],
+        queryFn: async () => {
+            if (!user || !quizId) return null;
+            const [quizRes, attemptsRes, goalRes, leaderboardRes] = await Promise.all([
+                supabase
+                    .from('quizzes')
+                    .select('title, total_questions, points_correct, rule_id, simulation_rule:simulation_rules(total_questions, points_correct)')
+                    .eq('id', quizId)
+                    .single(),
+                supabase
+                    .from("quiz_attempts")
+                    .select(`*, quiz:quizzes(title), mode`)
+                    .eq("user_id", user.id)
+                    .eq("quiz_id", quizId)
+                    .order("created_at", { ascending: false }),
+                supabase
+                    .from("test_goals")
+                    .select("*")
+                    .eq("user_id", user.id)
+                    .eq("quiz_id", quizId)
+                    .eq("status", "active")
+                    .maybeSingle(),
+                supabase
+                    .from('concorso_leaderboard')
+                    .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+                    .eq('user_id', user.id)
+                    .eq('quiz_id', quizId)
+                    .maybeSingle()
+            ]);
+            return {
+                quiz: quizRes.data,
+                attempts: attemptsRes.data,
+                goal: goalRes.data,
+                leaderboard: leaderboardRes.data,
+                error: Object.values({ quizRes, attemptsRes, goalRes, leaderboardRes }).find(r => r.error)?.error
+            };
+        },
+        enabled: !!user && !!quizId,
+        staleTime: 1000 * 60 * 5 // 5 minutes cache
+    });
+
     const [attempts, setAttempts] = useState<AttemptWithDetails[]>([]);
 
     // Info System State
@@ -73,77 +120,21 @@ export default function QuizStatsPage() {
 
     // Onboarding Tour
     const { startOnboarding, hasCompletedContext } = useOnboarding();
-    const { isModalDismissed, dismissModal, profile } = useAuth();
+    const { isModalDismissed, dismissModal } = useAuth();
 
+    // Effect: Process data after fetching
     useEffect(() => {
-        if (quizId) loadStats();
-    }, [quizId]);
+        if (!fetchedData || !quizId) return;
 
-    // Effect: Show Info Modal (Predictive Algorithm) if not dismissed
-    useEffect(() => {
-        if (!loading && !isModalDismissed('prep_info') && !hasCompletedContext('quizstats')) {
-            const timer = setTimeout(() => setShowInfoModal(true), 1500);
-            return () => clearTimeout(timer);
-        }
-    }, [loading, isModalDismissed, hasCompletedContext]);
+        const { quiz: quizData, attempts: data, goal: goalData, leaderboard: leaderboardData, error } = fetchedData;
 
-    // Auto-start quizstats onboarding (only if modal is NOT shown or after it's dismissed)
-    useEffect(() => {
-        if (!loading && stats.totalTests > 0 && !hasCompletedContext('quizstats') && !showInfoModal) {
-            const timer = setTimeout(() => startOnboarding('quizstats'), 600);
-            return () => clearTimeout(timer);
-        }
-    }, [loading, stats.totalTests, hasCompletedContext, startOnboarding, showInfoModal]);
+        let maxCalc = 0;
 
-    const loadStats = async () => {
-        setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            navigate('/login');
-            return;
-        }
+        if (quizData) {
+            setQuizTitle(quizData.title);
 
-        try {
-            // Fetch ALL data in parallel for maximum speed
-            const [quizRes, attemptsRes, goalRes, leaderboardRes] = await Promise.all([
-                supabase
-                    .from('quizzes')
-                    .select('title, total_questions, points_correct, rule_id, simulation_rule:simulation_rules(total_questions, points_correct)')
-                    .eq('id', quizId)
-                    .single(),
-                supabase
-                    .from("quiz_attempts")
-                    .select(`*, quiz:quizzes(title), mode`)
-                    .eq("user_id", user.id)
-                    .eq("quiz_id", quizId)
-                    .order("created_at", { ascending: false }),
-                supabase
-                    .from("test_goals")
-                    .select("*")
-                    .eq("user_id", user.id)
-                    .eq("quiz_id", quizId)
-                    .eq("status", "active")
-                    .maybeSingle(),
-                supabase
-                    .from('concorso_leaderboard')
-                    .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
-                    .eq('user_id', user.id)
-                    .eq('quiz_id', quizId)
-                    .maybeSingle()
-            ]);
-
-            const quizData = quizRes.data;
-            const data = attemptsRes.data;
-            const error = attemptsRes.error;
-            const goalData = goalRes.data;
-            const leaderboardData = leaderboardRes.data;
-
-            let maxCalc = 0;
-
-            if (quizData) {
-                setQuizTitle(quizData.title);
-
-                // 1. Check if there are specific subject rules (highest priority)
+            // 1. Check if there are specific subject rules (highest priority)
+            const checkRules = async () => {
                 const { data: rules } = await supabase
                     .from('quiz_subject_rules')
                     .select('question_count')
@@ -155,46 +146,43 @@ export default function QuizStatsPage() {
                         maxCalc = totalFromRules * (quizData.points_correct || 1);
                     }
                 }
+            };
+            checkRules();
 
-                // 2. Fallback to simulation_rule join (legacy)
-                if (maxCalc === 0) {
-                    const rule = quizData.simulation_rule as { total_questions?: number; points_correct?: number } | null;
-                    if (rule && rule.total_questions && rule.points_correct) {
-                        maxCalc = rule.total_questions * rule.points_correct;
-                    }
-                }
-
-                // 3. Fallback to total_questions column
-                if (maxCalc === 0 && quizData.total_questions && quizData.points_correct) {
-                    maxCalc = quizData.total_questions * quizData.points_correct;
+            // 2. Fallback to simulation_rule join (legacy)
+            if (maxCalc === 0) {
+                const rule = quizData.simulation_rule as { total_questions?: number; points_correct?: number } | null;
+                if (rule && rule.total_questions && rule.points_correct) {
+                    maxCalc = rule.total_questions * rule.points_correct;
                 }
             }
 
-            // 4. Fallback to max questions in attempts (if still 0)
-            if (maxCalc === 0 && data && data.length > 0) {
-                const maxQuestionsInAttempts = Math.max(...data.map(d => d.total_questions || 0));
-                if (maxQuestionsInAttempts > 0) {
-                    const pointsPerQuestion = quizData?.points_correct || 1;
-                    maxCalc = maxQuestionsInAttempts * pointsPerQuestion;
-                }
+            // 3. Fallback to total_questions column
+            if (maxCalc === 0 && quizData.total_questions && quizData.points_correct) {
+                maxCalc = quizData.total_questions * quizData.points_correct;
             }
-
-            if (maxCalc === 0) maxCalc = 100;
-
-            if (error) {
-                console.error(error);
-            } else if (data) {
-                processData(data as AttemptWithDetails[], maxCalc, leaderboardData);
-            }
-
-            if (goalData) setGoal(goalData);
-
-        } catch (err) {
-            console.error("Error loading stats:", err);
-        } finally {
-            setLoading(false);
         }
-    };
+
+        // 4. Fallback to max questions in attempts (if still 0)
+        if (maxCalc === 0 && data && data.length > 0) {
+            const maxQuestionsInAttempts = Math.max(...data.map(d => d.total_questions || 0));
+            if (maxQuestionsInAttempts > 0) {
+                const pointsPerQuestion = quizData?.points_correct || 1;
+                maxCalc = maxQuestionsInAttempts * pointsPerQuestion;
+            }
+        }
+
+        if (maxCalc === 0) maxCalc = 100;
+
+        if (error) {
+            console.error(error);
+        } else if (data) {
+            processData(data as AttemptWithDetails[], maxCalc, leaderboardData);
+        }
+
+        if (goalData) setGoal(goalData);
+
+    }, [fetchedData, quizId]);
 
     const processData = (data: AttemptWithDetails[], maxPossible: number, leaderboardData?: any) => {
         setAttempts(data);
@@ -313,12 +301,13 @@ export default function QuizStatsPage() {
 
                 {/* Header */}
                 <div className="flex items-center justify-between gap-4 py-4">
-                    <button
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="h-[48px] w-[48px] p-0 rounded-full"
                         onClick={() => navigate("/profile")}
-                        className="p-3 bg-white dark:bg-slate-800/50 rounded-full shadow-soft hover:shadow-card hover:scale-105 transition-all text-slate-400 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
-                    >
-                        <ChevronLeft className="w-6 h-6" />
-                    </button>
+                        icon={<ChevronLeft className="w-6 h-6" />}
+                    />
                     <div className="flex-1 text-center">
                         <h1 className="text-xl font-black text-text-primary leading-tight line-clamp-1">{quizTitle}</h1>
                         <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mt-0.5">Statistiche Dettagliate</p>
@@ -434,7 +423,7 @@ export default function QuizStatsPage() {
                                 <h3 className="text-lg font-bold text-text-primary">Cronologia Tentativi</h3>
                                 <span className="text-[10px] font-bold bg-canvas-light dark:bg-slate-800 text-text-tertiary px-3 py-1.5 rounded-pill uppercase tracking-wider">Ultimi 50</span>
                             </div>
-                            <AttemptsHistoryTable attempts={attempts} quizId={quizId} />
+                            <AttemptsHistoryTable attempts={attempts as any} quizId={quizId} />
                         </div>
 
                     </div>

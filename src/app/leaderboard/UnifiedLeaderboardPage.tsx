@@ -44,6 +44,7 @@ import LeaderboardViewLegacy from '@/components/leaderboard/LeaderboardViewLegac
 import InfoModal from '@/components/leaderboard/InfoModal';
 import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';
 import SEOHead from '@/components/seo/SEOHead';
+import { Button } from '@/components/ui/Button';
 
 function LeagueCountdown() {
     const [timeLeft, setTimeLeft] = useState('--g --o --m');
@@ -290,12 +291,13 @@ export default function UnifiedLeaderboardPage() {
                             </h1>
                             <p className="text-[var(--foreground)] opacity-50 mt-1">Competi con gli altri studenti e scala la classifica</p>
                         </div>
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-[48px] w-[48px] p-0 rounded-xl"
                             onClick={handleOpenInfo}
-                            className="p-3 rounded-xl bg-[var(--card)] hover:bg-slate-100 dark:hover:bg-slate-700 text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors shadow-sm border border-[var(--card-border)]"
-                        >
-                            <Info className="w-5 h-5" />
-                        </button>
+                            icon={<Info className="w-5 h-5 opacity-50" />}
+                        />
                     </div>
 
                     {/* Mobile Header Row */}
@@ -309,12 +311,13 @@ export default function UnifiedLeaderboardPage() {
                                 otherQuizzes={otherQuizzes}
                             />
                         </div>
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-[44px] w-[44px] p-0 rounded-full"
                             onClick={handleOpenInfo}
-                            className="p-2 rounded-full bg-[var(--card)] shadow-sm border border-[var(--card-border)] text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors"
-                        >
-                            <Info className="w-6 h-6" />
-                        </button>
+                            icon={<Info className="w-6 h-6 opacity-50" />}
+                        />
                     </div>
 
                     {/* Desktop Selector - Centered */}

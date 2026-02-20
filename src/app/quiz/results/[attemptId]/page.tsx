@@ -47,6 +47,7 @@ import TierSLoader from "@/components/ui/TierSLoader";
 import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen, AlertCircle } from "lucide-react";
 import { SuccessBadge } from "@/components/ui/SuccessBadge";
 import { FailBadge } from "@/components/ui/FailBadge";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 
@@ -526,35 +527,30 @@ export default function QuizResultsPage() {
                         {/* CTA Buttons - Desktop Sidebar */}
                         <div className="hidden lg:block space-y-3">
                             {hasErrors ? (
-                                <button
+                                <Button
+                                    variant="gradient"
+                                    size="lg"
+                                    fullWidth
                                     onClick={handleRipassaErrori}
-                                    disabled={processingReview || !!attemptId?.startsWith('local-')}
-                                    className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5
-                                        ${attemptId?.startsWith('local-')
-                                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                                            : 'bg-[#00B1FF] text-white shadow-[#00B1FF]/25'}`}
+                                    isLoading={processingReview}
+                                    disabled={!!attemptId?.startsWith('local-')}
+                                    icon={<RotateCcw className="w-5 h-5" />}
                                 >
-                                    {processingReview ? (
-                                        <span>Caricamento...</span>
-                                    ) : (
-                                        <>
-                                            <RotateCcw className="w-5 h-5" />
-                                            Ripassa ({wrongList.length + skippedList.length})
-                                        </>
-                                    )}
-                                </button>
+                                    Ripassa ({wrongList.length + skippedList.length})
+                                </Button>
                             ) : (
-                                <div className="bg-emerald-50 rounded-2xl p-4 text-center border border-emerald-100">
+                                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4 text-center border border-emerald-100 dark:border-emerald-800">
                                     <div className="text-2xl mb-1">🌟</div>
-                                    <p className="text-emerald-600 font-semibold text-sm">Nessun Errore!</p>
+                                    <p className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm">Nessun Errore!</p>
                                 </div>
                             )}
-                            <button
+                            <Button
+                                variant="outline"
+                                fullWidth
                                 onClick={() => navigate("/")}
-                                className="w-full py-3 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors bg-white rounded-xl shadow-sm hover:shadow"
                             >
                                 Torna alla Home
-                            </button>
+                            </Button>
                         </div>
                     </div>
 
@@ -631,39 +627,37 @@ export default function QuizResultsPage() {
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--card)]/95 backdrop-blur-md border-t border-[var(--card-border)] px-5 py-3 pb-safe z-50">
                 <div className="max-w-lg mx-auto space-y-2">
                     {hasErrors ? (
-                        <button
+                        <Button
+                            variant="gradient"
+                            size="lg"
+                            fullWidth
                             onClick={handleRipassaErrori}
-                            disabled={processingReview || !!attemptId?.startsWith('local-')}
-                            className={`w-full py-4 rounded-2xl font-bold text-[16px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg
-                                ${attemptId?.startsWith('local-')
-                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                                    : 'bg-[#00B1FF] text-white shadow-[#00B1FF]/25'}`}
+                            isLoading={processingReview}
+                            disabled={!!attemptId?.startsWith('local-')}
+                            icon={<RotateCcw className="w-5 h-5" />}
                         >
-                            {processingReview ? (
-                                <span>Caricamento...</span>
-                            ) : (
-                                <>
-                                    <RotateCcw className="w-5 h-5" />
-                                    Ripassa Errori ({wrongList.length + skippedList.length})
-                                </>
-                            )}
-                        </button>
+                            Ripassa Errori ({wrongList.length + skippedList.length})
+                        </Button>
                     ) : (
-                        <button
+                        <Button
+                            variant="gradient"
+                            size="lg"
+                            fullWidth
                             onClick={() => navigate("/")}
-                            className="w-full py-4 rounded-2xl font-bold text-[16px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/25"
                         >
                             Torna alla Home
-                        </button>
+                        </Button>
                     )}
 
                     {hasErrors && (
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            fullWidth
                             onClick={() => navigate("/")}
-                            className="w-full py-3 text-[15px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
                         >
                             Non ora
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>

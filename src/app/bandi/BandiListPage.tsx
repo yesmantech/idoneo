@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
 import { Bell, Bookmark, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     fetchBandi,
     fetchClosingSoonBandi,
@@ -16,106 +17,113 @@ import BandiFiltersBar from '@/components/bandi/BandiFilters';
 import BandiEmptyState from '@/components/bandi/BandiEmptyState';
 import { BandoCardSkeletonList } from '@/components/bandi/BandoSkeleton';
 import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/Button';
 import SEOHead from '@/components/seo/SEOHead';
 
 export default function BandiListPage() {
     const { user } = useAuth();
-    const [bandi, setBandi] = useState<Bando[]>([]);
-    const [closingSoon, setClosingSoon] = useState<Bando[]>([]);
-    const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
-    const [totalCount, setTotalCount] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [error, setError] = useState(false);
+    const queryClient = useQueryClient();
     const [filters, setFilters] = useState<BandiFilters>({
         status: 'open',
         sortBy: 'relevance',
         limit: 20,
-        offset: 0
+    }); // Removed offset from base filters as React Query manages it
+
+    // --- Queries ---
+
+    // 1. Main Infinite List
+    const {
+        data: infiniteData,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading: isMainLoading,
+        isError: isMainError,
+        refetch: refetchMain
+    } = useInfiniteQuery({
+        queryKey: ['bandi', filters],
+        queryFn: ({ pageParam = 0 }) => fetchBandi({ ...filters, offset: pageParam as number }),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            const currentTotal = allPages.reduce((acc, page) => acc + page.data.length, 0);
+            return currentTotal < lastPage.count ? currentTotal : undefined;
+        },
+        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
-    // Initial load
-    useEffect(() => {
-        loadInitialData();
-    }, []);
+    const bandi = infiniteData?.pages.flatMap(page => page.data) || [];
+    const totalCount = infiniteData?.pages[0]?.count || 0;
 
-    // Reload when filters change
-    useEffect(() => {
-        if (!loading) {
-            loadBandi(filters);
-        }
-    }, [filters]);
+    // 2. Closing Soon (Only on first page, no search)
+    const showClosingSoon = !filters.search && bandi.length > 0;
+    const { data: closingSoon = [] } = useQuery({
+        queryKey: ['bandi-closing-soon'],
+        queryFn: () => fetchClosingSoonBandi(7, 10),
+        enabled: showClosingSoon,
+        staleTime: 1000 * 60 * 15, // 15 minutes
+    });
 
-    const loadInitialData = async () => {
-        setLoading(true);
-        setError(false);
-        try {
-            const [bandiResult, closingSoonResult, savedResult] = await Promise.all([
-                fetchBandi(filters),
-                fetchClosingSoonBandi(7, 10),
-                user ? fetchUserSavedBandi() : Promise.resolve([])
-            ]);
+    // 3. Saved IDs Map
+    const { data: savedIds = new Set<string>() } = useQuery({
+        queryKey: ['saved-bandi-ids', user?.id],
+        queryFn: async () => {
+            if (!user) return new Set<string>();
+            const saved = await fetchUserSavedBandi();
+            return new Set(saved.map(b => b.id));
+        },
+        enabled: !!user,
+        staleTime: Infinity, // Mutated directly
+    });
 
-            setBandi(bandiResult.data);
-            setTotalCount(bandiResult.count);
-            setClosingSoon(closingSoonResult);
-            setSavedIds(new Set(savedResult.map(b => b.id)));
-        } catch (err) {
-            console.error('Error loading bandi:', err);
-            setError(true);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // --- Mutations ---
 
-    const loadBandi = async (newFilters: BandiFilters) => {
-        if (newFilters.offset === 0) {
-            setLoading(true);
-        } else {
-            setLoadingMore(true);
-        }
+    const saveMutation = useMutation({
+        mutationFn: async ({ bandoId, save }: { bandoId: string, save: boolean }) => {
+            if (!user) throw new Error("Not logged in");
+            if (save) await saveBando(bandoId);
+            else await unsaveBando(bandoId);
+            return { bandoId, save };
+        },
+        onMutate: async ({ bandoId, save }) => {
+            await queryClient.cancelQueries({ queryKey: ['saved-bandi-ids', user?.id] });
+            const previousSaved = queryClient.getQueryData<Set<string>>(['saved-bandi-ids', user?.id]);
 
-        try {
-            const result = await fetchBandi(newFilters);
-            if (newFilters.offset === 0) {
-                setBandi(result.data);
-            } else {
-                setBandi(prev => [...prev, ...result.data]);
-            }
-            setTotalCount(result.count);
-        } catch (err) {
-            console.error('Error loading bandi:', err);
-            setError(true);
-        } finally {
-            setLoading(false);
-            setLoadingMore(false);
-        }
-    };
-
-    const handleFiltersChange = useCallback((newFilters: BandiFilters) => {
-        setFilters(newFilters);
-    }, []);
-
-    const handleSaveToggle = useCallback(async (bandoId: string, save: boolean) => {
-        if (!user) return;
-
-        const success = save ? await saveBando(bandoId) : await unsaveBando(bandoId);
-        if (success) {
-            setSavedIds(prev => {
-                const next = new Set(prev);
-                if (save) {
-                    next.add(bandoId);
-                } else {
-                    next.delete(bandoId);
-                }
+            // Optimistic Update
+            queryClient.setQueryData<Set<string>>(['saved-bandi-ids', user?.id], old => {
+                const next = new Set(old);
+                if (save) next.add(bandoId);
+                else next.delete(bandoId);
                 return next;
             });
+            return { previousSaved };
+        },
+        onError: (err, variables, context) => {
+            console.error("Save toggle error:", err);
+            if (context?.previousSaved) {
+                queryClient.setQueryData(['saved-bandi-ids', user?.id], context.previousSaved);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['saved-bandi-ids', user?.id] });
         }
-    }, [user]);
+    });
+
+    // --- Handlers ---
+
+    const handleFiltersChange = useCallback((newFilters: BandiFilters) => {
+        // Strip offset when setting filters so we start fresh
+        const { offset, ...cleanFilters } = newFilters;
+        setFilters(cleanFilters);
+    }, []);
+
+    const handleSaveToggle = useCallback((bandoId: string, save: boolean) => {
+        if (!user) return;
+        saveMutation.mutate({ bandoId, save });
+    }, [user, saveMutation]);
 
     const handleLoadMore = () => {
-        if (!loadingMore && bandi.length < totalCount) {
-            setFilters(prev => ({ ...prev, offset: (prev.offset || 0) + (prev.limit || 20) }));
+        if (hasNextPage) {
+            fetchNextPage();
         }
     };
 
@@ -124,7 +132,6 @@ export default function BandiListPage() {
             status: 'open',
             sortBy: 'relevance',
             limit: 20,
-            offset: 0
         });
     };
 
@@ -145,19 +152,24 @@ export default function BandiListPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2.5">
-                        <Link
-                            to="/bandi/alerts"
-                            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--card)] border border-[var(--card-border)] text-slate-400 hover:text-brand-blue hover:border-brand-blue/30 transition-all shadow-sm"
-                            title="Gestisci notifiche"
-                        >
-                            <Bell className="w-[18px] h-[18px]" />
+                        <Link to="/bandi/alerts">
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                className="w-10 h-10 p-0 rounded-2xl"
+                                title="Gestisci notifiche"
+                                icon={<Bell className="w-[18px] h-[18px] opacity-50" />}
+                            />
                         </Link>
-                        <Link
-                            to="/bandi/watchlist"
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-brand-blue to-brand-cyan text-white text-[13px] font-bold shadow-lg shadow-brand-blue/20 hover:scale-[1.03] active:scale-[0.97] transition-all"
-                        >
-                            <Bookmark className="w-4 h-4" fill="currentColor" />
-                            Salvati
+                        <Link to="/bandi/watchlist">
+                            <Button
+                                variant="gradient"
+                                size="sm"
+                                className="px-4 py-2.5 rounded-2xl"
+                                icon={<Bookmark className="w-4 h-4" fill="currentColor" />}
+                            >
+                                Salvati
+                            </Button>
                         </Link>
                     </div>
                 </div>
@@ -166,7 +178,7 @@ export default function BandiListPage() {
                     <BandiFiltersBar
                         filters={filters}
                         onFiltersChange={handleFiltersChange}
-                        totalResults={loading ? undefined : totalCount}
+                        totalResults={isMainLoading ? undefined : totalCount}
                     />
                 </div>
             </div>
@@ -175,10 +187,10 @@ export default function BandiListPage() {
             <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6">
 
 
-                {loading ? (
+                {isMainLoading ? (
                     <BandoCardSkeletonList count={6} />
-                ) : error ? (
-                    <BandiEmptyState type="error" onRetry={loadInitialData} />
+                ) : isMainError ? (
+                    <BandiEmptyState type="error" onRetry={() => refetchMain()} />
                 ) : bandi.length === 0 ? (
                     <BandiEmptyState
                         type="no-results"
@@ -188,7 +200,7 @@ export default function BandiListPage() {
                 ) : (
                     <>
                         {/* Closing soon carousel (only on first page with no active search) */}
-                        {!filters.search && filters.offset === 0 && closingSoon.length > 0 && (
+                        {showClosingSoon && closingSoon.length > 0 && (
                             <section>
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-[17px] font-black text-[var(--foreground)] tracking-tight flex items-center gap-2">
@@ -201,9 +213,9 @@ export default function BandiListPage() {
                                         Vedi tutti <ChevronRight className="w-4 h-4" />
                                     </Link>
                                 </div>
-                                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-                                    {closingSoon.slice(0, 5).map((bando, i) => (
-                                        <motion.div
+                                <div className="flex gap-4 overflow-x-auto p-8 -mx-8 px-8 scrollbar-hide snap-x">
+                                    {closingSoon.slice(0, 5).map((bando: Bando, i: number) => (
+                                        <m.div
                                             key={bando.id}
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
@@ -213,7 +225,7 @@ export default function BandiListPage() {
                                                 bando={bando}
                                                 variant="featured"
                                             />
-                                        </motion.div>
+                                        </m.div>
                                     ))}
                                 </div>
                             </section>
@@ -221,15 +233,15 @@ export default function BandiListPage() {
 
                         {/* Main list */}
                         <section>
-                            {!filters.search && filters.offset === 0 && closingSoon.length > 0 && (
+                            {showClosingSoon && closingSoon.length > 0 && (
                                 <h2 className="text-[17px] font-black text-[var(--foreground)] tracking-tight mb-4">
                                     Tutti i bandi
                                 </h2>
                             )}
                             <div className="space-y-3">
                                 <AnimatePresence mode="popLayout">
-                                    {bandi.map((bando, i) => (
-                                        <motion.div
+                                    {bandi.map((bando: Bando, i: number) => (
+                                        <m.div
                                             key={bando.id}
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
@@ -242,22 +254,23 @@ export default function BandiListPage() {
                                                 isSaved={savedIds.has(bando.id)}
                                                 onSaveToggle={handleSaveToggle}
                                             />
-                                        </motion.div>
+                                        </m.div>
                                     ))}
                                 </AnimatePresence>
                             </div>
 
                             {/* Load more */}
-                            {bandi.length < totalCount && (
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                            {hasNextPage && (
+                                <Button
+                                    variant="secondary"
+                                    size="lg"
+                                    fullWidth
+                                    className="mt-6 border-slate-200 dark:border-slate-800"
                                     onClick={handleLoadMore}
-                                    disabled={loadingMore}
-                                    className="w-full mt-6 py-4 rounded-[20px] bg-[var(--card)] border border-[var(--card-border)] font-bold text-[14px] text-slate-500 shadow-sm hover:shadow-md transition-all"
+                                    isLoading={isFetchingNextPage}
                                 >
-                                    {loadingMore ? 'Caricamento...' : `Carica altri (${totalCount - bandi.length} rimasti)`}
-                                </motion.button>
+                                    Carica altri ({totalCount - bandi.length} rimasti)
+                                </Button>
                             )}
                         </section>
                     </>

@@ -59,6 +59,11 @@ export default {
                     success: '#34C759',
                     error: '#FF3B30',
                     errorBg: '#FEF2F2',
+                },
+                gradient: {
+                    'primary': 'linear-gradient(135deg, #06D6D3 0%, #0095FF 100%)',
+                    'vibrant': 'linear-gradient(90deg, #00A8FF 0%, #00E5FF 100%)',
+                    'glass': 'rgba(255, 255, 255, 0.1)',
                 }
             },
             borderRadius: {
@@ -75,7 +80,8 @@ export default {
                 'card': '0 8px 40px rgba(0,0,0,0.08)',
             },
             transitionTimingFunction: {
-                'ios': 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+                'ios': 'cubic-bezier(0.4, 0, 0.2, 1)', // Refined for smoother motion
+                'ios-spring': 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
             },
             keyframes: {
                 float: {

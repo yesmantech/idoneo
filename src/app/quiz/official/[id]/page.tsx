@@ -8,6 +8,7 @@ import { analytics } from "@/lib/analytics";
 import { motion } from "framer-motion";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { hapticLight, hapticSuccess } from "@/lib/haptics";
+import { Button } from "@/components/ui/Button";
 
 // Helper to normalize DB answers
 function normalizeDBAnswer(val: string | null | undefined): string | null {
@@ -449,23 +450,16 @@ export default function OfficialQuizStarterPage() {
             {/* Fixed Bottom Start Button - Balanced */}
             <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-[#0A0A0B]/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
                 <div className="max-w-lg mx-auto">
-                    <button
+                    <Button
+                        variant="gradient"
+                        size="lg"
+                        fullWidth
                         onClick={() => handleStart()}
-                        disabled={starting}
-                        className="group w-full relative overflow-hidden py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-extrabold text-lg rounded-2xl shadow-xl shadow-slate-900/20 dark:shadow-white/10 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none"
+                        isLoading={starting}
+                        icon={<Play className="w-5 h-5 fill-white" />}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                            {starting ? (
-                                <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    Avvia Simulazione (v2.2) <Play className="w-5 h-5 fill-current" />
-                                </>
-                            )}
-                        </span>
-                    </button>
+                        Avvia Simulazione
+                    </Button>
                 </div>
             </div>
         </div>

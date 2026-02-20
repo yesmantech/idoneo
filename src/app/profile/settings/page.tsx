@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil, Check, AlertTriangle, Loader2, Sun, Moon, Monitor } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import { hapticLight } from '@/lib/haptics';
+import { Button } from '@/components/ui/Button';
 
 export default function ProfileSettingsPage() {
     const { user, profile, loading, refreshProfile } = useAuth();
@@ -155,12 +156,13 @@ export default function ProfileSettingsPage() {
             {/* Header */}
             <header className="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md pt-safe">
                 <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
-                    <button
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-10 h-10 p-0 rounded-full"
                         onClick={() => navigate('/profile')}
-                        className="w-10 h-10 rounded-full bg-[var(--card)] flex items-center justify-center transition-all hover:opacity-80 active:scale-95 border border-[var(--card-border)] shadow-sm"
-                    >
-                        <ArrowLeft className="w-5 h-5 text-[var(--foreground)]" />
-                    </button>
+                        icon={<ArrowLeft className="w-5 h-5 text-[var(--foreground)]" />}
+                    />
                     <h1 className="text-[17px] font-bold text-[var(--foreground)]">Impostazioni Profilo</h1>
                     <div className="w-10" />
                 </div>
@@ -214,39 +216,33 @@ export default function ProfileSettingsPage() {
                         Tema
                     </label>
                     <div className="grid grid-cols-3 gap-2">
-                        <button
-                            type="button"
+                        <Button
+                            variant={selectedTheme === 'light' ? 'primary' : 'secondary'}
+                            size="sm"
+                            className="flex-col h-auto py-3 gap-2"
                             onClick={() => { hapticLight(); setSelectedTheme('light'); setTheme('light'); }}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${selectedTheme === 'light'
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                                }`}
+                            icon={<Sun className="w-5 h-5" />}
                         >
-                            <Sun className="w-5 h-5" />
-                            <span className="text-[11px] font-bold">Chiaro</span>
-                        </button>
-                        <button
-                            type="button"
+                            Chiaro
+                        </Button>
+                        <Button
+                            variant={selectedTheme === 'dark' ? 'primary' : 'secondary'}
+                            size="sm"
+                            className="flex-col h-auto py-3 gap-2"
                             onClick={() => { hapticLight(); setSelectedTheme('dark'); setTheme('dark'); }}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${selectedTheme === 'dark'
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                                }`}
+                            icon={<Moon className="w-5 h-5" />}
                         >
-                            <Moon className="w-5 h-5" />
-                            <span className="text-[11px] font-bold">Scuro</span>
-                        </button>
-                        <button
-                            type="button"
+                            Scuro
+                        </Button>
+                        <Button
+                            variant={selectedTheme === 'system' ? 'primary' : 'secondary'}
+                            size="sm"
+                            className="flex-col h-auto py-3 gap-2"
                             onClick={() => { hapticLight(); setSelectedTheme('system'); setTheme('system'); }}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${selectedTheme === 'system'
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                                }`}
+                            icon={<Monitor className="w-5 h-5" />}
                         >
-                            <Monitor className="w-5 h-5" />
-                            <span className="text-[11px] font-bold">Auto</span>
-                        </button>
+                            Auto
+                        </Button>
                     </div>
                 </div>
 
@@ -272,25 +268,16 @@ export default function ProfileSettingsPage() {
                     </div>
 
                     {/* Save Button */}
-                    <button
+                    <Button
                         type="submit"
-                        disabled={saving}
-                        className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-[16px] active:scale-[0.98]"
+                        variant="gradient"
+                        size="lg"
+                        fullWidth
+                        isLoading={saving}
+                        icon={showSuccess ? <Check className="w-5 h-5" /> : undefined}
                     >
-                        {saving ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Salvataggio...
-                            </>
-                        ) : showSuccess ? (
-                            <>
-                                <Check className="w-5 h-5" />
-                                Salvato!
-                            </>
-                        ) : (
-                            'Salva modifiche'
-                        )}
-                    </button>
+                        {showSuccess ? 'Salvato!' : 'Salva modifiche'}
+                    </Button>
                 </form>
 
                 {/* Danger Zone */}
@@ -298,13 +285,18 @@ export default function ProfileSettingsPage() {
                     <h3 className="text-[12px] font-bold text-[var(--foreground)] opacity-50 uppercase tracking-widest mb-4">
                         Zona pericolo
                     </h3>
-                    <button
+                    <Button
+                        variant="outline"
+                        fullWidth
                         onClick={handleDeleteAccount}
-                        className="w-full py-3.5 bg-[var(--card)] border-2 border-rose-200 dark:border-rose-800 text-rose-500 font-bold rounded-2xl hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all active:scale-[0.98]"
+                        className="border-rose-200 dark:border-rose-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 font-bold"
                     >
                         Elimina account
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="outline"
+                        fullWidth
+                        className="mt-4"
                         onClick={async () => {
                             if (window.confirm('Vuoi davvero ripristinare il tutorial iniziale?')) {
                                 await resetOnboarding();
@@ -312,10 +304,9 @@ export default function ProfileSettingsPage() {
                                 navigate('/');
                             }
                         }}
-                        className="w-full mt-4 py-3.5 bg-[var(--card)] border-2 border-slate-200 dark:border-slate-700 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-[0.98]"
                     >
                         Ripristina Tutorial
-                    </button>
+                    </Button>
                 </div>
 
             </div>

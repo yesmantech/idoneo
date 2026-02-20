@@ -37,6 +37,9 @@ import {
     Gift, Crown, Bell, Sparkles
 } from "lucide-react";
 import SEOHead from '@/components/seo/SEOHead';
+import { Button } from '@/components/ui/Button';
+import { hapticLight } from '@/lib/haptics';
+import { analytics } from '@/lib/analytics';
 
 // ============================================================================
 // COMPONENT
@@ -180,12 +183,13 @@ export default function LoginPage() {
                         <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm text-[var(--foreground)] opacity-50 border border-slate-100 dark:border-slate-700">
                             Non trovi l'email? Controlla nello spam o riprova.
                         </div>
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={toggleMode}
-                            className="text-[#00B1FF] font-bold text-sm hover:underline mt-4"
                         >
                             Torna al login
-                        </button>
+                        </Button>
                     </div>
                 )}
 
@@ -199,7 +203,7 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 dark:focus:bg-slate-700 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none border border-transparent dark:border-slate-700"
+                                className="w-full h-14 px-5 rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 dark:focus:bg-slate-700 transition-all shadow-soft border border-slate-100 dark:border-slate-700"
                             />
                             <input
                                 type="password"
@@ -207,7 +211,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F5F5] dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 dark:focus:bg-slate-700 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none border border-transparent dark:border-slate-700"
+                                className="w-full h-14 px-5 rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 dark:focus:bg-slate-700 transition-all shadow-soft border border-slate-100 dark:border-slate-700"
                             />
                             {isLogin && (
                                 <div className="flex justify-end px-2">
@@ -227,29 +231,29 @@ export default function LoginPage() {
                             </div>
                         )}
 
-                        <button
+                        <Button
                             type="submit"
-                            disabled={loading}
-                            className={`w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20 flex items-center justify-center`}
+                            variant="gradient"
+                            size="lg"
+                            fullWidth
+                            isLoading={loading}
                         >
-                            {loading
-                                ? (isLogin ? 'Accesso in corso...' : 'Registrazione in corso...')
-                                : (isLogin ? 'Accedi' : 'Registrati')
-                            }
-                        </button>
+                            {isLogin ? 'Accedi' : 'Registrati'}
+                        </Button>
                     </form>
                 )}
 
                 {!success && (
                     <div className="text-center space-y-4">
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={toggleMode}
-                            className="text-[#00B1FF] font-medium text-sm hover:underline transition-all"
                         >
                             {isLogin
                                 ? "Non hai un account? Registrati"
                                 : "Hai già un account? Accedi"}
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>

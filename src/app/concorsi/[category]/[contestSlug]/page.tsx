@@ -7,6 +7,9 @@ import {
   ChevronLeft, Trophy, Puzzle, Clock, Clipboard,
   BookOpen, Share2
 } from "lucide-react";
+import ReadinessCard from "@/components/role/ReadinessCard";
+import { Button } from "@/components/ui/Button";
+import TierSLoader from "@/components/ui/TierSLoader";
 
 export default function ContestPage() {
   const { category, contestSlug } = useParams<{ category: string; contestSlug: string }>();
@@ -31,8 +34,7 @@ export default function ContestPage() {
           .select('*')
           .eq('quiz_id', data.id)
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
+          .order('created_at', { ascending: false });
 
         if (myAttempts) {
           setAttempts(myAttempts);
@@ -45,9 +47,7 @@ export default function ContestPage() {
   }, [contestSlug, user]);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
-    </div>
+    <TierSLoader message="Caricamento concorso..." />
   );
 
   if (!contest) return (
@@ -91,6 +91,14 @@ export default function ContestPage() {
           </p>
         </div>
 
+        {/* 3.5 READINESS CARD */}
+        {user && (
+          <ReadinessCard
+            history={attempts}
+            theme={{ gradient: "from-[#00B1FF] to-[#00B1FF]" }}
+          />
+        )}
+
         {/* 4. ACTIONS */}
         <div className="space-y-4">
 
@@ -107,12 +115,13 @@ export default function ContestPage() {
                 </p>
               </div>
             </div>
-            <button
+            <Button
+              variant="gradient"
+              fullWidth
               onClick={() => navigate(`/quiz/${contestSlug}/official`)}
-              className="w-full bg-[#00B1FF] hover:bg-[#0099DD] text-white font-bold text-[16px] py-4 rounded-[18px] shadow-lg shadow-cyan-200/50 transition-all flex items-center justify-center gap-2"
             >
-              Avvia Simulazione <span className="text-lg">→</span>
-            </button>
+              Avvia Simulazione
+            </Button>
           </div>
 
           {/* Custom Test Card */}
@@ -128,12 +137,13 @@ export default function ContestPage() {
                 </p>
               </div>
             </div>
-            <button
+            <Button
+              variant="gradient-purple"
+              fullWidth
               onClick={() => navigate(`/concorsi/${category}/${contestSlug}/custom`)}
-              className="w-full bg-[#A855F7] hover:bg-[#9333EA] text-white font-bold text-[16px] py-4 rounded-[18px] shadow-lg shadow-purple-200/50 transition-all flex items-center justify-center gap-2"
             >
-              Configura Prova <span className="text-lg">→</span>
-            </button>
+              Configura Prova
+            </Button>
           </div>
 
         </div>
@@ -148,7 +158,7 @@ export default function ContestPage() {
           <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_15px_rgba(0,0,0,0.03)] overflow-hidden min-h-[160px] flex flex-col justify-center">
             {attempts.length > 0 ? (
               <div className="divide-y divide-slate-50">
-                {attempts.map((attempt) => (
+                {attempts.slice(0, 5).map((attempt) => (
                   <Link
                     key={attempt.id}
                     to={`/quiz/results/${attempt.id}`}
@@ -173,7 +183,6 @@ export default function ContestPage() {
               <div className="flex flex-col items-center justify-center p-8 text-center">
                 <div className="mb-3 opacity-60">
                   <Clipboard className="w-8 h-8 text-[#C4B598]" strokeWidth={1.5} />
-                  {/* Using a brownish tone for clipboard placeholder like reference if possible, or slate */}
                 </div>
                 <p className="text-[14px] text-slate-400 font-medium px-4">
                   Non hai ancora effettuato esercitazioni per questo ruolo.
