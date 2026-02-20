@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'vibrant-blue' | 'vibrant-purple';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
     size?: 'sm' | 'md' | 'lg';
     fullWidth?: boolean;
     isLoading?: boolean;
@@ -12,7 +12,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = 'primary', size = 'md', fullWidth = false, isLoading, icon, children, disabled, ...props }, ref) => {
 
-        const baseStyles = "relative overflow-hidden font-bold inline-flex items-center justify-center gap-2 transition-all duration-300 ease-ios active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none select-none";
+        const baseStyles = "relative overflow-hidden font-bold inline-flex items-center justify-center gap-2 transition-all duration-300 ease-ios disabled:opacity-50 disabled:cursor-not-allowed select-none";
 
         const sizes = {
             sm: "h-[40px] px-4 text-[14px] rounded-xl",
@@ -21,10 +21,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         };
 
         const variants = {
-            primary: "bg-brand-cyan text-white shadow-lg shadow-brand-cyan/20 hover:shadow-brand-cyan/30 hover:-translate-y-0.5",
+            primary: "bg-brand-cyan text-white hover:opacity-90",
             secondary: "bg-canvas-light dark:bg-slate-800 text-text-primary dark:text-white hover:bg-[#E5E7EB] dark:hover:bg-slate-700",
-            'vibrant-blue': "bg-gradient-to-r from-[#00b4fe] to-[#009cff] text-white shadow-[0_8px_20px_-6px_rgba(0,180,254,0.5)] hover:shadow-[0_12px_24px_-8px_rgba(0,180,254,0.6)] hover:-translate-y-0.5",
-            'vibrant-purple': "bg-gradient-to-r from-[#ac53ff] to-[#8f4cfc] text-white shadow-[0_8px_20px_-6px_rgba(172,83,255,0.5)] hover:shadow-[0_12px_24px_-8px_rgba(172,83,255,0.6)] hover:-translate-y-0.5",
             outline: "bg-transparent border-2 border-slate-200 dark:border-slate-700 text-text-primary dark:text-white hover:border-brand-blue hover:text-brand-blue",
             ghost: "bg-transparent text-text-secondary hover:text-brand-blue hover:bg-canvas-light/50 dark:hover:bg-slate-800/50",
         };

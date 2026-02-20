@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
 import {
   ChevronLeft, Trophy, Puzzle, Clock, Clipboard,
-  BookOpen, Share2, ArrowRight
+  BookOpen, Share2
 } from "lucide-react";
 import ReadinessCard from "@/components/role/ReadinessCard";
 import { Button } from "@/components/ui/Button";
@@ -116,14 +116,12 @@ export default function ContestPage() {
               </div>
             </div>
             <Button
-              variant="vibrant-blue"
+              variant="primary"
               fullWidth
-              className="rounded-[16px]"
+              className="rounded-2xl"
               onClick={() => navigate(`/quiz/${contestSlug}/official`)}
             >
-              <div className="flex items-center justify-center gap-1">
-                Avvia Simulazione <ArrowRight className="w-[18px] h-[18px]" strokeWidth={2.5} />
-              </div>
+              Avvia Simulazione
             </Button>
           </div>
 
@@ -141,14 +139,12 @@ export default function ContestPage() {
               </div>
             </div>
             <Button
-              variant="vibrant-purple"
+              variant="primary"
               fullWidth
-              className="rounded-[16px]"
+              className="rounded-2xl"
               onClick={() => navigate(`/concorsi/${category}/${contestSlug}/custom`)}
             >
-              <div className="flex items-center justify-center gap-1">
-                Configura Prova <ArrowRight className="w-[18px] h-[18px]" strokeWidth={2.5} />
-              </div>
+              Configura Prova
             </Button>
           </div>
 
