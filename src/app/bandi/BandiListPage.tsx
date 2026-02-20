@@ -163,7 +163,7 @@ export default function BandiListPage() {
                         </Link>
                         <Link to="/bandi/watchlist">
                             <Button
-                                variant="gradient"
+                                variant="primary"
                                 size="sm"
                                 className="px-4 py-2.5 rounded-2xl"
                                 icon={<Bookmark className="w-4 h-4" fill="currentColor" />}

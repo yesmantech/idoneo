@@ -31,6 +31,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import compression from 'vite-plugin-compression';
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -41,6 +42,16 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
+      ViteImageOptimizer({
+        svg: {
+          multipass: true,
+          plugins: ['preset-default'],
+        },
+        png: { quality: 80 },
+        jpeg: { quality: 80 },
+        jpg: { quality: 80 },
+        webp: { quality: 80, lossless: false },
+      }),
       // Gzip compression
       compression({
         algorithm: 'gzip',
@@ -85,6 +96,27 @@ export default defineConfig(({ mode }) => {
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable'
+            }
+          ]
+        },
+        workbox: {
+          // Increase limit to accommodate heavy chunks like Framer and Supabase initially
+          maximumFileSizeToCacheInBytes: 3000000,
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'supabase-api-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24, // 24 hours
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
             }
           ]
         }

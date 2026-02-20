@@ -37,49 +37,29 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
-/**
- * Extended user profile from the `profiles` table.
- * Contains display info and gamification stats.
- */
-interface Profile {
-    /** User UUID (matches auth.users.id) */
+export interface Profile {
     id: string;
-    /** Display name chosen by user */
     nickname: string | null;
-    /** Profile picture URL (Supabase Storage) */
     avatar_url: string | null;
-    /** User role for access control ('user' or 'admin') */
     role: string;
-    /** Current consecutive day streak */
     streak_current?: number;
-    /** Highest streak ever achieved */
     streak_max?: number;
-    /** Array of modal keys the user has dismissed */
     dismissed_modals?: string[];
-    /** Lifetime total XP across all seasons */
     total_xp?: number;
 }
 
-/**
- * Shape of the AuthContext value.
- */
 interface AuthContextType {
-    /** Supabase Auth user object (null if not logged in) */
     user: User | null;
-    /** Extended profile data (null if not loaded or not logged in) */
     profile: Profile | null;
-    /** True while checking initial session */
     loading: boolean;
-    /** Manually refresh profile data after updates */
     refreshProfile: () => Promise<void>;
-    /** Check if a modal has been dismissed */
     isModalDismissed: (key: string) => boolean;
-    /** Persist modal dismissal to DB */
     dismissModal: (key: string) => Promise<void>;
 }
 
@@ -100,85 +80,92 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [profile, setProfile] = useState<Profile | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [authLoading, setAuthLoading] = useState(true);
+    const queryClient = useQueryClient();
 
-    const fetchProfile = async (uid: string) => {
-        console.log('AuthContext: Fetching profile for', uid);
-        try {
-            // Create a timeout promise
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
-            );
-
-            // Race the fetch against the timeout
-            const fetchPromise = supabase
+    // React Query handle profile fetching
+    const { data: profile = null, isLoading: profileLoading, refetch } = useQuery({
+        queryKey: ['profile', user?.id],
+        queryFn: async () => {
+            if (!user?.id) return null;
+            console.log('React Query: Fetching profile for', user.id);
+            const { data, error } = await supabase
                 .from('profiles')
                 .select('id, nickname, avatar_url, role, streak_current, streak_max, dismissed_modals, total_xp')
-                .eq('id', uid)
+                .eq('id', user.id)
                 .single();
 
-            const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
-            const { data, error } = result;
-
-            if (data) {
-                console.log('AuthContext: Profile loaded', data);
-                setProfile(data);
-            }
             if (error) {
-                console.error("AuthContext: Error fetching profile:", error);
-                throw error; // Let the catch block handle fallback
+                console.error("Error fetching profile:", error);
+                throw error;
             }
-        } catch (err) {
-            console.error('AuthContext: Fetch failed, using fallback.', err);
-            // Optimization: If fetch fails, assume user role is 'user' to unblock UI
-            // This prevents infinite loading for admin users if DB is slow, but restricts secure pages
-            // However, for admin access, this will fail open to 'user' role -> redirect to Home.
-            // Better than infinite loading.
-        }
-    };
+            return data as Profile;
+        },
+        enabled: !!user?.id, // Only run query if we have a user
+        staleTime: 1000 * 60 * 5, // Data is fresh for 5 minutes
+    });
 
-    const refreshProfile = async () => {
-        if (user) await fetchProfile(user.id);
-    };
+    // Mutation for updating dismissed modals
+    const modalMutation = useMutation({
+        mutationFn: async ({ key, currentModals }: { key: string, currentModals: string[] }) => {
+            if (!user?.id) throw new Error("No user");
+            const updated = [...currentModals, key];
+            const { error } = await supabase
+                .from('profiles')
+                .update({ dismissed_modals: updated })
+                .eq('id', user.id);
+            if (error) throw error;
+            return updated;
+        },
+        onMutate: async ({ key, currentModals }) => {
+            // Cancel any outgoing refetches to avoid overwriting optimistic update
+            await queryClient.cancelQueries({ queryKey: ['profile', user?.id] });
+            const previousProfile = queryClient.getQueryData(['profile', user?.id]);
+
+            // Optimistically update
+            queryClient.setQueryData(['profile', user?.id], (old: any) => ({
+                ...old,
+                dismissed_modals: [...currentModals, key]
+            }));
+
+            return { previousProfile };
+        },
+        onError: (err, variables, context) => {
+            // Rollback on error
+            console.error("Error persisting modal dismissal:", err);
+            queryClient.setQueryData(['profile', user?.id], context?.previousProfile);
+        },
+        onSettled: () => {
+            // Always refetch after error or success to ensure sync
+            queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
+        }
+    });
 
     useEffect(() => {
         // Initial Session Check
-        supabase.auth.getSession().then(async ({ data: { session } }) => {
-            try {
-                setUser(session?.user ?? null);
-                if (session?.user) {
-                    await fetchProfile(session.user.id);
-                }
-            } catch (err) {
-                console.error("Error initializing session:", err);
-            } finally {
-                setLoading(false);
-            }
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null);
+            setAuthLoading(false);
         });
 
-        // Listen for Auth Changes
         // Listen for Auth Changes
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            try {
-                setUser(session?.user ?? null);
-                if (session?.user) {
-                    // Ensure profile is fetched before clearing loading state
-                    await fetchProfile(session.user.id);
-                } else {
-                    setProfile(null);
-                }
-            } catch (err) {
-                console.error('AuthContext: Error in onAuthStateChange', err);
-            } finally {
-                setLoading(false);
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+            if (!session?.user) {
+                // Clear query cache on logout
+                queryClient.removeQueries({ queryKey: ['profile'] });
             }
+            setAuthLoading(false);
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [queryClient]);
+
+    const refreshProfile = async () => {
+        if (user) await refetch();
+    };
 
     const isModalDismissed = (key: string) => {
         return profile?.dismissed_modals?.includes(key) ?? false;
@@ -189,22 +176,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const current = profile.dismissed_modals || [];
         if (current.includes(key)) return;
 
-        const updated = [...current, key];
-
-        // Optimistic update
-        setProfile({ ...profile, dismissed_modals: updated });
-
-        const { error } = await supabase
-            .from('profiles')
-            .update({ dismissed_modals: updated })
-            .eq('id', user.id);
-
-        if (error) {
-            console.error("Error persisting modal dismissal:", error);
-            // Rollback on error
-            await refreshProfile();
-        }
+        modalMutation.mutate({ key, currentModals: current });
     };
+
+    const loading = authLoading || (!!user?.id && profileLoading);
 
     return (
         <AuthContext.Provider value={{ user, profile, loading, refreshProfile, isModalDismissed, dismissModal }}>

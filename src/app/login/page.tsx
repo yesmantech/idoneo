@@ -233,7 +233,7 @@ export default function LoginPage() {
 
                         <Button
                             type="submit"
-                            variant="gradient"
+                            variant="primary"
                             size="lg"
                             fullWidth
                             isLoading={loading}

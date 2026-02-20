@@ -270,7 +270,7 @@ export default function ProfileSettingsPage() {
                     {/* Save Button */}
                     <Button
                         type="submit"
-                        variant="gradient"
+                        variant="primary"
                         size="lg"
                         fullWidth
                         isLoading={saving}

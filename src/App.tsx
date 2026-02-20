@@ -102,19 +102,19 @@ import SpotlightModal from './components/spotlight/SpotlightModal';
 import { StreakCelebration } from './components/gamification/StreakCelebration';
 import { streakService } from './lib/streakService';
 import { CinematicGrain } from './components/ui/CinematicGrain';
-
-// Loading fallback for lazy-loaded components
-const AdminLoading = () => (
-    <div className="flex items-center justify-center min-h-screen bg-[var(--background)]">
-        <div className="text-center">
-            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-[var(--foreground)] opacity-60">Caricamento...</p>
-        </div>
-    </div>
-);
-
-
 import { removeBootLoader } from './lib/domUtils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { LazyMotion, domAnimation } from 'framer-motion';
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+            retry: 1,
+        },
+    },
+});
 
 // Component to handle side effects that require AuthContext
 function AppEffects() {
@@ -129,6 +129,16 @@ function AppEffects() {
     return null;
 }
 
+// Loading fallback for lazy-loaded components
+const AdminLoading = () => (
+    <div className="flex items-center justify-center min-h-screen bg-[var(--background)]">
+        <div className="text-center">
+            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-[var(--foreground)] opacity-60">Caricamento...</p>
+        </div>
+    </div>
+);
+
 export default function App() {
     // Initialize native app features on mount
     useEffect(() => {
@@ -137,137 +147,141 @@ export default function App() {
     }, []);
 
     return (
-        <BrowserRouter>
-            <ErrorBoundary>
-                <ThemeProvider>
-                    <AuthProvider>
-                        <SidebarProvider>
-                            <OnboardingProvider>
-                                <SpotlightProvider>
-                                    <AppEffects />
-                                    <CinematicGrain />
-                                    <OnboardingSpotlight />
-                                    <SpotlightModal />
-                                    <StreakCelebration />
-                                    <Suspense fallback={<AdminLoading />}>
-                                        <Routes>
-                                            <Route path="/login" element={<LoginPage />} />
-                                            <Route path="/recover-password" element={<RecoverPasswordPage />} />
-                                            <Route path="/update-password" element={<UpdatePasswordPage />} />
-                                            <Route path="/waitlist" element={<WaitlistPage />} />
+        <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+                <ErrorBoundary>
+                    <ThemeProvider>
+                        <AuthProvider>
+                            <SidebarProvider>
+                                <OnboardingProvider>
+                                    <SpotlightProvider>
+                                        <LazyMotion features={domAnimation}>
+                                            <AppEffects />
+                                            <CinematicGrain />
+                                            <OnboardingSpotlight />
+                                            <SpotlightModal />
+                                            <StreakCelebration />
+                                            <Suspense fallback={<AdminLoading />}>
+                                                <Routes>
+                                                    <Route path="/login" element={<LoginPage />} />
+                                                    <Route path="/recover-password" element={<RecoverPasswordPage />} />
+                                                    <Route path="/update-password" element={<UpdatePasswordPage />} />
+                                                    <Route path="/waitlist" element={<WaitlistPage />} />
 
-                                            {/* Main App Layout */}
-                                            <Route path="/" element={
-                                                <MainLayout>
-                                                    <HomePage />
-                                                </MainLayout>
-                                            } />
+                                                    {/* Main App Layout */}
+                                                    <Route path="/" element={
+                                                        <MainLayout>
+                                                            <HomePage />
+                                                        </MainLayout>
+                                                    } />
 
-                                            <Route path="/profile" element={
-                                                <MainLayout>
-                                                    <ProfilePage />
-                                                </MainLayout>
-                                            } />
-                                            <Route path="/profile/setup" element={<ProfileSetupPage />} />
-                                            <Route path="/profile/settings" element={
-                                                <MainLayout>
-                                                    <ProfileSettingsPage />
-                                                </MainLayout>
-                                            } />
-                                            <Route path="/profile/stats/:quizId" element={
-                                                <MainLayout>
-                                                    <QuizStatsPage />
-                                                </MainLayout>
-                                            } />
+                                                    <Route path="/profile" element={
+                                                        <MainLayout>
+                                                            <ProfilePage />
+                                                        </MainLayout>
+                                                    } />
+                                                    <Route path="/profile/setup" element={<ProfileSetupPage />} />
+                                                    <Route path="/profile/settings" element={
+                                                        <MainLayout>
+                                                            <ProfileSettingsPage />
+                                                        </MainLayout>
+                                                    } />
+                                                    <Route path="/profile/stats/:quizId" element={
+                                                        <MainLayout>
+                                                            <QuizStatsPage />
+                                                        </MainLayout>
+                                                    } />
 
-                                            {/* Concorsi Flow (Wrapped) */}
-                                            <Route path="/concorsi/search" element={<MainLayout><ConcorsiSearchPage /></MainLayout>} />
-                                            <Route path="/concorsi/:category" element={<MainLayout><ConcorsoHubPage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:contestSlug" element={<MainLayout><ContestPage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:contestSlug/simulazione" element={<MainLayout><SimulationTypePage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:contestSlug/simulazione/:type/regole" element={<MainLayout><QuizRulesPage /></MainLayout>} />
-                                            <Route path="/concorsi/:category/:contestSlug/custom" element={<CustomQuizWizardPage />} />
+                                                    {/* Concorsi Flow (Wrapped) */}
+                                                    <Route path="/concorsi/search" element={<MainLayout><ConcorsiSearchPage /></MainLayout>} />
+                                                    <Route path="/concorsi/:category" element={<MainLayout><ConcorsoHubPage /></MainLayout>} />
+                                                    <Route path="/concorsi/:category/:contestSlug" element={<MainLayout><ContestPage /></MainLayout>} />
+                                                    <Route path="/concorsi/:category/:contestSlug/simulazione" element={<MainLayout><SimulationTypePage /></MainLayout>} />
+                                                    <Route path="/concorsi/:category/:contestSlug/simulazione/:type/regole" element={<MainLayout><QuizRulesPage /></MainLayout>} />
+                                                    <Route path="/concorsi/:category/:contestSlug/custom" element={<CustomQuizWizardPage />} />
 
-                                            {/* Quiz Engine (Wrapped) */}
-                                            <Route path="/quiz/:id/official" element={<OfficialQuizStarterPage />} />
-                                            <Route path="/quiz/:quizId/practice" element={<MainLayout><PracticeStartPage /></MainLayout>} />
-                                            <Route path="/quiz/:quizId/review" element={<MainLayout><ReviewPage /></MainLayout>} />
-                                            <Route path="/quiz/run/:attemptId" element={<QuizRunnerPage />} />
-                                            <Route path="/quiz/results/:attemptId" element={<MainLayout><QuizResultsPage /></MainLayout>} />
-                                            <Route path="/quiz/explanations/:attemptId/:questionId" element={<MainLayout><ExplanationPage /></MainLayout>} />
-                                            {/* <Route path="/stats" element={<MainLayout><StatsPage /></MainLayout>} /> */}
+                                                    {/* Quiz Engine (Wrapped) */}
+                                                    <Route path="/quiz/:id/official" element={<OfficialQuizStarterPage />} />
+                                                    <Route path="/quiz/:quizId/practice" element={<MainLayout><PracticeStartPage /></MainLayout>} />
+                                                    <Route path="/quiz/:quizId/review" element={<MainLayout><ReviewPage /></MainLayout>} />
+                                                    <Route path="/quiz/run/:attemptId" element={<QuizRunnerPage />} />
+                                                    <Route path="/quiz/results/:attemptId" element={<MainLayout><QuizResultsPage /></MainLayout>} />
+                                                    <Route path="/quiz/explanations/:attemptId/:questionId" element={<MainLayout><ExplanationPage /></MainLayout>} />
+                                                    {/* <Route path="/stats" element={<MainLayout><StatsPage /></MainLayout>} /> */}
 
-                                            {/* Bandi (Public Tenders) */}
-                                            <Route path="/bandi" element={<MainLayout><BandiListPage /></MainLayout>} />
-                                            <Route path="/bandi/watchlist" element={<MainLayout><BandiWatchlistPage /></MainLayout>} />
-                                            <Route path="/bandi/alerts" element={<MainLayout><BandiAlertsPage /></MainLayout>} />
-                                            <Route path="/bandi/:slug" element={<MainLayout><BandoDetailPage /></MainLayout>} />
+                                                    {/* Bandi (Public Tenders) */}
+                                                    <Route path="/bandi" element={<MainLayout><BandiListPage /></MainLayout>} />
+                                                    <Route path="/bandi/watchlist" element={<MainLayout><BandiWatchlistPage /></MainLayout>} />
+                                                    <Route path="/bandi/alerts" element={<MainLayout><BandiAlertsPage /></MainLayout>} />
+                                                    <Route path="/bandi/:slug" element={<MainLayout><BandoDetailPage /></MainLayout>} />
 
-                                            {/* Blog (User-facing) (Wrapped) */}
-                                            <Route path="/blog" element={<MainLayout><BlogIndexPage /></MainLayout>} />
-                                            <Route path="/blog/:slug" element={<MainLayout><BlogPostPage /></MainLayout>} />
-                                            <Route path="/leaderboard" element={<MainLayout><LeaderboardPage /></MainLayout>} />
+                                                    {/* Blog (User-facing) (Wrapped) */}
+                                                    <Route path="/blog" element={<MainLayout><BlogIndexPage /></MainLayout>} />
+                                                    <Route path="/blog/:slug" element={<MainLayout><BlogPostPage /></MainLayout>} />
+                                                    <Route path="/leaderboard" element={<MainLayout><LeaderboardPage /></MainLayout>} />
 
-                                            {/* Informational Pages */}
-                                            <Route path="/come-funziona/punteggi" element={<MainLayout><PunteggiPage /></MainLayout>} />
-                                            <Route path="/preparazione" element={<PreparazionePage />} />
+                                                    {/* Informational Pages */}
+                                                    <Route path="/come-funziona/punteggi" element={<MainLayout><PunteggiPage /></MainLayout>} />
+                                                    <Route path="/preparazione" element={<PreparazionePage />} />
 
-                                            {/* Demo Pages */}
-                                            <Route path="/demo/flames" element={<FlamesDemoPage />} />
+                                                    {/* Demo Pages */}
+                                                    <Route path="/demo/flames" element={<FlamesDemoPage />} />
 
-                                            {/* Skitla Landing Page */}
+                                                    {/* Skitla Landing Page */}
 
-                                            {/* Admin - Protected with AdminGuard + Lazy loaded */}
-                                            <Route element={
-                                                <AdminGuard>
-                                                    <Suspense fallback={<AdminLoading />}>
-                                                        <Outlet />
-                                                    </Suspense>
-                                                </AdminGuard>
-                                            }>
-                                                <Route path="/admin" element={<AdminDashboardPage />} />
-                                                <Route path="/admin/questions" element={<AdminQuestionsPage />} />
-                                                <Route path="/admin/structure" element={<AdminStructurePage />} />
-                                                <Route path="/admin/structure/categories/:id" element={<AdminCategoryEditPage />} />
-                                                <Route path="/admin/quiz" element={<AdminQuizListPage />} />
-                                                <Route path="/admin/quiz/materie" element={<AdminSubjectsListPage />} />
-                                                <Route path="/admin/questions/:id" element={<AdminQuestionEditPage />} />
-                                                <Route path="/admin/images" element={<AdminImagesPage />} />
-                                                <Route path="/admin/upload-csv" element={<AdminUploadCsvPage />} />
-                                                <Route path="/admin/rules" element={<AdminRulesPage />} />
-                                                <Route path="/admin/stats" element={<StatsPage />} />
-                                                <Route path="/admin/leaderboard" element={<AdminLeaderboardPage />} />
-                                                <Route path="/admin/users" element={<AdminUsersPage />} />
-                                                <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
-                                                <Route path="/admin/reports" element={<AdminReportsPage />} />
-                                                <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+                                                    {/* Admin - Protected with AdminGuard + Lazy loaded */}
+                                                    <Route element={
+                                                        <AdminGuard>
+                                                            <Suspense fallback={<AdminLoading />}>
+                                                                <Outlet />
+                                                            </Suspense>
+                                                        </AdminGuard>
+                                                    }>
+                                                        <Route path="/admin" element={<AdminDashboardPage />} />
+                                                        <Route path="/admin/questions" element={<AdminQuestionsPage />} />
+                                                        <Route path="/admin/structure" element={<AdminStructurePage />} />
+                                                        <Route path="/admin/structure/categories/:id" element={<AdminCategoryEditPage />} />
+                                                        <Route path="/admin/quiz" element={<AdminQuizListPage />} />
+                                                        <Route path="/admin/quiz/materie" element={<AdminSubjectsListPage />} />
+                                                        <Route path="/admin/questions/:id" element={<AdminQuestionEditPage />} />
+                                                        <Route path="/admin/images" element={<AdminImagesPage />} />
+                                                        <Route path="/admin/upload-csv" element={<AdminUploadCsvPage />} />
+                                                        <Route path="/admin/rules" element={<AdminRulesPage />} />
+                                                        <Route path="/admin/stats" element={<StatsPage />} />
+                                                        <Route path="/admin/leaderboard" element={<AdminLeaderboardPage />} />
+                                                        <Route path="/admin/users" element={<AdminUsersPage />} />
+                                                        <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
+                                                        <Route path="/admin/reports" element={<AdminReportsPage />} />
+                                                        <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
 
-                                                {/* Admin Blog */}
-                                                <Route path="/admin/blog" element={<AdminBlogListPage />} />
-                                                <Route path="/admin/blog/categorie" element={<AdminBlogCategoriesPage />} />
-                                                <Route path="/admin/blog/tag" element={<AdminBlogTagsPage />} />
-                                                <Route path="/admin/blog/nuovo" element={<AdminBlogEditorPage />} />
-                                                <Route path="/admin/blog/:id" element={<AdminBlogEditorPage />} />
+                                                        {/* Admin Blog */}
+                                                        <Route path="/admin/blog" element={<AdminBlogListPage />} />
+                                                        <Route path="/admin/blog/categorie" element={<AdminBlogCategoriesPage />} />
+                                                        <Route path="/admin/blog/tag" element={<AdminBlogTagsPage />} />
+                                                        <Route path="/admin/blog/nuovo" element={<AdminBlogEditorPage />} />
+                                                        <Route path="/admin/blog/:id" element={<AdminBlogEditorPage />} />
 
-                                                {/* Admin Bandi */}
-                                                <Route path="/admin/bandi" element={<AdminBandiListPage />} />
-                                                <Route path="/admin/bandi/nuovo" element={<AdminBandoEditorPage />} />
-                                                <Route path="/admin/bandi/import" element={<AdminBandiImportPage />} />
-                                                <Route path="/admin/bandi/categorie" element={<AdminBandiCategoriesPage />} />
-                                                <Route path="/admin/bandi/:id" element={<AdminBandoEditorPage />} />
+                                                        {/* Admin Bandi */}
+                                                        <Route path="/admin/bandi" element={<AdminBandiListPage />} />
+                                                        <Route path="/admin/bandi/nuovo" element={<AdminBandoEditorPage />} />
+                                                        <Route path="/admin/bandi/import" element={<AdminBandiImportPage />} />
+                                                        <Route path="/admin/bandi/categorie" element={<AdminBandiCategoriesPage />} />
+                                                        <Route path="/admin/bandi/:id" element={<AdminBandoEditorPage />} />
 
-                                                {/* Admin Enti */}
-                                                <Route path="/admin/enti" element={<AdminEntiListPage />} />
-                                            </Route>
-                                        </Routes>
-                                    </Suspense>
-                                </SpotlightProvider>
-                            </OnboardingProvider>
-                        </SidebarProvider>
-                    </AuthProvider>
-                </ThemeProvider>
-            </ErrorBoundary>
-        </BrowserRouter>
+                                                        {/* Admin Enti */}
+                                                        <Route path="/admin/enti" element={<AdminEntiListPage />} />
+                                                    </Route>
+                                                </Routes>
+                                            </Suspense>
+                                        </LazyMotion>
+                                    </SpotlightProvider>
+                                </OnboardingProvider>
+                            </SidebarProvider>
+                        </AuthProvider>
+                    </ThemeProvider>
+                </ErrorBoundary>
+            </BrowserRouter>
+            <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
     );
 }
-

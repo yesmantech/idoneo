@@ -10,8 +10,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Shield, Sparkles, X, ChevronRight, Stethoscope, Briefcase, Scale, Gavel, GraduationCap, Car, Search, Filter } from 'lucide-react';
 import TierSLoader from '@/components/ui/TierSLoader';
 import SEOHead from '@/components/seo/SEOHead';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function ConcorsoHubPage() {
+  const queryClient = useQueryClient();
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const { category: categoryData, quizzes: allQuizzes, candidatiCount, loading, error } = useConcorsoData(category || '');
@@ -26,7 +29,7 @@ export default function ConcorsoHubPage() {
     return allQuizzes.filter(q => {
       const matchesSearch = q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (q.year && q.year.toString().includes(searchTerm));
-      const matchesOfficial = !isOfficialOnly || q.is_official;
+      const matchesOfficial = !isOfficialOnly || (q as any).is_official;
       const matchesYear = !selectedYear || q.year === selectedYear;
       return matchesSearch && matchesOfficial && matchesYear;
     });
@@ -120,7 +123,7 @@ export default function ConcorsoHubPage() {
         <StatsSection
           theme={theme}
           candidatiCount={candidatiCount}
-          availableSeats={categoryData.available_seats}
+          availableSeats={String(categoryData.available_seats || 0)}
         />
 
         <section className="flex flex-col gap-3">
@@ -210,6 +213,16 @@ export default function ConcorsoHubPage() {
                   <Link
                     key={quiz.id}
                     to={`/concorsi/${category}/${quiz.slug}`}
+                    onMouseEnter={() => {
+                      queryClient.prefetchQuery({
+                        queryKey: ['quiz-detail', quiz.slug],
+                        queryFn: async () => {
+                          const { data } = await supabase.from('quizzes').select('*, questions_count:quiz_questions(count)').eq('slug', quiz.slug).single();
+                          return data;
+                        },
+                        staleTime: 1000 * 60 * 5,
+                      });
+                    }}
                     className="group relative bg-white dark:bg-[#1e2330] p-4 rounded-[24px] shadow-sm border border-slate-200/60 dark:border-[var(--card-border)] transition-all duration-300 hover:shadow-md dark:hover:bg-[#252b3b] overflow-hidden flex items-center gap-4"
                   >
                     <div className="w-12 h-12 rounded-full border border-sky-100 dark:border-sky-500/20 bg-sky-50 dark:bg-[#141820] flex items-center justify-center shrink-0">

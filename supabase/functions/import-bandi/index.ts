@@ -61,7 +61,7 @@ async function parseWithAI(description: string, openaiKey: string) {
     - category_slug: Scegli una tra: ['pubblica-amministrazione', 'enti-locali', 'sanita', 'istruzione', 'forze-armate', 'forze-ordine', 'giustizia', 'agenzia-entrate', 'universita', 'infrastrutture-trasporti', 'altro'].
     - seats_total: numero posti (intero).
     - contract_type: 'tempo_indeterminato', 'tempo_determinato', 'formazione_lavoro', 'altro'.
-    - education_level: array ["Laurea", "Diploma", "Licenza Media", "Nessuno"].
+    - education_level: array ["Laurea", "Diploma", "Licenza Media", "Nessuno"]. ATTENZIONE: Se il bando richiede 'Scuola secondaria di secondo grado' o gradi militari come 'Maresciallo', 'Ispettore', 'Sovrintendente', classifica come 'Diploma'. Se richiede 'Scuola dell'obbligo', 'Licenza media', classifica come 'Licenza Media'.
     - region: Regione (es. "Lombardia").
     - province: Sigla provincia (es. "MI").
     - city: Comune principale (es. "Milano").
@@ -71,6 +71,7 @@ async function parseWithAI(description: string, openaiKey: string) {
         - ## Requisiti Principali
         - ## Scadenza e Riferimenti
       Rendila leggibile, rimuovi burocratese inutile. Usa elenchi puntati.
+    - is_remote: Boolean, true se il bando menziona esplicitamente smart working, lavoro da remoto, o telelavoro.
     
     Rispondi SOLO JSON valido.`;
 
@@ -117,6 +118,8 @@ serve(async (req) => {
             requestData = await req.json();
         } catch (e) { /* ignore if empty */ }
 
+        const updateExisting = (requestData as any).update_existing || false;
+        const targetSourceId = (requestData as any).target_source_id;
         const forcePage = (requestData as any).page;
         const subBatchStart = (requestData as any).start_index || 0;
         const subBatchLimit = (requestData as any).limit || 50;
@@ -133,10 +136,12 @@ serve(async (req) => {
             errors: 0,
             total_fetched: 0,
             enriched_enti: 0,
+            total_pages: 0,
+            current_page: 0,
             details: [] as any[]
         };
 
-        console.log(`Starting import. Page: ${currentPage}, Mode: ${typeof forcePage === 'number' ? 'Single Page' : 'Auto-Loop'}`);
+        console.log(`Starting import. Page: ${currentPage}, Mode: ${targetSourceId ? 'Target ID: ' + targetSourceId : (typeof forcePage === 'number' ? 'Single Page' : 'Auto-Loop')}`);
 
         // Loop through pages (or just run once if specific page requested)
         do {
@@ -157,6 +162,8 @@ serve(async (req) => {
 
             const data = await inpaRes.json() as { content: InPABando[], totalPages: number };
             totalPages = data.totalPages;
+            results.total_pages = totalPages;
+            results.current_page = currentPage;
             // Sub-batching logic: slice the 50 items
             const allBandi = data.content || [];
             results.total_fetched += allBandi.length;
@@ -165,6 +172,11 @@ serve(async (req) => {
             console.log(`Processing sub-batch: ${bandiToProcess.length} items (from index ${subBatchStart})`);
 
             for (const item of bandiToProcess) {
+                // If targeting, skip others
+                if (targetSourceId && item.id !== targetSourceId) {
+                    continue;
+                }
+
                 processedCount++;
 
                 // Check if exists
@@ -174,7 +186,7 @@ serve(async (req) => {
                     .eq('source_id', item.id)
                     .single();
 
-                if (existing) {
+                if (existing && !updateExisting) {
                     results.skipped++;
                     continue;
                 }
@@ -197,42 +209,63 @@ serve(async (req) => {
                     if (aiData.category_slug) {
                         categoryId = await getCategoryId(supabaseClient, aiData.category_slug);
                     }
+
+                    // Safety Override for Military/Police roles
+                    const militaryKeywords = ['MARESCIALLO', 'MARESCIALLI', 'ISPETTORE', 'ISPETTORI', 'SOVRINTENDENTE', 'SOVRINTENDENTI'];
+                    const upperTitle = item.titolo.toUpperCase();
+                    const isMilitary = militaryKeywords.some(kw => upperTitle.includes(kw));
+
+                    if (isMilitary) {
+                        if (!aiData.education_level || aiData.education_level.includes('Nessuno') || aiData.education_level.length === 0) {
+                            console.log(`AI-Override: Forcing 'Diploma' for military role: ${item.titolo}`);
+                            aiData.education_level = ['Diploma'];
+                        }
+                    }
                 }
 
                 // Fallback for description if AI fails
                 const finalDescription = aiData.optimized_description || item.descrizione || item.descrizioneBreve;
 
-                const { error } = await supabaseClient
-                    .from('bandi')
-                    .insert({
-                        title: item.titolo,
-                        source_id: item.id,
-                        source_type: 'inpa',
-                        status: 'published', // Always live
-                        deadline: item.dataScadenza,
-                        publication_date: item.dataPubblicazione,
+                // Upsert logic
+                const bandodata = {
+                    title: item.titolo,
+                    source_id: item.id,
+                    source_type: 'inpa',
+                    status: 'published', // Always live
+                    deadline: item.dataScadenza,
+                    publication_date: item.dataPubblicazione,
 
-                        // Enriched Relations
-                        ente_id: enteId,
-                        category_id: categoryId,
+                    // Enriched Relations
+                    ente_id: enteId,
+                    category_id: categoryId,
 
-                        // Precise Data
-                        seats_total: aiData.seats_total || item.numPosti || null,
-                        contract_type: aiData.contract_type || 'altro',
-                        education_level: aiData.education_level || [],
+                    // Precise Data
+                    seats_total: aiData.seats_total || item.numPosti || null,
+                    contract_type: aiData.contract_type || 'altro',
+                    education_level: aiData.education_level || [],
 
-                        // Location
-                        region: aiData.region || null,
-                        province: aiData.province || null,
-                        city: aiData.city || null,
+                    // Location
+                    region: aiData.region || null,
+                    province: aiData.province || null,
+                    city: aiData.city || null,
 
-                        // Content
-                        salary_range: aiData.salary_range || null,
-                        short_description: item.descrizioneBreve, // keep original short
-                        description: finalDescription, // Optimized MD
+                    // Content
+                    is_remote: aiData.is_remote || false,
+                    salary_range: aiData.salary_range || null,
+                    short_description: item.descrizioneBreve, // keep original short
+                    description: finalDescription, // Optimized MD
 
-                        source_urls: [`https://www.inpa.gov.it/bandi-e-avvisi/dettaglio-bando-avviso/?concorso_id=${item.id}`]
-                    });
+                    source_urls: [`https://www.inpa.gov.it/bandi-e-avvisi/dettaglio-bando-avviso/?concorso_id=${item.id}`]
+                };
+
+                let query;
+                if (existing) {
+                    query = supabaseClient.from('bandi').update(bandodata).eq('id', existing.id);
+                } else {
+                    query = supabaseClient.from('bandi').insert(bandodata);
+                }
+
+                const { error } = await query;
 
                 if (error) {
                     results.errors++;

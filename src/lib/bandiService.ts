@@ -207,6 +207,8 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
     switch (sortBy) {
         case 'relevance':
             query = query.order('is_featured', { ascending: false });
+            // Fallback for new app: sort by "importance" (seats) then deadline
+            query = query.order('seats_total', { ascending: false, nullsFirst: false });
             query = query.order('deadline', { ascending: true });
             break;
         case 'deadline':
@@ -262,8 +264,9 @@ export async function fetchBandoBySlug(slug: string): Promise<Bando | null> {
         return null;
     }
 
-    // Increment views (commented out for debugging)
-    // await supabase.rpc('increment_bando_views', { bando_id: data.id }).catch(() => { });
+    // Increment views (skipped for now until migration is confirmed/users exist)
+    // const { error: viewError } = await supabase.rpc('increment_bando_views', { bando_id: data.id });
+    // if (viewError) console.error('Error incrementing views:', viewError);
 
     const now = new Date();
     return {
@@ -418,10 +421,10 @@ export const ITALIAN_REGIONS = [
 ];
 
 export const EDUCATION_LEVELS = [
-    { value: 'diploma', label: 'Diploma' },
-    { value: 'laurea_triennale', label: 'Laurea Triennale' },
-    { value: 'laurea_magistrale', label: 'Laurea Magistrale' },
-    { value: 'dottorato', label: 'Dottorato' }
+    { value: 'Nessuno', label: 'Nessun Titolo' },
+    { value: 'Licenza Media', label: 'Licenza Media' },
+    { value: 'Diploma', label: 'Diploma' },
+    { value: 'Laurea', label: 'Laurea' }
 ];
 
 export const CONTRACT_TYPES = [

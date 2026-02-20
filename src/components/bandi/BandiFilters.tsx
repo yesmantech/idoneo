@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
     Search,
     SlidersHorizontal,
@@ -34,13 +35,14 @@ interface BandiFiltersProps {
 
 export default function BandiFiltersBar({ filters, onFiltersChange, totalResults }: BandiFiltersProps) {
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [categories, setCategories] = useState<BandiCategory[]>([]);
     const [keyword, setKeyword] = useState(filters.search || '');
     const [location, setLocation] = useState(filters.province || '');
 
-    useEffect(() => {
-        fetchBandiCategories().then(setCategories);
-    }, []);
+    const { data: categories = [] } = useQuery({
+        queryKey: ['bandi-categories'],
+        queryFn: fetchBandiCategories,
+        staleTime: Infinity, // Categories rarely change, cache indefinitely per session
+    });
 
     useEffect(() => {
         const timer = setTimeout(() => {

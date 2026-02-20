@@ -451,7 +451,7 @@ export default function OfficialQuizStarterPage() {
             <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-[#0A0A0B]/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
                 <div className="max-w-lg mx-auto">
                     <Button
-                        variant="gradient"
+                        variant="primary"
                         size="lg"
                         fullWidth
                         onClick={() => handleStart()}

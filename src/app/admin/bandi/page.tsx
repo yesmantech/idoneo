@@ -206,16 +206,15 @@ export default function AdminBandiListPage() {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 mb-4 flex items-center gap-4 flex-wrap">
-                <div className="flex-1 min-w-[200px] relative">
+            <div className="flex flex-wrap items-center gap-4 bg-[var(--card)] p-4 rounded-xl border border-[var(--card-border)] shadow-sm">
+                <div className="flex-1 min-w-[300px] relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                         type="text"
+                        placeholder="Cerca bando per titolo o slug..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Cerca bandi..."
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent"
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-blue/20 outline-none"
                     />
                 </div>
 
@@ -256,6 +255,25 @@ export default function AdminBandiListPage() {
                             className="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg text-sm"
                         >
                             Annulla
+                        </button>
+                        <button
+                            onClick={async () => {
+                                if (!confirm('Impostare Smart Working su ' + selectedIds.size + ' bandi?')) return;
+                                const { supabase } = await import('@/lib/supabaseClient');
+                                const { error } = await supabase
+                                    .from('bandi')
+                                    .update({ is_remote: true })
+                                    .in('id', Array.from(selectedIds));
+                                if (error) alert('Errore: ' + error.message);
+                                else {
+                                    alert('Successo!');
+                                    loadBandi();
+                                    setSelectedIds(new Set());
+                                }
+                            }}
+                            className="px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-sm font-medium"
+                        >
+                            Smart Working
                         </button>
                     </div>
                 </div>

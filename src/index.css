@@ -142,33 +142,7 @@ body {
   }
 }
 
-@keyframes shine {
-  from {
-    mask-position: 150%;
-  }
 
-  to {
-    mask-position: -50%;
-  }
-}
-
-.animate-shine {
-  mask-image: linear-gradient(120deg,
-      transparent 20%,
-      white 45%,
-      white 55%,
-      transparent 80%);
-  mask-size: 250% 100%;
-  animation: shine 1.5s infinite;
-}
-
-.bg-tier-s-gradient {
-  background: linear-gradient(135deg, #06D6D3 0%, #0095FF 100%);
-}
-
-.bg-purple-gradient {
-  background: linear-gradient(135deg, #C026D3 0%, #7C3AED 100%);
-}
 
 .animate-fade-in-up {
   animation: fade-in-up 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;

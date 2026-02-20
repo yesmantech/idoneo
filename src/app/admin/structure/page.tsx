@@ -6,22 +6,48 @@
  * [Categories] → [Quizzes]
  */
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { AdminLayout } from "@/components/admin";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // --- Types Local to this Admin Page ---
 type Category = { id: string; slug: string; title: string; description: string; is_featured: boolean; is_archived?: boolean };
 type Quiz = { id: string; title: string; slug: string; year: number; is_official: boolean; category_id: string; is_archived?: boolean };
 
+const fetchCategories = async (): Promise<Category[]> => {
+    const { data, error } = await supabase.from("categories").select("*").order("title");
+    if (error) throw error;
+    return data || [];
+};
+
+const fetchQuizzes = async (): Promise<Quiz[]> => {
+    const { data, error } = await supabase.from("quizzes").select("id, title, slug, year, is_official, category_id, is_archived").order("created_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
+};
+
 // Simple Slugify Helper
 const slugify = (text: string) => text.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
 export default function AdminStructurePage() {
-    // Data
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+    const queryClient = useQueryClient();
+
+    // Data - React Query
+    const { data: categories = [] as Category[], isLoading: catsLoading } = useQuery({
+        queryKey: ['admin-categories'],
+        queryFn: fetchCategories,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    const { data: quizzes = [] as Quiz[], isLoading: quizzesLoading } = useQuery({
+        queryKey: ['admin-quizzes'],
+        queryFn: fetchQuizzes,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    const loading = catsLoading || quizzesLoading;
 
     // Selection State
     const [selectedCatId, setSelectedCatId] = useState<string | null>(null);
@@ -30,55 +56,79 @@ export default function AdminStructurePage() {
     const [showArchivedCats, setShowArchivedCats] = useState(false);
     const [showArchivedQuizzes, setShowArchivedQuizzes] = useState(false);
 
-    // Loading
-    const [loading, setLoading] = useState(true);
-
     // Form State - Category
     const [catTitle, setCatTitle] = useState("");
     const [catSlug, setCatSlug] = useState("");
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    // --- Mutations ---
 
-    const loadData = async () => {
-        setLoading(true);
-        const [c, q] = await Promise.all([
-            supabase.from("categories").select("*").order("title"),
-            supabase.from("quizzes").select("id, title, slug, year, is_official, category_id, is_archived").order("created_at", { ascending: false })
-        ]);
+    const addCategoryMutation = useMutation({
+        mutationFn: async ({ title, slug }: { title: string, slug: string }) => {
+            const { error } = await supabase.from("categories").insert({ title, slug });
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            setCatTitle(""); setCatSlug("");
+            queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+            // Invalidate the public categories cache too, so the filters bar updates immediately
+            queryClient.invalidateQueries({ queryKey: ['bandi-categories'] });
+        },
+        onError: (error) => alert(error.message)
+    });
 
-        if (c.data) setCategories(c.data);
-        if (q.data) setQuizzes(q.data);
-        setLoading(false);
-    };
+    const deleteCategoryMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await supabase.from("categories").delete().eq("id", id);
+            if (error) throw error;
+        },
+        onSuccess: (_, variables) => {
+            if (selectedCatId === variables) setSelectedCatId(null);
+            queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-quizzes'] }); // Cascading deletes might happen
+            queryClient.invalidateQueries({ queryKey: ['bandi-categories'] });
+        }
+    });
 
-    const handleAddCategory = async () => {
+    const archiveCategoryMutation = useMutation({
+        mutationFn: async ({ id, archive }: { id: string, archive: boolean }) => {
+            const { error } = await supabase.from("categories").update({ is_archived: archive }).eq("id", id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+            queryClient.invalidateQueries({ queryKey: ['bandi-categories'] });
+        }
+    });
+
+    const archiveQuizMutation = useMutation({
+        mutationFn: async ({ id, archive }: { id: string, archive: boolean }) => {
+            const { error } = await supabase.from("quizzes").update({ is_archived: archive }).eq("id", id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-quizzes'] });
+        }
+    });
+
+    // --- Handlers wrapping mutations ---
+
+    const handleAddCategory = () => {
         if (!catTitle) return;
         const slug = catSlug || slugify(catTitle);
-        const { error } = await supabase.from("categories").insert({ title: catTitle, slug });
-        if (!error) {
-            setCatTitle(""); setCatSlug(""); loadData();
-        } else {
-            alert(error.message);
-        }
+        addCategoryMutation.mutate({ title: catTitle, slug });
     };
 
-    const handleDeleteCategory = async (id: string) => {
+    const handleDeleteCategory = (id: string) => {
         if (!confirm("Cancella categoria e tutto il contenuto?")) return;
-        await supabase.from("categories").delete().eq("id", id);
-        if (selectedCatId === id) setSelectedCatId(null);
-        loadData();
+        deleteCategoryMutation.mutate(id);
     };
 
-    const handleArchiveCategory = async (id: string, archive: boolean) => {
-        await supabase.from("categories").update({ is_archived: archive }).eq("id", id);
-        loadData();
+    const handleArchiveCategory = (id: string, archive: boolean) => {
+        archiveCategoryMutation.mutate({ id, archive });
     };
 
-    const handleArchiveQuiz = async (id: string, archive: boolean) => {
-        await supabase.from("quizzes").update({ is_archived: archive }).eq("id", id);
-        loadData();
+    const handleArchiveQuiz = (id: string, archive: boolean) => {
+        archiveQuizMutation.mutate({ id, archive });
     };
 
     const visibleCategories = useMemo(() =>

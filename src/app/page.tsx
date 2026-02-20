@@ -21,13 +21,11 @@ import BlogHero from "@/components/home/BlogHero";
 import SearchSection from "@/components/home/SearchSection";
 import ConcorsiSection from "@/components/home/ConcorsiSection";
 import RecentlyUsedSection from "@/components/home/RecentlyUsedSection";
-import BandiScadenzaSection from "@/components/home/BandiScadenzaSection";
 import NewArrivalsSection from "@/components/home/NewArrivalsSection";
 import PopularSection from "@/components/home/PopularSection";
 import SEOHead from "@/components/seo/SEOHead";
 import { Reveal } from "@/components/ui/Reveal";
 import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, fetchRecentCategories, type RecentlyUsedItem, type NewArrivalQuiz, type PopularQuiz } from "@/lib/homeSectionsService";
-import { fetchClosingSoonBandi, type Bando } from "@/lib/bandiService";
 
 // =============================================================================
 // MAIN HOME PAGE
@@ -41,7 +39,6 @@ export default function HomePage() {
 
   // New section states
   const [recentlyUsed, setRecentlyUsed] = useState<RecentlyUsedItem[]>([]);
-  const [closingSoonBandi, setClosingSoonBandi] = useState<Bando[]>([]);
   const [newArrivals, setNewArrivals] = useState<NewArrivalQuiz[]>([]);
   const [popularQuizzes, setPopularQuizzes] = useState<PopularQuiz[]>([]);
   const [recentCategories, setRecentCategories] = useState<Category[]>([]);
@@ -69,7 +66,6 @@ export default function HomePage() {
     });
 
     // New sections data (non-blocking)
-    fetchClosingSoonBandi(7, 8).then(setClosingSoonBandi);
     fetchNewArrivals(30, 10).then(setNewArrivals);
     fetchMostPopular(5).then(setPopularQuizzes);
     fetchRecentCategories(8).then(setRecentCategories);
@@ -120,15 +116,6 @@ export default function HomePage() {
           <section className="mb-8 lg:mb-10">
             <Reveal width="100%" delay={0.4}>
               <RecentlyUsedSection items={recentlyUsed} />
-            </Reveal>
-          </section>
-        )}
-
-        {/* 4. BANDI IN SCADENZA - Urgency section */}
-        {closingSoonBandi.length > 0 && (
-          <section className="mb-8 lg:mb-10">
-            <Reveal width="100%" delay={0.5}>
-              <BandiScadenzaSection bandi={closingSoonBandi} />
             </Reveal>
           </section>
         )}

@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Users, Clock, Heart, Building2, ExternalLink } from 'lucide-react';
+import { MapPin, Users, Clock, Heart, Building2, ExternalLink, GraduationCap, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Bando } from '@/lib/bandiService';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 
 interface BandoCardProps {
     bando: Bando;
@@ -15,6 +17,7 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
     const daysRemaining = bando.days_remaining ?? 0;
     const isClosingSoon = daysRemaining <= 7 && daysRemaining > 0;
     const isClosed = daysRemaining <= 0;
+    const queryClient = useQueryClient();
 
     const handleSaveClick = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -22,10 +25,22 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
         onSaveToggle?.(bando.id, !isSaved);
     };
 
+    const handleMouseEnter = () => {
+        queryClient.prefetchQuery({
+            queryKey: ['bando', bando.slug],
+            queryFn: async () => {
+                const { data } = await supabase.from('bandi').select('*, category:categories(*)').eq('slug', bando.slug).single();
+                return data;
+            },
+            staleTime: 1000 * 60 * 5, // 5 mins
+        });
+    };
+
     if (variant === 'compact') {
         return (
             <Link to={`/bandi/${bando.slug}`}>
                 <motion.div
+                    onMouseEnter={handleMouseEnter}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700"
@@ -65,47 +80,61 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
         return (
             <Link to={`/bandi/${bando.slug}`}>
                 <motion.div
-                    whileHover={{ scale: 1.02, y: -2 }}
+                    onMouseEnter={handleMouseEnter}
+                    whileHover={{ y: -6, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="relative bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-5 text-white overflow-hidden min-w-[280px] shadow-lg shadow-emerald-500/20"
+                    className="relative w-[300px] h-full bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl shadow-slate-200/50 dark:shadow-black/50 overflow-hidden group border border-slate-100 dark:border-white/5"
                 >
-                    {/* Background pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
-                    </div>
+                    {/* Brand Accent Bar */}
+                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand-blue to-brand-cyan" />
 
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Building2 className="w-4 h-4 opacity-80" />
-                            <span className="text-sm opacity-90 truncate">{bando.ente?.name}</span>
+                    <div className="p-6 flex flex-col h-full">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                                    <Building2 className="w-4 h-4 text-brand-blue" />
+                                </div>
+                                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate max-w-[140px]">
+                                    {bando.ente?.name}
+                                </span>
+                            </div>
                         </div>
 
+                        {/* Title */}
                         <motion.h3
                             layoutId={`bando-title-${bando.id}`}
-                            className="font-bold text-lg leading-tight line-clamp-2 mb-3"
+                            className="font-black text-[19px] text-slate-900 dark:text-white leading-tight mb-auto line-clamp-3 group-hover:text-brand-blue transition-colors"
                         >
                             {bando.title}
                         </motion.h3>
 
-                        <div className="flex items-center gap-4 text-sm opacity-90">
-                            {bando.region && (
-                                <span className="flex items-center gap-1">
-                                    <MapPin className="w-4 h-4" />
-                                    {bando.region}
-                                </span>
-                            )}
-                            {bando.seats_total && (
-                                <span className="flex items-center gap-1">
-                                    <Users className="w-4 h-4" />
-                                    {bando.seats_total} posti
-                                </span>
-                            )}
-                        </div>
+                        {/* Footer Info */}
+                        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                {bando.region && (
+                                    <span className="flex items-center gap-1.5">
+                                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                                        {bando.region}
+                                    </span>
+                                )}
+                                {bando.seats_total && (
+                                    <span className="flex items-center gap-1.5">
+                                        <Users className="w-3.5 h-3.5 text-slate-400" />
+                                        {bando.seats_total} posti
+                                    </span>
+                                )}
+                            </div>
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-3 py-1.5 text-sm font-medium">
-                                ⏰ Scade tra {daysRemaining} giorni
+                            {/* Urgency Badge */}
+                            <div className={`flex items-center gap-2 rounded-xl py-2 px-3 ${daysRemaining <= 7
+                                ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
+                                : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                                }`}>
+                                <Clock className={`w-4 h-4 ${daysRemaining <= 7 ? 'animate-pulse' : ''}`} />
+                                <span className="text-xs font-black uppercase tracking-wide">
+                                    {daysRemaining <= 3 ? 'Scadenza Imminente' : `Scade tra ${daysRemaining} gg`}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -118,6 +147,7 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
     return (
         <Link to={`/bandi/${bando.slug}`}>
             <motion.div
+                onMouseEnter={handleMouseEnter}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow"
@@ -151,6 +181,18 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                                     <Users className="w-4 h-4" />
                                     {bando.seats_total} posti
                                     {bando.seats_reserved ? ` (${bando.seats_reserved} ris.)` : ''}
+                                </span>
+                            )}
+                            {bando.education_level && bando.education_level.length > 0 && bando.education_level[0] !== 'Nessuno' && (
+                                <span className="flex items-center gap-1">
+                                    <GraduationCap className="w-4 h-4" />
+                                    {bando.education_level[0]}
+                                </span>
+                            )}
+                            {bando.is_remote && (
+                                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                                    <Globe className="w-4 h-4" />
+                                    Smart Working
                                 </span>
                             )}
                         </div>

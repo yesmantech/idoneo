@@ -528,7 +528,7 @@ export default function QuizResultsPage() {
                         <div className="hidden lg:block space-y-3">
                             {hasErrors ? (
                                 <Button
-                                    variant="gradient"
+                                    variant="primary"
                                     size="lg"
                                     fullWidth
                                     onClick={handleRipassaErrori}
@@ -628,7 +628,7 @@ export default function QuizResultsPage() {
                 <div className="max-w-lg mx-auto space-y-2">
                     {hasErrors ? (
                         <Button
-                            variant="gradient"
+                            variant="primary"
                             size="lg"
                             fullWidth
                             onClick={handleRipassaErrori}
@@ -640,7 +640,7 @@ export default function QuizResultsPage() {
                         </Button>
                     ) : (
                         <Button
-                            variant="gradient"
+                            variant="primary"
                             size="lg"
                             fullWidth
                             onClick={() => navigate("/")}

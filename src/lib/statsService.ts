@@ -327,29 +327,53 @@ export function calculateReadinessLevel(
     }
 
     // Heuristic fallback if leaderboard not yet calculated
-    const scoreWeight = avgScore >= 90 ? 2 : avgScore >= 70 ? 1 : 0;
-    const accuracyWeight = avgAccuracy >= 90 ? 2 : avgAccuracy >= 70 ? 1 : 0;
-    const volumeWeight = attemptCount >= 10 ? 2 : attemptCount >= 5 ? 1 : 0;
-
-    const total = scoreWeight + accuracyWeight + volumeWeight;
-    const scoreEstimate = Math.min((total / 6) * 100, 100);
-
-    if (total >= 5) {
-        return {
-            level: 'high', label: 'Pronto', color: 'semantic-success', score: scoreEstimate,
-            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: Math.round(recency) }
-        };
-    } else if (total >= 3) {
-        return {
-            level: 'medium', label: 'In progresso', color: 'brand-orange', score: scoreEstimate,
-            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: Math.round(recency) }
-        };
+    let calculatedVolume = 0;
+    if (history && history.length > 0) {
+        const totalCorrect = history.reduce((sum, h) => sum + (h.correct || 0), 0);
+        // Let's assume 300 correct answers is a solid "100%" volume target for baseline preparation
+        calculatedVolume = Math.min((totalCorrect / 300) * 100, 100);
     } else {
-        return {
-            level: 'low', label: 'Da migliorare', color: 'semantic-error', score: scoreEstimate,
-            breakdown: { accuracy: avgAccuracy, volume: (attemptCount / 10) * 100, coverage: 0, reliability: 0, recency: Math.round(recency) }
-        };
+        calculatedVolume = Math.min((attemptCount / 10) * 100, 100);
     }
+
+    // MULTIPLICATIVE ALGORITHM (User's Proposal)
+    // 1. Calculate the "Effort/Work" Score (0 to 100)
+    // In the heuristic, we use Volume (80% weight) and Recency (20% weight) to represent work done.
+    const effortScore = (calculatedVolume * 0.8) + (recency * 0.2);
+
+    // 2. Multiply by Accuracy (Quality filter from 0.0 to 1.0)
+    const accuracyMultiplier = (avgAccuracy || 0) / 100;
+
+    // 3. Final Score is the product of Effort and Quality
+    const scoreEstimate = Math.min(effortScore * accuracyMultiplier, 100);
+
+    let level: 'low' | 'medium' | 'high' = 'low';
+    let label = 'Da migliorare';
+    let color = 'semantic-error';
+
+    if (scoreEstimate >= 85) {
+        level = 'high';
+        label = 'Pronto';
+        color = 'semantic-success';
+    } else if (scoreEstimate >= 50) {
+        level = 'medium';
+        label = 'A buon punto';
+        color = 'brand-orange';
+    }
+
+    return {
+        level,
+        label,
+        color,
+        score: scoreEstimate,
+        breakdown: {
+            accuracy: avgAccuracy,
+            volume: calculatedVolume,
+            coverage: 0,
+            reliability: 0,
+            recency: Math.round(recency)
+        }
+    };
 }
 
 // ============================================

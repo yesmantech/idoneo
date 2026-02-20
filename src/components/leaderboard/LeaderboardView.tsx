@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { LeaderboardEntry } from '@/lib/leaderboardService';
 import { Trophy, Crown, Medal } from 'lucide-react'; // Assuming lucide is available as per other files
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface LeaderboardViewProps {
     data: LeaderboardEntry[];
@@ -12,6 +13,8 @@ interface LeaderboardViewProps {
 }
 
 export default function LeaderboardView({ data, loading, theme, metricLabel, emptyMessage, currentUserEntry }: LeaderboardViewProps) {
+    const parentRef = useRef<HTMLDivElement>(null);
+
     const top3 = data.slice(0, 3);
     const list = data.slice(3);
 
@@ -19,6 +22,14 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
     const showStickyUser = !!currentUserEntry && !isUserInTopList;
 
     const isGold = theme === 'gold';
+
+    // Virtualizer for the remaining list (beyond top 3)
+    const rowVirtualizer = useVirtualizer({
+        count: list.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 72, // Estimated height of a row
+        overscan: 5, // Render 5 items outside viewport for smoother scrolling
+    });
 
     // Loading State
     if (loading) {
@@ -58,24 +69,36 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
         <div className="flex flex-col h-full bg-[var(--card)]">
 
 
-            <div className="flex-1 overflow-y-auto scrollbar-hide relative bg-[var(--card)]">
+            <div ref={parentRef} className="flex-1 overflow-y-auto scrollbar-hide relative bg-[var(--card)]">
                 <div className="px-4 pb-24 pt-4">
                     {/* PODIUM */}
                     <div className="mb-8">
                         <Podium top3={top3} metricLabel={metricLabel} />
                     </div>
 
-                    {/* RANKING LIST */}
-                    <div className="space-y-1">
-                        {list.map(entry => (
-                            <RankingRow key={entry.rank} entry={entry} metricLabel={metricLabel} />
-                        ))}
-
-                        {/* Placeholder for 'User not ranked' if needed */}
-                        {/* Logic: If user is logged in but not in data, show message. 
-                            But data usually includes user if we fetch getUserActiveQuizzes? 
-                            Actual logic depends on backend. We'll rely on the list.
-                        */}
+                    {/* RANKING LIST (VIRTUALIZED) */}
+                    <div
+                        style={{
+                            height: `${rowVirtualizer.getTotalSize()}px`,
+                            width: '100%',
+                            position: 'relative',
+                        }}
+                    >
+                        {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                            const entry = list[virtualItem.index];
+                            return (
+                                <div
+                                    key={virtualItem.key}
+                                    className="absolute top-0 left-0 w-full px-2 py-1"
+                                    style={{
+                                        height: `${virtualItem.size}px`,
+                                        transform: `translateY(${virtualItem.start}px)`,
+                                    }}
+                                >
+                                    <RankingRow entry={entry} metricLabel={metricLabel} />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

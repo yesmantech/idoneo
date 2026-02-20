@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -29,6 +29,9 @@ import { fetchBandoBySlug, saveBando, unsaveBando, isUserSaved, Bando, EDUCATION
 import BandoSkeleton from '@/components/bandi/BandoSkeleton';
 import { useAuth } from '@/context/AuthContext';
 import { hapticLight, hapticSuccess } from '@/lib/haptics';
+
+// Lazy load react-markdown
+const Markdown = React.lazy(() => import('react-markdown'));
 
 export default function BandoDetailPage() {
     const { slug } = useParams<{ slug: string }>();
@@ -184,7 +187,7 @@ export default function BandoDetailPage() {
                     <InfoTile
                         icon={GraduationCap}
                         label="Titolo"
-                        value={bando.education_level && EDUCATION_LEVELS.find(l => l.value === bando.education_level?.[0])?.label}
+                        value={bando.education_level?.filter(l => l !== 'Nessuno').join(', ') || 'Nessun titolo richiesto'}
                         delay={0.3}
                         color="text-brand-blue"
                         bg="bg-brand-blue/10"
@@ -205,10 +208,26 @@ export default function BandoDetailPage() {
                     className="bg-white dark:bg-slate-900/50 backdrop-blur-sm rounded-[24px] p-6 border border-slate-200 dark:border-white/5"
                 >
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">Descrizione</h3>
-                    <div className={`relative overflow-hidden transition-all duration-500 ease-ios ${expandedDesc ? 'max-h-[1000px]' : 'max-h-32'}`}>
-                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-[15px]">
-                            {bando.description || bando.short_description}
-                        </p>
+                    <div className={`relative overflow-hidden transition-all duration-500 ease-ios ${expandedDesc ? 'max-h-[2000px]' : 'max-h-32'}`}>
+                        <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
+                            <Suspense fallback={<div className="animate-pulse h-24 bg-slate-100 dark:bg-slate-800 rounded-xl w-full" />}>
+                                <Markdown
+                                    components={{
+                                        h1: ({ ...props }) => <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-6 mb-2" {...props} />,
+                                        h2: ({ ...props }) => <h4 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-5 mb-2" {...props} />,
+                                        h3: ({ ...props }) => <h5 className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-4 mb-1" {...props} />,
+                                        ul: ({ ...props }) => <ul className="list-disc pl-5 space-y-1 my-2 marker:text-brand-blue" {...props} />,
+                                        ol: ({ ...props }) => <ol className="list-decimal pl-5 space-y-1 my-2 marker:text-brand-blue" {...props} />,
+                                        li: ({ ...props }) => <li className="pl-1" {...props} />,
+                                        p: ({ ...props }) => <p className="mb-3 last:mb-0" {...props} />,
+                                        strong: ({ ...props }) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
+                                        a: ({ ...props }) => <a className="text-brand-blue hover:underline font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
+                                    }}
+                                >
+                                    {(bando.description || bando.short_description || '').replace(/^## Descrizione\s*/i, '')}
+                                </Markdown>
+                            </Suspense>
+                        </div>
                         {!expandedDesc && (
                             <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white dark:from-slate-900 to-transparent" />
                         )}

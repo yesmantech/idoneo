@@ -116,7 +116,7 @@ export default function ContestPage() {
               </div>
             </div>
             <Button
-              variant="gradient"
+              variant="primary"
               fullWidth
               onClick={() => navigate(`/quiz/${contestSlug}/official`)}
             >
@@ -138,7 +138,7 @@ export default function ContestPage() {
               </div>
             </div>
             <Button
-              variant="gradient-purple"
+              variant="secondary"
               fullWidth
               onClick={() => navigate(`/concorsi/${category}/${contestSlug}/custom`)}
             >

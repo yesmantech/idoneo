@@ -27,7 +27,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     if (!loading) {
         if (!user && !isAdmin) {
             // Guest -> Force Waitlist Landing
-            return <Navigate to="/waitlist" replace />;
+            // return <Navigate to="/waitlist" replace />;
         }
     }
 

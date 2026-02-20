@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { LeaderboardEntry } from '@/lib/leaderboardService';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface LeaderboardViewProps {
     data: LeaderboardEntry[];
@@ -10,12 +11,21 @@ interface LeaderboardViewProps {
 }
 
 export default function LeaderboardViewLegacy({ data, loading, theme, metricLabel, emptyMessage }: LeaderboardViewProps) {
+    const parentRef = useRef<HTMLDivElement>(null);
     const top3 = data.slice(0, 3);
     const list = data.slice(3);
 
     const isGold = theme === 'gold';
     const accentColor = isGold ? 'text-brand-orange' : 'text-brand-cyan';
     const bgColor = isGold ? 'bg-brand-orange/10' : 'bg-brand-cyan/10';
+
+    // Virtualizer for the list
+    const rowVirtualizer = useVirtualizer({
+        count: list.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 76, // 64 height + 12 gap roughly
+        overscan: 5,
+    });
 
     if (loading) {
         return (
@@ -48,10 +58,30 @@ export default function LeaderboardViewLegacy({ data, loading, theme, metricLabe
             <Podium top3={top3} theme={theme} metricLabel={metricLabel} />
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto px-6 pb-24 space-y-3 scrollbar-thin scrollbar-thumb-gray-200">
-                {list.map(entry => (
-                    <RankingRow key={entry.rank} entry={entry} theme={theme} metricLabel={metricLabel} />
-                ))}
+            <div ref={parentRef} className="flex-1 overflow-y-auto px-6 pb-24 scrollbar-thin scrollbar-thumb-gray-200">
+                <div
+                    style={{
+                        height: `${rowVirtualizer.getTotalSize()}px`,
+                        width: '100%',
+                        position: 'relative',
+                    }}
+                >
+                    {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                        const entry = list[virtualItem.index];
+                        return (
+                            <div
+                                key={virtualItem.key}
+                                className="absolute top-0 left-0 w-full pb-3" // Add bottom padding to act as gap
+                                style={{
+                                    height: `${virtualItem.size}px`,
+                                    transform: `translateY(${virtualItem.start}px)`,
+                                }}
+                            >
+                                <RankingRow entry={entry} theme={theme} metricLabel={metricLabel} />
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

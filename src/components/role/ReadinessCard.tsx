@@ -23,10 +23,14 @@ export default function ReadinessCard({ history, theme, leaderboardData }: Readi
 
         const totalTests = history.length;
         const totalScore = history.reduce((acc, curr) => acc + (curr.score || 0), 0);
+        const totalCorrect = history.reduce((acc, curr) => acc + (curr.correct || 0), 0);
+        const totalQuestions = history.reduce((acc, curr) => acc + (curr.total_questions || 0), 0);
+
         const avgScore = totalTests ? totalScore / totalTests : 0;
         const normalizedAvg = (avgScore / 30) * 100;
+        const trueAccuracy = totalQuestions ? (totalCorrect / totalQuestions) * 100 : 0;
 
-        return calculateReadinessLevel(normalizedAvg, normalizedAvg, totalTests);
+        return calculateReadinessLevel(normalizedAvg, trueAccuracy, totalTests, undefined, history);
     }, [history, leaderboardData]);
 
     if (!stats) {
