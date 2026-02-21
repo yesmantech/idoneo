@@ -93,6 +93,24 @@ function normalizeDBAnswer(val: string | null | undefined): string | null {
     return val.replace(/[.,:;()\[\]]/g, "").trim().toLowerCase();
 }
 
+// Helper to reliably check correctness against both letter keys ('a') and text values ('2011')
+function checkIsCorrect(selectedKey: string | null, correctValue: string | null, options?: any): boolean {
+    if (!selectedKey || !correctValue) return false;
+    const normalizedSelected = normalizeDBAnswer(selectedKey);
+    const normalizedCorrect = normalizeDBAnswer(correctValue);
+
+    // 1. Literal match (e.g., 'a' === 'a')
+    if (normalizedSelected === normalizedCorrect) return true;
+
+    // 2. Content match (e.g., options['a'] === '2011')
+    if (options && normalizedSelected) {
+        const optionText = normalizeDBAnswer(options[normalizedSelected]);
+        if (optionText && optionText === normalizedCorrect) return true;
+    }
+
+    return false;
+}
+
 // =============================================================================
 // QUIZ RUNNER PAGE - Idoneo Redesign
 // =============================================================================
@@ -401,9 +419,8 @@ export default function QuizRunnerPage() {
         }
 
         const nextList = [...currentList];
-        const normalizedCorrect = normalizeDBAnswer(currentQ.correctOption);
         const shouldLock = instantCheck;
-        const isCorrect = opt === normalizedCorrect;
+        const isCorrect = checkIsCorrect(opt, currentQ.correctOption, currentQ.options);
 
         // TIER S: Haptic Feedback
         if (shouldLock) {
@@ -446,16 +463,20 @@ export default function QuizRunnerPage() {
         setFinished(true);
         setIsSaving(true); // Show Tier S Loader
 
+        // Prioritize memory, fallback to local storage only if memory seems empty/reset
         let finalAnswersSource = answeringRef.current.length > 0 ? answeringRef.current : answering;
-        const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
-        if (localBackup) {
-            try {
-                const parsed = JSON.parse(localBackup);
-                if (Array.isArray(parsed) && parsed.length === finalAnswersSource.length) {
-                    finalAnswersSource = parsed;
+
+        if (finalAnswersSource.length === 0) {
+            const localBackup = localStorage.getItem(`quiz_progress_${quizAttemptId}`);
+            if (localBackup) {
+                try {
+                    const parsed = JSON.parse(localBackup);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        finalAnswersSource = parsed;
+                    }
+                } catch (e) {
+                    console.error("Finish LS Parse Error", e);
                 }
-            } catch (e) {
-                console.error("Finish LS Parse Error", e);
             }
         }
 
@@ -463,9 +484,8 @@ export default function QuizRunnerPage() {
         let score = 0;
 
         const finalAnswers = finalAnswersSource.map(a => {
-            const normalizedCorrect = normalizeDBAnswer(a.correctOption);
-            const normalizedSelected = normalizeDBAnswer(a.selectedOption);
-            const isCorrect = normalizedSelected !== null && normalizedSelected === normalizedCorrect;
+            const isCorrect = checkIsCorrect(a.selectedOption, a.correctOption, a.options);
+
             if (a.selectedOption === null) {
                 blank++;
                 score += pointsBlank;
@@ -594,7 +614,6 @@ export default function QuizRunnerPage() {
     if (!currentQ) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center text-[var(--foreground)]">Errore dati</div>;
 
     const isLocked = currentQ.isLocked || false;
-    const normalizedCorrect = normalizeDBAnswer(currentQ.correctOption);
 
     return (
         <>
@@ -698,7 +717,7 @@ export default function QuizRunnerPage() {
                             if (!optText) return null;
 
                             const isSelected = currentQ.selectedOption === optKey;
-                            const isCorrectAnswer = optKey === normalizedCorrect;
+                            const isCorrectAnswer = checkIsCorrect(optKey, currentQ.correctOption, currentQ.options);
                             const isDisabled = isLocked;
 
                             // Determine styling

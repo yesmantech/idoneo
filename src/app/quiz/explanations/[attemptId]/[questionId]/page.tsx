@@ -8,6 +8,30 @@ import DOMPurify from "dompurify";
 // Components
 import { motion } from "framer-motion";
 
+// Helper to normalize DB answers for comparison
+function normalizeDBAnswer(val: string | null | undefined): string | null {
+    if (!val) return null;
+    return val.replace(/[.,:;()\[\]]/g, "").trim().toLowerCase();
+}
+
+// Helper to reliably check correctness against both letter keys ('a') and text values ('2011')
+function checkIsCorrect(selectedKey: string | null, correctValue: string | null, options?: any): boolean {
+    if (!selectedKey || !correctValue) return false;
+    const normalizedSelected = normalizeDBAnswer(selectedKey);
+    const normalizedCorrect = normalizeDBAnswer(correctValue);
+
+    // 1. Literal match (e.g., 'a' === 'a')
+    if (normalizedSelected === normalizedCorrect) return true;
+
+    // 2. Content match (e.g., options['a'] === '2011')
+    if (options && normalizedSelected) {
+        const optionText = normalizeDBAnswer(options[normalizedSelected]);
+        if (optionText && optionText === normalizedCorrect) return true;
+    }
+
+    return false;
+}
+
 interface RichAnswer {
     questionId: string;
     text: string;
@@ -39,6 +63,7 @@ export default function ExplanationPage() {
     const [currentAnswer, setCurrentAnswer] = useState<RichAnswer | null>(null);
     const [questionDetails, setQuestionDetails] = useState<QuestionDetails | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     // Load Attempt
     useEffect(() => {
@@ -86,6 +111,53 @@ export default function ExplanationPage() {
             setLoading(false);
         }
     }, [attempt, questionId]);
+
+    const handleGenerateExplanation = async () => {
+        if (!currentAnswer || !questionDetails) return;
+
+        setIsGenerating(true);
+        try {
+            const correctAnswerText = getCorrectAnswerText(currentAnswer);
+
+            const { data, error } = await supabase.functions.invoke('generate-explanation', {
+                body: {
+                    questionId: currentAnswer.questionId,
+                    questionText: currentAnswer.text,
+                    correctAnswer: correctAnswerText
+                }
+            });
+
+            if (error) throw error;
+            if (data?.explanation) {
+                setQuestionDetails({
+                    ...questionDetails,
+                    explanation: data.explanation
+                });
+            }
+        } catch (error) {
+            console.error("Error generating explanation:", error);
+            alert("Si è verificato un errore durante la generazione della spiegazione. Riprova più tardi.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    // Helper to get the actual text of the correct answer
+    const getCorrectAnswerText = (answer: RichAnswer) => {
+        // If correctOption perfectly matches an option key (a, b, c, d)
+        if (answer.correctOption && ['a', 'b', 'c', 'd'].includes(answer.correctOption)) {
+            return (answer.options as any)[answer.correctOption];
+        }
+
+        // If correctOption contains the actual text already (or we fallback)
+        for (const key of ['a', 'b', 'c', 'd']) {
+            const text = (answer.options as any)[key];
+            if (checkIsCorrect(key, answer.correctOption, answer.options)) {
+                return text;
+            }
+        }
+        return answer.correctOption || "Risposta Corretta Sconosciuta";
+    };
 
     // Navigation Helper
     const goToNextError = () => {
@@ -157,10 +229,10 @@ export default function ExplanationPage() {
                     {['a', 'b', 'c', 'd'].map(optKey => {
                         const text = (currentAnswer.options as any)[optKey];
                         const isSelected = currentAnswer.selectedOption === optKey;
-                        const isCorrect = currentAnswer.correctOption === optKey; // Note: You might need to normalize
+                        const isCorrect = checkIsCorrect(optKey, currentAnswer.correctOption, currentAnswer.options);
 
                         let style = "bg-[var(--card)] border-[var(--card-border)] text-[var(--foreground)] opacity-70";
-                        let icon = null;
+                        let icon: React.ReactNode = null;
 
                         if (isCorrect) {
                             style = "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-900 dark:text-emerald-400 ring-1 ring-emerald-500 shadow-sm shadow-emerald-500/10";
@@ -194,7 +266,23 @@ export default function ExplanationPage() {
                         {explanation ? (
                             <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(explanation) }} />
                         ) : (
-                            <p className="italic opacity-60">Spiegazione non ancora disponibile per questa domanda.</p>
+                            <div className="flex flex-col items-start gap-4">
+                                <p className="italic opacity-60 m-0">Spiegazione non ancora disponibile per questa domanda.</p>
+                                <button
+                                    onClick={handleGenerateExplanation}
+                                    disabled={isGenerating}
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-sm shadow-md shadow-indigo-500/20 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-70 disabled:scale-100 flex items-center gap-2"
+                                >
+                                    {isGenerating ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Generazione in corso...
+                                        </>
+                                    ) : (
+                                        <>Genera Spiegazione con AI ✨</>
+                                    )}
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>

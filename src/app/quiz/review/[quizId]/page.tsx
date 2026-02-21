@@ -26,6 +26,24 @@ function normalizeDBAnswer(val: string | null | undefined): string | null {
     return val.replace(/[.,:;()[\]]/g, "").trim().toLowerCase();
 }
 
+// Helper to reliably check correctness against both letter keys ('a') and text values ('2011')
+function checkIsCorrect(selectedKey: string | null, correctValue: string | null, options?: any): boolean {
+    if (!selectedKey || !correctValue) return false;
+    const normalizedSelected = normalizeDBAnswer(selectedKey);
+    const normalizedCorrect = normalizeDBAnswer(correctValue);
+
+    // 1. Literal match (e.g., 'a' === 'a')
+    if (normalizedSelected === normalizedCorrect) return true;
+
+    // 2. Content match (e.g., options['a'] === '2011')
+    if (options && normalizedSelected) {
+        const optionText = normalizeDBAnswer(options[normalizedSelected]);
+        if (optionText && optionText === normalizedCorrect) return true;
+    }
+
+    return false;
+}
+
 export default function ReviewPage() {
     const { quizId } = useParams<{ quizId: string }>();
     const [searchParams] = useSearchParams();
@@ -41,6 +59,9 @@ export default function ReviewPage() {
 
     // Drawer state (matching QuizRunner)
     const [drawerExpanded, setDrawerExpanded] = useState(false);
+
+    // AI Generation
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -133,6 +154,55 @@ export default function ReviewPage() {
         }
     };
 
+    // Helper to get actual correct answer text
+    const getCorrectAnswerText = (answer: WrongAnswer) => {
+        if (answer.correctOption && ['a', 'b', 'c', 'd'].includes(answer.correctOption)) {
+            return (answer.options as any)[answer.correctOption];
+        }
+        for (const key of ['a', 'b', 'c', 'd']) {
+            const text = (answer.options as any)[key];
+            if (checkIsCorrect(key, answer.correctOption, answer.options)) {
+                return text;
+            }
+        }
+        return answer.correctOption || "Sconosciuta";
+    };
+
+    const handleGenerateExplanation = async () => {
+        if (!currentQuestion) return;
+
+        setIsGenerating(true);
+        try {
+            const correctAnswerText = getCorrectAnswerText(currentQuestion);
+
+            const { data, error } = await supabase.functions.invoke('generate-explanation', {
+                body: {
+                    questionId: currentQuestion.questionId,
+                    questionText: currentQuestion.text,
+                    correctAnswer: correctAnswerText
+                }
+            });
+
+            if (error) throw error;
+            if (data?.explanation) {
+                // Update local state so it shows up immediately
+                setWrongAnswers(prev => {
+                    const next = [...prev];
+                    next[currentIndex] = {
+                        ...next[currentIndex],
+                        explanation: data.explanation
+                    };
+                    return next;
+                });
+            }
+        } catch (error) {
+            console.error("Error generating explanation:", error);
+            alert("Errore durante la generazione della spiegazione.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
@@ -220,7 +290,7 @@ export default function ReviewPage() {
                         const optText = (currentQuestion.options as any)[optKey];
                         if (!optText) return null;
 
-                        const isCorrectAnswer = optKey === normalizedCorrect;
+                        const isCorrectAnswer = checkIsCorrect(optKey, currentQuestion.correctOption, currentQuestion.options);
                         const isSelectedAnswer = optKey === normalizedSelected;
 
                         // STYLING LOGIC:
@@ -274,14 +344,37 @@ export default function ReviewPage() {
                 </div>
 
                 {/* Explanation */}
-                {showAnswer && currentQuestion.explanation && (
-                    <div className="mt-6 bg-white rounded-2xl p-5 border border-[#00B1FF]/20 animate-in slide-in-from-top-2">
+                {showAnswer && (
+                    <div className="mt-6 bg-white rounded-2xl p-5 border border-[#00B1FF]/20 animate-in slide-in-from-top-2 flex flex-col items-start">
                         <h4 className="text-[12px] font-bold text-[#00B1FF] uppercase tracking-wider mb-2">
                             Spiegazione
                         </h4>
-                        <p className="text-[14px] text-slate-600 leading-relaxed">
-                            {currentQuestion.explanation}
-                        </p>
+
+                        {currentQuestion.explanation ? (
+                            <p className="text-[14px] text-slate-600 leading-relaxed m-0">
+                                {currentQuestion.explanation}
+                            </p>
+                        ) : (
+                            <div className="flex flex-col items-start gap-4">
+                                <p className="italic text-slate-500 opacity-60 text-[14px] m-0">
+                                    Spiegazione non ancora disponibile per questa domanda.
+                                </p>
+                                <button
+                                    onClick={handleGenerateExplanation}
+                                    disabled={isGenerating}
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-sm shadow-md shadow-indigo-500/20 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-70 disabled:scale-100 flex items-center gap-2"
+                                >
+                                    {isGenerating ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Generazione in corso...
+                                        </>
+                                    ) : (
+                                        <>Genera Spiegazione con AI ✨</>
+                                    )}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 
