@@ -513,6 +513,20 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
+    // Initial typing delay for welcome message
+    const [isTypingWelcome, setIsTypingWelcome] = useState(() => {
+        return initialMessages.length === 1 && initialMessages[0].id === 'welcome-msg';
+    });
+
+    useEffect(() => {
+        if (isTypingWelcome) {
+            const timer = setTimeout(() => {
+                setIsTypingWelcome(false);
+            }, 1800);
+            return () => clearTimeout(timer);
+        }
+    }, [isTypingWelcome]);
+
     // Close menu on outside click
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -656,6 +670,8 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             >
                 <AnimatePresence initial={false}>
                     {(messages || []).map((m: any) => {
+                        if (m.id === 'welcome-msg' && isTypingWelcome) return null;
+
                         const textContent = getMessageText(m);
                         const toolCalls = getToolInvocations(m);
 
@@ -742,7 +758,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </AnimatePresence>
 
                 {/* Loading indicator */}
-                {isStreaming && (
+                {(isStreaming || isTypingWelcome) && (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
