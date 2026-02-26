@@ -45,9 +45,14 @@ Il tuo obiettivo è aiutare l'utente a migliorare nei quiz misurando i suoi dati
 
 REGOLA FONDAMENTALE SULL'USO DEGLI STRUMENTI (TOOLS):
 Quando l'utente chiede consigli su come migliorare, cosa studiare o come sta andando:
-1. DEVI SEMPRE e OBBLIGATORIAMENTE usare prima il tool "get_user_overview" per vedere le sue statistiche generali.
+1. DEVI SEMPRE e OBBLIGATORIAMENTE usare prima il tool "get_user_overview" per vedere le sue statistiche generali E i concorsi a cui si sta preparando.
 2. DEVI SEMPRE e OBBLIGATORIAMENTE usare il tool "get_mistakes_by_topic" per capire in quali materie fa più errori.
 Non dare MAI consigli generici prima di aver consultato i suoi dati reali tramite i tools.
+
+REGOLA FONDAMENTALE SUI CONCORSI:
+- Il tool "get_user_overview" restituisce anche la lista dei concorsi a cui l'utente si sta preparando (campo "concorsi_attivi"), con il nome del concorso, il numero di quiz fatti e l'accuratezza per ognuno.
+- Usa SEMPRE queste informazioni per personalizzare i tuoi consigli. Cita i concorsi per nome!
+- Esempio: "Stai preparando il concorso **Allievi Marescialli** e la tua accuratezza su questo è del 65%..." NON dire mai solo "sui tuoi quiz".
 
 REGOLA FONDAMENTALE SULLA PRECISIONE DEI DATI:
 - Riporta SOLO i numeri esatti che ricevi dai tools. NON fare calcoli tuoi né inventare numeri.
@@ -84,7 +89,8 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
 - **Streak (Giorni Consecutivi)**: L'app premia chi studia tutti i giorni con uno "Streak" di fuoco che aumenta i moltiplicatori di XP. Suggerisci di mantenere lo streak.
 - **Modalità Offline**: Se l'utente scarica i quiz, può esercitarsi anche senza internet (es. in treno o aereo).
 - **Statistiche Avanzate**: L'utente ha una dashboard con grafici sulle materie. Tu puoi leggere questi dati usando i tuoi tool.
-- **Bandi e Concorsi**: L'app tiene traccia dei concorsi attivi. (Ricorda la regola di usare "search_bandi").`,
+- **Bandi e Concorsi**: L'app tiene traccia dei concorsi attivi. (Ricorda la regola di usare "search_bandi").
+- **Template Prova Personalizzata**: L'utente può salvare la configurazione della propria prova personalizzata e ripeterla con un click.`,
             tools: {
                 get_user_overview: tool({
                     description: 'Recupera le performance generali dell\'utente: quiz completati, risposte corrette, errate e omesse, accuratezza, durata media. Usalo per avere un\'idea del livello generale.',
@@ -97,7 +103,7 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
 
                         const { data: stats, error } = await supabase
                             .from('quiz_attempts')
-                            .select('correct, wrong, blank, total_questions, duration_seconds, score')
+                            .select('correct, wrong, blank, total_questions, duration_seconds, score, quiz_id')
                             .eq('user_id', userId)
                             .gte('created_at', startDate.toISOString());
 
@@ -105,7 +111,8 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
                             return JSON.stringify({
                                 message: 'Nessun quiz completato nel periodo selezionato',
                                 quiz_completati: 0,
-                                timeframe_days: range_days
+                                timeframe_days: range_days,
+                                concorsi_attivi: []
                             });
                         }
 
@@ -117,6 +124,35 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
                         const avgDuration = Math.round(stats.reduce((acc, s) => acc + (s.duration_seconds || 0), 0) / stats.length);
                         const avgScore = Math.round(stats.reduce((acc, s) => acc + (s.score || 0), 0) / stats.length);
 
+                        // Fetch distinct contests the user has practiced for
+                        const quizIds = [...new Set(stats.map(s => s.quiz_id).filter(Boolean))];
+                        let concorsiAttivi: any[] = [];
+
+                        if (quizIds.length > 0) {
+                            const { data: quizzes } = await supabase
+                                .from('quizzes')
+                                .select('id, title, slug')
+                                .in('id', quizIds);
+
+                            if (quizzes) {
+                                concorsiAttivi = quizzes.map(q => {
+                                    const qStats = stats.filter(s => s.quiz_id === q.id);
+                                    const qCorrect = qStats.reduce((acc, s) => acc + (s.correct || 0), 0);
+                                    const qWrong = qStats.reduce((acc, s) => acc + (s.wrong || 0), 0);
+                                    const qBlank = qStats.reduce((acc, s) => acc + (s.blank || 0), 0);
+                                    const qTotal = qCorrect + qWrong + qBlank;
+                                    return {
+                                        nome_concorso: q.title,
+                                        quiz_completati: qStats.length,
+                                        risposte_corrette: qCorrect,
+                                        risposte_errate: qWrong,
+                                        risposte_omesse: qBlank,
+                                        accuratezza_percentuale: qTotal > 0 ? Math.round((qCorrect / qTotal) * 100) : 0
+                                    };
+                                });
+                            }
+                        }
+
                         return JSON.stringify({
                             quiz_completati: stats.length,
                             domande_totali: totalQuestions,
@@ -126,7 +162,8 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
                             accuratezza_percentuale: accuracy,
                             punteggio_medio: avgScore,
                             durata_media_secondi: avgDuration,
-                            timeframe_days: range_days
+                            timeframe_days: range_days,
+                            concorsi_attivi: concorsiAttivi
                         });
                     }
                 }),
