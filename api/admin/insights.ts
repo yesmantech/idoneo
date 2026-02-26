@@ -2,9 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { createClient } from '@supabase/supabase-js';
 
-export const config = {
-    runtime: 'nodejs',
-};
+export const runtime = 'edge';
 
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '',

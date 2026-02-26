@@ -1,9 +1,7 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 
-export const config = {
-    runtime: 'nodejs',
-};
+export const runtime = 'edge';
 
 export default async function handler(req: Request) {
     // 1. Validate CORS and method

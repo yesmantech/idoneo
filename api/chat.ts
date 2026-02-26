@@ -1,6 +1,4 @@
-export const config = {
-    runtime: 'nodejs', // Node.js runtime — ai SDK modules aren't Edge-compatible
-};
+export const runtime = 'edge';
 
 import { streamText, tool, convertToModelMessages, stepCountIs, embed } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
