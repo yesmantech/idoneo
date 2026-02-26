@@ -15,7 +15,8 @@ import {
     Download,
     Bot,
     Loader2,
-    Star
+    Star,
+    Archive
 } from 'lucide-react';
 import {
     fetchAdminBandi,
@@ -33,8 +34,9 @@ const STATUS_COLORS: Record<string, string> = {
     draft: 'bg-slate-100 text-slate-600',
     review: 'bg-amber-100 text-amber-700',
     published: 'bg-emerald-100 text-emerald-700',
-    closed: 'bg-slate-200 text-slate-500',
-    suspended: 'bg-red-100 text-red-700'
+    closed: 'bg-orange-100 text-orange-600',
+    suspended: 'bg-red-100 text-red-700',
+    archived: 'bg-slate-200 text-slate-400'
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -42,8 +44,17 @@ const STATUS_LABELS: Record<string, string> = {
     review: 'In Revisione',
     published: 'Pubblicato',
     closed: 'Chiuso',
-    suspended: 'Sospeso'
+    suspended: 'Sospeso',
+    archived: 'Archiviato'
 };
+
+const TABS = [
+    { key: 'all', label: 'Tutti' },
+    { key: 'published', label: 'Pubblicati' },
+    { key: 'draft', label: 'Bozze' },
+    { key: 'review', label: 'In Revisione' },
+    { key: 'archived', label: 'Archiviati' },
+];
 
 export default function AdminBandiListPage() {
     const navigate = useNavigate();
@@ -76,7 +87,7 @@ export default function AdminBandiListPage() {
         setLoading(true);
         try {
             const { data, count } = await fetchAdminBandi({
-                status: statusFilter,
+                status: statusFilter === 'archived' ? 'closed' : statusFilter,
                 search: searchQuery || undefined,
                 limit,
                 offset: page * limit
@@ -165,6 +176,16 @@ export default function AdminBandiListPage() {
         }
     };
 
+    const handleBulkArchive = async () => {
+        try {
+            await bulkUpdateStatus(Array.from(selectedIds), 'closed');
+            setSelectedIds(new Set());
+            loadBandi();
+        } catch (error) {
+            alert('Errore durante l\'archiviazione');
+        }
+    };
+
     const handleToggleFeatured = async (id: string, current: boolean) => {
         try {
             // Optimistic update
@@ -206,6 +227,25 @@ export default function AdminBandiListPage() {
                 </div>
             </div>
 
+            {/* Status Tabs */}
+            <div className="flex items-center gap-2 mb-4 overflow-x-auto scrollbar-hide">
+                {TABS.map(tab => (
+                    <button
+                        key={tab.key}
+                        onClick={() => { setStatusFilter(tab.key); setPage(0); }}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${statusFilter === tab.key
+                                ? tab.key === 'archived'
+                                    ? 'bg-slate-600 text-white shadow-md'
+                                    : 'bg-blue-500 text-white shadow-md'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                    >
+                        {tab.key === 'archived' && <Archive className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />}
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
             <div className="flex flex-wrap items-center gap-4 bg-[var(--card)] p-4 rounded-xl border border-[var(--card-border)] shadow-sm">
                 <div className="flex-1 min-w-[300px] relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -217,18 +257,6 @@ export default function AdminBandiListPage() {
                         className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-blue/20 outline-none"
                     />
                 </div>
-
-                <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
-                >
-                    <option value="all">Tutti gli stati</option>
-                    <option value="draft">Bozza</option>
-                    <option value="review">In Revisione</option>
-                    <option value="published">Pubblicati</option>
-                    <option value="closed">Chiusi</option>
-                </select>
             </div>
 
             {/* Bulk Actions Bar */}
@@ -249,6 +277,13 @@ export default function AdminBandiListPage() {
                             className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-sm font-medium"
                         >
                             Elimina
+                        </button>
+                        <button
+                            onClick={handleBulkArchive}
+                            className="px-3 py-1.5 bg-slate-500 text-white rounded-lg text-sm font-medium flex items-center gap-1"
+                        >
+                            <Archive className="w-3.5 h-3.5" />
+                            Archivia
                         </button>
                         <button
                             onClick={() => setSelectedIds(new Set())}
@@ -351,8 +386,13 @@ export default function AdminBandiListPage() {
                                         {new Date(bando.deadline).toLocaleDateString('it-IT')}
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-medium ${STATUS_COLORS[bando.status]}`}>
-                                            {STATUS_LABELS[bando.status]}
+                                        <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-medium ${bando.status === 'closed'
+                                                ? STATUS_COLORS['archived']
+                                                : STATUS_COLORS[bando.status]
+                                            }`}>
+                                            {bando.status === 'closed'
+                                                ? '📦 Archiviato'
+                                                : STATUS_LABELS[bando.status]}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
@@ -387,10 +427,10 @@ export default function AdminBandiListPage() {
                                             {bando.status === 'published' && (
                                                 <button
                                                     onClick={() => handleClose(bando.id)}
-                                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg"
-                                                    title="Chiudi"
+                                                    className="p-2 hover:bg-orange-100 dark:hover:bg-orange-500/20 rounded-lg"
+                                                    title="Archivia"
                                                 >
-                                                    <X className="w-4 h-4 text-slate-400" />
+                                                    <Archive className="w-4 h-4 text-orange-400" />
                                                 </button>
                                             )}
                                             <button
