@@ -1,5 +1,5 @@
 export const config = {
-    runtime: 'edge', // Using Edge runtime for faster cold starts and streaming
+    runtime: 'nodejs', // Node.js runtime — ai SDK modules aren't Edge-compatible
 };
 
 import { streamText, tool, convertToModelMessages, stepCountIs, embed } from 'ai';

@@ -3,7 +3,7 @@ import { generateText } from 'ai';
 import { createClient } from '@supabase/supabase-js';
 
 export const config = {
-    runtime: 'edge', // Using Edge runtime for fast scale
+    runtime: 'nodejs',
 };
 
 const supabase = createClient(
