@@ -21,7 +21,8 @@ const openai = createOpenAI({
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
-        const { messages, userId } = req.body;
+        const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        const { messages, userId } = body || {};
 
         if (!userId) {
             return res.status(401).json({ error: 'Unauthorized: userId required' });
