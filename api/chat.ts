@@ -496,7 +496,9 @@ Usa un tono caldo e incoraggiante. Formatta con markdown.`
             }
         });
 
-        result.pipeTextStreamToResponse(res);
+        result.pipeUIMessageStreamToResponse(res, {
+            sendReasoning: true,
+        });
     } catch (error: any) {
         console.error("AI API Error:", error?.stack || error);
         res.status(500).json({ error: 'Internal Server Error', details: error?.message || String(error) });
