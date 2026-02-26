@@ -501,6 +501,26 @@ export default function AiChatInterface() {
 }
 
 // =============================================
+// Helper Functions
+// =============================================
+const getMessageText = (m: any): string => {
+    if (m.parts) {
+        return m.parts
+            .filter((p: any) => p.type === 'text')
+            .map((p: any) => p.text)
+            .join('');
+    }
+    return m.content || '';
+};
+
+const getToolInvocations = (m: any): any[] => {
+    if (m.parts) {
+        return m.parts.filter((p: any) => p.type === 'tool-invocation');
+    }
+    return m.toolInvocations || [];
+};
+
+// =============================================
 // Inner chat: useChat is initialized once with the correct messages
 // =============================================
 function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
@@ -607,23 +627,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
         if (!text || isStreaming) return;
         setInputValue('');
         await sendMessage({ text });
-    };
-
-    const getMessageText = (m: any): string => {
-        if (m.parts) {
-            return m.parts
-                .filter((p: any) => p.type === 'text')
-                .map((p: any) => p.text)
-                .join('');
-        }
-        return m.content || '';
-    };
-
-    const getToolInvocations = (m: any): any[] => {
-        if (m.parts) {
-            return m.parts.filter((p: any) => p.type === 'tool-invocation');
-        }
-        return m.toolInvocations || [];
     };
 
     return (
