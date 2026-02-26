@@ -825,7 +825,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                             whileHover={{ scale: 0.96 }}
                             whileTap={{ scale: 0.9 }}
                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${inputValue.trim()
-                                ? 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
+                                ? 'bg-[#00B1FF] text-white hover:bg-[#009ee0]'
                                 : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
                                 }`}
                         >
