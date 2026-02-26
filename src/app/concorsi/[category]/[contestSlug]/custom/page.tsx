@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchSmartQuestions, QuestionSelectionMode, SubjectConfig } from "@/lib/quiz-smart-selection";
-import { ChevronLeft, ChevronDown, Minus, Plus, Check, Play, Clock, Filter, Layers, Target } from "lucide-react";
+import { ChevronLeft, ChevronDown, Minus, Plus, Check, Play, Clock, Filter, Layers, Target, RotateCcw, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TierSLoader from "@/components/ui/TierSLoader";
 import ScrollPicker from "@/components/ui/ScrollPicker";
@@ -40,6 +40,7 @@ export default function CustomQuizWizardPage() {
     // --- State ---
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
+    const [hasTemplate, setHasTemplate] = useState(false);
 
     // Data
     const [quizId, setQuizId] = useState<string | null>(null);
@@ -59,7 +60,7 @@ export default function CustomQuizWizardPage() {
     // Scoring Config
     const [scoring, setScoring] = useState<ScoringConfig>({ correct: 1, wrong: 0, blank: 0 });
 
-    // --- Load Data ---
+    // --- Load Data & Restore Template ---
     useEffect(() => {
         const load = async () => {
             const { data: qData } = await supabase.from("quizzes").select("id").eq("slug", contestSlug).single();
@@ -74,6 +75,35 @@ export default function CustomQuizWizardPage() {
                 }));
                 enriched.sort((a, b) => a.name.localeCompare(b.name));
                 setSubjects(enriched);
+
+                // Restore saved template
+                try {
+                    const saved = localStorage.getItem(`quiz-template-${qData.id}`);
+                    if (saved) {
+                        const t = JSON.parse(saved);
+                        // Validate subject IDs still exist
+                        const validIds = new Set(enriched.map(s => s.id));
+                        const validSelections: Record<string, number> = {};
+                        for (const [id, count] of Object.entries(t.subjectSelections || {})) {
+                            if (validIds.has(id)) {
+                                const subj = enriched.find(s => s.id === id);
+                                validSelections[id] = Math.min(count as number, subj?.question_count || 20);
+                            }
+                        }
+                        if (Object.keys(validSelections).length > 0) {
+                            setSubjectSelections(validSelections);
+                            setSelectionMode(t.selectionMode || 'random');
+                            setTimeHours(t.timeHours ?? 0);
+                            setTimeMinutes(t.timeMinutes ?? 30);
+                            setTimeSeconds(t.timeSeconds ?? 0);
+                            setNoTimeLimit(t.noTimeLimit ?? false);
+                            setScoring(t.scoring || { correct: 1, wrong: 0, blank: 0 });
+                            setHasTemplate(true);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[Template] Failed to restore:', e);
+                }
             }
             setLoading(false);
         };
@@ -116,6 +146,19 @@ export default function CustomQuizWizardPage() {
     const totalSelectedQuestions = useMemo(() => {
         return Object.values(subjectSelections).reduce((acc: number, c: number) => acc + c, 0);
     }, [subjectSelections]);
+
+    const resetTemplate = () => {
+        hapticLight();
+        setSubjectSelections({});
+        setSelectionMode('random');
+        setTimeHours(0);
+        setTimeMinutes(30);
+        setTimeSeconds(0);
+        setNoTimeLimit(false);
+        setScoring({ correct: 1, wrong: 0, blank: 0 });
+        setHasTemplate(false);
+        if (quizId) localStorage.removeItem(`quiz-template-${quizId}`);
+    };
 
     // --- Action ---
     const handleStart = async () => {
@@ -204,6 +247,13 @@ export default function CustomQuizWizardPage() {
 
             if (error) throw error;
 
+            // Save template for one-click repeat
+            localStorage.setItem(`quiz-template-${quizId}`, JSON.stringify({
+                subjectSelections, selectionMode,
+                timeHours, timeMinutes, timeSeconds, noTimeLimit,
+                scoring, savedAt: Date.now()
+            }));
+
             const scoringParams = `correct=${scoring.correct}&wrong=${scoring.wrong}&blank=${scoring.blank}`;
             const timeParam = noTimeLimit ? "time=0" : `time=${Math.ceil(durationSeconds / 60)}`;
 
@@ -268,11 +318,38 @@ export default function CustomQuizWizardPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col gap-1"
                 >
-                    <h1 className="text-2xl font-black text-[var(--foreground)] tracking-tight">Crea la tua Prova</h1>
+                    <h1 className="text-2xl font-black text-[var(--foreground)] tracking-tight">{hasTemplate ? 'Ripeti Prova' : 'Crea la tua Prova'}</h1>
                     <p className="text-sm font-medium text-[var(--foreground)] opacity-60">
-                        Configura ogni dettaglio per un allenamento mirato.
+                        {hasTemplate ? 'I tuoi settings sono stati ripristinati.' : 'Configura ogni dettaglio per un allenamento mirato.'}
                     </p>
                 </motion.div>
+
+                {/* Template Loaded Banner */}
+                <AnimatePresence>
+                    {hasTemplate && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10, height: 0 }}
+                            animate={{ opacity: 1, y: 0, height: 'auto' }}
+                            exit={{ opacity: 0, y: -10, height: 0 }}
+                            className="flex items-center gap-3 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/60 dark:border-purple-500/20 rounded-2xl px-4 py-3"
+                        >
+                            <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                <Bookmark className="w-4 h-4 text-purple-500" fill="currentColor" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[13px] font-bold text-purple-700 dark:text-purple-300">Template caricato</p>
+                                <p className="text-[11px] text-purple-500/80 dark:text-purple-400/60">Configurazione dell'ultima prova ripristinata</p>
+                            </div>
+                            <button
+                                onClick={resetTemplate}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-purple-600 dark:text-purple-300 bg-purple-100 dark:bg-purple-500/20 hover:bg-purple-200 dark:hover:bg-purple-500/30 transition-colors uppercase tracking-wider"
+                            >
+                                <RotateCcw className="w-3 h-3" />
+                                Resetta
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* SELEZIONA MATERIE */}
                 <section>
@@ -414,15 +491,22 @@ export default function CustomQuizWizardPage() {
                                 <h2 className="text-[11px] font-bold uppercase tracking-widest">Tempo</h2>
                             </div>
 
-                            <button
-                                onClick={() => { hapticLight(); setNoTimeLimit(!noTimeLimit); }}
-                                className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full transition-all border ${noTimeLimit
-                                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                    : 'bg-slate-100 dark:bg-white/5 text-[var(--foreground)] opacity-60 border-transparent'
-                                    }`}
-                            >
-                                {noTimeLimit ? "Senza Limiti" : "Con Timer"}
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <span className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${noTimeLimit ? 'text-brand-blue' : 'text-slate-500'}`}>
+                                    Senza Limiti
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => { hapticLight(); setNoTimeLimit(!noTimeLimit); }}
+                                    className={`relative inline-flex h-[28px] w-[50px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm ${noTimeLimit ? 'bg-brand-blue' : 'bg-slate-200 dark:bg-white/10'
+                                        }`}
+                                >
+                                    <span
+                                        className={`pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${noTimeLimit ? 'translate-x-[22px]' : 'translate-x-0'
+                                            }`}
+                                    />
+                                </button>
+                            </div>
                         </div>
 
                         <AnimatePresence mode="wait">
@@ -459,12 +543,10 @@ export default function CustomQuizWizardPage() {
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="bg-emerald-500/[0.03] dark:bg-emerald-500/5 backdrop-blur-sm rounded-[32px] p-8 border border-emerald-500/10 flex flex-col items-center justify-center gap-3 text-emerald-500/60 transition-all"
+                                    className="bg-white/40 dark:bg-white/5 backdrop-blur-xl rounded-[24px] p-6 border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-4 text-slate-500/80 dark:text-slate-400/80 transition-all shadow-sm"
                                 >
-                                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                                        <Clock className="w-6 h-6 opacity-40 capitalize" />
-                                    </div>
-                                    <span className="text-sm font-black uppercase tracking-widest opacity-80">Senza Limiti di Tempo</span>
+                                    <Clock className="w-5 h-5 opacity-50" />
+                                    <span className="text-[12px] font-bold uppercase tracking-widest">Nessun limite impostato</span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -493,50 +575,35 @@ export default function CustomQuizWizardPage() {
 
                     <div className="space-y-3">
                         {[
-                            { label: 'Esatta', key: 'correct', color: 'emerald', value: scoring.correct, sign: '+' },
-                            { label: 'Errata', key: 'wrong', color: 'red', value: scoring.wrong, sign: '' },
-                            { label: 'Saltata', key: 'blank', color: 'slate', value: scoring.blank, sign: '' }
+                            { label: 'Esatta', key: 'correct', value: scoring.correct },
+                            { label: 'Errata', key: 'wrong', value: scoring.wrong },
+                            { label: 'Saltata', key: 'blank', value: scoring.blank }
                         ].map((item) => (
                             <div
                                 key={item.key}
-                                className={`flex items-center justify-between p-3 rounded-[20px] border relative overflow-hidden ${item.color === 'emerald' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/10 border-emerald-500/10' :
-                                    item.color === 'red' ? 'bg-red-500/[0.03] dark:bg-red-500/10 border-red-500/10' :
-                                        'bg-slate-100/50 dark:bg-white/5 border-slate-200/50 dark:border-white/5'
-                                    }`}
+                                className="flex items-center justify-between p-4 bg-white/60 dark:bg-white/5 backdrop-blur-xl rounded-[24px] border border-slate-200/50 dark:border-white/5 shadow-sm"
                             >
-                                <span className={`text-[13px] font-bold ml-2 ${item.color === 'emerald' ? 'text-emerald-700 dark:text-emerald-400' :
-                                    item.color === 'red' ? 'text-red-600 dark:text-red-400' :
-                                        'text-slate-600 dark:text-slate-400'
-                                    }`}>
+                                <span className="text-[15px] font-bold text-slate-800 dark:text-slate-200">
                                     {item.label}
                                 </span>
 
                                 <div className="flex items-center gap-3">
                                     <button
                                         onClick={() => { hapticLight(); setScoring(s => ({ ...s, [item.key]: parseFloat(((s as any)[item.key] - 0.1).toFixed(1)) })); }}
-                                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-transform active:scale-90 ${item.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
-                                            item.color === 'red' ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400' :
-                                                'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'
-                                            }`}
+                                        className="w-10 h-10 rounded-[14px] flex items-center justify-center transition-all bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20 active:scale-95"
                                     >
-                                        <Minus className="w-3.5 h-3.5" strokeWidth={3} />
+                                        <Minus className="w-4 h-4" strokeWidth={2.5} />
                                     </button>
 
-                                    <span className={`w-12 text-center text-[15px] font-black ${item.color === 'emerald' ? 'text-emerald-700 dark:text-emerald-400' :
-                                        item.color === 'red' ? 'text-red-600 dark:text-red-400' :
-                                            'text-slate-600 dark:text-slate-400'
-                                        }`}>
+                                    <span className="w-14 text-center text-[17px] font-black text-slate-900 dark:text-white tabular-nums tracking-tighter">
                                         {item.key === 'correct' ? `+${item.value}` : item.value}
                                     </span>
 
                                     <button
                                         onClick={() => { hapticLight(); setScoring(s => ({ ...s, [item.key]: parseFloat(((s as any)[item.key] + 0.1).toFixed(1)) })); }}
-                                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-transform active:scale-90 ${item.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
-                                            item.color === 'red' ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400' :
-                                                'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'
-                                            }`}
+                                        className="w-10 h-10 rounded-[14px] flex items-center justify-center transition-all bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20 active:scale-95"
                                     >
-                                        <Plus className="w-3.5 h-3.5" strokeWidth={3} />
+                                        <Plus className="w-4 h-4" strokeWidth={2.5} />
                                     </button>
                                 </div>
                             </div>
@@ -560,11 +627,10 @@ export default function CustomQuizWizardPage() {
                     <button
                         onClick={handleStart}
                         disabled={generating || totalSelectedQuestions === 0}
-                        className={`flex-1 group relative overflow-hidden py-4 rounded-[24px] shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${totalSelectedQuestions > 0 ? 'shadow-brand-blue/30' : 'shadow-none'
-                            }`}
+                        className={`flex-1 group relative overflow-hidden py-4 rounded-[24px] shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                        <div className={`absolute inset-0 transition-opacity duration-300 ${totalSelectedQuestions > 0
-                            ? 'bg-gradient-to-r from-brand-blue to-cyan-400 opacity-100'
+                        <div className={`absolute inset-0 transition-colors duration-300 ${totalSelectedQuestions > 0
+                            ? 'bg-brand-blue opacity-100 hover:opacity-90'
                             : 'bg-slate-200 dark:bg-white/10 opacity-100'
                             }`} />
 
@@ -574,7 +640,7 @@ export default function CustomQuizWizardPage() {
                                 <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    Avvia Prova <Play className="w-5 h-5 fill-current" />
+                                    {hasTemplate ? 'Ripeti Prova' : 'Avvia Prova'} <Play className="w-5 h-5 fill-current" />
                                 </>
                             )}
                         </span>
