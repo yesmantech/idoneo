@@ -89,7 +89,7 @@ function FeedbackModal({ isOpen, onClose, type, messageContent }: { isOpen: bool
                     animate={{ y: 0 }}
                     exit={{ y: '100%', transition: { duration: 0.35, ease: [0.4, 0, 1, 1] } }}
                     transition={{ duration: 0.45, ease: [0.32, 1, 0.23, 1] }}
-                    className="fixed inset-0 z-[110] bg-white dark:bg-[#000000] flex flex-col"
+                    className="fixed inset-x-0 top-0 z-[110] bg-white dark:bg-[#000000] flex flex-col h-[100dvh]"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-5 py-4">
@@ -142,7 +142,7 @@ function FeedbackModal({ isOpen, onClose, type, messageContent }: { isOpen: bool
                         </motion.div>
                     ) : (
                         /* ===== Form State ===== */
-                        <>
+                        <div className="flex flex-col flex-1 min-h-0">
                             <motion.div
                                 variants={containerVariants}
                                 initial="hidden"
@@ -214,7 +214,7 @@ function FeedbackModal({ isOpen, onClose, type, messageContent }: { isOpen: bool
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4, duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-                                className="px-5 py-4 border-t border-gray-100 dark:border-[#1A1A1A] pb-safe"
+                                className="flex-shrink-0 px-5 pt-4 pb-8 md:pb-5 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-[#111111]"
                             >
                                 <Button
                                     variant="primary"
@@ -226,7 +226,7 @@ function FeedbackModal({ isOpen, onClose, type, messageContent }: { isOpen: bool
                                     Invia feedback
                                 </Button>
                             </motion.div>
-                        </>
+                        </div>
                     )}
                 </motion.div>
             )}
