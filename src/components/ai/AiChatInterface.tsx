@@ -380,7 +380,7 @@ function MessageActions({ text }: { text: string }) {
                         animate={{ opacity: 1, y: 0, x: '-50%' }}
                         exit={{ opacity: 0, y: -20, x: '-50%', transition: { duration: 0.2, ease: 'easeIn' } }}
                         transition={{ duration: 0.3, ease: [0.18, 0.89, 0.32, 1.28] }}
-                        className="fixed top-12 left-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full"
+                        className="fixed top-20 left-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full whitespace-nowrap"
                     >
                         <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                             <Check className="w-3 h-3 text-white" strokeWidth={3} />
