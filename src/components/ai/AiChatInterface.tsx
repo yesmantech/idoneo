@@ -837,14 +837,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                         disabled={isStreaming}
                     />
                     <div className="absolute right-2 flex items-center gap-1">
-                        <motion.button
-                            type="button"
-                            whileHover={{ scale: 0.96 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 dark:text-[#8E8E93] hover:text-black dark:hover:text-white transition-colors"
-                        >
-                            <Mic className="w-5 h-5" />
-                        </motion.button>
 
                         <motion.button
                             type="submit"
