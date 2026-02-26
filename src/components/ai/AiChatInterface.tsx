@@ -382,10 +382,13 @@ function MessageActions({ text }: { text: string }) {
                         transition={{ duration: 0.3, ease: [0.18, 0.89, 0.32, 1.28] }}
                         className="fixed top-12 left-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full"
                     >
-                        <button onClick={() => setToastMessage(null)} className="w-4 h-4 flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity flex-shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                        </div>
+                        <span className="text-[14px] font-medium text-black dark:text-white">{toastMessage}</span>
+                        <button onClick={() => setToastMessage(null)} className="w-4 h-4 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity flex-shrink-0 ml-1">
                             <X className="w-3 h-3" />
                         </button>
-                        <span className="text-[14px] font-medium text-black dark:text-white">{toastMessage}</span>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -825,8 +828,8 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                             whileHover={{ scale: 0.96 }}
                             whileTap={{ scale: 0.9 }}
                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${inputValue.trim()
-                                    ? 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
-                                    : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
+                                ? 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
+                                : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
                                 }`}
                         >
                             <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
