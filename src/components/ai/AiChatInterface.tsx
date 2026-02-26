@@ -371,7 +371,7 @@ function MessageActions({ text }: { text: string }) {
     const reactionSpring = { type: 'spring' as const, stiffness: 500, damping: 15 };
 
     return (
-        <div className="flex items-center gap-3 mt-3 text-gray-400 dark:text-gray-500">
+        <div className="flex items-center gap-3 mt-1.5 text-gray-400 dark:text-gray-500">
             {/* Floating Feedback Toast */}
             <AnimatePresence>
                 {toastMessage && (
@@ -667,16 +667,9 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                                 transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
                                 className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
-                                {/* Assistant Avatar (Optional - keeping minimal per Skitla ref) */}
-                                {m.role === 'assistant' && (
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1E1E1E] flex items-center justify-center flex-shrink-0 mt-1 border border-gray-200 dark:border-[#333]">
-                                        <Bot className="w-4 h-4 text-black dark:text-white" />
-                                    </div>
-                                )}
-
                                 <div className={`max-w-[85%] ${m.role === 'user'
                                     ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
-                                    : 'bg-transparent text-black dark:text-white px-2 py-1'
+                                    : 'bg-[#F2F2F7] dark:bg-[#1C1C1E] text-black dark:text-white rounded-[20px] rounded-bl-[12px] px-4 py-3 pb-2.5'
                                     }`}>
                                     {textContent && (
                                         <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
@@ -755,10 +748,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex gap-3 justify-start"
                     >
-                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1E1E1E] flex items-center justify-center flex-shrink-0 mt-1 border border-gray-200 dark:border-[#333]">
-                            <Bot className="w-4 h-4 text-black dark:text-white" />
-                        </div>
-                        <div className="bg-transparent px-2 py-3 flex items-center gap-2">
+                        <div className="bg-[#F2F2F7] dark:bg-[#1C1C1E] rounded-[20px] rounded-bl-[12px] px-4 py-3 flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce"></span>
