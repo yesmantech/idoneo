@@ -22,5 +22,15 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "supabase/functions/**/*",
+    "scripts/**/*",
+    "api/**/*",
+    "**/*.test.ts",
+    "**/*.spec.tsx",
+    "*.ts",
+    "*.js"
+  ]
 }

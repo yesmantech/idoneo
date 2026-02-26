@@ -54,7 +54,7 @@ export const Reveal = ({
     return (
         <div ref={ref} style={{ width, position: 'relative' }} className={className}>
             <motion.div
-                variants={variants}
+                variants={variants as any}
                 initial="hidden"
                 animate={mainControls}
             >
@@ -100,7 +100,7 @@ export const RevealGroup = ({
     return (
         <motion.div
             ref={ref}
-            variants={containerVariants}
+            variants={containerVariants as any}
             initial="hidden"
             animate={controls}
             className={className}
@@ -122,7 +122,7 @@ export const RevealItem = ({ children, className }: { children: React.ReactNode,
     };
 
     return (
-        <motion.div variants={itemVariants} className={className}>
+        <motion.div variants={itemVariants as any} className={className}>
             {children}
         </motion.div>
     );

@@ -326,7 +326,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         if (!profile || authLoading) return;
 
         // If already completed in DB, don't show welcome
-        if (profile.onboarding_completed) {
+        if ((profile as any).onboarding_completed) {
             localStorage.setItem(WELCOME_KEY, 'true');
             return;
         }

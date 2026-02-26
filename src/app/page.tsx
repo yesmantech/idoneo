@@ -32,7 +32,7 @@ import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, fetchRecentCateg
 // =============================================================================
 export default function HomePage() {
   const { profile, user } = useAuth();
-  const { hasCompletedOnboarding, startOnboarding } = useOnboarding();
+  const { hasCompletedContext, startOnboarding } = useOnboarding();
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchItems, setSearchItems] = useState<SearchItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,14 +45,14 @@ export default function HomePage() {
 
   // Auto-start onboarding for first-time users
   useEffect(() => {
-    if (!loading && !hasCompletedOnboarding) {
+    if (!loading && !hasCompletedContext('homepage')) {
       // Small delay to ensure DOM is ready
       const timer = setTimeout(() => {
-        startOnboarding();
+        startOnboarding('homepage');
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [loading, hasCompletedOnboarding, startOnboarding]);
+  }, [loading, hasCompletedContext, startOnboarding]);
 
   useEffect(() => {
     // Core data
@@ -105,11 +105,9 @@ export default function HomePage() {
         </section>
 
         {/* 2. SEARCH BAR - Overlaps hero for visual continuity with better spacing */}
-        <section className="px-4 lg:px-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20 -mt-4 lg:-mt-6">
-          <Reveal width="100%" duration={0.6} delay={0.3} y={10}>
-            <SearchSection items={searchItems} />
-          </Reveal>
-        </section>
+        <Reveal width="100%" duration={0.6} delay={0.3} y={10} className="px-4 lg:px-8 mb-6 lg:mb-8 max-w-7xl lg:mx-auto lg:w-full relative z-20 -mt-4 lg:-mt-6">
+          <SearchSection items={searchItems} />
+        </Reveal>
 
         {/* 3. RECENTLY USED - Quick access for returning users */}
         {recentlyUsed.length > 0 && (

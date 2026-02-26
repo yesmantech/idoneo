@@ -121,13 +121,13 @@ export default function AdminBandiCategoriesPage() {
                             {categories.map((category, index) => (
                                 <tr key={category.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                                     <td className="px-4 py-3 text-sm text-slate-400">
-                                        {category.sort_order || index + 1}
+                                        {(category as any).sort_order || index + 1}
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
                                             <div
                                                 className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm"
-                                                style={{ backgroundColor: category.color || '#6366f1' }}
+                                                style={{ backgroundColor: (category as any).color || '#6366f1' }}
                                             >
                                                 {category.icon || '📁'}
                                             </div>
@@ -146,10 +146,10 @@ export default function AdminBandiCategoriesPage() {
                                         <div className="flex items-center gap-2">
                                             <div
                                                 className="w-4 h-4 rounded"
-                                                style={{ backgroundColor: category.color || '#6366f1' }}
+                                                style={{ backgroundColor: (category as any).color || '#6366f1' }}
                                             />
                                             <span className="text-sm text-slate-500 font-mono">
-                                                {category.color || '-'}
+                                                {(category as any).color || '-'}
                                             </span>
                                         </div>
                                     </td>
@@ -205,9 +205,9 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
         name: category?.name || '',
         slug: category?.slug || '',
         icon: category?.icon || '',
-        color: category?.color || '#6366f1',
-        sort_order: category?.sort_order || 0
-    });
+        color: (category as any)?.color || '#6366f1',
+        sort_order: (category as any)?.sort_order || 0
+    } as any);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -289,8 +289,8 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
                                     type="button"
                                     onClick={() => setFormData(p => ({ ...p, icon }))}
                                     className={`w-9 h-9 rounded-lg text-xl flex items-center justify-center transition-all ${formData.icon === icon
-                                            ? 'bg-slate-200 dark:bg-slate-600 ring-2 ring-emerald-500'
-                                            : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                        ? 'bg-slate-200 dark:bg-slate-600 ring-2 ring-emerald-500'
+                                        : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
                                         }`}
                                 >
                                     {icon}
@@ -336,8 +336,8 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
                         </label>
                         <input
                             type="number"
-                            value={formData.sort_order}
-                            onChange={(e) => setFormData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))}
+                            value={(formData as any).sort_order}
+                            onChange={(e) => setFormData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 } as any))}
                             className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
                         />
                     </div>

@@ -50,7 +50,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Category, Role, Contest } from '@/lib/data';
+import { Category, Contest } from '@/lib/data';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -60,10 +60,7 @@ export interface ContestWithSeats extends Contest {
     available_seats?: string | null;
 }
 
-export interface RoleWithContests extends Role {
-    contests: ContestWithSeats[];
-    activeUsers: number;
-}
+
 
 export interface ConcorsoData {
     category: Category | null;

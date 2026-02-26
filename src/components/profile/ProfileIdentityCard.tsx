@@ -211,7 +211,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                                 </button>
 
                                 <div className={`w-16 h-16 rounded-2xl ${explanation.color} flex items-center justify-center mx-auto mb-5`}>
-                                    {React.cloneElement(explanation.icon as React.ReactElement, { className: "w-8 h-8" })}
+                                    {React.cloneElement(explanation.icon as any, { className: "w-8 h-8" })}
                                 </div>
 
                                 <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{explanation.title}</h3>

@@ -146,7 +146,7 @@ export default function ProfileStatsCard({ xp = 0, score = 0, streak = 0 }: Prof
                             </button>
 
                             <div className={`w-20 h-20 rounded-[24px] ${explanation.color} flex items-center justify-center mx-auto mb-6 shadow-sm`}>
-                                {React.cloneElement(explanation.icon as React.ReactElement, { className: "w-10 h-10" })}
+                                {React.cloneElement(explanation.icon as any, { className: "w-10 h-10" })}
                             </div>
 
                             <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{explanation.title}</h3>

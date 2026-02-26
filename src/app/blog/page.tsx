@@ -207,7 +207,7 @@ export default function BlogIndexPage() {
                                     : 'bg-white dark:bg-[var(--card)] text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/50 dark:border-slate-800'
                             )}
                         >
-                            {cat.icon && <span>{cat.icon}</span>}
+                            {(cat as any).icon && <span>{(cat as any).icon}</span>}
                             {cat.name}
                         </button>
                     ))}
