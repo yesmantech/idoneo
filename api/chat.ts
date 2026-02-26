@@ -1,4 +1,4 @@
-import type { VercelRequest } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export const config = {
     supportsResponseStreaming: true,
@@ -19,12 +19,12 @@ const openai = createOpenAI({
     apiKey: process.env.OPENAI_API_KEY || '',
 });
 
-export default async function handler(req: VercelRequest) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         const { messages, userId } = req.body;
 
         if (!userId) {
-            return new Response(JSON.stringify({ error: 'Unauthorized: userId required' }), { status: 401 });
+            return res.status(401).json({ error: 'Unauthorized: userId required' });
         }
 
         // Convert UIMessages (from useChat frontend) to ModelMessages (for streamText)
@@ -495,36 +495,9 @@ Usa un tono caldo e incoraggiante. Formatta con markdown.`
             }
         });
 
-        const originalResponse = result.toUIMessageStreamResponse({
-            onError: (error: any) => {
-                console.error("AI SDK Stream Error:", error);
-                return 'Internal Server Error: ' + (error?.message || String(error));
-            }
-        });
-
-        // Throttle the stream to slow down text delivery (~30ms between chunks)
-        const reader = originalResponse.body!.getReader();
-        const throttledStream = new ReadableStream({
-            async pull(controller) {
-                const { done, value } = await reader.read();
-                if (done) {
-                    controller.close();
-                    return;
-                }
-                await new Promise(resolve => setTimeout(resolve, 80));
-                controller.enqueue(value);
-            },
-            cancel() {
-                reader.cancel();
-            }
-        });
-
-        return new Response(throttledStream, {
-            headers: originalResponse.headers,
-            status: originalResponse.status,
-        });
+        result.pipeTextStreamToResponse(res);
     } catch (error: any) {
         console.error("AI API Error:", error?.stack || error);
-        return new Response(JSON.stringify({ error: 'Internal Server Error', details: error?.message || String(error) }), { status: 500 });
+        res.status(500).json({ error: 'Internal Server Error', details: error?.message || String(error) });
     }
 }
