@@ -562,6 +562,19 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     });
 
     const isStreaming = status === 'streaming' || status === 'submitted';
+    
+    // Solo se stiamo aspettando la prima risposta, NON se l'assistant sta già scrivendo
+    const isWaitingForResponse = isStreaming && (() => {
+        const lastMsg = messages[messages.length - 1];
+        if (!lastMsg) return true;
+        if (lastMsg.role === 'user') return true;
+        
+        // Se l'ultimo messaggio è dell'assistant, mostra i pallini SOLO se è completamente vuoto
+        // (niente testo e niente tool calls finora)
+        const hasText = getMessageText(lastMsg).length > 0;
+        const hasTools = getToolInvocations(lastMsg).length > 0;
+        return !hasText && !hasTools;
+    })();
 
     const handleNewChat = async () => {
         if (user?.id) {
@@ -758,7 +771,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </AnimatePresence>
 
                 {/* Loading indicator */}
-                {(isStreaming || isTypingWelcome) && (
+                {(isWaitingForResponse || isTypingWelcome) && (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
