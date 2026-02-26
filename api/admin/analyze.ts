@@ -1,26 +1,22 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export const runtime = 'edge';
-
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 1. Validate CORS and method
     if (req.method === 'OPTIONS') {
-        return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
+        return res.status(200).json(null);
     }
 
     if (req.method !== 'POST') {
-        return new Response('Method not allowed', { status: 405 });
+        return res.status(405).send('Method not allowed');
     }
 
     try {
-        const { data } = await req.json();
+        const { data } = req.body;
 
         if (!data || typeof data !== 'string') {
-            return new Response(JSON.stringify({ error: 'Nessun dato fornito per l\'analisi.' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-            });
+            return res.status(400).json({ error: 'Nessun dato fornito per l\'analisi.' });
         }
 
         // 2. Generate analysis using Vercel AI SDK
@@ -37,15 +33,9 @@ Regole di risposta:
             prompt: `Ecco i dati grezzi estratti:\n\n${data.substring(0, 10000)}\n\nCosa noti di anomalo o cosa suggerisci di fare oggi per migliorare questi numeri?`,
         });
 
-        return new Response(JSON.stringify({ analysis: text }), {
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            status: 200,
-        });
+        return res.status(200).json({ analysis: text });
     } catch (e: any) {
         console.error('API Error /admin/analyze:', e);
-        return new Response(JSON.stringify({ error: 'Errore durante l\'analisi AI.' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-        });
+        return res.status(500).json({ error: 'Errore durante l\'analisi AI.' });
     }
 }

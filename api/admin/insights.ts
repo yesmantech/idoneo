@@ -1,21 +1,20 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { createClient } from '@supabase/supabase-js';
-
-export const runtime = 'edge';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '',
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
 );
 
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'OPTIONS') {
-        return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
+        return res.status(200).json(null);
     }
 
     if (req.method !== 'POST') {
-        return new Response('Method not allowed', { status: 405 });
+        return res.status(405).send('Method not allowed');
     }
 
     try {
@@ -129,13 +128,10 @@ Rispondi SOLO con un array JSON valido (nessun markdown o codeblock). Esempio:
 
         if (insertError) throw new Error(`Database error: ${insertError.message}`);
 
-        return new Response(JSON.stringify({ success: true, insights: savedInsights }), {
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            status: 200,
-        });
+        return res.status(200).json({ success: true, insights: savedInsights });
 
     } catch (error: any) {
         console.error('API Error /admin/insights:', error);
-        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
+        return res.status(500).json({ error: error.message });
     }
 }

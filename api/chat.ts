@@ -1,4 +1,8 @@
-export const runtime = 'edge';
+import type { VercelRequest } from '@vercel/node';
+
+export const config = {
+    supportsResponseStreaming: true,
+};
 
 import { streamText, tool, convertToModelMessages, stepCountIs, embed } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
@@ -15,9 +19,9 @@ const openai = createOpenAI({
     apiKey: process.env.OPENAI_API_KEY || '',
 });
 
-export default async function req(request: Request) {
+export default async function handler(req: VercelRequest) {
     try {
-        const { messages, userId } = await request.json();
+        const { messages, userId } = req.body;
 
         if (!userId) {
             return new Response(JSON.stringify({ error: 'Unauthorized: userId required' }), { status: 401 });
