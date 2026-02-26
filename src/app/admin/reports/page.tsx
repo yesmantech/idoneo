@@ -11,11 +11,12 @@ import { it } from "date-fns/locale";
 // Types
 interface Report {
     id: string;
-    question_id: string;
+    question_id: string | null;
     user_id: string;
     reason: string;
     description: string | null;
     status: 'pending' | 'resolved' | 'dismissed';
+    report_type: 'question' | 'ai_feedback';
     created_at: string;
     profiles?: { email: string; nickname: string } | null;
     questionText?: string; // Loaded separately
@@ -46,7 +47,8 @@ export default function AdminReportsPage() {
             const reportsData = (data || []) as Report[];
 
             // Batch fetch question texts
-            const qIds = Array.from(new Set(reportsData.map(r => r.question_id)));
+            // Only fetch question texts for question-type reports
+            const qIds = Array.from(new Set(reportsData.filter(r => r.report_type !== 'ai_feedback' && r.question_id).map(r => r.question_id!)));
             if (qIds.length > 0) {
                 const { data: questions } = await supabase
                     .from('questions')
@@ -56,7 +58,7 @@ export default function AdminReportsPage() {
                 if (questions) {
                     const qMap = new Map(questions.map(q => [q.id, q.text]));
                     reportsData.forEach(r => {
-                        r.questionText = qMap.get(r.question_id);
+                        if (r.question_id) r.questionText = qMap.get(r.question_id);
                     });
                 }
             }
@@ -168,24 +170,33 @@ export default function AdminReportsPage() {
                             <thead>
                                 <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
                                     <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[120px]">Data</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[80px]">Tipo</th>
                                     <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[100px]">Stato</th>
                                     <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[200px]">Utente</th>
                                     <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[200px]">Motivo</th>
-                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Domanda / Dettagli</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Dettagli</th>
                                     <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right w-[150px]">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                 {loading ? (
-                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Caricamento...</td></tr>
+                                    <tr><td colSpan={7} className="p-8 text-center text-slate-500">Caricamento...</td></tr>
                                 ) : filteredReports.length === 0 ? (
-                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nessuna segnalazione trovata</td></tr>
+                                    <tr><td colSpan={7} className="p-8 text-center text-slate-500">Nessuna segnalazione trovata</td></tr>
                                 ) : (
                                     paginatedReports.map(report => (
                                         <tr key={report.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
                                             <td className="p-4 align-top text-sm text-slate-500 font-mono">
                                                 {format(new Date(report.created_at), 'dd MMM yyyy', { locale: it })}<br />
                                                 {format(new Date(report.created_at), 'HH:mm', { locale: it })}
+                                            </td>
+                                            <td className="p-4 align-top">
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${report.report_type === 'ai_feedback'
+                                                    ? 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800'
+                                                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
+                                                    }`}>
+                                                    {report.report_type === 'ai_feedback' ? '🤖 AI' : '📝 Quiz'}
+                                                </span>
                                             </td>
                                             <td className="p-4 align-top">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${report.status === 'pending'
@@ -214,28 +225,38 @@ export default function AdminReportsPage() {
                                             </td>
                                             <td className="p-4 align-top">
                                                 <div className="flex flex-col gap-2">
-                                                    <div className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 font-medium">
-                                                        {report.questionText || <span className="italic opacity-50">Testo domanda non disponibile</span>}
-                                                    </div>
-                                                    {report.description && (
-                                                        <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
-                                                            "{report.description}"
+                                                    {report.report_type === 'ai_feedback' ? (
+                                                        <div className="text-sm text-slate-600 dark:text-slate-300 line-clamp-3">
+                                                            {report.description || <span className="italic opacity-50">Nessun dettaglio</span>}
                                                         </div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 font-medium">
+                                                                {report.questionText || <span className="italic opacity-50">Testo domanda non disponibile</span>}
+                                                            </div>
+                                                            {report.description && (
+                                                                <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                                                                    "{report.description}"
+                                                                </div>
+                                                            )}
+                                                            <div className="text-[10px] text-slate-400 font-mono">
+                                                                ID: {report.question_id}
+                                                            </div>
+                                                        </>
                                                     )}
-                                                    <div className="text-[10px] text-slate-400 font-mono">
-                                                        ID: {report.question_id}
-                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="p-4 align-middle text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <Link
-                                                        to={`/admin/questions/${report.question_id}`}
-                                                        title="Modifica Domanda"
-                                                        className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
-                                                    >
-                                                        <ExternalLink className="w-4 h-4" />
-                                                    </Link>
+                                                    {report.report_type !== 'ai_feedback' && report.question_id && (
+                                                        <Link
+                                                            to={`/admin/questions/${report.question_id}`}
+                                                            title="Modifica Domanda"
+                                                            className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
+                                                        >
+                                                            <ExternalLink className="w-4 h-4" />
+                                                        </Link>
+                                                    )}
                                                     {report.status === 'pending' && (
                                                         <>
                                                             <button
