@@ -342,7 +342,7 @@ function MessageActions({ text }: { text: string }) {
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(text);
-        showToast('Message copied');
+        showToast('Messaggio copiato');
     };
 
     const handleShare = async () => {
@@ -360,7 +360,7 @@ function MessageActions({ text }: { text: string }) {
         setReaction(newReaction);
         if (newReaction === 'like') {
             // Like: only show dismissible toast, no modal
-            showToast('Thank you for your feedback!');
+            showToast('Grazie per il feedback!');
         } else if (newReaction === 'dislike') {
             // Dislike: open feedback modal directly, no toast
             setFeedbackModalState({ isOpen: true, type: 'dislike' });
@@ -386,9 +386,6 @@ function MessageActions({ text }: { text: string }) {
                             <Check className="w-3 h-3 text-white" strokeWidth={3} />
                         </div>
                         <span className="text-[14px] font-medium text-black dark:text-white">{toastMessage}</span>
-                        <button onClick={() => setToastMessage(null)} className="w-4 h-4 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity flex-shrink-0 ml-1">
-                            <X className="w-3 h-3" />
-                        </button>
                     </motion.div>
                 )}
             </AnimatePresence>
