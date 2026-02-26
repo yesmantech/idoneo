@@ -691,6 +691,11 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                         const textContent = getMessageText(m);
                         const toolCalls = getToolInvocations(m);
 
+                        // Nascondi il messaggio assistente se è completamente vuoto (evita la doppia bolla di caricamento)
+                        if (m.role === 'assistant' && !textContent && toolCalls.length === 0) {
+                            return null;
+                        }
+
                         return (
                             <motion.div
                                 key={m.id}
