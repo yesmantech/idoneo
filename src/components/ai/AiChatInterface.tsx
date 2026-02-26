@@ -5,7 +5,7 @@ import { DefaultChatTransport } from 'ai';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Send, Bot, User, Sparkles, RotateCcw, ArrowLeft, Mic, Copy, Check, ThumbsUp, ThumbsDown, MoreVertical, Trash2, X, Plus, MessageSquare, Mail, Link2, BookOpen, AlertCircle, ChevronDown } from 'lucide-react';
+import { ArrowUp, Bot, User, Sparkles, RotateCcw, ArrowLeft, Mic, Copy, Check, ThumbsUp, ThumbsDown, MoreVertical, Trash2, X, Plus, MessageSquare, Mail, Link2, BookOpen, AlertCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -824,9 +824,12 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                             disabled={isStreaming || !inputValue.trim()}
                             whileHover={{ scale: 0.96 }}
                             whileTap={{ scale: 0.9 }}
-                            className="w-10 h-10 rounded-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${inputValue.trim()
+                                    ? 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
+                                    : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
+                                }`}
                         >
-                            <Send className="w-4 h-4 ml-0.5" />
+                            <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
                         </motion.button>
                     </div>
                 </form>
