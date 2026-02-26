@@ -156,9 +156,9 @@ export default function BandiListPage() {
                             <Button
                                 variant="secondary"
                                 size="sm"
-                                className="w-10 h-10 p-0 rounded-2xl"
+                                className="w-10 h-10 p-0 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow"
                                 title="Gestisci notifiche"
-                                icon={<Bell className="w-[18px] h-[18px] opacity-50" />}
+                                icon={<Bell className="w-5 h-5 text-slate-500 dark:text-slate-400" strokeWidth={2} />}
                             />
                         </Link>
                         <Link to="/bandi/watchlist">
@@ -206,12 +206,6 @@ export default function BandiListPage() {
                                     <h2 className="text-[17px] font-black text-[var(--foreground)] tracking-tight flex items-center gap-2">
                                         🔥 In scadenza
                                     </h2>
-                                    <Link
-                                        to="/bandi?deadline_within_days=7"
-                                        className="text-[13px] text-brand-blue font-bold flex items-center hover:opacity-80 transition-opacity"
-                                    >
-                                        Vedi tutti <ChevronRight className="w-4 h-4" />
-                                    </Link>
                                 </div>
                                 <div className="flex gap-4 overflow-x-auto p-8 -mx-8 px-8 scrollbar-hide snap-x">
                                     {closingSoon.slice(0, 5).map((bando: Bando, i: number) => (
