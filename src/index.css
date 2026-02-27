@@ -10,10 +10,10 @@
 }
 
 .dark {
-  --background: #0F172A;
+  --background: #000000;
   --foreground: #F8FAFC;
-  --card: #1E293B;
-  --card-border: rgba(255, 255, 255, 0.1);
+  --card: #111111;
+  --card-border: rgba(255, 255, 255, 0.08);
 }
 
 html,
