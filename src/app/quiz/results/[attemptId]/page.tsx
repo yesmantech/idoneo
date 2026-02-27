@@ -38,7 +38,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { xpService } from "@/lib/xpService";
 import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
@@ -95,6 +95,7 @@ const IDONEO_CONFETTI_COLORS = ['#22C55E', '#00B1FF', '#FBBF24', '#F472B6', '#8B
 export default function QuizResultsPage() {
     const { attemptId } = useParams<{ attemptId: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const [attempt, setAttempt] = useState<AttemptData | null>(null);
     const [loading, setLoading] = useState(true);
     const [processingReview, setProcessingReview] = useState(false);
@@ -108,6 +109,15 @@ export default function QuizResultsPage() {
     useEffect(() => {
         if (!attemptId) return;
         const fetchAttempt = async () => {
+            // If data was passed from the Quiz completion, use it directly!
+            // This prevents stale reads from caching/race conditions.
+            const passedAttempt = (location.state as any)?.updatedAttempt;
+            if (passedAttempt) {
+                setAttempt(passedAttempt as AttemptData);
+                setLoading(false);
+                return;
+            }
+
             // OFFLINE HANDLING
             if (attemptId.startsWith('local-')) {
                 try {
@@ -139,12 +149,13 @@ export default function QuizResultsPage() {
                 return;
             }
 
-            // ONLINE HANDLING
+            // ONLINE HANDLING (Cache-busted)
             const { data, error } = await supabase
                 .from("quiz_attempts")
                 .select("*")
                 .eq("id", attemptId)
                 .single();
+
             if (error) console.error(error);
             else setAttempt(data as any);
             setLoading(false);
@@ -338,6 +349,23 @@ export default function QuizResultsPage() {
         correctAnswer: getOptionText(a, a.correctOption),
     }));
 
+    // Resilient fallback: if DB columns are stale (all 0) but answers array is populated,
+    // recompute the counts from the answers themselves. This handles old attempts that were
+    // saved before the RLS UPDATE policy was deployed.
+    const computedCorrect = correctList.length;
+    const computedWrong = wrongList.length;
+    const computedBlank = skippedList.length;
+    const dbCountsAreStale = (attempt.correct === 0 && attempt.wrong === 0 && attempt.blank === 0)
+        && (computedCorrect + computedWrong + computedBlank) > 0;
+
+    if (dbCountsAreStale) {
+        attempt.correct = computedCorrect;
+        attempt.wrong = computedWrong;
+        attempt.blank = computedBlank;
+        // Recompute score: use default 1pt per correct, -0.25 per wrong, 0 per blank
+        attempt.score = computedCorrect - (computedWrong * 0.25);
+    }
+
     const hasErrors = (wrongList.length + skippedList.length) > 0;
     const total = attempt.total_questions || 1;
     const passed = attempt.is_idoneo !== null
@@ -487,7 +515,7 @@ export default function QuizResultsPage() {
                                         <X className="hidden lg:block w-4 h-4" />
                                         Errate
                                     </span>
-                                    <span className="lg:bg-red-100 lg:text-red-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
+                                    <span className="ml-[0.35rem] lg:ml-0 lg:bg-red-100 lg:text-red-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
                                         {wrongList.length}
                                     </span>
                                 </button>
@@ -502,7 +530,7 @@ export default function QuizResultsPage() {
                                         <Check className="hidden lg:block w-4 h-4" />
                                         Corrette
                                     </span>
-                                    <span className="lg:bg-emerald-100 lg:text-emerald-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
+                                    <span className="ml-[0.35rem] lg:ml-0 lg:bg-emerald-100 lg:text-emerald-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
                                         {correctList.length}
                                     </span>
                                 </button>
@@ -517,7 +545,7 @@ export default function QuizResultsPage() {
                                         <Minus className="hidden lg:block w-4 h-4" />
                                         Omesse
                                     </span>
-                                    <span className="lg:bg-slate-200 lg:text-slate-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
+                                    <span className="ml-[0.35rem] lg:ml-0 lg:bg-slate-200 lg:text-slate-600 lg:px-2 lg:py-0.5 lg:rounded-full lg:text-xs lg:font-bold">
                                         {skippedList.length}
                                     </span>
                                 </button>

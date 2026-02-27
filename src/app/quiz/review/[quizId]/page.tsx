@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Check, Lightbulb, Loader2, ChevronDown } from "lucide-react";
 
 // =============================================================================
 // TYPES
@@ -343,37 +343,59 @@ export default function ReviewPage() {
                     })}
                 </div>
 
-                {/* Explanation */}
+                {/* Tier S Explanation Block / Accordion */}
                 {showAnswer && (
-                    <div className="mt-6 bg-white rounded-2xl p-5 border border-[#00B1FF]/20 animate-in slide-in-from-top-2 flex flex-col items-start">
-                        <h4 className="text-[12px] font-bold text-[#00B1FF] uppercase tracking-wider mb-2">
-                            Spiegazione
-                        </h4>
-
+                    <div className="mt-6">
                         {currentQuestion.explanation ? (
-                            <p className="text-[14px] text-slate-600 leading-relaxed m-0">
-                                {currentQuestion.explanation}
-                            </p>
-                        ) : (
-                            <div className="flex flex-col items-start gap-4">
-                                <p className="italic text-slate-500 opacity-60 text-[14px] m-0">
-                                    Spiegazione non ancora disponibile per questa domanda.
-                                </p>
-                                <button
-                                    onClick={handleGenerateExplanation}
-                                    disabled={isGenerating}
-                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-sm shadow-md shadow-indigo-500/20 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-70 disabled:scale-100 flex items-center gap-2"
-                                >
-                                    {isGenerating ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Generazione in corso...
-                                        </>
-                                    ) : (
-                                        <>Genera Spiegazione con AI ✨</>
-                                    )}
-                                </button>
+                            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-blue-100 dark:border-blue-900/50 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                                {/* Decorative background element */}
+                                <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                                    <Lightbulb className="w-32 h-32 text-blue-500" />
+                                </div>
+
+                                <h3 className="text-[13px] font-bold text-[#00B1FF] uppercase tracking-widest mb-4 flex items-center gap-2 relative z-10">
+                                    <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                        <Lightbulb className="w-4 h-4" />
+                                    </div>
+                                    Spiegazione
+                                </h3>
+                                <div className="prose prose-slate dark:prose-invert prose-sm sm:prose-base max-w-none text-slate-700 dark:text-slate-300 leading-relaxed relative z-10">
+                                    <p className="m-0">{currentQuestion.explanation}</p>
+                                </div>
                             </div>
+                        ) : (
+                            <button
+                                onClick={handleGenerateExplanation}
+                                disabled={isGenerating}
+                                className="w-full group relative overflow-hidden rounded-2xl bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/80 hover:from-blue-50/50 hover:to-blue-50/20 dark:hover:from-blue-900/20 dark:hover:to-blue-900/10 border border-slate-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800/50 p-4 sm:p-5 text-left transition-all duration-300 shadow-sm hover:shadow"
+                            >
+                                {/* Subtle animated shine effect on hover */}
+                                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-blue-100/20 dark:via-blue-400/10 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+
+                                <div className="flex items-center justify-between relative z-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-[#00B1FF] shadow-inner border border-blue-100/50 dark:border-blue-800/50 transition-colors group-hover:bg-[#00B1FF] group-hover:text-white">
+                                            <Lightbulb className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 transition-colors group-hover:text-[#00B1FF]">
+                                                Spiegazione passo-passo
+                                            </h4>
+                                            <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                                                {isGenerating ? "Caricamento in corso..." : "Scopri il ragionamento dietro la risposta"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-slate-700 text-slate-400 group-hover:text-[#00B1FF] group-hover:bg-blue-50 dark:group-hover:bg-blue-900/50 shadow-sm border border-slate-100 dark:border-slate-600 group-hover:border-blue-100 dark:group-hover:border-blue-800 transition-all duration-300 ${isGenerating ? 'opacity-100' : 'group-hover:translate-y-0.5'}`}>
+                                        {isGenerating ? (
+                                            <Loader2 className="w-4 h-4 animate-spin text-[#00B1FF]" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4" />
+                                        )}
+                                    </div>
+                                </div>
+                            </button>
                         )}
                     </div>
                 )}

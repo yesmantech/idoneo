@@ -155,8 +155,8 @@ export default function BandiAlertsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center max-w-sm"
                 >
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-[22%] bg-gradient-to-br from-brand-cyan/20 to-brand-blue/20 flex items-center justify-center">
-                        <Bell className="w-10 h-10 text-brand-cyan" />
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-[#00B1FF]/10 flex items-center justify-center border border-[#00B1FF]/20 shadow-lg shadow-[#00B1FF]/5">
+                        <Bell className="w-10 h-10 text-[#00B1FF]" />
                     </div>
                     <h2 className="text-2xl font-bold text-text-primary dark:text-white mb-2">
                         Accedi per continuare
@@ -166,7 +166,7 @@ export default function BandiAlertsPage() {
                     </p>
                     <Link
                         to="/login"
-                        className="inline-flex px-6 py-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-white rounded-2xl font-semibold shadow-lg shadow-brand-cyan/20"
+                        className="inline-flex px-8 py-3.5 bg-[#00B1FF] hover:bg-blue-500 text-white rounded-2xl font-bold shadow-lg shadow-[#00B1FF]/30 transition-all hover:scale-[1.02] active:scale-95"
                     >
                         Accedi ora
                     </Link>
@@ -179,12 +179,11 @@ export default function BandiAlertsPage() {
     // MAIN RENDER
     // ============================================
     return (
-        <div className="min-h-screen bg-canvas-light dark:bg-slate-950 relative overflow-hidden">
-            {/* Animated Background Mesh */}
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] relative overflow-hidden transition-colors duration-500">
+            {/* Animated Background Ambient Glows */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand-cyan/10 rounded-full blur-3xl animate-float" />
-                <div className="absolute top-1/2 -left-20 w-72 h-72 bg-brand-blue/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '-2s' }} />
-                <div className="absolute bottom-20 right-10 w-48 h-48 bg-brand-purple/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '-4s' }} />
+                <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-[#00B1FF]/5 rounded-full blur-[100px]" />
+                <div className="absolute top-1/2 -right-40 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px]" />
             </div>
 
             {/* Sticky Compact Header (appears on scroll) */}
@@ -226,7 +225,7 @@ export default function BandiAlertsPage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setShowCreateModal(true)}
-                            className="p-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-white rounded-2xl shadow-lg shadow-brand-cyan/30"
+                            className="p-3 bg-[#00B1FF] hover:bg-blue-500 text-white rounded-2xl shadow-lg shadow-[#00B1FF]/30 transition-all"
                         >
                             <Plus className="w-5 h-5" />
                         </motion.button>
@@ -238,13 +237,13 @@ export default function BandiAlertsPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl"
+                        className="relative overflow-hidden rounded-3xl bg-[var(--card)] border border-[var(--card-border)] shadow-sm"
                     >
-                        {/* Card Header with Gradient */}
-                        <div className="relative p-5 bg-gradient-to-r from-brand-cyan/10 via-brand-blue/5 to-transparent dark:from-brand-cyan/20 dark:via-brand-blue/10">
+                        {/* Card Header */}
+                        <div className="relative p-5 sm:p-6 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-slate-800/20">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-[22%] bg-gradient-to-br from-brand-cyan to-brand-blue flex items-center justify-center shadow-lg shadow-brand-cyan/30">
-                                    <Settings2 className="w-6 h-6 text-white" />
+                                <div className="w-12 h-12 rounded-[14px] bg-[#00B1FF]/10 flex items-center justify-center border border-[#00B1FF]/20 shadow-sm">
+                                    <Settings2 className="w-6 h-6 text-[#00B1FF]" />
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -260,9 +259,9 @@ export default function BandiAlertsPage() {
                         <div className="p-5 space-y-6">
                             {/* Toggle: New Bandi */}
                             <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-semantic-success/10 flex items-center justify-center">
-                                        <Sparkles className="w-5 h-5 text-semantic-success" />
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-100 dark:border-emerald-500/20">
+                                        <Sparkles className="w-5 h-5 text-emerald-500" />
                                     </div>
                                     <div>
                                         <p className="font-semibold text-slate-800 dark:text-white">
@@ -294,9 +293,9 @@ export default function BandiAlertsPage() {
                                             whileHover={{ scale: 1.03 }}
                                             whileTap={{ scale: 0.97 }}
                                             onClick={() => setGlobalSettings(s => ({ ...s, notify_days_before: opt.value }))}
-                                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${globalSettings.notify_days_before === opt.value
-                                                ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-white shadow-lg shadow-brand-cyan/20'
-                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                            className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border ${globalSettings.notify_days_before === opt.value
+                                                ? 'bg-[#00B1FF]/10 border-[#00B1FF]/30 text-[#00B1FF] shadow-sm'
+                                                : 'bg-transparent border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
                                                 }`}
                                         >
                                             {opt.label}
@@ -363,18 +362,18 @@ function TierSToggle({ checked, onChange }: { checked: boolean; onChange: () => 
     return (
         <button
             onClick={onChange}
-            className={`relative w-14 h-8 rounded-full transition-all duration-300 ${checked
-                ? 'bg-gradient-to-r from-brand-cyan to-brand-blue shadow-lg shadow-brand-cyan/30'
-                : 'bg-slate-200 dark:bg-slate-700'
+            className={`relative w-[52px] h-8 rounded-full transition-all duration-300 border ${checked
+                ? 'bg-[#00B1FF] border-[#00B1FF] shadow-lg shadow-[#00B1FF]/30'
+                : 'bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600'
                 }`}
         >
             <motion.div
                 layout
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center ${checked ? 'left-7' : 'left-1'
+                className={`absolute top-[2px] w-[26px] h-[26px] rounded-full bg-white shadow-sm flex items-center justify-center ${checked ? 'left-[22px]' : 'left-[2px]'
                     }`}
             >
-                {checked && <Check className="w-3.5 h-3.5 text-brand-cyan" />}
+                {checked && <Check className="w-3.5 h-3.5 text-[#00B1FF]" strokeWidth={3} />}
             </motion.div>
         </button>
     );
@@ -402,21 +401,21 @@ function AlertCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -100, scale: 0.9 }}
             transition={{ delay: index * 0.05 }}
-            className={`relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900/80 backdrop-blur-xl border transition-all ${alert.is_active
-                ? 'border-brand-cyan/30 shadow-lg shadow-brand-cyan/5'
-                : 'border-slate-200/50 dark:border-slate-700/50 opacity-60'
+            className={`relative overflow-hidden rounded-[24px] bg-[var(--card)] border transition-all duration-300 ${alert.is_active
+                ? 'border-[var(--card-border)] hover:border-[#00B1FF]/30 hover:shadow-lg hover:shadow-[#00B1FF]/5'
+                : 'border-slate-100 dark:border-slate-800/50 opacity-60 grayscale-[0.5]'
                 }`}
         >
             {/* Active indicator bar */}
             {alert.is_active && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-cyan to-brand-blue" />
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#00B1FF]" />
             )}
 
-            <div className="p-4 pl-5 flex items-center gap-4">
+            <div className="p-5 pl-6 flex items-center gap-4">
                 {/* Icon */}
-                <div className={`w-12 h-12 rounded-[18%] flex items-center justify-center text-xl shrink-0 ${alert.is_active
-                    ? 'bg-gradient-to-br from-brand-cyan/20 to-brand-blue/20'
-                    : 'bg-slate-100 dark:bg-slate-800'
+                <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center border text-xl shrink-0 transition-colors ${alert.is_active
+                    ? 'bg-[#00B1FF]/10 text-[#00B1FF] border-[#00B1FF]/20 shadow-sm'
+                    : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-400'
                     }`}>
                     {alert.category?.icon || '📋'}
                 </div>
@@ -446,9 +445,9 @@ function AlertCard({
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={onToggle}
-                        className={`p-2.5 rounded-xl transition-all ${alert.is_active
-                            ? 'bg-brand-cyan/10 text-brand-cyan'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                        className={`p-3 rounded-[14px] transition-all border ${alert.is_active
+                            ? 'bg-[var(--card)] border-[var(--card-border)] text-[#00B1FF]'
+                            : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-400'
                             }`}
                     >
                         {alert.is_active ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
@@ -457,7 +456,7 @@ function AlertCard({
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={onDelete}
-                        className="p-2.5 rounded-xl text-semantic-error bg-semantic-error/10 hover:bg-semantic-error/20 transition-colors"
+                        className="p-3 rounded-[14px] text-rose-500 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors"
                     >
                         <Trash2 className="w-5 h-5" />
                     </motion.button>
@@ -476,9 +475,9 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center"
+            className="relative overflow-hidden rounded-3xl bg-[var(--card)] border border-dashed border-[var(--card-border)] p-10 text-center"
         >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-[22%] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-5 rounded-[22px] bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
                 <BellOff className="w-8 h-8 text-slate-400" />
             </div>
             <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -491,9 +490,9 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onCreateClick}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-cyan to-brand-blue text-white rounded-xl font-semibold shadow-lg shadow-brand-cyan/20"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#00B1FF] hover:bg-blue-500 text-white rounded-2xl font-bold shadow-lg shadow-[#00B1FF]/30 transition-all"
             >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" strokeWidth={3} />
                 Crea il primo avviso
             </motion.button>
         </motion.div>
@@ -576,12 +575,12 @@ function CreateAlertModal({ categories, onSave, onClose }: CreateAlertModalProps
                 {/* Header */}
                 <div className="relative p-5 border-b border-slate-100 dark:border-slate-800">
                     <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4 sm:hidden" />
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-[18%] bg-gradient-to-br from-brand-cyan to-brand-blue flex items-center justify-center">
-                            <Bell className="w-5 h-5 text-white" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-[14px] bg-[#00B1FF]/10 flex items-center justify-center border border-[#00B1FF]/20 shadow-sm">
+                            <Bell className="w-5 h-5 text-[#00B1FF]" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                            <h2 className="text-xl font-black text-slate-900 dark:text-white">
                                 Nuovo Avviso
                             </h2>
                             <p className="text-sm text-slate-500">
@@ -603,7 +602,7 @@ function CreateAlertModal({ categories, onSave, onClose }: CreateAlertModalProps
                             <select
                                 value={formData.category_id}
                                 onChange={(e) => setFormData(p => ({ ...p, category_id: e.target.value }))}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white appearance-none font-medium focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition-all"
+                                className="w-full px-4 py-3.5 rounded-2xl border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] appearance-none font-medium focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF] transition-all shadow-sm"
                             >
                                 <option value="">✨ Tutte le categorie</option>
                                 {categories.map(cat => (
@@ -626,7 +625,7 @@ function CreateAlertModal({ categories, onSave, onClose }: CreateAlertModalProps
                             <select
                                 value={formData.region}
                                 onChange={(e) => setFormData(p => ({ ...p, region: e.target.value }))}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white appearance-none font-medium focus:ring-2 focus:ring-brand-blue focus:border-transparent transition-all"
+                                className="w-full px-4 py-3.5 rounded-2xl border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] appearance-none font-medium focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF] transition-all shadow-sm"
                             >
                                 <option value="">🇮🇹 Tutte le regioni</option>
                                 <option value="nazionale">🏛️ Nazionale</option>
@@ -652,9 +651,9 @@ function CreateAlertModal({ categories, onSave, onClose }: CreateAlertModalProps
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}
                                     onClick={() => setFormData(p => ({ ...p, notify_days_before: opt.value }))}
-                                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${formData.notify_days_before === opt.value
-                                        ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-white shadow-md'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                                    className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border ${formData.notify_days_before === opt.value
+                                        ? 'bg-[#00B1FF]/10 border-[#00B1FF]/30 text-[#00B1FF] shadow-sm'
+                                        : 'bg-transparent border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
                                 >
                                     {opt.label}
@@ -693,7 +692,7 @@ function CreateAlertModal({ categories, onSave, onClose }: CreateAlertModalProps
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSubmit}
                         disabled={saving}
-                        className="flex-1 py-3.5 bg-gradient-to-r from-brand-cyan to-brand-blue text-white rounded-2xl font-bold shadow-lg shadow-brand-cyan/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="flex-1 py-3.5 bg-[#00B1FF] hover:bg-blue-500 text-white rounded-2xl font-bold shadow-lg shadow-[#00B1FF]/30 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                     >
                         {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                         Crea Avviso
@@ -722,9 +721,9 @@ function ToggleOption({
     return (
         <div
             onClick={onChange}
-            className={`flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all ${checked
-                ? 'bg-brand-cyan/5 border border-brand-cyan/30'
-                : 'bg-slate-50 dark:bg-slate-800 border border-transparent'
+            className={`flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border ${checked
+                ? 'bg-[#00B1FF]/5 border-[#00B1FF]/20'
+                : 'bg-[var(--card)] border-[var(--card-border)] hover:border-[#00B1FF]/20'
                 }`}
         >
             <div>

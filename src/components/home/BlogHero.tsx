@@ -161,7 +161,7 @@ export default function BlogHero() {
     const displayPosts = posts.length > 0 ? posts : PLACEHOLDER_POSTS;
 
     return (
-        <section className="w-full pt-safe bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
+        <section className="w-full pt-[max(1.5rem,env(safe-area-inset-top))] bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
             <BlogCarousel posts={displayPosts} />
         </section>
     );

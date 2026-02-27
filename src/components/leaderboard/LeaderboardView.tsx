@@ -12,6 +12,14 @@ interface LeaderboardViewProps {
     currentUserEntry?: LeaderboardEntry | null;
 }
 
+/** Replace ugly avataaars style with clean initials */
+const getAvatarUrl = (avatarUrl: string | undefined, nickname: string) => {
+    if (avatarUrl && avatarUrl.includes('avataaars')) {
+        return avatarUrl.replace('avataaars', 'initials');
+    }
+    return avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${nickname}`;
+};
+
 export default function LeaderboardView({ data, loading, theme, metricLabel, emptyMessage, currentUserEntry }: LeaderboardViewProps) {
     const parentRef = useRef<HTMLDivElement>(null);
 
@@ -135,7 +143,7 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
                         <div className="relative group">
                             <div className="w-20 h-20 rounded-[28px] border-[3px] border-slate-200 dark:border-slate-700 bg-[var(--card)] shadow-[0_4px_12px_rgba(0,0,0,0.1)] p-0.5 overflow-hidden z-10 relative">
                                 <img
-                                    src={second.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${second.user.nickname}`}
+                                    src={getAvatarUrl(second.user.avatarUrl, second.user.nickname)}
                                     alt={second.user.nickname}
                                     className="w-full h-full object-cover rounded-[20px]"
                                 />
@@ -162,7 +170,7 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
                             </div>
                             <div className="w-24 h-24 rounded-[32px] border-[3px] border-amber-300 dark:border-amber-500/50 bg-[var(--card)] shadow-[0_8px_24px_rgba(251,191,36,0.3)] p-0.5 overflow-hidden z-10 relative ring-4 ring-amber-50 dark:ring-amber-900/20">
                                 <img
-                                    src={first.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${first.user.nickname}`}
+                                    src={getAvatarUrl(first.user.avatarUrl, first.user.nickname)}
                                     alt={first.user.nickname}
                                     className="w-full h-full object-cover rounded-[24px]"
                                 />
@@ -186,7 +194,7 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
                         <div className="relative group">
                             <div className="w-20 h-20 rounded-[28px] border-[3px] border-orange-200 dark:border-orange-800/50 bg-[var(--card)] shadow-[0_4px_12px_rgba(0,0,0,0.1)] p-0.5 overflow-hidden z-10 relative">
                                 <img
-                                    src={third.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${third.user.nickname}`}
+                                    src={getAvatarUrl(third.user.avatarUrl, third.user.nickname)}
                                     alt={third.user.nickname}
                                     className="w-full h-full object-cover rounded-[20px]"
                                 />
@@ -227,7 +235,7 @@ const RankingRow = ({ entry, metricLabel }: { key?: React.Key, entry: Leaderboar
 
                 <div className="w-10 h-10 rounded-[16px] bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0 shadow-sm border border-[var(--card-border)]">
                     <img
-                        src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`}
+                        src={getAvatarUrl(entry.user.avatarUrl, entry.user.nickname)}
                         alt="Avatar"
                         className="w-full h-full object-cover"
                     />

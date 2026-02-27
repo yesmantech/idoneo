@@ -29,6 +29,7 @@ export default function AdminAnalyticsPage() {
     const [insightsLoading, setInsightsLoading] = useState(false);
     const [pastedData, setPastedData] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState('');
 
     useEffect(() => {
         async function loadData() {
@@ -76,11 +77,21 @@ export default function AdminAnalyticsPage() {
     const handleAnalyze = async () => {
         if (!pastedData.trim()) return;
         setIsAnalyzing(true);
+        setAnalysisResult('');
         try {
-            console.log('AdminAnalyticsPage: Analyzing pasted data...');
-            const newInsights = await insightService.generateInsights();
-            setInsights(newInsights);
-            alert("Analisi completata con successo!");
+            console.log('AdminAnalyticsPage: Analyzing pasted data via Vercel Edge...');
+            // In development this calls Vite proxy if configured, or absolute url for Vercel
+            const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/api/admin/analyze' : '/api/admin/analyze';
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: pastedData })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Errore API');
+
+            setAnalysisResult(result.analysis);
+            setPastedData(''); // clear input on success
         } catch (err: any) {
             console.error('Failed to analyze:', err);
             alert(`Errore nell'analisi: ${err.message || 'Errore sconosciuto'}`);
@@ -214,6 +225,25 @@ export default function AdminAnalyticsPage() {
                                     </>
                                 )}
                             </button>
+
+                            {/* Analysis Result Box */}
+                            {analysisResult && (
+                                <div className="mt-4 p-5 bg-cyan-900/10 border border-cyan-500/20 rounded-xl">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                                        <h4 className="font-bold text-sm text-cyan-800 dark:text-cyan-300">Report AI Generato</h4>
+                                    </div>
+                                    <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                        {analysisResult}
+                                    </div>
+                                    <button
+                                        onClick={() => setAnalysisResult('')}
+                                        className="mt-4 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                                    >
+                                        Chiudi / Nuova Analisi
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

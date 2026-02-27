@@ -1,0 +1,7 @@
+Perfetto! La versione che vedi in quello screenshot è **esattamente** quella a cui ho appena fatto il rollback pochissimi minuti fa. 
+
+Sia la classifica (con gli avatar a "squircle" e il box bianco centrato), sia la navigation bar in basso (con quel padding specifico dalla Home Indicator) sono stati del tutto ripristinati alla versione originale.
+
+L'aggiornamento è già online in produzione su Vercel. Ti basta chiudere la PWA (rimuoverla dalle app recenti) e riaprirla per svuotare la cache, e ritroverai *esattamente* questa schermata che mi hai appena mandato.
+
+Non tocco più il codice relativo al layout, lascio questa versione stabile! ✅

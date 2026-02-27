@@ -126,17 +126,23 @@ export const insightService = {
     },
 
     /**
-     * Generate AI-powered insights via Supabase Edge Function
+     * Generate AI-powered insights via Vercel API Endpoint
      */
     async generateAIInsights(): Promise<Insight[]> {
-        const { data, error } = await supabase.functions.invoke('generate-insights', {
-            body: {},
+        const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/api/admin/insights' : '/api/admin/insights';
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
         });
 
-        if (error) {
-            console.error('Edge function error:', error);
-            throw new Error(error.message || 'Edge function failed');
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('API endpoint error:', errText);
+            throw new Error(`API error: ${response.status} - ${errText}`);
         }
+
+        const data = await response.json();
 
         if (!data?.success || !data?.insights) {
             throw new Error('Invalid response from AI service');

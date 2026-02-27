@@ -132,7 +132,7 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
                     className={`
                         md:w-auto w-full px-6 py-3.5 rounded-[22px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px]
                         ${activeFiltersCount > 0
-                            ? 'bg-gradient-to-r from-brand-blue to-brand-cyan text-white shadow-lg shadow-brand-blue/20'
+                            ? 'bg-brand-blue text-white shadow-sm hover:opacity-90'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}
                     `}
                 >
@@ -453,7 +453,7 @@ function TierSFilterModal({
                                 onFiltersChange({ ...local, offset: 0 });
                                 onClose();
                             }}
-                            className="flex-[2] py-4 bg-gradient-to-r from-brand-blue to-brand-cyan text-white font-black text-[14px] rounded-[20px] shadow-xl shadow-brand-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            className="flex-[2] py-4 bg-brand-blue text-white font-black text-[14px] rounded-[20px] shadow-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                             <Check className="w-4 h-4" strokeWidth={3} />
                             Applica Filtri

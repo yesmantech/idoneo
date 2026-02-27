@@ -597,11 +597,8 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                                 close();
                                                 navigate('/concorsi/search');
                                             }}
-                                            className="col-span-2 p-4 rounded-2xl bg-gradient-to-br from-brand-blue via-brand-cyan to-brand-blue text-white shadow-lg shadow-brand-blue/25 flex items-center justify-between group relative overflow-hidden"
+                                            className="col-span-2 p-4 rounded-[24px] bg-brand-blue hover:opacity-90 active:scale-[0.98] transition-all text-white shadow-sm flex items-center justify-between group relative overflow-hidden"
                                         >
-                                            {/* Animated shine effect */}
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-
                                             <div className="flex items-center gap-3 relative z-10">
                                                 <div className="w-10 h-10 rounded-[18%] bg-white/20 backdrop-blur-sm flex items-center justify-center">
                                                     <Search className="w-5 h-5 text-white" />

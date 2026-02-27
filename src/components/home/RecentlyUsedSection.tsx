@@ -56,7 +56,7 @@ export default function RecentlyUsedSection({ items }: RecentlyUsedSectionProps)
             {/* Carousel - uses padding for alignment instead of spacer divs */}
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-2 -my-2 pl-4 lg:pl-8 gap-3 lg:gap-4"
+                className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-6 -my-6 pl-4 lg:pl-8 gap-3 lg:gap-4"
             >
                 {items.map((item, idx) => (
                     <div key={item.quizId} className="snap-start flex-shrink-0">

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { LeaderboardEntry } from '@/lib/leaderboardService';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { Crown } from 'lucide-react';
 
 interface LeaderboardViewProps {
     data: LeaderboardEntry[];
@@ -87,6 +88,16 @@ export default function LeaderboardViewLegacy({ data, loading, theme, metricLabe
     );
 }
 
+// --- Helpers ---
+
+/** Replace ugly avataaars style with clean initials */
+const getAvatarUrl = (avatarUrl: string | undefined, nickname: string) => {
+    if (avatarUrl && avatarUrl.includes('avataaars')) {
+        return avatarUrl.replace('avataaars', 'initials');
+    }
+    return avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${nickname}`;
+};
+
 // --- Sub Components ---
 
 const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme: 'gold' | 'emerald', metricLabel: string }) => {
@@ -104,9 +115,9 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                     <>
                         <div className="relative group hover:scale-105 transition-transform duration-300">
                             <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft overflow-hidden bg-white`}>
-                                <img src={second.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${second.user.nickname}`} alt={second.user.nickname} className="w-full h-full object-cover" />
+                                <img src={getAvatarUrl(second.user.avatarUrl, second.user.nickname)} alt={second.user.nickname} className="w-full h-full object-cover" />
                             </div>
-                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-text-secondary text-white text-[10px] font-black px-2 py-0.5 rounded-pill shadow-sm">2nd</div>
+                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-white dark:border-slate-800">2</div>
                         </div>
                         <div className="text-center w-full">
                             <div className="font-bold text-sm text-text-primary truncate">{second.user.nickname}</div>
@@ -121,11 +132,13 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                 {first && (
                     <>
                         <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-3xl animate-bounce">👑</div>
-                            <div className={`w-24 h-24 rounded-squircle border-4 ${isGold ? 'border-brand-orange' : 'border-brand-cyan'} overflow-hidden bg-white shadow-card`}>
-                                <img src={first.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${first.user.nickname}`} alt={first.user.nickname} className="w-full h-full object-cover" />
+                            <div className="absolute -top-9 left-1/2 -translate-x-1/2 animate-[float_3s_ease-in-out_infinite]">
+                                <Crown className="w-8 h-8 text-amber-500 fill-amber-400/40 drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]" strokeWidth={2} />
                             </div>
-                            <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 ${rankBg} text-white text-sm font-black px-3 py-1 rounded-pill shadow-lg border-2 border-white`}>1st</div>
+                            <div className={`w-24 h-24 rounded-squircle border-4 ${isGold ? 'border-brand-orange' : 'border-brand-cyan'} overflow-hidden bg-white shadow-card`}>
+                                <img src={getAvatarUrl(first.user.avatarUrl, first.user.nickname)} alt={first.user.nickname} className="w-full h-full object-cover" />
+                            </div>
+                            <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 ${rankBg} text-white text-[13px] font-black w-7 h-7 flex items-center justify-center rounded-full shadow-lg border-2 border-white`}>1</div>
                         </div>
                         <div className="text-center w-full mt-2">
                             <div className="font-black text-base text-text-primary truncate">{first.user.nickname}</div>
@@ -141,9 +154,9 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                     <>
                         <div className="relative group hover:scale-105 transition-transform duration-300">
                             <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft overflow-hidden bg-white`}>
-                                <img src={third.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${third.user.nickname}`} alt={third.user.nickname} className="w-full h-full object-cover" />
+                                <img src={getAvatarUrl(third.user.avatarUrl, third.user.nickname)} alt={third.user.nickname} className="w-full h-full object-cover" />
                             </div>
-                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-text-tertiary text-white text-[10px] font-black px-2 py-0.5 rounded-pill shadow-sm">3rd</div>
+                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-white dark:border-slate-800">3</div>
                         </div>
                         <div className="text-center w-full">
                             <div className="font-bold text-sm text-text-primary truncate">{third.user.nickname}</div>
@@ -172,7 +185,7 @@ const RankingRow = ({ entry, theme, metricLabel }: { key?: React.Key; entry: Lea
             </span>
 
             <div className="w-10 h-10 rounded-squircle bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0 shadow-sm border border-transparent">
-                <img src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={getAvatarUrl(entry.user.avatarUrl, entry.user.nickname)} alt="Avatar" className="w-full h-full object-cover" />
             </div>
 
             <div className="flex-1 min-w-0">

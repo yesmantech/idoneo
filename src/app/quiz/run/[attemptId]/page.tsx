@@ -537,7 +537,7 @@ export default function QuizRunnerPage() {
         }
 
         // ONLINE SAVE
-        const { error } = await supabase.from("quiz_attempts").update({
+        const updatePayload = {
             finished_at: new Date().toISOString(),
             score,
             correct,
@@ -547,11 +547,23 @@ export default function QuizRunnerPage() {
             duration_seconds: remainingSeconds !== null ? (parseFloat(timeLimitParam || "0") * 60 - remainingSeconds) : 0,
             is_idoneo: quizConfig?.useCustomPassThreshold ? correct >= (quizConfig.minCorrectForPass || 0) : null,
             pass_threshold: quizConfig?.useCustomPassThreshold ? quizConfig.minCorrectForPass : null,
-        }).eq("id", quizAttemptId);
+        };
+
+        console.log("[FINISH] Saving attempt:", quizAttemptId, "score:", score, "correct:", correct, "wrong:", wrong, "blank:", blank);
+
+        const { data: updateData, error } = await supabase.from("quiz_attempts").update(updatePayload).eq("id", quizAttemptId).select();
+
+        console.log("[FINISH] Update result - data:", updateData, "error:", error);
 
         if (error) {
             console.error("Save error:", error);
             alert(`Errore salvataggio: ${error.message}`);
+            return;
+        }
+
+        if (!updateData || updateData.length === 0) {
+            console.error("[FINISH] UPDATE returned 0 rows! The RLS policy may be blocking the update.");
+            alert("Errore: il salvataggio non è andato a buon fine. Riprova.");
             return;
         }
 
@@ -588,7 +600,10 @@ export default function QuizRunnerPage() {
         }
 
         localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
-        navigate(`/quiz/results/${quizAttemptId}`);
+        // Proceed to results
+        navigate(`/quiz/results/${quizAttemptId}`, {
+            state: { updatedAttempt: updateData[0] }
+        });
     };
 
     const formatTime = (seconds: number | null) => {

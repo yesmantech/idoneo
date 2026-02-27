@@ -35,6 +35,7 @@ import { ProfileBackgroundDecor } from '@/components/ui/ProfileBackgroundDecor';
 import SEOHead from '@/components/seo/SEOHead';
 
 import { xpService } from '@/lib/xpService';
+import { BADGE_DEFINITIONS } from '@/lib/badgeDefinitions';
 
 export default function ProfilePage() {
     const { user, profile, loading } = useAuth();
@@ -69,7 +70,6 @@ export default function ProfilePage() {
         }
     }, [loading, profile, hasCompletedContext, startOnboarding]);
 
-    // Loading State
     if (loading || !profile) return (
         <TierSLoader message="Caricamento profilo..." />
     );

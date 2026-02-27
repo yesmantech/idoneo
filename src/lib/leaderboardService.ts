@@ -170,10 +170,14 @@ export const leaderboardService = {
 
             // Fetch Profiles for nicknames
             const userIds = rankings.map(r => r.user_id);
-            const { data: profiles } = await supabase
+            const { data: profiles, error: profilesError } = await supabase
                 .from('profiles')
                 .select('id, nickname, avatar_url')
                 .in('id', userIds);
+
+            if (profilesError) {
+                console.error("Error fetching profiles for leaderboard:", profilesError);
+            }
 
             const profileMap = new Map(profiles?.map(p => [p.id, p]));
 

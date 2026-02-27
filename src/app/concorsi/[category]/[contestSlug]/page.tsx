@@ -63,7 +63,7 @@ export default function ContestPage() {
     <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">
 
       {/* 1. TOP BAR */}
-      <div className="sticky top-0 z-30 bg-[#F8FAFC]/90 backdrop-blur-md px-4 py-4 flex items-center gap-1">
+      <div className="sticky top-0 z-30 bg-[#F8FAFC]/90 backdrop-blur-md px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex items-center gap-1 border-b border-transparent transition-all">
         <button
           onClick={() => navigate(-1)}
           className="p-1 -ml-2 rounded-full hover:bg-slate-200/50 transition-colors flex items-center text-slate-500"
@@ -139,7 +139,7 @@ export default function ContestPage() {
               </div>
             </div>
             <Button
-              variant="primary"
+              variant="vibrant-purple"
               fullWidth
               className="rounded-2xl"
               onClick={() => navigate(`/concorsi/${category}/${contestSlug}/custom`)}

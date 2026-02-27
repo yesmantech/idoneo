@@ -81,59 +81,55 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
             <Link to={`/bandi/${bando.slug}`}>
                 <motion.div
                     onMouseEnter={handleMouseEnter}
-                    whileHover={{ y: -6, scale: 1.02 }}
+                    whileHover={{ y: -4, scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
-                    className="relative w-[300px] h-full bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl shadow-slate-200/50 dark:shadow-black/50 overflow-hidden group border border-slate-100 dark:border-white/5"
+                    className="relative w-[280px] sm:w-[320px] h-full bg-[var(--card)] rounded-3xl shadow-sm hover:shadow-xl hover:shadow-[#00B1FF]/10 border border-[var(--card-border)] hover:border-[#00B1FF]/30 overflow-hidden group transition-all duration-500 flex flex-col"
                 >
-                    {/* Brand Accent Bar */}
-                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand-blue to-brand-cyan" />
+                    {/* Subtle Glow Background */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-32 bg-[#00B1FF]/10 blur-[50px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                    <div className="p-6 flex flex-col h-full">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
-                                    <Building2 className="w-4 h-4 text-brand-blue" />
-                                </div>
-                                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate max-w-[140px]">
-                                    {bando.ente?.name}
-                                </span>
+                    <div className="p-6 flex flex-col h-full relative z-10 space-y-4">
+                        {/* Header: Icon & Ente Name */}
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-[14px] bg-[#00B1FF]/10 flex items-center justify-center border border-[#00B1FF]/20 shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                                <Building2 className="w-5 h-5 text-[#00B1FF]" />
                             </div>
+                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider line-clamp-2 leading-tight flex-1 pt-1">
+                                {bando.ente?.name || 'Ente Non Specificato'}
+                            </span>
                         </div>
 
                         {/* Title */}
                         <motion.h3
                             layoutId={`bando-title-${bando.id}`}
-                            className="font-black text-[19px] text-slate-900 dark:text-white leading-tight mb-auto line-clamp-3 group-hover:text-brand-blue transition-colors"
+                            className="font-black text-lg text-[var(--foreground)] leading-tight mb-auto line-clamp-3 group-hover:text-[#00B1FF] transition-colors duration-300"
                         >
                             {bando.title}
                         </motion.h3>
 
                         {/* Footer Info */}
-                        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 space-y-4">
-                            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                {bando.region && (
-                                    <span className="flex items-center gap-1.5">
-                                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                        {bando.region}
-                                    </span>
-                                )}
+                        <div className="pt-4 border-t border-[var(--card-border)] mt-auto space-y-4">
+                            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                <div className="flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                    <span className="truncate max-w-[120px]">{bando.region || 'Nazionale'}</span>
+                                </div>
                                 {bando.seats_total && (
-                                    <span className="flex items-center gap-1.5">
-                                        <Users className="w-3.5 h-3.5 text-slate-400" />
-                                        {bando.seats_total} posti
-                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                        <Users className="w-3.5 h-3.5" />
+                                        <span>{bando.seats_total} posti</span>
+                                    </div>
                                 )}
                             </div>
 
-                            {/* Urgency Badge */}
-                            <div className={`flex items-center gap-2 rounded-xl py-2 px-3 ${daysRemaining <= 7
-                                ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
-                                : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            {/* Urgency Badge (Tier S Style) */}
+                            <div className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 border transition-colors ${daysRemaining <= 3
+                                    ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 shadow-[0_0_15px_-3px_rgba(225,29,72,0.1)]'
+                                    : 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 shadow-[0_0_15px_-3px_rgba(245,158,11,0.1)]'
                                 }`}>
-                                <Clock className={`w-4 h-4 ${daysRemaining <= 7 ? 'animate-pulse' : ''}`} />
-                                <span className="text-xs font-black uppercase tracking-wide">
-                                    {daysRemaining <= 3 ? 'Scadenza Imminente' : `Scade tra ${daysRemaining} gg`}
+                                <Clock className={`w-4 h-4 ${daysRemaining <= 3 ? 'animate-pulse' : ''}`} />
+                                <span className="text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
+                                    {daysRemaining <= 2 ? 'Scadenza Imminente' : `Scade tra ${daysRemaining} gg`}
                                 </span>
                             </div>
                         </div>

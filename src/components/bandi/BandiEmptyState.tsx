@@ -128,7 +128,7 @@ export default function BandiEmptyState({ type, searchQuery, onRetry, onClearFil
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={action.onClick}
-                            className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-br from-brand-blue to-brand-cyan text-white font-bold shadow-xl shadow-brand-blue/20 hover:shadow-brand-blue/40 transition-all duration-300"
+                            className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-brand-blue text-white font-bold shadow-sm hover:opacity-90 active:scale-[0.98] transition-all duration-300"
                         >
                             {type === 'error' ? <RefreshCw className="w-5 h-5" /> : <Search className="w-5 h-5 opacity-60" />}
                             {action.label}

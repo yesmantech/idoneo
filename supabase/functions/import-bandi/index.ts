@@ -61,10 +61,15 @@ async function parseWithAI(description: string, openaiKey: string) {
     - category_slug: Scegli una tra: ['pubblica-amministrazione', 'enti-locali', 'sanita', 'istruzione', 'forze-armate', 'forze-ordine', 'giustizia', 'agenzia-entrate', 'universita', 'infrastrutture-trasporti', 'altro'].
     - seats_total: numero posti (intero).
     - contract_type: 'tempo_indeterminato', 'tempo_determinato', 'formazione_lavoro', 'altro'.
-    - education_level: array ["Laurea", "Diploma", "Licenza Media", "Nessuno"]. ATTENZIONE: Se il bando richiede 'Scuola secondaria di secondo grado' o gradi militari come 'Maresciallo', 'Ispettore', 'Sovrintendente', classifica come 'Diploma'. Se richiede 'Scuola dell'obbligo', 'Licenza media', classifica come 'Licenza Media'.
-    - region: Regione (es. "Lombardia").
-    - province: Sigla provincia (es. "MI").
-    - city: Comune principale (es. "Milano").
+    - education_level: array ["Laurea", "Diploma", "Licenza Media", "Nessuno", "ND"]. REGOLE TASSATIVE:
+        1. DEVI estrarre SOLO il titolo minimo richiesto che trovi scritto esplicitamente.
+        2. NON TIRARE A INDOVINARE. Se il titolo non è menzionato chiaramente nel testo, devi obbligatoriamente restituire ["ND"].
+        3. Se il bando richiede "Scuola secondaria di secondo grado" o gradi militari operativi ("Maresciallo", "Ispettore", "Sovrintendente", "Allievo Agente"), classifica ESCLUSIVAMENTE come ["Diploma"].
+        4. Se richiede "Scuola dell'obbligo", "Scuola media inferiore" o "Licenza media", classifica come ["Licenza Media"].
+        5. Se richiede un titolo accademico ("Laurea", "Laurea Triennale", "Laurea Magistrale", "Dottorato"), classifica come ["Laurea"].
+    - region: Regione (es. "Lombardia", "Lazio", ecc.). REGOLE TASSATIVE: Se il bando è valido su tutto il territorio o non specifica una singola regione, devi restituire OBBLIGATORIAMENTE "nazionale".
+    - province: Sigla provincia (es. "MI") o null se "nazionale".
+    - city: Comune principale (es. "Milano") o null se "nazionale".
     - salary_range: Stringa stima stipendio o RAL se presente.
     - optimized_description: Una descrizione riscritta in Markdown, ben strutturata con:
         - ## Descrizione
@@ -122,10 +127,10 @@ serve(async (req) => {
         const targetSourceId = (requestData as any).target_source_id;
         const forcePage = (requestData as any).page;
         const subBatchStart = (requestData as any).start_index || 0;
-        const subBatchLimit = (requestData as any).limit || 50;
+        const subBatchLimit = (requestData as any).limit || 15; // Decreased limit to 15 to stay well under 60s timeout
 
-        // Increase batch size for faster processing
-        const size = 50;
+        // Decrease API fetch size
+        const size = 15;
         let currentPage = (typeof forcePage === 'number') ? forcePage : 0;
         let totalPages = 1;
         let processedCount = 0;
@@ -169,12 +174,12 @@ serve(async (req) => {
             results.total_fetched += allBandi.length;
 
             const bandiToProcess = allBandi.slice(subBatchStart, subBatchStart + subBatchLimit);
-            console.log(`Processing sub-batch: ${bandiToProcess.length} items (from index ${subBatchStart})`);
+            console.log(`Processing sub-batch: ${bandiToProcess.length} items (from index ${subBatchStart}) concurrently`);
 
-            for (const item of bandiToProcess) {
+            await Promise.all(bandiToProcess.map(async (item) => {
                 // If targeting, skip others
                 if (targetSourceId && item.id !== targetSourceId) {
-                    continue;
+                    return;
                 }
 
                 processedCount++;
@@ -188,7 +193,7 @@ serve(async (req) => {
 
                 if (existing && !updateExisting) {
                     results.skipped++;
-                    continue;
+                    return;
                 }
 
                 // AI Parsing & Enrichment
@@ -244,8 +249,8 @@ serve(async (req) => {
                     contract_type: aiData.contract_type || 'altro',
                     education_level: aiData.education_level || [],
 
-                    // Location
-                    region: aiData.region || null,
+                    // Location (Fallback to 'nazionale' if completely empty to ensure standard format)
+                    region: aiData.region || 'nazionale',
                     province: aiData.province || null,
                     city: aiData.city || null,
 
@@ -273,7 +278,7 @@ serve(async (req) => {
                 } else {
                     results.imported++;
                 }
-            }
+            }));
 
             currentPage++;
 

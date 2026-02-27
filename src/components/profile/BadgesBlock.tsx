@@ -4,15 +4,10 @@ import { X, Target, Zap, Trophy, Crown, Flame, GraduationCap, Medal, Users, Shie
 import { useAuth } from '@/context/AuthContext';
 import { badgeService } from '@/lib/badgeService';
 import { supabase } from '@/lib/supabaseClient';
+import { BADGE_DEFINITIONS, BadgeDefinition } from '@/lib/badgeDefinitions';
 
-interface Badge {
-    id: string;
-    name: string;
-    icon: React.ReactNode;
+interface Badge extends BadgeDefinition {
     unlocked: boolean;
-    description: string;
-    requirement: string;
-    color: string;
 }
 
 export default function BadgesBlock() {

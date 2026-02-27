@@ -1,9 +1,10 @@
 "use client";
 
+import { Lightbulb, Loader2, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import DOMPurify from "dompurify";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import DOMPurify from "dompurify";
 
 // Components
 import { motion } from "framer-motion";
@@ -77,30 +78,27 @@ export default function ExplanationPage() {
 
     // Set Current Answer & Load Explanation
     useEffect(() => {
-        console.log("Explanation Page Params:", { attemptId, questionId });
-
         if (!attempt || !questionId) {
-            console.log("Waiting for attempt or questionId...");
             return;
         }
 
-        // Find answer in attempt
+        // Reset state so we don't flash previous question's UI
+        setQuestionDetails(null);
+        setLoading(true);
+
         const ans = attempt.answers.find((a: any) => a.questionId === questionId);
-        console.log("Found Answer:", ans);
-
-        if (!ans) {
-            console.error("Answer NOT found in attempt. Answers array:", attempt.answers);
-        }
-
         setCurrentAnswer(ans || null);
 
         if (ans) {
-            // Fetch live question details (explanation)
+            // Fetch live question details (explanation) with Cache-Control headers
             const fetchQ = async () => {
                 const { data } = await supabase
                     .from("questions")
                     .select("id, explanation, image_url")
                     .eq("id", ans.questionId)
+                    .setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+                    .setHeader('Pragma', 'no-cache')
+                    .setHeader('Expires', '0')
                     .single();
 
                 if (data) setQuestionDetails(data as any);
@@ -183,6 +181,8 @@ export default function ExplanationPage() {
         if (currentIndex > 0) {
             const prevId = errors[currentIndex - 1].questionId;
             navigate(`/quiz/explanations/${attemptId}/${prevId}`);
+        } else {
+            navigate(`/quiz/results/${attemptId}`);
         }
     };
 
@@ -194,7 +194,7 @@ export default function ExplanationPage() {
     const isGeneric = !explanation;
 
     return (
-        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-20 transition-colors duration-500">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-32 md:pb-36 transition-colors duration-500">
             {/* Header */}
             <div className="sticky top-0 z-20 bg-[var(--card)] border-b border-[var(--card-border)] px-4 h-16 flex items-center justify-between shadow-sm">
                 <button
@@ -256,52 +256,78 @@ export default function ExplanationPage() {
                     })}
                 </div>
 
-                {/* Explanation Block */}
-                <div className="bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-6 sm:p-8 border border-blue-100 dark:border-blue-900/30">
-                    <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4 flex items-center gap-2">
-                        <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        Spiegazione
-                    </h3>
-                    <div className="prose prose-blue dark:prose-invert prose-sm sm:prose-base max-w-none text-[var(--foreground)] opacity-80">
-                        {explanation ? (
-                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(explanation) }} />
-                        ) : (
-                            <div className="flex flex-col items-start gap-4">
-                                <p className="italic opacity-60 m-0">Spiegazione non ancora disponibile per questa domanda.</p>
-                                <button
-                                    onClick={handleGenerateExplanation}
-                                    disabled={isGenerating}
-                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-sm shadow-md shadow-indigo-500/20 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-70 disabled:scale-100 flex items-center gap-2"
-                                >
-                                    {isGenerating ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Generazione in corso...
-                                        </>
-                                    ) : (
-                                        <>Genera Spiegazione con AI ✨</>
-                                    )}
-                                </button>
+                {/* Tier S Explanation Block / Accordion */}
+                <div className="mt-6">
+                    {explanation ? (
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-blue-100 dark:border-blue-900/50 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                            {/* Decorative background element */}
+                            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                                <Lightbulb className="w-32 h-32 text-blue-500" />
                             </div>
-                        )}
-                    </div>
+
+                            <h3 className="text-[13px] font-bold text-[#00B1FF] uppercase tracking-widest mb-4 flex items-center gap-2 relative z-10">
+                                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                    <Lightbulb className="w-4 h-4" />
+                                </div>
+                                Spiegazione
+                            </h3>
+                            <div className="prose prose-slate dark:prose-invert prose-sm sm:prose-base max-w-none text-slate-700 dark:text-slate-300 leading-relaxed relative z-10">
+                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(explanation) }} />
+                            </div>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={handleGenerateExplanation}
+                            disabled={isGenerating}
+                            className="w-full group relative overflow-hidden rounded-2xl bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/80 hover:from-blue-50/50 hover:to-blue-50/20 dark:hover:from-blue-900/20 dark:hover:to-blue-900/10 border border-slate-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800/50 p-4 sm:p-5 text-left transition-all duration-300 shadow-sm hover:shadow"
+                        >
+                            {/* Subtle animated shine effect on hover */}
+                            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-blue-100/20 dark:via-blue-400/10 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+
+                            <div className="flex items-center justify-between relative z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-[#00B1FF] shadow-inner border border-blue-100/50 dark:border-blue-800/50 transition-colors group-hover:bg-[#00B1FF] group-hover:text-white">
+                                        <Lightbulb className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 transition-colors group-hover:text-[#00B1FF]">
+                                            Spiegazione passo-passo
+                                        </h4>
+                                        <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                                            {isGenerating ? "Caricamento in corso..." : "Scopri il ragionamento dietro la risposta"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-slate-700 text-slate-400 group-hover:text-[#00B1FF] group-hover:bg-blue-50 dark:group-hover:bg-blue-900/50 shadow-sm border border-slate-100 dark:border-slate-600 group-hover:border-blue-100 dark:group-hover:border-blue-800 transition-all duration-300 ${isGenerating ? 'opacity-100' : 'group-hover:translate-y-0.5'}`}>
+                                    {isGenerating ? (
+                                        <Loader2 className="w-4 h-4 animate-spin text-[#00B1FF]" />
+                                    ) : (
+                                        <ChevronDown className="w-4 h-4" />
+                                    )}
+                                </div>
+                            </div>
+                        </button>
+                    )}
                 </div>
 
             </div>
 
             {/* Footer Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--card)] border-t border-[var(--card-border)] shadow-lg flex items-center justify-between sm:justify-center gap-4 transition-colors">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--card)] border-t border-[var(--card-border)] shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex items-center justify-between sm:justify-center gap-4 transition-colors z-40 bg-opacity-95 backdrop-blur-md">
                 <button
                     onClick={goToPrevError}
-                    className="px-6 py-3 rounded-xl border border-[var(--card-border)] font-bold text-[var(--foreground)] opacity-50 hover:opacity-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                    className="px-6 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
                 >
-                    ← Precedente
+                    <ChevronLeft className="w-5 h-5" />
+                    <span>Precedente</span>
                 </button>
                 <button
                     onClick={goToNextError}
-                    className="px-8 py-3 rounded-xl bg-[var(--foreground)] text-[var(--background)] font-bold hover:opacity-90 transition-all shadow-lg shadow-black/10"
+                    className="px-8 py-3.5 rounded-2xl bg-[#00B1FF] text-white font-bold hover:bg-blue-500 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 flex-1 sm:flex-none"
                 >
-                    Prossimo Errore →
+                    <span>Prossimo Errore</span>
+                    <ChevronRight className="w-5 h-5" />
                 </button>
             </div>
         </div>

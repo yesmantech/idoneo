@@ -40,6 +40,9 @@ const BlogIndexPage = React.lazy(() => import('./app/blog/page'));
 const BlogPostPage = React.lazy(() => import('./app/blog/[slug]/page'));
 const LeaderboardPage = React.lazy(() => import('./app/leaderboard/page'));
 
+// AI Assistant
+const AiAssistantPage = React.lazy(() => import('./app/ai-assistant/page'));
+
 // Informational Pages
 const PunteggiPage = React.lazy(() => import('./app/come-funziona/punteggi/page'));
 const PreparazionePage = React.lazy(() => import('./app/preparazione/page'));
@@ -100,6 +103,7 @@ import { initializeNativeApp } from './lib/nativeConfig';
 import OnboardingSpotlight from './components/onboarding/OnboardingSpotlight';
 import SpotlightModal from './components/spotlight/SpotlightModal';
 import { StreakCelebration } from './components/gamification/StreakCelebration';
+import { BadgeUnlockCelebration } from './components/gamification/BadgeUnlockCelebration';
 import { streakService } from './lib/streakService';
 import { CinematicGrain } from './components/ui/CinematicGrain';
 import { removeBootLoader } from './lib/domUtils';
@@ -161,6 +165,7 @@ export default function App() {
                                             <OnboardingSpotlight />
                                             <SpotlightModal />
                                             <StreakCelebration />
+                                            <BadgeUnlockCelebration />
                                             <Suspense fallback={<AdminLoading />}>
                                                 <Routes>
                                                     <Route path="/login" element={<LoginPage />} />
@@ -219,6 +224,7 @@ export default function App() {
                                                     <Route path="/blog" element={<MainLayout><BlogIndexPage /></MainLayout>} />
                                                     <Route path="/blog/:slug" element={<MainLayout><BlogPostPage /></MainLayout>} />
                                                     <Route path="/leaderboard" element={<MainLayout><LeaderboardPage /></MainLayout>} />
+                                                    <Route path="/ai-assistant" element={<MainLayout><AiAssistantPage /></MainLayout>} />
 
                                                     {/* Informational Pages */}
                                                     <Route path="/come-funziona/punteggi" element={<MainLayout><PunteggiPage /></MainLayout>} />

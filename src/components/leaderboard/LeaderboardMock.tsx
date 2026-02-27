@@ -32,7 +32,7 @@ const Podium = ({ top3, context }: { top3: LeaderboardEntry[], context: 'skill' 
                 <div className="flex flex-col items-center gap-2">
                     <div className="relative">
                         <div className={`w-16 h-16 rounded-full border-4 ${isDark ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'} overflow-hidden`}>
-                            <img src={second.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${second.user.nickname}`} alt={second.user.nickname} />
+                            <img src={second.user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${second.user.nickname}`} alt={second.user.nickname} />
                         </div>
                         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-400 text-white text-xs font-bold px-2 py-0.5 rounded-full ring-2 ring-white">2nd</div>
                     </div>
@@ -50,7 +50,7 @@ const Podium = ({ top3, context }: { top3: LeaderboardEntry[], context: 'skill' 
                         {/* Crown */}
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-2xl">👑</div>
                         <div className={`w-24 h-24 rounded-full border-4 ${isDark ? 'border-emerald-500 bg-slate-800' : 'border-yellow-400 bg-white'} overflow-hidden shadow-xl`}>
-                            <img src={first.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${first.user.nickname}`} alt={first.user.nickname} />
+                            <img src={first.user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${first.user.nickname}`} alt={first.user.nickname} />
                         </div>
                         <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 ${isDark ? 'bg-emerald-500' : 'bg-yellow-400'} text-white text-sm font-bold px-3 py-0.5 rounded-full ring-2 ring-white shadow-lg`}>1st</div>
                     </div>
@@ -66,7 +66,7 @@ const Podium = ({ top3, context }: { top3: LeaderboardEntry[], context: 'skill' 
                 <div className="flex flex-col items-center gap-2">
                     <div className="relative">
                         <div className={`w-16 h-16 rounded-full border-4 ${isDark ? 'border-amber-700 bg-slate-800' : 'border-slate-200 bg-white'} overflow-hidden`}>
-                            <img src={third.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${third.user.nickname}`} alt={third.user.nickname} />
+                            <img src={third.user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${third.user.nickname}`} alt={third.user.nickname} />
                         </div>
                         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs font-bold px-2 py-0.5 rounded-full ring-2 ring-white">3rd</div>
                     </div>
@@ -94,7 +94,7 @@ const RankingRow = ({ entry, context }: { key?: React.Key; entry: LeaderboardEnt
             </span>
 
             <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden flex-shrink-0">
-                <img src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.user.nickname}`} alt="Avatar" />
+                <img src={entry.user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.user.nickname}`} alt="Avatar" />
             </div>
 
             <div className="flex-1 min-w-0">

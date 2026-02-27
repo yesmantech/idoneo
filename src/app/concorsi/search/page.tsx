@@ -141,23 +141,23 @@ export default function ConcorsiSearchPage() {
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-[var(--card-border)] text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all"
+                        className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-6 h-6" />
                     </button>
 
                     <div className="flex-1">
-                        <h1 className="text-xl font-black text-[var(--foreground)] tracking-tight">Ricerca Concorsi</h1>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                        <h1 className="text-xl font-bold text-[var(--foreground)] tracking-tight">Ricerca Concorsi</h1>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">
                             {totalCount} quiz disponibili
                         </p>
                     </div>
 
                     <button
                         onClick={() => setShowFilters(true)}
-                        className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all border relative ${activeFiltersCount > 0
-                            ? 'bg-brand-blue text-white border-brand-blue'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-[var(--card-border)] shadow-sm'
+                        className={`w-10 h-10 flex items-center justify-center rounded-full transition-all relative ${activeFiltersCount > 0
+                            ? 'bg-brand-blue text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                             }`}
                     >
                         <Filter className="w-5 h-5" />
@@ -173,7 +173,7 @@ export default function ConcorsiSearchPage() {
                 <div className="max-w-7xl mx-auto px-4 pb-4 space-y-4">
                     <form onSubmit={handleSearch} className="relative group">
                         {/* Search Icon */}
-                        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Search className="w-5 h-5 text-slate-400 group-focus-within:text-brand-blue transition-colors" />
                         </div>
 
@@ -183,21 +183,21 @@ export default function ConcorsiSearchPage() {
                             placeholder="Cerca concorso..."
                             value={filters.search}
                             onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                            className="w-full h-[52px] pl-14 pr-5 bg-[var(--card)] 
-                                       text-[15px] font-medium text-[var(--foreground)] placeholder:text-slate-400/70
-                                       shadow-soft border border-[var(--card-border)] rounded-[26px]
-                                       focus:border-brand-blue/30 focus:shadow-lg focus:shadow-brand-blue/5 
+                            className="w-full h-[52px] pl-12 pr-5 bg-slate-100 dark:bg-slate-800/50 
+                                       text-[16px] font-medium text-[var(--foreground)] placeholder:text-slate-400/70
+                                       border-transparent rounded-2xl
+                                       focus:bg-white dark:focus:bg-slate-900 focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/10 
                                        outline-none transition-all duration-200"
                         />
                     </form>
 
                     {/* Category Scroll */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 snap-x">
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
                         <button
                             onClick={() => setFilters(prev => ({ ...prev, categorySlug: undefined, offset: 0 }))}
-                            className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border snap-start ${!filters.categorySlug
-                                ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                            className={`flex-shrink-0 px-4 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all border snap-start ${!filters.categorySlug
+                                ? 'bg-brand-blue text-white border-transparent'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
                                 }`}
                         >
                             Tutti
@@ -206,9 +206,9 @@ export default function ConcorsiSearchPage() {
                             <button
                                 key={cat.id}
                                 onClick={() => toggleCategory(cat.slug)}
-                                className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border snap-start ${filters.categorySlug === cat.slug
-                                    ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                    : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                                className={`flex-shrink-0 px-4 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all border snap-start ${filters.categorySlug === cat.slug
+                                    ? 'bg-brand-blue text-white border-transparent'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
                                     }`}
                             >
                                 {cat.title}
@@ -299,26 +299,26 @@ export default function ConcorsiSearchPage() {
 
 function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
     // Dynamic styling based on category
-    const getStyle = (title?: string) => {
-        if (!title) return 'from-brand-blue to-brand-cyan';
+    const getColorClass = (title?: string) => {
+        if (!title) return 'bg-brand-blue';
         const lower = title.toLowerCase();
-        if (lower.includes('forze-armate') || lower.includes('militari') || lower.includes('polizia')) return 'from-blue-500 to-indigo-600';
-        if (lower.includes('sanita')) return 'from-rose-500 to-pink-600';
-        if (lower.includes('amministrativi')) return 'from-brand-purple to-indigo-700';
-        if (lower.includes('enti-locali')) return 'from-brand-orange to-orange-700';
-        return 'from-brand-blue to-brand-cyan';
+        if (lower.includes('forze-armate') || lower.includes('militari') || lower.includes('polizia')) return 'bg-brand-blue';
+        if (lower.includes('sanita')) return 'bg-semantic-error';
+        if (lower.includes('amministrativi')) return 'bg-brand-purple';
+        if (lower.includes('enti-locali')) return 'bg-brand-orange';
+        return 'bg-brand-blue';
     };
 
-    const gradient = getStyle(quiz.category?.slug);
+    const cardBgColor = getColorClass(quiz.category?.slug);
 
     return (
         <Link
             to={`/concorsi/${quiz.category?.slug || 'unknown'}/${quiz.slug}`}
-            className="group block bg-[var(--card)] rounded-[32px] border border-[var(--card-border)] overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-300"
+            className="group block bg-[var(--card)] rounded-3xl border border-[var(--card-border)] overflow-hidden hover:shadow-card transition-all duration-300"
         >
             <div className="p-5 flex gap-4">
                 {/* Visual Icon */}
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0 shadow-lg shadow-black/5`}>
+                <div className={`w-14 h-14 rounded-2xl ${cardBgColor} flex items-center justify-center shrink-0`}>
                     <Shield className="w-6 h-6 text-white" strokeWidth={1.5} />
                 </div>
 
@@ -357,11 +357,11 @@ function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
             </div>
 
             {/* Bottom Section */}
-            <div className="px-5 py-3 bg-slate-50 dark:bg-white/5 border-t border-[var(--card-border)] flex items-center justify-between">
-                <span className="text-[12px] font-medium text-slate-500 truncate pr-4">
-                    {quiz.title}
+            <div className="px-5 py-4 border-t border-[var(--card-border)] flex items-center justify-between bg-transparent">
+                <span className="text-[13px] font-bold text-slate-500 truncate pr-4">
+                    Vedi dettagli concorso
                 </span>
-                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-brand-blue shadow-sm transition-all group-hover:translate-x-1">
+                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-brand-blue transition-all group-hover:translate-x-1">
                     <ArrowRight className="w-4 h-4" />
                 </div>
             </div>
@@ -423,9 +423,9 @@ function TierSFilterModal({
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         onClick={() => setFilters(f => ({ ...f, categorySlug: undefined, offset: 0 }))}
-                                        className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all border ${!filters.categorySlug
-                                            ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                            : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-800'}`}
+                                        className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${!filters.categorySlug
+                                            ? 'bg-brand-blue text-white border-transparent'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                     >
                                         Tutti
                                     </button>
@@ -433,9 +433,9 @@ function TierSFilterModal({
                                         <button
                                             key={cat.id}
                                             onClick={() => setFilters(f => ({ ...f, categorySlug: cat.slug, offset: 0 }))}
-                                            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all border ${filters.categorySlug === cat.slug
-                                                ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                                : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-800'}`}
+                                            className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${filters.categorySlug === cat.slug
+                                                ? 'bg-brand-blue text-white border-transparent'
+                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                         >
                                             {cat.title}
                                         </button>
@@ -449,9 +449,9 @@ function TierSFilterModal({
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         onClick={() => setFilters(f => ({ ...f, year: undefined, offset: 0 }))}
-                                        className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all border ${!filters.year
-                                            ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                            : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-800'}`}
+                                        className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${!filters.year
+                                            ? 'bg-brand-blue text-white border-transparent'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                     >
                                         Tutti
                                     </button>
@@ -459,9 +459,9 @@ function TierSFilterModal({
                                         <button
                                             key={y}
                                             onClick={() => setFilters(f => ({ ...f, year: y, offset: 0 }))}
-                                            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all border ${filters.year === y
-                                                ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                                : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-800'}`}
+                                            className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${filters.year === y
+                                                ? 'bg-brand-blue text-white border-transparent'
+                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                         >
                                             {y}
                                         </button>
@@ -506,7 +506,7 @@ function TierSFilterModal({
                             </button>
                             <button
                                 onClick={onClose}
-                                className="py-4 bg-gradient-to-r from-brand-blue to-brand-cyan text-white rounded-[24px] font-black text-sm shadow-xl shadow-brand-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                className="py-4 bg-brand-blue text-white rounded-[24px] font-black text-sm shadow-sm hover:opacity-90 active:scale-[0.98] transition-all"
                             >
                                 Applica
                             </button>

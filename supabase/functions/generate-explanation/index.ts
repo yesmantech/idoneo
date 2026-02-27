@@ -76,8 +76,8 @@ Scrivi una spiegazione sintetica in italiano (massimo 3-4 frasi) che spieghi per
         console.log(`Successfully generated explanation for [${questionId}]. Length: ${generatedExplanation.length} chars`);
 
         // 4. Update the DB via Supabase Admin Client
-        const supabaseUrl = Deno.env.get('SUPABASE_URL');
-        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+        const supabaseUrl = Deno.env.get('IDONEO_SUPABASE_URL');
+        const supabaseServiceKey = Deno.env.get('IDONEO_SERVICE_ROLE_KEY');
 
         if (supabaseUrl && supabaseServiceKey) {
             const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
