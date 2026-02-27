@@ -150,6 +150,36 @@ export default function App() {
         removeBootLoader();
     }, []);
 
+    // Prefetch core page chunks in the background for instant navigation
+    useEffect(() => {
+        const prefetchCore = setTimeout(() => {
+            // Prefetch the most visited pages immediately
+            import('./app/page');
+            import('./app/profile/page');
+            import('./app/concorsi/[category]/page');
+            import('./app/concorsi/[category]/[contestSlug]/page');
+            import('./app/concorsi/[category]/[contestSlug]/custom/page');
+            import('./app/leaderboard/page');
+            import('./app/ai-assistant/page');
+            import('./app/bandi/BandiListPage');
+        }, 2000); // Start prefetching 2s after mount (after initial render settles)
+
+        const prefetchSecondary = setTimeout(() => {
+            // Prefetch secondary pages after 5s
+            import('./app/quiz/run/[attemptId]/page');
+            import('./app/quiz/results/[attemptId]/page');
+            import('./app/quiz/official/[id]/page');
+            import('./app/concorsi/search/page');
+            import('./app/profile/settings/page');
+            import('./app/blog/page');
+        }, 5000);
+
+        return () => {
+            clearTimeout(prefetchCore);
+            clearTimeout(prefetchSecondary);
+        };
+    }, []);
+
     return (
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
