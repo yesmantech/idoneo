@@ -103,10 +103,10 @@ export default function BottomNavigation() {
                 className="flex items-end justify-around"
                 style={{
                     background: '#FFFFFF',
-                    paddingTop: '14px',
+                    paddingTop: '18px',
                     paddingBottom: isNativeApp
-                        ? 'max(10px, env(safe-area-inset-bottom, 10px))'
-                        : '10px',
+                        ? 'max(12px, env(safe-area-inset-bottom, 12px))'
+                        : '12px',
                 }}
             >
                 {NAV_ITEMS.map((item, index) => {
@@ -118,7 +118,7 @@ export default function BottomNavigation() {
                             to={item.path}
                             className="flex flex-col items-center justify-end flex-1"
                             style={{
-                                gap: '4px',
+                                gap: '6px',
                                 WebkitTapHighlightColor: 'transparent',
                                 textDecoration: 'none',
                             }}
@@ -136,7 +136,7 @@ export default function BottomNavigation() {
                             </div>
                             <span
                                 style={{
-                                    fontSize: '11px',
+                                    fontSize: '12px',
                                     fontWeight: isActive ? 700 : 500,
                                     color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR,
                                     transition: 'color 0.15s ease',
