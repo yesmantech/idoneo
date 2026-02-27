@@ -60,50 +60,64 @@ export default function CustomQuizWizardPage() {
     // Scoring Config
     const [scoring, setScoring] = useState<ScoringConfig>({ correct: 1, wrong: 0, blank: 0 });
 
-    // --- Load Data & Restore Template ---
+    // --- Load Data & Restore Template (Optimized: 2 queries instead of N+2) ---
     useEffect(() => {
         const load = async () => {
+            // Single parallel fetch: quiz + subjects
             const { data: qData } = await supabase.from("quizzes").select("id").eq("slug", contestSlug).single();
-            if (!qData) return;
+            if (!qData) { setLoading(false); return; }
             setQuizId(qData.id);
 
+            // Fetch subjects first (1 query)
             const { data: sData } = await supabase.from("subjects").select("id, name").eq("quiz_id", qData.id).eq("is_archived", false);
-            if (sData) {
-                const enriched = await Promise.all(sData.map(async (s) => {
-                    const { count } = await supabase.from("questions").select("*", { count: 'exact', head: true }).eq("subject_id", s.id).eq("is_archived", false);
-                    return { ...s, question_count: count || 0 };
-                }));
-                enriched.sort((a, b) => a.name.localeCompare(b.name));
-                setSubjects(enriched);
+            if (!sData || sData.length === 0) { setLoading(false); return; }
 
-                // Restore saved template
-                try {
-                    const saved = localStorage.getItem(`quiz-template-${qData.id}`);
-                    if (saved) {
-                        const t = JSON.parse(saved);
-                        // Validate subject IDs still exist
-                        const validIds = new Set(enriched.map(s => s.id));
-                        const validSelections: Record<string, number> = {};
-                        for (const [id, count] of Object.entries(t.subjectSelections || {})) {
-                            if (validIds.has(id)) {
-                                const subj = enriched.find(s => s.id === id);
-                                validSelections[id] = Math.min(count as number, subj?.question_count || 20);
-                            }
-                        }
-                        if (Object.keys(validSelections).length > 0) {
-                            setSubjectSelections(validSelections);
-                            setSelectionMode(t.selectionMode || 'random');
-                            setTimeHours(t.timeHours ?? 0);
-                            setTimeMinutes(t.timeMinutes ?? 30);
-                            setTimeSeconds(t.timeSeconds ?? 0);
-                            setNoTimeLimit(t.noTimeLimit ?? false);
-                            setScoring(t.scoring || { correct: 1, wrong: 0, blank: 0 });
-                            setHasTemplate(true);
+            // Single batch query for ALL question counts instead of N separate queries (1 query)
+            const subjectIds = sData.map(s => s.id);
+            const { data: qRows } = await supabase
+                .from("questions")
+                .select("subject_id")
+                .in("subject_id", subjectIds)
+                .eq("is_archived", false);
+
+            // Count questions per subject from the batch result
+            const countMap: Record<string, number> = {};
+            (qRows || []).forEach(q => {
+                countMap[q.subject_id] = (countMap[q.subject_id] || 0) + 1;
+            });
+
+            const enriched: Subject[] = sData
+                .map(s => ({ ...s, question_count: countMap[s.id] || 0 }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            setSubjects(enriched);
+
+            // Restore saved template (sync, from localStorage)
+            try {
+                const saved = localStorage.getItem(`quiz-template-${qData.id}`);
+                if (saved) {
+                    const t = JSON.parse(saved);
+                    const validIds = new Set(enriched.map(s => s.id));
+                    const validSelections: Record<string, number> = {};
+                    for (const [id, count] of Object.entries(t.subjectSelections || {})) {
+                        if (validIds.has(id)) {
+                            const subj = enriched.find(s => s.id === id);
+                            validSelections[id] = Math.min(count as number, subj?.question_count || 20);
                         }
                     }
-                } catch (e) {
-                    console.warn('[Template] Failed to restore:', e);
+                    if (Object.keys(validSelections).length > 0) {
+                        setSubjectSelections(validSelections);
+                        setSelectionMode(t.selectionMode || 'random');
+                        setTimeHours(t.timeHours ?? 0);
+                        setTimeMinutes(t.timeMinutes ?? 30);
+                        setTimeSeconds(t.timeSeconds ?? 0);
+                        setNoTimeLimit(t.noTimeLimit ?? false);
+                        setScoring(t.scoring || { correct: 1, wrong: 0, blank: 0 });
+                        setHasTemplate(true);
+                    }
                 }
+            } catch (e) {
+                console.warn('[Template] Failed to restore:', e);
             }
             setLoading(false);
         };
