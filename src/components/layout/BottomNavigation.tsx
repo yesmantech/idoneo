@@ -1,16 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Sparkles, Trophy, User } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 /**
- * Praktika-style bottom navigation (Skitla reference).
- *
- * - Solid white background, tall bar
- * - Lucide icons (high quality) — filled style, only color changes
- * - Bold label when active, medium when inactive
- * - 5 tabs: Home, Bandi, AI (center), Classifiche, Profilo
- * - Brand blue (#0095FF) active color
+ * Praktika-style bottom navigation with dark mode support.
  */
 
 const NAV_ITEMS = [
@@ -22,11 +16,26 @@ const NAV_ITEMS = [
 ];
 
 const ACTIVE_COLOR = '#0095FF';
-const INACTIVE_COLOR = '#9CA3AF';
 
 export default function BottomNavigation() {
     const location = useLocation();
     const isNativeApp = Capacitor.isNativePlatform();
+
+    // Dark mode detection
+    const [isDark, setIsDark] = useState(() =>
+        document.documentElement.classList.contains('dark')
+    );
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsDark(document.documentElement.classList.contains('dark'));
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+
+    const inactiveColor = isDark ? '#64748B' : '#9CA3AF'; // slate-500 in dark, gray-400 in light
+    const bgColor = isDark ? '#0F172A' : '#FFFFFF';       // slate-900 in dark, white in light
 
     const activeIndex = NAV_ITEMS.findIndex(item =>
         item.path === '/'
@@ -46,11 +55,12 @@ export default function BottomNavigation() {
             <nav
                 className="flex items-end justify-around"
                 style={{
-                    background: '#FFFFFF',
+                    background: bgColor,
                     paddingTop: '18px',
                     paddingBottom: isNativeApp
                         ? 'max(12px, env(safe-area-inset-bottom, 12px))'
                         : '12px',
+                    transition: 'background-color 0.3s ease',
                 }}
             >
                 {NAV_ITEMS.map((item, index) => {
@@ -69,7 +79,7 @@ export default function BottomNavigation() {
                         >
                             <item.Icon
                                 size={26}
-                                color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
+                                color={isActive ? ACTIVE_COLOR : inactiveColor}
                                 strokeWidth={2}
                                 style={{ transition: 'color 0.15s ease' }}
                             />
@@ -77,7 +87,7 @@ export default function BottomNavigation() {
                                 style={{
                                     fontSize: '12px',
                                     fontWeight: isActive ? 700 : 500,
-                                    color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR,
+                                    color: isActive ? ACTIVE_COLOR : inactiveColor,
                                     transition: 'color 0.15s ease',
                                     lineHeight: 1.3,
                                     letterSpacing: '-0.01em',
@@ -92,3 +102,4 @@ export default function BottomNavigation() {
         </div>
     );
 }
+
