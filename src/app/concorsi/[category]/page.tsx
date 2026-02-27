@@ -44,7 +44,43 @@ export default function ConcorsoHubPage() {
   }, [allQuizzes]);
 
   if (loading) {
-    return <TierSLoader message="Caricamento concorso..." />;
+    return (
+      <div className="min-h-screen bg-[var(--background)] pb-24">
+        {/* Skeleton Hero Banner */}
+        <div className="relative h-[35vh] min-h-[300px] overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300 animate-pulse">
+          <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-12 text-center space-y-3">
+            <div className="w-40 h-6 bg-white/30 rounded-full mx-auto" />
+            <div className="w-64 h-10 bg-white/20 rounded-lg mx-auto" />
+            <div className="w-48 h-4 bg-white/15 rounded mx-auto" />
+          </div>
+        </div>
+        <main className="px-4 max-w-7xl mx-auto -mt-6 relative z-20 space-y-8">
+          {/* Skeleton Stats */}
+          <div className="flex gap-2.5">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex-1 bg-[var(--card)] rounded-2xl p-4 border border-[var(--card-border)] flex flex-col items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-slate-100 animate-pulse" />
+                <div className="w-12 h-6 bg-slate-100 rounded animate-pulse" />
+                <div className="w-16 h-3 bg-slate-50 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+          {/* Skeleton Quiz Cards */}
+          <div className="space-y-3">
+            <div className="w-48 h-6 bg-slate-200 rounded-lg animate-pulse" />
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white dark:bg-[#1e2330] p-4 rounded-[24px] border border-slate-200/60 flex items-center gap-4 animate-pulse">
+                <div className="w-12 h-12 rounded-full bg-slate-100" />
+                <div className="flex-1 space-y-2">
+                  <div className="w-40 h-5 bg-slate-100 rounded" />
+                  <div className="w-24 h-4 bg-slate-50 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (error || !categoryData) {

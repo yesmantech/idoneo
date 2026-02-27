@@ -47,7 +47,38 @@ export default function ContestPage() {
   }, [contestSlug, user]);
 
   if (loading) return (
-    <TierSLoader message="Caricamento concorso..." />
+    <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">
+      <div className="sticky top-0 z-30 bg-[#F8FAFC]/90 backdrop-blur-md px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex items-center gap-1">
+        <div className="w-20 h-5 bg-slate-200 rounded-full animate-pulse" />
+      </div>
+      <div className="px-5 space-y-6">
+        <div className="w-3/4 h-8 bg-slate-200 rounded-lg animate-pulse" />
+        <div className="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100/50 space-y-2">
+          <div className="w-full h-4 bg-slate-100 rounded animate-pulse" />
+          <div className="w-2/3 h-4 bg-slate-100 rounded animate-pulse" />
+        </div>
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="w-40 h-5 bg-slate-100 rounded animate-pulse" />
+              <div className="w-60 h-4 bg-slate-50 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="w-full h-12 bg-slate-100 rounded-2xl animate-pulse" />
+        </div>
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="w-36 h-5 bg-slate-100 rounded animate-pulse" />
+              <div className="w-52 h-4 bg-slate-50 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="w-full h-12 bg-slate-100 rounded-2xl animate-pulse" />
+        </div>
+      </div>
+    </div>
   );
 
   if (!contest) return (
