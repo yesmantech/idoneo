@@ -166,7 +166,7 @@ export default function App() {
                                             <SpotlightModal />
                                             <StreakCelebration />
                                             <BadgeUnlockCelebration />
-                                            <Suspense fallback={<AdminLoading />}>
+                                            <Suspense fallback={null}>
                                                 <Routes>
                                                     <Route path="/login" element={<LoginPage />} />
                                                     <Route path="/recover-password" element={<RecoverPasswordPage />} />
