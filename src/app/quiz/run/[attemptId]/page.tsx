@@ -66,7 +66,7 @@ import { analytics } from "@/lib/analytics";
 import { useOnboarding } from "@/context/OnboardingProvider";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { AnimatePresence } from "framer-motion";
-import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check, Flag, AlertTriangle } from "lucide-react";
+import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check, Flag, AlertTriangle, Lock } from "lucide-react";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -139,10 +139,13 @@ export default function QuizRunnerPage() {
 
     // Report State
     const [showReportModal, setShowReportModal] = useState(false);
-    const [showReportSuccess, setShowReportSuccess] = useState(false); // New Success Modal State
+    const [showReportSuccess, setShowReportSuccess] = useState(false);
     const [reportReason, setReportReason] = useState<string>("");
     const [reportDescription, setReportDescription] = useState("");
     const [isReporting, setIsReporting] = useState(false);
+
+    // Locked answer modal
+    const [showLockedModal, setShowLockedModal] = useState(false);
 
     // Modes - Load from localStorage for persistence
     const [instantCheck, setInstantCheck] = useState(() => {
@@ -718,12 +721,7 @@ export default function QuizRunnerPage() {
                         {currentQ.text}
                     </h2>
 
-                    {/* Lock indicator */}
-                    {isLocked && (
-                        <div className="mb-4 flex items-center gap-2 text-[12px] font-semibold text-amber-600">
-                            <span>🔒</span> Risposta bloccata
-                        </div>
-                    )}
+
 
                     {/* Answer Options */}
                     <div className="space-y-3">
@@ -761,9 +759,14 @@ export default function QuizRunnerPage() {
                             return (
                                 <button
                                     key={optKey}
-                                    onClick={() => !isDisabled && handleSelect(optKey)}
-                                    disabled={isDisabled}
-                                    className={`w-full p-4 rounded-2xl border-2 flex items-start gap-4 text-left transition-all duration-200 ${cardStyle} ${!isDisabled ? 'hover:shadow-md active:scale-[0.99]' : ''
+                                    onClick={() => {
+                                        if (isDisabled) {
+                                            setShowLockedModal(true);
+                                        } else {
+                                            handleSelect(optKey);
+                                        }
+                                    }}
+                                    className={`w-full p-4 rounded-2xl border-2 flex items-start gap-4 text-left transition-all duration-200 ${cardStyle} ${!isDisabled ? 'hover:shadow-md active:scale-[0.99]' : 'cursor-pointer'
                                         }`}
                                 >
                                     {/* Letter Badge */}
@@ -1089,6 +1092,28 @@ export default function QuizRunnerPage() {
                                 className="w-full py-3.5 bg-[#00B1FF] hover:bg-[#0095dd] text-white font-bold rounded-xl transition-colors shadow-lg shadow-[#00B1FF]/20"
                             >
                                 Chiudi
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* LOCKED ANSWER MODAL */}
+                {showLockedModal && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowLockedModal(false)} />
+                        <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl w-full max-w-sm p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+                            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-4">
+                                <Lock className="w-8 h-8 text-amber-500" />
+                            </div>
+                            <h3 className="text-xl font-black text-[var(--foreground)] mb-2">Risposta Bloccata</h3>
+                            <p className="text-[var(--foreground)] opacity-50 text-[14px] mb-6 leading-relaxed">
+                                Con la <strong>Verifica Istantanea</strong> attiva, la risposta viene bloccata dopo la selezione per simulare le condizioni reali d'esame. Puoi disattivarla dalle impostazioni ⚙️.
+                            </p>
+                            <button
+                                onClick={() => setShowLockedModal(false)}
+                                className="w-full py-3.5 bg-[#00B1FF] hover:bg-[#0095dd] text-white font-bold rounded-xl transition-colors shadow-lg shadow-[#00B1FF]/20"
+                            >
+                                Ho capito
                             </button>
                         </div>
                     </div>
