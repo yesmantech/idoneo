@@ -34,8 +34,8 @@ export default function BottomNavigation() {
         return () => observer.disconnect();
     }, []);
 
-    const inactiveColor = isDark ? '#64748B' : '#9CA3AF'; // slate-500 in dark, gray-400 in light
-    const bgColor = isDark ? '#0F172A' : '#FFFFFF';       // slate-900 in dark, white in light
+    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF'; // gray-500 in dark, gray-400 in light
+    const bgColor = isDark ? '#000000' : '#FFFFFF';       // true black in dark, white in light
 
     const activeIndex = NAV_ITEMS.findIndex(item =>
         item.path === '/'
