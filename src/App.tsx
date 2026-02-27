@@ -2,61 +2,45 @@ import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 
 // ============================================================================
-// LAZY-LOADED PAGES (Code Splitting for Smaller Initial Bundle)
+// DIRECT IMPORTS — User-facing pages (instant navigation, zero delay)
 // ============================================================================
+import LoginPage from './app/login/page';
+import WaitlistPage from './app/waitlist/page';
+import RecoverPasswordPage from './app/recover-password/page';
+import UpdatePasswordPage from './app/update-password/page';
+import HomePage from './app/page';
+import ProfilePage from './app/profile/page';
+import ProfileSettingsPage from './app/profile/settings/page';
+import ProfileSetupPage from './app/profile/setup/page';
+import QuizStatsPage from './app/profile/stats/QuizStatsPage';
+import ConcorsiSearchPage from './app/concorsi/search/page';
+import ConcorsoHubPage from './app/concorsi/[category]/page';
+import ContestPage from './app/concorsi/[category]/[contestSlug]/page';
+import SimulationTypePage from './app/concorsi/[category]/[contestSlug]/simulazione/page';
+import QuizRulesPage from './app/concorsi/[category]/[contestSlug]/simulazione/[type]/regole/page';
+import CustomQuizWizardPage from './app/concorsi/[category]/[contestSlug]/custom/page';
+import QuizRunnerPage from './app/quiz/run/[attemptId]/page';
+import QuizResultsPage from './app/quiz/results/[attemptId]/page';
+import ExplanationPage from './app/quiz/explanations/[attemptId]/[questionId]/page';
+import OfficialQuizStarterPage from './app/quiz/official/[id]/page';
+import PracticeStartPage from './app/quiz/practice/[quizId]/page';
+import ReviewPage from './app/quiz/review/[quizId]/page';
+import StatsPage from './app/stats/page';
+import BlogIndexPage from './app/blog/page';
+import BlogPostPage from './app/blog/[slug]/page';
+import LeaderboardPage from './app/leaderboard/page';
+import AiAssistantPage from './app/ai-assistant/page';
+import PunteggiPage from './app/come-funziona/punteggi/page';
+import PreparazionePage from './app/preparazione/page';
+import BandiListPage from './app/bandi/BandiListPage';
+import BandoDetailPage from './app/bandi/BandoDetailPage';
+import BandiWatchlistPage from './app/bandi/BandiWatchlistPage';
+import BandiAlertsPage from './app/bandi/alerts/page';
+import FlamesDemoPage from './app/demo/flames/page';
 
-// Auth & Onboarding
-const LoginPage = React.lazy(() => import('./app/login/page'));
-const WaitlistPage = React.lazy(() => import('./app/waitlist/page'));
-const RecoverPasswordPage = React.lazy(() => import('./app/recover-password/page'));
-const UpdatePasswordPage = React.lazy(() => import('./app/update-password/page'));
-
-// Home & Profile
-const HomePage = React.lazy(() => import('./app/page'));
-const ProfilePage = React.lazy(() => import('./app/profile/page'));
-const ProfileSettingsPage = React.lazy(() => import('./app/profile/settings/page'));
-const ProfileSetupPage = React.lazy(() => import('./app/profile/setup/page'));
-const QuizStatsPage = React.lazy(() => import('./app/profile/stats/QuizStatsPage'));
-
-// Concorsi Flow
-const ConcorsiSearchPage = React.lazy(() => import('./app/concorsi/search/page'));
-const ConcorsoHubPage = React.lazy(() => import('./app/concorsi/[category]/page'));
-const ContestPage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/page'));
-const SimulationTypePage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/simulazione/page'));
-const QuizRulesPage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/simulazione/[type]/regole/page'));
-const CustomQuizWizardPage = React.lazy(() => import('./app/concorsi/[category]/[contestSlug]/custom/page'));
-
-// Quiz Engine
-const QuizRunnerPage = React.lazy(() => import('./app/quiz/run/[attemptId]/page'));
-const QuizResultsPage = React.lazy(() => import('./app/quiz/results/[attemptId]/page'));
-const ExplanationPage = React.lazy(() => import('./app/quiz/explanations/[attemptId]/[questionId]/page'));
-const OfficialQuizStarterPage = React.lazy(() => import('./app/quiz/official/[id]/page'));
-const PracticeStartPage = React.lazy(() => import('./app/quiz/practice/[quizId]/page'));
-const ReviewPage = React.lazy(() => import('./app/quiz/review/[quizId]/page'));
-const StatsPage = React.lazy(() => import('./app/stats/page'));
-
-// Blog (User-facing)
-const BlogIndexPage = React.lazy(() => import('./app/blog/page'));
-const BlogPostPage = React.lazy(() => import('./app/blog/[slug]/page'));
-const LeaderboardPage = React.lazy(() => import('./app/leaderboard/page'));
-
-// AI Assistant
-const AiAssistantPage = React.lazy(() => import('./app/ai-assistant/page'));
-
-// Informational Pages
-const PunteggiPage = React.lazy(() => import('./app/come-funziona/punteggi/page'));
-const PreparazionePage = React.lazy(() => import('./app/preparazione/page'));
-
-// Skitla Integration
-
-// Bandi Pages
-const BandiListPage = React.lazy(() => import('./app/bandi/BandiListPage'));
-const BandoDetailPage = React.lazy(() => import('./app/bandi/BandoDetailPage'));
-const BandiWatchlistPage = React.lazy(() => import('./app/bandi/BandiWatchlistPage'));
-const BandiAlertsPage = React.lazy(() => import('./app/bandi/alerts/page'));
-
-// Demo Pages
-const FlamesDemoPage = React.lazy(() => import('./app/demo/flames/page'));
+// ============================================================================
+// LAZY-LOADED PAGES (Admin only — rarely accessed)
+// ============================================================================
 
 // Admin Pages
 const AdminDashboardPage = React.lazy(() => import('./app/admin/dashboard/page'));
