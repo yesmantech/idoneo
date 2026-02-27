@@ -20,31 +20,29 @@ export default function ContestPage() {
   const [loading, setLoading] = useState(true);
   const [attempts, setAttempts] = useState<any[]>([]);
 
+  // Load contest data (fast, renders page immediately)
   useEffect(() => {
     if (!contestSlug) return;
-
-    async function loadData() {
-      setLoading(true);
-      const data = await getContestBySlug(contestSlug || '');
+    setLoading(true);
+    getContestBySlug(contestSlug).then(data => {
       setContest(data);
-
-      if (data && user) {
-        const { data: myAttempts } = await supabase
-          .from('quiz_attempts')
-          .select('*')
-          .eq('quiz_id', data.id)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (myAttempts) {
-          setAttempts(myAttempts);
-        }
-      }
       setLoading(false);
-    }
+    });
+  }, [contestSlug]);
 
-    loadData();
-  }, [contestSlug, user]);
+  // Load user attempts separately (doesn't block page render)
+  useEffect(() => {
+    if (!contest || !user) return;
+    supabase
+      .from('quiz_attempts')
+      .select('*')
+      .eq('quiz_id', contest.id)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data: myAttempts }) => {
+        if (myAttempts) setAttempts(myAttempts);
+      });
+  }, [contest?.id, user]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">
