@@ -32,8 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const incomingMessages = messages || [];
         const modelMessages = await convertToModelMessages(incomingMessages);
 
-        // Artificial delay to show the "thinking" animation for 3.5 seconds
-        await new Promise(resolve => setTimeout(resolve, 3500));
+        // No artificial delay — OpenAI's natural latency provides enough "thinking" time
 
         const result = streamText({
             model: openai('gpt-4o-mini'),

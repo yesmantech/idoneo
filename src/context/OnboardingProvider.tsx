@@ -323,29 +323,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
     // Check if Welcome should be shown
     useEffect(() => {
-        if (!profile || authLoading) return;
-
-        // If already completed in DB, don't show welcome
-        if ((profile as any).onboarding_completed) {
-            localStorage.setItem(WELCOME_KEY, 'true');
-            return;
-        }
-
-        // Show welcome on homepage for users who haven't completed
-        if (window.location.pathname === '/' && !localStorage.getItem(WELCOME_KEY)) {
-            setShowWelcome(true);
-        }
+        // ARCHIVED FEATURE: Disabling the welcome modal intentionally.
+        return;
     }, [profile, authLoading]);
 
     const hasCompletedContext = useCallback((context: OnboardingContext) => {
-        // If auth is still loading, assume completed to prevent flicker/race start
-        if (authLoading) return true;
-
-        // Fast path: localStorage
-        if (localStorage.getItem(STORAGE_PREFIX + context) === 'true') return true;
-        // Source of truth: DB (via AuthContext)
-        return isModalDismissed(`tour_${context}`);
-    }, [isModalDismissed, authLoading]);
+        // ARCHIVED FEATURE: Tour is permanently disabled, always return true.
+        return true;
+    }, []);
 
     const dismissWelcome = useCallback(() => {
         setShowWelcome(false);
@@ -366,16 +351,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }, [markOnboardingCompleted]);
 
     const startOnboarding = useCallback((context: OnboardingContext) => {
-        // Guard 0: Don't start if auth is loading (we don't know dismissal state yet)
-        if (authLoading) return;
-        // Guard 1: Use centralized helper
-        if (hasCompletedContext(context)) return;
-        // Guard 2: Don't start a new tour if one is already active
-        if (isActive) return;
-        setActiveContext(context);
-        setCurrentStepIndex(0);
-        setIsActive(true);
-    }, [hasCompletedContext, isActive, authLoading]);
+        // ARCHIVED FEATURE: Forcefully disable tour startup
+        return;
+    }, []);
 
     const steps = activeContext ? STEPS_BY_CONTEXT[activeContext] : [];
 
