@@ -93,32 +93,36 @@ export function useConcorsoData(categorySlug: string) {
                     throw new Error(catError?.message || "Category not found");
                 }
 
-                // 2. Fetch Quizzes and Leaderboard IN PARALLEL
-                const [quizzesResult, leaderboardResult] = await Promise.all([
-                    supabase
-                        .from("quizzes")
-                        .select("*")
-                        .eq("category_id", category.id)
-                        .eq("is_archived", false)
-                        .order("year", { ascending: false }),
-                    supabase
-                        .from("concorso_leaderboard")
-                        .select("quiz_id, user_id")
-                ]);
+                // 2. Fetch Quizzes (Contests) for this Category
+                const { data: quizzesData, error: quizzesError } = await supabase
+                    .from("quizzes")
+                    .select("*")
+                    .eq("category_id", category.id)
+                    .eq("is_archived", false)
+                    .order("year", { ascending: false });
 
-                if (quizzesResult.error) {
-                    throw new Error(quizzesResult.error.message);
+                if (quizzesError) {
+                    throw new Error(quizzesError.message);
                 }
 
-                const quizzesData = quizzesResult.data || [];
-                const allLeaderboardEntries = leaderboardResult.data || [];
-                const quizIds = new Set(quizzesData.map(q => q.id));
+                const quizIds = quizzesData?.map(q => q.id) || [];
+                let allLeaderboardEntries: { quiz_id: string, user_id: string }[] = [];
+
+                if (quizIds.length > 0) {
+                    const { data: leaderboardData } = await supabase
+                        .from("concorso_leaderboard")
+                        .select("quiz_id, user_id")
+                        .in("quiz_id", quizIds);
+
+                    if (leaderboardData) {
+                        allLeaderboardEntries = leaderboardData;
+                    }
+                }
 
                 // 3. Calculate Candidati (Active Users) per Quiz
-                const relevantEntries = allLeaderboardEntries.filter(e => quizIds.has(e.quiz_id));
-                const quizzesWithData = quizzesData.map(q => {
+                const quizzesWithData = (quizzesData || []).map(q => {
                     const quizUsers = new Set(
-                        relevantEntries
+                        allLeaderboardEntries
                             .filter(entry => entry.quiz_id === q.id)
                             .map(entry => entry.user_id)
                     );
@@ -136,7 +140,7 @@ export function useConcorsoData(categorySlug: string) {
                 });
 
                 // 4. Total category candidates (unique users across all quizzes)
-                const categoryUniqueUsers = new Set(relevantEntries.map(e => e.user_id));
+                const categoryUniqueUsers = new Set(allLeaderboardEntries.map(e => e.user_id));
 
                 setData({
                     category: {
