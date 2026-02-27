@@ -146,7 +146,7 @@ export default function BandoDetailPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="relative rounded-[24px] bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-5 shadow-sm"
+                    className="relative rounded-[24px] bg-white dark:bg-black/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-5 shadow-sm"
                 >
                     <div className="flex justify-between items-end mb-3">
                         <div>
@@ -163,7 +163,7 @@ export default function BandoDetailPage() {
                         </span>
                     </div>
                     {/* Progress Bar with Gradient */}
-                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-3 bg-slate-100 dark:bg-[#111] rounded-full overflow-hidden">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${progressPercent}%` }}
@@ -205,12 +205,12 @@ export default function BandoDetailPage() {
                 {/* 4. EXPANDABLE DESCRIPTION */}
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                    className="bg-white dark:bg-slate-900/50 backdrop-blur-sm rounded-[24px] p-6 border border-slate-200 dark:border-white/5"
+                    className="bg-white dark:bg-black/50 backdrop-blur-sm rounded-[24px] p-6 border border-slate-200 dark:border-white/5"
                 >
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">Descrizione</h3>
                     <div className={`relative overflow-hidden transition-all duration-500 ease-ios ${expandedDesc ? 'max-h-[2000px]' : 'max-h-32'}`}>
                         <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
-                            <Suspense fallback={<div className="animate-pulse h-24 bg-slate-100 dark:bg-slate-800 rounded-xl w-full" />}>
+                            <Suspense fallback={<div className="animate-pulse h-24 bg-slate-100 dark:bg-[#111] rounded-xl w-full" />}>
                                 <Markdown
                                     components={{
                                         h1: ({ ...props }) => <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-6 mb-2" {...props} />,
@@ -305,7 +305,7 @@ function InfoTile({ icon: Icon, label, value, delay, color, bg }: { icon: any, l
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay, type: 'spring', stiffness: 300 }}
-            className="flex flex-col items-center p-4 rounded-[24px] bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-white/5 shadow-soft text-center h-full min-h-[140px]"
+            className="flex flex-col items-center p-4 rounded-[24px] bg-white dark:bg-black/60 border border-slate-100 dark:border-white/5 shadow-soft text-center h-full min-h-[140px]"
         >
             <div className="flex-1 flex flex-col items-center justify-start pt-2">
                 <div className={`w-12 h-12 rounded-[18px] ${bg} ${color} flex items-center justify-center mb-3`}>
@@ -327,7 +327,7 @@ function ActionRow({ icon: Icon, label, href, highlight }: { icon: any, label: s
             className={`flex items-center justify-between p-4 rounded-[24px] border transition-all active:scale-[0.98]
                 ${highlight
                     ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                    : 'bg-white dark:bg-slate-800/50 text-slate-700 dark:text-white border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    : 'bg-white dark:bg-[#111]/50 text-slate-700 dark:text-white border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
         >
             <div className="flex items-center gap-3">
@@ -344,7 +344,7 @@ function ActionCard({ icon: Icon, label, href, onClick }: { icon: any, label: st
     return (
         <Component
             href={href} onClick={onClick}
-            className="flex flex-col items-center justify-center gap-2 p-4 rounded-[24px] bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="flex flex-col items-center justify-center gap-2 p-4 rounded-[24px] bg-white dark:bg-[#111]/50 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
         >
             <Icon className="w-6 h-6 text-slate-400" />
             <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{label}</span>

@@ -92,7 +92,7 @@ export default function MetricModal({ isOpen, onClose, type }: MetricModalProps)
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: "100%", opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-t-[40px] sm:rounded-[40px] overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10"
+                        className="relative w-full max-w-sm bg-white dark:bg-black rounded-t-[40px] sm:rounded-[40px] overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10"
                     >
                         {/* Shimmer Effect */}
                         <div className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-20 ${details.color.split(' ')[0]}`} />

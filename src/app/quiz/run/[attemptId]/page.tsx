@@ -651,7 +651,7 @@ export default function QuizRunnerPage() {
                         {/* Left: Close */}
                         <button
                             onClick={() => setShowExitConfirm(true)}
-                            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-[#111] hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                         >
                             <X className="w-5 h-5 text-[var(--foreground)] opacity-50" />
                         </button>
@@ -669,7 +669,7 @@ export default function QuizRunnerPage() {
                         {/* Right: Mode Toggle + Settings */}
                         <div className="flex items-center gap-2">
                             {/* Mode Toggle */}
-                            <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-0.5">
+                            <div className="hidden sm:flex items-center bg-slate-100 dark:bg-[#111] rounded-full p-0.5">
                                 <button
                                     onClick={() => setInstantCheck(!instantCheck)}
                                     className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${instantCheck
@@ -737,7 +737,7 @@ export default function QuizRunnerPage() {
 
                             // Determine styling
                             let cardStyle = "bg-[var(--card)] border-[var(--card-border)]";
-                            let badgeStyle = "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400";
+                            let badgeStyle = "bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400";
                             let textStyle = "text-[var(--foreground)] opacity-80";
 
                             if (isLocked) {
@@ -750,7 +750,7 @@ export default function QuizRunnerPage() {
                                     badgeStyle = "bg-red-500 text-white";
                                     textStyle = "text-red-700 dark:text-red-400";
                                 } else {
-                                    cardStyle = "bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 opacity-50";
+                                    cardStyle = "bg-slate-50 dark:bg-black/50 border-slate-100 dark:border-slate-800 opacity-50";
                                 }
                             } else if (isSelected) {
                                 cardStyle = "bg-[#00B1FF]/5 border-[#00B1FF]";
@@ -846,7 +846,7 @@ export default function QuizRunnerPage() {
                     </div>
 
                     {/* Border line */}
-                    <div className="h-px bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-px bg-slate-100 dark:bg-[#111]" />
 
                     {/* Collapsible Question Pills */}
                     <div
@@ -867,7 +867,7 @@ export default function QuizRunnerPage() {
 
                                     if (isActive) {
                                         // Current: Blue Outline ("corners only")
-                                        buttonClass = "bg-white dark:bg-slate-900 text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm scale-110 z-10";
+                                        buttonClass = "bg-white dark:bg-black text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm scale-110 z-10";
                                     } else if (hasAnswer) {
                                         // Answered: Solid Blue
                                         buttonClass = "bg-[#00B1FF] text-white shadow-sm";
@@ -913,8 +913,8 @@ export default function QuizRunnerPage() {
                                     }}
                                     disabled={currentIndex === 0}
                                     className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
-                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98]'
+                                        ? 'bg-slate-100 dark:bg-[#111] text-slate-300 dark:text-slate-600'
+                                        : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98]'
                                         }`}
                                 >
                                     <ChevronLeft className="w-5 h-5" />
@@ -934,7 +934,7 @@ export default function QuizRunnerPage() {
                                             hapticLight();
                                             setCurrentIndex(p => Math.min(answering.length - 1, p + 1));
                                         }}
-                                        className="flex-1 py-3 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                        className="flex-1 py-3 rounded-xl font-semibold text-[15px] bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                     >
                                         Successiva
                                         <ChevronRight className="w-5 h-5" />
@@ -987,7 +987,7 @@ export default function QuizRunnerPage() {
                                 <div className="pt-4 border-t border-[var(--card-border)]">
                                     <button
                                         onClick={() => setShowReportModal(true)}
-                                        className="w-full py-3 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                        className="w-full py-3 flex items-center justify-center gap-2 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                                     >
                                         <Flag className="w-4 h-4" />
                                         Segnala un errore
@@ -999,7 +999,7 @@ export default function QuizRunnerPage() {
 
                             <button
                                 onClick={() => setShowSettings(false)}
-                                className="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold rounded-xl"
+                                className="w-full mt-6 py-3 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-400 font-semibold rounded-xl"
                             >
                                 Chiudi
                             </button>
@@ -1037,7 +1037,7 @@ export default function QuizRunnerPage() {
                                         onClick={() => setReportReason(r)}
                                         className={`w-full p-3 rounded-xl text-left text-sm font-medium transition-all ${reportReason === r
                                             ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 border border-amber-200 dark:border-amber-800'
-                                            : 'bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'
+                                            : 'bg-slate-50 dark:bg-[#111] text-[var(--foreground)] border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         {r}
@@ -1049,7 +1049,7 @@ export default function QuizRunnerPage() {
                                 value={reportDescription}
                                 onChange={(e) => setReportDescription(e.target.value)}
                                 placeholder="Dettagli aggiuntivi (opzionale)..."
-                                className="w-full mb-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none text-sm text-[var(--foreground)] focus:ring-2 focus:ring-amber-500 min-h-[80px]"
+                                className="w-full mb-4 p-3 rounded-xl bg-slate-50 dark:bg-[#111] border-none text-sm text-[var(--foreground)] focus:ring-2 focus:ring-amber-500 min-h-[80px]"
                             />
 
                             <button

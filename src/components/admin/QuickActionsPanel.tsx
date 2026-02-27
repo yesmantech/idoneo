@@ -92,7 +92,7 @@ export default function QuickActionsPanel() {
     ];
 
     return (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] p-6 shadow-sm">
+        <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-[24px] p-6 shadow-sm">
             {/* Header */}
             <div className="flex items-center gap-2 mb-5">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
@@ -110,7 +110,7 @@ export default function QuickActionsPanel() {
                         disabled={activeAction === action.id}
                         className={`
                             relative p-4 rounded-xl text-left transition-all duration-200
-                            bg-slate-50 dark:bg-slate-800/50 
+                            bg-slate-50 dark:bg-[#111]/50 
                             hover:bg-slate-100 dark:hover:bg-slate-800 
                             hover:shadow-md hover:scale-[1.02] active:scale-[0.98]
                             disabled:opacity-50 disabled:cursor-wait

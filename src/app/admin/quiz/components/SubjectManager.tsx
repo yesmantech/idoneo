@@ -127,21 +127,21 @@ export default function SubjectManager({
                         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                             <div>
                                 <label className="block font-bold text-[var(--foreground)] opacity-40 mb-1.5">Concorso Afferenza *</label>
-                                <select className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-medium" value={subjectQuizId} onChange={e => setSubjectQuizId(e.target.value)}>
+                                <select className="w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-medium" value={subjectQuizId} onChange={e => setSubjectQuizId(e.target.value)}>
                                     {quizzes.map(q => <option key={q.id} value={q.id}>{q.title}</option>)}
                                 </select>
                             </div>
                             <div>
                                 <label className="block font-bold text-[var(--foreground)] opacity-40 mb-1.5">Nome Materia *</label>
-                                <input required className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-medium placeholder:text-[var(--foreground)] placeholder:opacity-40" value={subjectName} onChange={e => setSubjectName(e.target.value)} placeholder="es. Diritto Costituzionale" />
+                                <input required className="w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-medium placeholder:text-[var(--foreground)] placeholder:opacity-40" value={subjectName} onChange={e => setSubjectName(e.target.value)} placeholder="es. Diritto Costituzionale" />
                             </div>
                             <div>
                                 <label className="block font-bold text-[var(--foreground)] opacity-40 mb-1.5">Codice (opz)</label>
-                                <input className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-mono text-xs" value={subjectCode} onChange={e => setSubjectCode(e.target.value)} placeholder="DIR-COST" />
+                                <input className="w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none font-mono text-xs" value={subjectCode} onChange={e => setSubjectCode(e.target.value)} placeholder="DIR-COST" />
                             </div>
                             <div>
                                 <label className="block font-bold text-[var(--foreground)] opacity-40 mb-1.5">Descrizione</label>
-                                <textarea className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none h-20" value={subjectDescription} onChange={e => setSubjectDescription(e.target.value)} />
+                                <textarea className="w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-[var(--foreground)] focus:ring-2 focus:ring-brand-cyan/20 focus:border-brand-cyan outline-none h-20" value={subjectDescription} onChange={e => setSubjectDescription(e.target.value)} />
                             </div>
 
                             <div className="flex gap-3 pt-2">
@@ -172,13 +172,13 @@ export default function SubjectManager({
                         <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px] font-bold">
                             <button
                                 onClick={() => setShowArchivedSubjects(false)}
-                                className={`px-3 py-1.5 rounded-lg transition-all ${!showArchivedSubjects ? "bg-white dark:bg-slate-800 text-[var(--foreground)] shadow-sm" : "text-[var(--foreground)] opacity-40 hover:opacity-100"}`}
+                                className={`px-3 py-1.5 rounded-lg transition-all ${!showArchivedSubjects ? "bg-white dark:bg-[#111] text-[var(--foreground)] shadow-sm" : "text-[var(--foreground)] opacity-40 hover:opacity-100"}`}
                             >
                                 Attive
                             </button>
                             <button
                                 onClick={() => setShowArchivedSubjects(true)}
-                                className={`px-3 py-1.5 rounded-lg transition-all ${showArchivedSubjects ? "bg-white dark:bg-slate-800 text-[var(--foreground)] shadow-sm" : "text-[var(--foreground)] opacity-40 hover:opacity-100"}`}
+                                className={`px-3 py-1.5 rounded-lg transition-all ${showArchivedSubjects ? "bg-white dark:bg-[#111] text-[var(--foreground)] shadow-sm" : "text-[var(--foreground)] opacity-40 hover:opacity-100"}`}
                             >
                                 Archiviate
                             </button>

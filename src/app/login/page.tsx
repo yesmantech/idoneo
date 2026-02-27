@@ -138,7 +138,7 @@ export default function LoginPage() {
                 {decorativeIcons.map((item, idx) => (
                     <div
                         key={idx}
-                        className={`absolute rounded-full flex items-center justify-center ${item.bg} dark:bg-slate-800/50 ${item.size} animate-in fade-in zoom-in duration-1000 opacity-60 dark:opacity-40`}
+                        className={`absolute rounded-full flex items-center justify-center ${item.bg} dark:bg-[#111]/50 ${item.size} animate-in fade-in zoom-in duration-1000 opacity-60 dark:opacity-40`}
                         style={{
                             top: item.top,
                             left: item.left,
@@ -180,7 +180,7 @@ export default function LoginPage() {
                         <p className="text-lg text-[var(--foreground)] opacity-60 leading-relaxed max-w-sm mx-auto">
                             Ti abbiamo inviato un link magico per accedere. Cliccalo per confermare la tua identità!
                         </p>
-                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm text-[var(--foreground)] opacity-50 border border-slate-100 dark:border-slate-700">
+                        <div className="p-4 bg-slate-50 dark:bg-[#111] rounded-xl text-sm text-[var(--foreground)] opacity-50 border border-slate-100 dark:border-slate-700">
                             Non trovi l'email? Controlla nello spam o riprova.
                         </div>
                         <Button
@@ -203,7 +203,7 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full h-14 px-5 rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 dark:focus:bg-slate-700 transition-all shadow-soft border border-slate-100 dark:border-slate-700"
+                                className="w-full h-14 px-5 rounded-2xl bg-white dark:bg-[#111] text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 dark:focus:bg-slate-700 transition-all shadow-soft border border-slate-100 dark:border-slate-700"
                             />
                             <input
                                 type="password"
@@ -211,7 +211,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full h-14 px-5 rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 dark:focus:bg-slate-700 transition-all shadow-soft border border-slate-100 dark:border-slate-700"
+                                className="w-full h-14 px-5 rounded-2xl bg-white dark:bg-[#111] text-lg font-medium text-[var(--foreground)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 dark:focus:bg-slate-700 transition-all shadow-soft border border-slate-100 dark:border-slate-700"
                             />
                             {isLogin && (
                                 <div className="flex justify-end px-2">

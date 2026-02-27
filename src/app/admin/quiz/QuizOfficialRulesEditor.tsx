@@ -194,7 +194,7 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                         <h2 className="text-2xl font-black text-[var(--foreground)] tracking-tight">Regole Simulazione Ufficiale</h2>
                         <p className="text-sm font-medium text-[var(--foreground)] opacity-40 mt-1">{quiz.title}</p>
                     </div>
-                    <button onClick={onClose} className="text-[var(--foreground)] opacity-40 hover:opacity-100 transition-all bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-full">
+                    <button onClick={onClose} className="text-[var(--foreground)] opacity-40 hover:opacity-100 transition-all bg-slate-100 dark:bg-[#111] hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-full">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
@@ -216,7 +216,7 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                         <label className="block text-[var(--foreground)] opacity-40 font-bold text-xs uppercase tracking-wider mb-2">Durata (minuti)</label>
                                         <input
                                             type="number"
-                                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[var(--foreground)] font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
+                                            className="w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[var(--foreground)] font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
                                             value={timeLimit}
                                             onChange={e => setTimeLimit(Number(e.target.value))}
                                         />
@@ -225,23 +225,23 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                     <div className="grid grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-[var(--foreground)] opacity-30 font-bold text-[10px] uppercase tracking-wider mb-2 text-center">Esatti</label>
-                                            <input type="number" step="0.1" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-emerald-500 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500 text-center font-mono" value={pointsCorrect} onChange={e => setPointsCorrect(Number(e.target.value))} />
+                                            <input type="number" step="0.1" className="bg-white dark:bg-black border border-slate-200 dark:border-slate-700 text-emerald-500 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500 text-center font-mono" value={pointsCorrect} onChange={e => setPointsCorrect(Number(e.target.value))} />
                                         </div>
                                         <div>
                                             <label className="block text-[var(--foreground)] opacity-30 font-bold text-[10px] uppercase tracking-wider mb-2 text-center">Errati</label>
-                                            <input type="number" step="0.1" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-rose-500 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-rose-500 text-center font-mono" value={pointsWrong} onChange={e => setPointsWrong(Number(e.target.value))} />
+                                            <input type="number" step="0.1" className="bg-white dark:bg-black border border-slate-200 dark:border-slate-700 text-rose-500 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-rose-500 text-center font-mono" value={pointsWrong} onChange={e => setPointsWrong(Number(e.target.value))} />
                                         </div>
                                         <div>
                                             <label className="block text-[var(--foreground)] opacity-30 font-bold text-[10px] uppercase tracking-wider mb-2 text-center">Vuoti</label>
-                                            <input type="number" step="0.1" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[var(--foreground)] opacity-50 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-slate-500 text-center font-mono" value={pointsBlank} onChange={e => setPointsBlank(Number(e.target.value))} />
+                                            <input type="number" step="0.1" className="bg-white dark:bg-black border border-slate-200 dark:border-slate-700 text-[var(--foreground)] opacity-50 font-bold w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-slate-500 text-center font-mono" value={pointsBlank} onChange={e => setPointsBlank(Number(e.target.value))} />
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 pt-2 bg-slate-100 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <div className="flex items-center gap-3 pt-2 bg-slate-100 dark:bg-black p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                                         <input
                                             type="checkbox"
                                             id="isOfficial"
-                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-[#111] text-emerald-500 focus:ring-emerald-500"
                                             checked={isOfficial}
                                             onChange={e => setIsOfficial(e.target.checked)}
                                         />
@@ -274,7 +274,7 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                     {availableSubjects.length > 0 && (
                                         <div className="flex gap-2">
                                             <select
-                                                className="bg-white dark:bg-slate-900 text-[var(--foreground)] opacity-60 text-xs font-bold p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 max-w-[150px] focus:outline-none focus:border-purple-500"
+                                                className="bg-white dark:bg-black text-[var(--foreground)] opacity-60 text-xs font-bold p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 max-w-[150px] focus:outline-none focus:border-purple-500"
                                                 onChange={(e) => {
                                                     if (e.target.value) {
                                                         handleAddRule(e.target.value);
@@ -303,7 +303,7 @@ export default function QuizOfficialRulesEditor({ quiz, onClose, onUpdate }: Pro
                                             const isError = rule.question_count > available;
 
                                             return (
-                                                <div key={rule.subject_id} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
+                                                <div key={rule.subject_id} className="bg-white dark:bg-black p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-[var(--foreground)] opacity-80 text-sm truncate" title={subjectName}>{subjectName}</p>
                                                         <p className="text-[10px] text-[var(--foreground)] opacity-30 font-medium mt-0.5">Disponibili: <span className="opacity-100">{available}</span></p>

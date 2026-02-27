@@ -22,7 +22,7 @@ function getAttemptTypeDisplay(mode?: string | null) {
         case 'simulation':
             return { label: 'Simulazione', className: 'bg-sky-100 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400' };
         default:
-            return { label: 'Simulazione', className: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' };
+            return { label: 'Simulazione', className: 'bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400' };
     }
 }
 

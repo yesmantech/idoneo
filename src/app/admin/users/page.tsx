@@ -37,7 +37,7 @@ export default function AdminUsersPage() {
             ) : (
                 <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-[20px] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-colors">
                     <table className="w-full text-left text-sm text-[var(--foreground)] opacity-70">
-                        <thead className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-[var(--card-border)] text-[var(--foreground)] opacity-40 uppercase text-[10px] font-bold tracking-widest">
+                        <thead className="bg-slate-50/50 dark:bg-[#111]/30 border-b border-[var(--card-border)] text-[var(--foreground)] opacity-40 uppercase text-[10px] font-bold tracking-widest">
                             <tr>
                                 <th className="px-6 py-4">ID</th>
                                 <th className="px-6 py-4">Nickname</th>
@@ -58,7 +58,7 @@ export default function AdminUsersPage() {
                                     <td className="px-6 py-4">
                                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${user.role === 'admin'
                                             ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/30'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50'
+                                            : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50'
                                             }`}>
                                             {user.role}
                                         </span>

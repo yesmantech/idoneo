@@ -99,7 +99,7 @@ export default function PowerUsersCard() {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] p-6 shadow-sm">
+        <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-[24px] p-6 shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
@@ -110,7 +110,7 @@ export default function PowerUsersCard() {
                 </div>
 
                 {/* Toggle */}
-                <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                <div className="flex bg-slate-100 dark:bg-[#111] rounded-lg p-1">
                     <button
                         onClick={() => setViewMode('streak')}
                         className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${viewMode === 'streak'
@@ -138,7 +138,7 @@ export default function PowerUsersCard() {
             {loading ? (
                 <div className="space-y-3">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-12 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse" />
+                        <div key={i} className="h-12 bg-slate-100 dark:bg-[#111] rounded-xl animate-pulse" />
                     ))}
                 </div>
             ) : users.length === 0 ? (

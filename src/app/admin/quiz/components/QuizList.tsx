@@ -37,7 +37,7 @@ export default function QuizList({
                 <label className="flex gap-2 text-xs cursor-pointer text-[var(--foreground)] opacity-50 hover:opacity-100 font-medium bg-[var(--card)] px-3 py-1.5 rounded-full border border-[var(--card-border)] shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800">
                     <input
                         type="checkbox"
-                        className="rounded bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-brand-cyan focus:ring-brand-cyan"
+                        className="rounded bg-white dark:bg-[#111] border-slate-300 dark:border-slate-700 text-brand-cyan focus:ring-brand-cyan"
                         checked={showArchived}
                         onChange={e => onToggleShowArchived(e.target.checked)}
                     />
@@ -67,7 +67,7 @@ export default function QuizList({
                                 const roleName = categories.find(c => c.id === anyQ.category_id)?.title || "-";
                                 const isArchived = q.is_archived;
                                 return (
-                                    <tr key={q.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${isArchived ? "bg-slate-50/50 dark:bg-slate-900/50 grayscale opacity-40" : ""}`}>
+                                    <tr key={q.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${isArchived ? "bg-slate-50/50 dark:bg-black/50 grayscale opacity-40" : ""}`}>
                                         <td className="px-6 py-4">
                                             <div className="font-bold text-[var(--foreground)] opacity-80 text-sm mb-0.5">{q.title}</div>
                                             <div className="text-[10px] text-[var(--foreground)] opacity-40 font-mono bg-slate-100 dark:bg-slate-950 inline-block px-1.5 rounded border border-slate-200 dark:border-slate-800">{anyQ.slug}</div>

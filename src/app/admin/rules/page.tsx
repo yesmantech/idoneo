@@ -179,7 +179,7 @@ export default function AdminRulesPage() {
     };
 
     const availableSubjects = subjects.filter(s => !rules.find(r => r.subject_id === s.id));
-    const inputClass = "w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-[var(--foreground)] placeholder-[var(--foreground)]/30 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all";
+    const inputClass = "w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-black text-[var(--foreground)] placeholder-[var(--foreground)]/30 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/30 focus:border-[#00B1FF] transition-all";
 
     // No quiz selected
     if (!quizId) {
@@ -227,7 +227,7 @@ export default function AdminRulesPage() {
             <div className="grid md:grid-cols-2 gap-6">
                 {/* LEFT: Global Settings */}
                 <div className="bg-[var(--card)] rounded-[20px] border border-[var(--card-border)] shadow-sm overflow-hidden text-[var(--foreground)]">
-                    <div className="p-6 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
+                    <div className="p-6 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-black/50 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
                             <Settings className="w-5 h-5 text-emerald-500" />
                         </div>
@@ -237,7 +237,7 @@ export default function AdminRulesPage() {
                         </div>
                     </div>
 
-                    <div className="p-6 space-y-6 bg-slate-50/30 dark:bg-slate-900/10">
+                    <div className="p-6 space-y-6 bg-slate-50/30 dark:bg-black/10">
                         {/* Time */}
                         <div>
                             <label className="block text-sm font-medium opacity-60 mb-1.5 flex items-center gap-2">
@@ -253,7 +253,7 @@ export default function AdminRulesPage() {
                         </div>
 
                         {/* Points */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+                        <div className="bg-white dark:bg-black rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
                             <h4 className="text-sm font-bold opacity-60 mb-4">Punteggi</h4>
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
@@ -287,7 +287,7 @@ export default function AdminRulesPage() {
                                     <input
                                         type="number"
                                         step="0.01"
-                                        className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] font-bold text-center focus:outline-none focus:border-slate-400 transition-all"
+                                        className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#111] text-[var(--foreground)] font-bold text-center focus:outline-none focus:border-slate-400 transition-all"
                                         value={pointsBlank}
                                         onChange={e => setPointsBlank(Number(e.target.value))}
                                     />
@@ -296,7 +296,7 @@ export default function AdminRulesPage() {
                         </div>
 
                         {/* Official Checkbox */}
-                        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800">
+                        <div className="bg-white dark:bg-black rounded-xl p-4 border border-slate-100 dark:border-slate-800">
                             <label className="flex items-center gap-3 cursor-pointer select-none">
                                 <div className="relative flex items-center">
                                     <input
@@ -328,7 +328,7 @@ export default function AdminRulesPage() {
 
                 {/* RIGHT: Subject Distribution */}
                 <div className="bg-[var(--card)] rounded-[20px] border border-[var(--card-border)] shadow-sm overflow-hidden flex flex-col text-[var(--foreground)]">
-                    <div className="p-6 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+                    <div className="p-6 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-black/50 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
                                 <BookOpen className="w-5 h-5 text-violet-500" />
@@ -343,7 +343,7 @@ export default function AdminRulesPage() {
                         </div>
                     </div>
 
-                    <div className="p-6 flex-1 space-y-4 bg-slate-50/30 dark:bg-slate-900/10 overflow-y-auto max-h-[400px]">
+                    <div className="p-6 flex-1 space-y-4 bg-slate-50/30 dark:bg-black/10 overflow-y-auto max-h-[400px]">
                         {/* Add subject dropdown */}
                         {availableSubjects.length > 0 && (
                             <div className="flex gap-2">
@@ -366,7 +366,7 @@ export default function AdminRulesPage() {
 
                         {/* Rules list */}
                         {rules.length === 0 ? (
-                            <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                            <div className="text-center py-12 bg-white dark:bg-black rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                                 <BookOpen className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
                                 <p className="text-[var(--foreground)] opacity-40 text-sm">Nessuna materia configurata</p>
                             </div>
@@ -377,7 +377,7 @@ export default function AdminRulesPage() {
                                 const isError = rule.question_count > available;
 
                                 return (
-                                    <div key={rule.subject_id} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4 group">
+                                    <div key={rule.subject_id} className="bg-white dark:bg-black p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4 group">
                                         <div className="flex-1 min-w-0">
                                             <p className="font-semibold text-[var(--foreground)] truncate">{subjectName}</p>
                                             <p className="text-xs opacity-40 mt-0.5">
@@ -391,7 +391,7 @@ export default function AdminRulesPage() {
                                                     type="number"
                                                     className={`w-20 px-3 py-2 rounded-lg border-2 text-center font-bold focus:outline-none transition-all ${isError
                                                         ? 'border-red-300 bg-red-50 dark:bg-rose-900/20 text-red-600 dark:text-rose-400'
-                                                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] focus:border-[#00B1FF]'
+                                                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#111] text-[var(--foreground)] focus:border-[#00B1FF]'
                                                         }`}
                                                     value={rule.question_count}
                                                     onChange={e => handleUpdateRuleCount(idx, parseInt(e.target.value) || 0)}
@@ -401,7 +401,7 @@ export default function AdminRulesPage() {
 
                                             <button
                                                 onClick={() => handleRemoveRule(idx)}
-                                                className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-rose-900/20 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                                className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#111] hover:bg-red-50 dark:hover:bg-rose-900/20 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -413,7 +413,7 @@ export default function AdminRulesPage() {
                     </div>
 
                     {/* Save rules button */}
-                    <div className="p-6 border-t border-[var(--card-border)] bg-slate-50/50 dark:bg-slate-900/50">
+                    <div className="p-6 border-t border-[var(--card-border)] bg-slate-50/50 dark:bg-black/50">
                         <button
                             onClick={handleSaveRules}
                             disabled={saving || rules.some(r => r.question_count > (subjectStats[r.subject_id] || 0))}

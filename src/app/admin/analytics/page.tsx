@@ -117,7 +117,7 @@ export default function AdminAnalyticsPage() {
                         </p>
                     </div>
                 </div>
-                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-[#111] rounded-xl">
                     <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -136,7 +136,7 @@ export default function AdminAnalyticsPage() {
                 <div className="lg:col-span-2 space-y-6">
 
                     {/* Performance Chart */}
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-[24px] shadow-sm">
+                    <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800 p-6 rounded-[24px] shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
@@ -155,7 +155,7 @@ export default function AdminAnalyticsPage() {
                                         <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[70%]">{p.quizTitle}</span>
                                         <span className="font-bold text-slate-900 dark:text-white">{Math.round(p.successRate)}%</span>
                                     </div>
-                                    <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div className="h-2.5 w-full bg-slate-100 dark:bg-[#111] rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-1000 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
                                             style={{ width: `${p.successRate}%` }}
@@ -255,7 +255,7 @@ export default function AdminAnalyticsPage() {
                     <PowerUsersCard />
 
                     {/* AI Insights */}
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] p-6 shadow-sm">
+                    <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-[24px] p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-5">
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">

@@ -106,7 +106,7 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
                             onClick={() => handleAction(rec)}
-                            className={`w-full flex items-center gap-4 p-4 rounded-[20px] bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 ${config.borderHover} hover:shadow-md active:scale-[0.98] transition-all text-left group relative overflow-hidden`}
+                            className={`w-full flex items-center gap-4 p-4 rounded-[20px] bg-white dark:bg-[#111]/50 border border-slate-100 dark:border-slate-700/50 ${config.borderHover} hover:shadow-md active:scale-[0.98] transition-all text-left group relative overflow-hidden`}
                         >
                             {/* Subtle background glow */}
                             <div className={`absolute inset-0 ${config.bgGlow} opacity-0 group-hover:opacity-100 transition-opacity`} />

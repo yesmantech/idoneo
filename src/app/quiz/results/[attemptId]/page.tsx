@@ -502,7 +502,7 @@ export default function QuizResultsPage() {
                     {/* Left Sidebar - Tabs + CTA (Desktop) */}
                     <div className="lg:space-y-4">
                         {/* Tabs */}
-                        <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-xl mb-4 lg:mb-0 lg:bg-[var(--card)] lg:border lg:border-[var(--card-border)] lg:rounded-2xl lg:p-3 lg:shadow-sm">
+                        <div className="bg-slate-200/60 dark:bg-[#111]/60 p-1 rounded-xl mb-4 lg:mb-0 lg:bg-[var(--card)] lg:border lg:border-[var(--card-border)] lg:rounded-2xl lg:p-3 lg:shadow-sm">
                             <div className="flex lg:flex-col lg:gap-1">
                                 <button
                                     onClick={() => setActiveTab('errate')}
@@ -611,7 +611,7 @@ export default function QuizResultsPage() {
                                                 ? 'bg-red-100 dark:bg-red-900/30'
                                                 : activeTab === 'corrette'
                                                     ? 'bg-emerald-100 dark:bg-emerald-900/30'
-                                                    : 'bg-slate-100 dark:bg-slate-800'
+                                                    : 'bg-slate-100 dark:bg-[#111]'
                                                 }`}>
                                                 {activeTab === 'errate' && <X className="w-5 h-5 lg:w-6 lg:h-6 text-red-500" />}
                                                 {activeTab === 'corrette' && <Check className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-500" />}

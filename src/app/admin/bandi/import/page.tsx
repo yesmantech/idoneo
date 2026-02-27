@@ -288,7 +288,7 @@ export default function AdminBandiImportPage() {
                     onClick={() => setMode('import')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'import'
                             ? 'bg-emerald-500 text-white'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            : 'bg-white dark:bg-[#111] text-slate-600 dark:text-slate-300'
                         }`}
                 >
                     <Upload className="w-4 h-4 inline mr-2" />
@@ -298,7 +298,7 @@ export default function AdminBandiImportPage() {
                     onClick={() => setMode('export')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'export'
                             ? 'bg-emerald-500 text-white'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            : 'bg-white dark:bg-[#111] text-slate-600 dark:text-slate-300'
                         }`}
                 >
                     <Download className="w-4 h-4 inline mr-2" />
@@ -309,7 +309,7 @@ export default function AdminBandiImportPage() {
             {mode === 'import' ? (
                 <div className="space-y-6">
                     {/* Import Instructions */}
-                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6">
+                    <div className="bg-white dark:bg-[#111] rounded-xl p-6">
                         <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                             Importa Bandi da CSV
                         </h2>
@@ -357,7 +357,7 @@ export default function AdminBandiImportPage() {
 
                     {/* Result */}
                     {result && (
-                        <div className="bg-white dark:bg-slate-800 rounded-xl p-6">
+                        <div className="bg-white dark:bg-[#111] rounded-xl p-6">
                             <div className="flex items-center gap-3 mb-4">
                                 {result.errors.length === 0 ? (
                                     <CheckCircle2 className="w-6 h-6 text-emerald-500" />
@@ -391,7 +391,7 @@ export default function AdminBandiImportPage() {
                     )}
                 </div>
             ) : (
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-6">
+                <div className="bg-white dark:bg-[#111] rounded-xl p-6">
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                         Esporta Bandi in CSV
                     </h2>

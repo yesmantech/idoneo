@@ -9,40 +9,36 @@ import {
 } from "lucide-react";
 import ReadinessCard from "@/components/role/ReadinessCard";
 import { Button } from "@/components/ui/Button";
-import TierSLoader from "@/components/ui/TierSLoader";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ContestPage() {
   const { category, contestSlug } = useParams<{ category: string; contestSlug: string }>();
   const navigate = useNavigate();
-
   const { user } = useAuth();
-  const [contest, setContest] = useState<Contest | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [attempts, setAttempts] = useState<any[]>([]);
 
-  // Load contest data (fast, renders page immediately)
-  useEffect(() => {
-    if (!contestSlug) return;
-    setLoading(true);
-    getContestBySlug(contestSlug).then(data => {
-      setContest(data);
-      setLoading(false);
-    });
-  }, [contestSlug]);
+  // Contest data — cached for 5 min, instant on repeat visits
+  const { data: contest, isLoading: loading } = useQuery({
+    queryKey: ['contest', contestSlug],
+    queryFn: () => getContestBySlug(contestSlug || ''),
+    enabled: !!contestSlug,
+    staleTime: 1000 * 60 * 5,
+  });
 
-  // Load user attempts separately (doesn't block page render)
-  useEffect(() => {
-    if (!contest || !user) return;
-    supabase
-      .from('quiz_attempts')
-      .select('*')
-      .eq('quiz_id', contest.id)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(({ data: myAttempts }) => {
-        if (myAttempts) setAttempts(myAttempts);
-      });
-  }, [contest?.id, user]);
+  // Attempts — cached separately, loads independently
+  const { data: attempts = [] } = useQuery({
+    queryKey: ['contest-attempts', contest?.id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('quiz_attempts')
+        .select('*')
+        .eq('quiz_id', contest!.id)
+        .eq('user_id', user!.id)
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+    enabled: !!contest?.id && !!user?.id,
+    staleTime: 1000 * 60 * 5,
+  });
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">

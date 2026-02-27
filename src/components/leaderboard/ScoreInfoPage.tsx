@@ -30,7 +30,7 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
                 <div className="p-5 max-w-lg mx-auto pb-20">
 
                     {/* Tabs / Segmented Control */}
-                    <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-[14px] mb-8 relative border border-slate-200 dark:border-slate-700">
+                    <div className="flex p-1 bg-slate-100 dark:bg-[#111] rounded-[14px] mb-8 relative border border-slate-200 dark:border-slate-700">
                         {/* Active Tab Indicator */}
                         <motion.div
                             layoutId="activeTab"
@@ -138,7 +138,7 @@ function PrepContent() {
             </div>
 
             {/* Reliability Note */}
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 space-y-3">
+            <div className="bg-slate-50 dark:bg-[#111]/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--foreground)] font-bold">
                     <AlertTriangle className="w-5 h-5 text-amber-500" />
                     <span>Affidabilità del punteggio</span>

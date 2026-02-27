@@ -89,7 +89,7 @@ export default function ConfirmDialog({
                 </div>
 
                 {/* Actions */}
-                <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-[var(--card-border)] flex justify-end gap-3">
+                <div className="p-4 bg-slate-50 dark:bg-black/50 border-t border-[var(--card-border)] flex justify-end gap-3">
                     <button
                         onClick={onClose}
                         disabled={loading}

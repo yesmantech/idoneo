@@ -91,7 +91,7 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
                 <div className="flex-1 relative group">
                     <button
                         type="submit"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-focus-within:text-brand-blue group-focus-within:bg-brand-blue/10 dark:group-focus-within:bg-brand-blue/20 transition-all hover:bg-brand-blue hover:text-white"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400 group-focus-within:text-brand-blue group-focus-within:bg-brand-blue/10 dark:group-focus-within:bg-brand-blue/20 transition-all hover:bg-brand-blue hover:text-white"
                     >
                         <Search className="w-4 h-4" />
                     </button>
@@ -109,7 +109,7 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
 
                 {/* Location Input */}
                 <div className="flex-1 relative group md:max-w-[30%]">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-focus-within:text-brand-blue group-focus-within:bg-brand-blue/10 dark:group-focus-within:bg-brand-blue/20 transition-all">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400 group-focus-within:text-brand-blue group-focus-within:bg-brand-blue/10 dark:group-focus-within:bg-brand-blue/20 transition-all">
                         <MapPin className="w-4 h-4" />
                     </div>
                     <input
@@ -133,7 +133,7 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
                         md:w-auto w-full px-6 py-3.5 rounded-[22px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px]
                         ${activeFiltersCount > 0
                             ? 'bg-brand-blue text-white shadow-sm hover:opacity-90'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}
+                            : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}
                     `}
                 >
                     <SlidersHorizontal className="w-4 h-4" />
@@ -301,7 +301,7 @@ function TierSFilterModal({
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                        className="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-[#111] text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -442,7 +442,7 @@ function TierSFilterModal({
                                 });
                                 onClose();
                             }}
-                            className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[14px] rounded-[20px] hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2"
+                            className="flex-1 py-4 bg-slate-100 dark:bg-[#111] text-slate-500 font-bold text-[14px] rounded-[20px] hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2"
                         >
                             <RotateCcw className="w-4 h-4" />
                             Reset

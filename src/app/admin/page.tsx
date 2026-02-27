@@ -213,7 +213,7 @@ export default function AdminQuestionsPage() {
         <div className="flex-1 w-full md:max-w-md relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40">🔍</span>
           <input
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40 focus:outline-none focus:bg-[var(--card)] focus:ring-2 focus:ring-[#00B1FF]/20 focus:border-[#00B1FF] transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40 focus:outline-none focus:bg-[var(--card)] focus:ring-2 focus:ring-[#00B1FF]/20 focus:border-[#00B1FF] transition-all"
             placeholder="Cerca per testo, materia, concorso..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -224,7 +224,7 @@ export default function AdminQuestionsPage() {
           <label className="flex items-center gap-2 text-sm text-[var(--foreground)] opacity-50 font-medium cursor-pointer select-none hover:opacity-100 transition-all">
             <input
               type="checkbox"
-              className="rounded-md bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-[#00B1FF] focus:ring-[#00B1FF]"
+              className="rounded-md bg-white dark:bg-black border-slate-300 dark:border-slate-700 text-[#00B1FF] focus:ring-[#00B1FF]"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
             />

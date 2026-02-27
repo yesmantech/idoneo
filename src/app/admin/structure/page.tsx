@@ -158,7 +158,7 @@ export default function AdminStructurePage() {
 
                 {/* COLUMN 1: CATEGORIES */}
                 <div className="flex flex-col bg-[var(--card)] border border-[var(--card-border)] rounded-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.04)] overflow-hidden">
-                    <div className="p-5 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
+                    <div className="p-5 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-black/50 flex justify-between items-center">
                         <h2 className="font-bold text-[var(--foreground)] flex items-center gap-2">
                             <span className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">1</span>
                             Categorie
@@ -180,7 +180,7 @@ export default function AdminStructurePage() {
                                 onClick={() => { setSelectedCatId(c.id); }}
                                 className={`p-4 rounded-2xl cursor-pointer border transition-all flex justify-between group ${c.is_archived ? 'opacity-50' : ''} ${selectedCatId === c.id
                                     ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 ring-1 ring-emerald-100 dark:ring-emerald-500/20 shadow-sm"
-                                    : "bg-slate-50/50 dark:bg-slate-900/50 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
+                                    : "bg-slate-50/50 dark:bg-black/50 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
                                     }`}
                             >
                                 <div>
@@ -210,17 +210,17 @@ export default function AdminStructurePage() {
                             </div>
                         ))}
                     </div>
-                    <div className="p-4 border-t border-[var(--card-border)] bg-slate-50/30 dark:bg-slate-900/30 space-y-3">
+                    <div className="p-4 border-t border-[var(--card-border)] bg-slate-50/30 dark:bg-black/30 space-y-3">
                         <div className="space-y-2">
                             <input
-                                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                                className="w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                                 placeholder="Nuova Categoria..."
                                 value={catTitle}
                                 onChange={e => { setCatTitle(e.target.value); setCatSlug(slugify(e.target.value)); }}
                             />
                             <div className="flex gap-2">
                                 <input
-                                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-[var(--foreground)] opacity-50 font-mono placeholder:text-[var(--foreground)]/30 focus:outline-none focus:border-slate-300 dark:focus:border-slate-600"
+                                    className="w-full bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-[var(--foreground)] opacity-50 font-mono placeholder:text-[var(--foreground)]/30 focus:outline-none focus:border-slate-300 dark:focus:border-slate-600"
                                     placeholder="slug-automatico"
                                     value={catSlug}
                                     onChange={e => setCatSlug(e.target.value)}
@@ -238,13 +238,13 @@ export default function AdminStructurePage() {
 
                 {/* COLUMN 2: CONTESTS (Quizzes) */}
                 <div className={`flex flex-col bg-[var(--card)] border border-[var(--card-border)] rounded-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-300 ${!selectedCatId ? "opacity-40 grayscale pointer-events-none" : "opacity-100"}`}>
-                    <div className="p-5 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
+                    <div className="p-5 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-black/50 flex justify-between items-center">
                         <h2 className="font-bold text-[var(--foreground)] flex items-center gap-2">
                             <span className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-bold">2</span>
                             Concorsi
                         </h2>
                         <div className="flex items-center gap-2">
-                            {selectedCat && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-[var(--foreground)] opacity-60 font-medium px-2 py-1 rounded-full">{selectedCat.title}</span>}
+                            {selectedCat && <span className="text-[10px] bg-slate-100 dark:bg-[#111] text-[var(--foreground)] opacity-60 font-medium px-2 py-1 rounded-full">{selectedCat.title}</span>}
                             <label className="flex items-center gap-1.5 text-[10px] text-[var(--foreground)] opacity-50 cursor-pointer hover:opacity-70">
                                 <input
                                     type="checkbox"
@@ -264,11 +264,11 @@ export default function AdminStructurePage() {
                             </div>
                         )}
                         {visibleQuizzes.map(q => (
-                            <div key={q.id} className={`p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shadow-sm flex flex-col gap-2 hover:border-amber-300 dark:hover:border-amber-500/30 hover:bg-amber-50/30 dark:hover:bg-amber-500/5 transition-all group ${q.is_archived ? 'opacity-50' : ''}`}>
+                            <div key={q.id} className={`p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-black/50 shadow-sm flex flex-col gap-2 hover:border-amber-300 dark:hover:border-amber-500/30 hover:bg-amber-50/30 dark:hover:bg-amber-500/5 transition-all group ${q.is_archived ? 'opacity-50' : ''}`}>
                                 <div className="flex justify-between items-start">
                                     <h4 className={`font-semibold text-sm text-[var(--foreground)] opacity-80 leading-tight group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors ${q.is_archived ? 'line-through' : ''}`}>{q.title}</h4>
                                     <div className="flex items-center gap-1.5">
-                                        {q.year && <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-[var(--foreground)] opacity-50 font-bold px-1.5 py-0.5 rounded-md">{q.year}</span>}
+                                        {q.year && <span className="text-[10px] bg-slate-200 dark:bg-[#111] text-[var(--foreground)] opacity-50 font-bold px-1.5 py-0.5 rounded-md">{q.year}</span>}
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleArchiveQuiz(q.id, !q.is_archived); }}
                                             className={`opacity-0 group-hover:opacity-100 p-1 rounded-lg transition-all text-xs ${q.is_archived ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' : 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'}`}
@@ -288,9 +288,9 @@ export default function AdminStructurePage() {
                             </div>
                         ))}
                     </div>
-                    <div className="p-4 border-t border-[var(--card-border)] bg-slate-50/30 dark:bg-slate-900/30">
+                    <div className="p-4 border-t border-[var(--card-border)] bg-slate-50/30 dark:bg-black/30">
                         <Link to="/admin/quiz">
-                            <button className="w-full bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-[var(--foreground)] opacity-70 border border-slate-200 dark:border-slate-700 text-xs py-3 rounded-xl font-bold transition-all shadow-sm">
+                            <button className="w-full bg-white dark:bg-black hover:bg-slate-50 dark:hover:bg-slate-800 text-[var(--foreground)] opacity-70 border border-slate-200 dark:border-slate-700 text-xs py-3 rounded-xl font-bold transition-all shadow-sm">
                                 Gestisci / Crea Concorsi
                             </button>
                         </Link>

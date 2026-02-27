@@ -105,7 +105,7 @@ export default function AdminUserDetailPage() {
             <div className="mb-6 flex items-center gap-4">
                 <button
                     onClick={() => navigate('/admin/users')}
-                    className="p-2 bg-white dark:bg-slate-800 rounded-full shadow-sm hover:scale-105 transition-transform"
+                    className="p-2 bg-white dark:bg-[#111] rounded-full shadow-sm hover:scale-105 transition-transform"
                 >
                     <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -179,7 +179,7 @@ export default function AdminUserDetailPage() {
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-[var(--card-border)] text-[var(--foreground)] opacity-40 uppercase text-[10px] font-bold tracking-widest">
+                        <thead className="bg-slate-50/50 dark:bg-[#111]/30 border-b border-[var(--card-border)] text-[var(--foreground)] opacity-40 uppercase text-[10px] font-bold tracking-widest">
                             <tr>
                                 <th className="px-6 py-4">Data</th>
                                 <th className="px-6 py-4">Quiz</th>
@@ -196,7 +196,7 @@ export default function AdminUserDetailPage() {
                                     </td>
                                     <td className="px-6 py-4 font-bold text-[var(--foreground)]">
                                         {attempt.quiz_title}
-                                        <span className="ml-2 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-[9px] text-slate-400 uppercase">
+                                        <span className="ml-2 px-1.5 py-0.5 bg-slate-100 dark:bg-[#111] rounded text-[9px] text-slate-400 uppercase">
                                             {attempt.mode || 'Normal'}
                                         </span>
                                     </td>

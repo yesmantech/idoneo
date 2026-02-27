@@ -46,7 +46,7 @@ export default function ReadinessCard({ history, theme, leaderboardData }: Readi
                     <div className="flex items-center justify-between relative z-10 w-full">
                         <div className="flex-1 pr-4">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500">
+                                <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-[#111] text-slate-500">
                                     Da iniziare
                                 </div>
                             </div>
@@ -57,7 +57,7 @@ export default function ReadinessCard({ history, theme, leaderboardData }: Readi
                                 Completa almeno 3 simulazioni per sbloccare il calcolo del livello di preparazione.
                             </p>
                         </div>
-                        <div className="relative w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 group-hover:bg-slate-100 dark:group-hover:bg-slate-700 transition-colors">
+                        <div className="relative w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-100 dark:border-slate-700 group-hover:bg-slate-100 dark:group-hover:bg-slate-700 transition-colors">
                             <Trophy className="w-6 h-6 text-slate-300 dark:text-slate-600" />
                         </div>
                     </div>
@@ -103,7 +103,7 @@ export default function ReadinessCard({ history, theme, leaderboardData }: Readi
                             <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${currentTheme.bg} ${currentTheme.text}`}>
                                 {label}
                             </div>
-                            <div className="w-4 h-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                            <div className="w-4 h-4 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400">
                                 <Info className="w-2.5 h-2.5" />
                             </div>
                         </div>
@@ -195,7 +195,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
 
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 opacity-70 hover:opacity-100 transition-colors z-50"
+                            className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-[#111] rounded-full text-slate-500 dark:text-slate-400 opacity-70 hover:opacity-100 transition-colors z-50"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -210,7 +210,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
 
                             <div className="space-y-4">
                                 {/* Levels */}
-                                <div className={`p-3 rounded-2xl flex items-center gap-3 border ${stats?.level === 'high' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700'}`}>
+                                <div className={`p-3 rounded-2xl flex items-center gap-3 border ${stats?.level === 'high' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : 'bg-slate-50 dark:bg-[#111]/50 border-slate-100 dark:border-slate-700'}`}>
                                     <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
                                         <Trophy className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
@@ -221,7 +221,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
                                     {stats?.level === 'high' && <CheckCircle2 className="w-5 h-5 text-emerald-500 ml-auto" />}
                                 </div>
 
-                                <div className={`p-3 rounded-2xl flex items-center gap-3 border ${stats?.level === 'medium' ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700'}`}>
+                                <div className={`p-3 rounded-2xl flex items-center gap-3 border ${stats?.level === 'medium' ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' : 'bg-slate-50 dark:bg-[#111]/50 border-slate-100 dark:border-slate-700'}`}>
                                     <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
                                         <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                                     </div>
@@ -232,7 +232,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
                                     {stats?.level === 'medium' && <CheckCircle2 className="w-5 h-5 text-amber-500 ml-auto" />}
                                 </div>
 
-                                <div className={`p-3 rounded-2xl flex items-center gap-3 border ${stats?.level === 'low' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700'}`}>
+                                <div className={`p-3 rounded-2xl flex items-center gap-3 border ${stats?.level === 'low' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-[#111]/50 border-slate-100 dark:border-slate-700'}`}>
                                     <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center flex-shrink-0">
                                         <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                                     </div>
@@ -259,7 +259,7 @@ function ReadinessInfoModal({ isOpen, onClose, theme, stats }: { isOpen: boolean
                                                 <span className="text-slate-600 dark:text-slate-300">{factor.label}</span>
                                                 <span className="text-slate-900 dark:text-slate-100">{Math.round(factor.value)}%</span>
                                             </div>
-                                            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                            <div className="h-1.5 w-full bg-slate-100 dark:bg-[#111] rounded-full overflow-hidden">
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${factor.value}%` }}

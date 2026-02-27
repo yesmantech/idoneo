@@ -223,7 +223,7 @@ export default function QuizForm({
                         </div>
 
                         <div className="flex items-center gap-3 pt-2">
-                            <input type="checkbox" id="arch_q" className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-brand-cyan focus:ring-brand-cyan" checked={quizIsArchived} onChange={e => setQuizIsArchived(e.target.checked)} />
+                            <input type="checkbox" id="arch_q" className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-[#111] text-brand-cyan focus:ring-brand-cyan" checked={quizIsArchived} onChange={e => setQuizIsArchived(e.target.checked)} />
                             <label htmlFor="arch_q" className="text-[var(--foreground)] opacity-50 font-medium select-none cursor-pointer">Segna come Archiviato (Nascosto)</label>
                         </div>
                     </div>
@@ -256,7 +256,7 @@ export default function QuizForm({
                         </div>
                         <div>
                             <label className="block text-[var(--foreground)] opacity-40 font-bold text-xs mb-1.5">Totale Domande</label>
-                            <div className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-center font-mono font-bold text-[var(--foreground)] opacity-30 cursor-not-allowed flex items-center justify-center gap-1" title="Calcolato automaticamente">
+                            <div className="w-full bg-slate-100 dark:bg-[#111]/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-center font-mono font-bold text-[var(--foreground)] opacity-30 cursor-not-allowed flex items-center justify-center gap-1" title="Calcolato automaticamente">
                                 <span>∑</span> {currentTotalQuestions}
                             </div>
                         </div>
@@ -277,7 +277,7 @@ export default function QuizForm({
                                 <p className="text-xs text-slate-500">Salva il concorso prima di configurare le materie.</p>
                             </div>
                         ) : (
-                            <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-60 overflow-y-auto shadow-sm">
+                            <div className="bg-slate-50 dark:bg-black border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-60 overflow-y-auto shadow-sm">
                                 {availableSubjects.length === 0 && <p className="p-6 text-xs text-slate-500 text-center italic">Nessuna materia attiva associata.</p>}
                                 <table className="w-full text-xs">
                                     <thead className="bg-slate-100 dark:bg-slate-950 text-[var(--foreground)] opacity-40 font-bold border-b border-[var(--card-border)]">

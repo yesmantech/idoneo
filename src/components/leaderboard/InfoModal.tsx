@@ -39,7 +39,7 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
                         {/* Close Button */}
                         <button
                             onClick={onClose}
-                            className="absolute top-3 right-3 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-[var(--foreground)] opacity-50 hover:opacity-100 z-10"
+                            className="absolute top-3 right-3 p-2 bg-slate-100 dark:bg-[#111] rounded-full text-[var(--foreground)] opacity-50 hover:opacity-100 z-10"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -111,7 +111,7 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
 function BulletRow({ icon, title, text, color }: { icon: React.ReactNode, title: string, text: string, color: 'cyan' | 'amber' }) {
     const bgClass = color === 'cyan' ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-500' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-500';
     return (
-        <div className="flex gap-3 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100/50 dark:border-slate-700/50">
+        <div className="flex gap-3 p-3 rounded-xl bg-slate-50/50 dark:bg-[#111]/50 border border-slate-100/50 dark:border-slate-700/50">
             <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center ${bgClass}`}>
                 {icon}
             </div>

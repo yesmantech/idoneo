@@ -61,7 +61,7 @@ export default function PreparazionePage() {
                 <div className="px-4 h-14 flex items-center gap-3">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100/50 dark:bg-[#111]/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
@@ -204,7 +204,7 @@ export default function PreparazionePage() {
                                         <span className="text-slate-600 dark:text-slate-300">{factor.label}</span>
                                         <span className="text-[var(--foreground)]">{Math.round(factor.value)}%</span>
                                     </div>
-                                    <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div className="h-2 w-full bg-slate-100 dark:bg-[#111] rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${factor.value}%` }}

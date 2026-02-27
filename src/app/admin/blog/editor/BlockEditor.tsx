@@ -71,7 +71,7 @@ function ParagraphBlock({ text, onChange }: ParagraphBlockProps) {
             value={text}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Scrivi il testo..."
-            className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-80 min-h-[100px] resize-y focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+            className="w-full p-3 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-80 min-h-[100px] resize-y focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
         />
     );
 }
@@ -89,7 +89,7 @@ function HeadingBlock({ level, text, onChangeLevel, onChangeText }: HeadingBlock
             <select
                 value={level}
                 onChange={(e) => onChangeLevel(parseInt(e.target.value) as 2 | 3)}
-                className="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
+                className="px-2 py-1 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
             >
                 <option value={2}>H2</option>
                 <option value={3}>H3</option>
@@ -99,7 +99,7 @@ function HeadingBlock({ level, text, onChangeLevel, onChangeText }: HeadingBlock
                 value={text}
                 onChange={(e) => onChangeText(e.target.value)}
                 placeholder="Titolo sezione..."
-                className="flex-1 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded font-bold text-[var(--foreground)] focus:outline-none"
+                className="flex-1 p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded font-bold text-[var(--foreground)] focus:outline-none"
             />
         </div>
     );
@@ -149,7 +149,7 @@ function ListBlock({ ordered, items, onChangeOrdered, onChangeItems }: ListBlock
                         value={item}
                         onChange={(e) => updateItem(itemIdx, e.target.value)}
                         placeholder="Elemento lista..."
-                        className="flex-1 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
+                        className="flex-1 p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
                     />
                     <button
                         onClick={() => removeItem(itemIdx)}
@@ -185,7 +185,7 @@ function CalloutBlock({ variant, title, text, onChangeVariant, onChangeTitle, on
             <select
                 value={variant}
                 onChange={(e) => onChangeVariant(e.target.value as typeof variant)}
-                className="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
+                className="px-2 py-1 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
             >
                 <option value="tip">💡 Tip</option>
                 <option value="warning">⚠️ Warning</option>
@@ -197,13 +197,13 @@ function CalloutBlock({ variant, title, text, onChangeVariant, onChangeTitle, on
                 value={title}
                 onChange={(e) => onChangeTitle(e.target.value)}
                 placeholder="Titolo callout..."
-                className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded font-medium text-[var(--foreground)]"
+                className="w-full p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded font-medium text-[var(--foreground)]"
             />
             <textarea
                 value={text}
                 onChange={(e) => onChangeText(e.target.value)}
                 placeholder="Contenuto callout..."
-                className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)] opacity-80"
+                className="w-full p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)] opacity-80"
             />
         </div>
     );
@@ -233,7 +233,7 @@ function FAQBlock({ items, onChangeItems }: FAQBlockProps) {
     return (
         <div className="space-y-4">
             {items.map((item, itemIdx) => (
-                <div key={itemIdx} className="border border-slate-100 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
+                <div key={itemIdx} className="border border-slate-100 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-black/50">
                     <div className="flex justify-between items-start mb-2">
                         <span className="text-xs font-bold text-[var(--foreground)] opacity-30">FAQ #{itemIdx + 1}</span>
                         <button
@@ -248,13 +248,13 @@ function FAQBlock({ items, onChangeItems }: FAQBlockProps) {
                         value={item.question}
                         onChange={(e) => updateItem(itemIdx, 'question', e.target.value)}
                         placeholder="Domanda..."
-                        className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded mb-2 font-medium text-[var(--foreground)]"
+                        className="w-full p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded mb-2 font-medium text-[var(--foreground)]"
                     />
                     <textarea
                         value={item.answer}
                         onChange={(e) => updateItem(itemIdx, 'answer', e.target.value)}
                         placeholder="Risposta..."
-                        className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded min-h-[60px] text-[var(--foreground)] opacity-80"
+                        className="w-full p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded min-h-[60px] text-[var(--foreground)] opacity-80"
                     />
                 </div>
             ))}
@@ -284,28 +284,28 @@ function CTABlock({ title, description, buttonText, buttonUrl, onChange }: CTABl
                 value={title}
                 onChange={(e) => onChange('title', e.target.value)}
                 placeholder="Titolo CTA..."
-                className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
+                className="p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
             />
             <input
                 type="text"
                 value={buttonText}
                 onChange={(e) => onChange('buttonText', e.target.value)}
                 placeholder="Testo pulsante..."
-                className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
+                className="p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)]"
             />
             <input
                 type="text"
                 value={description}
                 onChange={(e) => onChange('description', e.target.value)}
                 placeholder="Descrizione..."
-                className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)] opacity-80"
+                className="p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)] opacity-80"
             />
             <input
                 type="text"
                 value={buttonUrl}
                 onChange={(e) => onChange('buttonUrl', e.target.value)}
                 placeholder="URL pulsante..."
-                className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)] text-xs"
+                className="p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded text-[var(--foreground)] text-xs"
             />
         </div>
     );
@@ -400,7 +400,7 @@ export default function BlockEditor({ content, onAdd, onUpdate, onRemove, onMove
                         <button
                             key={type}
                             onClick={() => onAdd(type)}
-                            className="px-3 py-1 text-sm bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--foreground)] opacity-70 hover:opacity-100 rounded transition-colors"
+                            className="px-3 py-1 text-sm bg-slate-100 dark:bg-[#111] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--foreground)] opacity-70 hover:opacity-100 rounded transition-colors"
                         >
                             {label}
                         </button>

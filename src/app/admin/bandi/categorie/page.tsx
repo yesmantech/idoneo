@@ -89,7 +89,7 @@ export default function AdminBandiCategoriesPage() {
             </div>
 
             {/* Categories Grid */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden">
+            <div className="bg-white dark:bg-[#111] rounded-xl overflow-hidden">
                 {loading ? (
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
@@ -240,8 +240,8 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-            <div className="relative bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white dark:bg-slate-800 p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div className="relative bg-white dark:bg-[#111] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white dark:bg-[#111] p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                         {category ? 'Modifica Categoria' : 'Nuova Categoria'}
                     </h2>
@@ -261,7 +261,7 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
                             onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
                             required
                             placeholder="Es: Forze Armate"
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                         />
                     </div>
 
@@ -274,7 +274,7 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
                             value={formData.slug}
                             onChange={(e) => setFormData(p => ({ ...p, slug: e.target.value }))}
                             placeholder="Autogenerato se vuoto"
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono text-sm"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black font-mono text-sm"
                         />
                     </div>
 
@@ -302,7 +302,7 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
                             value={formData.icon}
                             onChange={(e) => setFormData(p => ({ ...p, icon: e.target.value }))}
                             placeholder="Emoji o testo"
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                         />
                     </div>
 
@@ -338,7 +338,7 @@ function CategoryModal({ category, saving, onSave, onClose }: CategoryModalProps
                             type="number"
                             value={(formData as any).sort_order}
                             onChange={(e) => setFormData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 } as any))}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                         />
                     </div>
 

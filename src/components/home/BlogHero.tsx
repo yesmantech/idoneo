@@ -107,7 +107,7 @@ function BlogHeroSkeleton() {
                 {[1, 2, 3].map((i) => (
                     <div
                         key={i}
-                        className="shrink-0 w-[320px] h-[420px] bg-slate-200 dark:bg-slate-800 animate-pulse rounded-[32px]"
+                        className="shrink-0 w-[320px] h-[420px] bg-slate-200 dark:bg-[#111] animate-pulse rounded-[32px]"
                     />
                 ))}
             </div>
@@ -161,7 +161,7 @@ export default function BlogHero() {
     const displayPosts = posts.length > 0 ? posts : PLACEHOLDER_POSTS;
 
     return (
-        <section className="w-full pt-[max(1.5rem,env(safe-area-inset-top))] bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
+        <section className="w-full pt-[max(1.5rem,env(safe-area-inset-top))] bg-slate-50/50 dark:bg-black/50 overflow-hidden">
             <BlogCarousel posts={displayPosts} />
         </section>
     );

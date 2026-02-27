@@ -6,6 +6,7 @@
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useConcorsoData } from '@/hooks/useConcorsoData';
+import { getContestBySlug } from '@/lib/data';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Shield, Sparkles, X, ChevronRight, Stethoscope, Briefcase, Scale, Gavel, GraduationCap, Car, Search, Filter } from 'lucide-react';
 import TierSLoader from '@/components/ui/TierSLoader';
@@ -251,11 +252,8 @@ export default function ConcorsoHubPage() {
                     to={`/concorsi/${category}/${quiz.slug}`}
                     onMouseEnter={() => {
                       queryClient.prefetchQuery({
-                        queryKey: ['quiz-detail', quiz.slug],
-                        queryFn: async () => {
-                          const { data } = await supabase.from('quizzes').select('*, questions_count:quiz_questions(count)').eq('slug', quiz.slug).single();
-                          return data;
-                        },
+                        queryKey: ['contest', quiz.slug],
+                        queryFn: () => getContestBySlug(quiz.slug),
                         staleTime: 1000 * 60 * 5,
                       });
                     }}

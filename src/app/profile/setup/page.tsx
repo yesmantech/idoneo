@@ -286,7 +286,7 @@ export default function ProfileSetupPage() {
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                             required
-                            className="w-full h-14 px-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 text-[17px] md:text-lg font-medium text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-30 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-[var(--card)] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
+                            className="w-full h-14 px-5 rounded-2xl bg-slate-50 dark:bg-[#111]/50 border border-slate-100 dark:border-slate-700/50 text-[17px] md:text-lg font-medium text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-30 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:bg-[var(--card)] transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
                         />
                     </div>
 

@@ -83,7 +83,7 @@ export default function BandiEmptyState({ type, searchQuery, onRetry, onClearFil
                         repeat: Infinity,
                         ease: "easeInOut"
                     }}
-                    className="relative w-28 h-28 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-2xl shadow-indigo-500/10 flex items-center justify-center border border-white/40 dark:border-white/10 backdrop-blur-xl"
+                    className="relative w-28 h-28 rounded-[2.5rem] bg-white dark:bg-black shadow-2xl shadow-indigo-500/10 flex items-center justify-center border border-white/40 dark:border-white/10 backdrop-blur-xl"
                 >
                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg`}>
                         <Icon className="w-7 h-7 text-white" />

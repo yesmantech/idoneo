@@ -291,7 +291,7 @@ export default function OfficialQuizStarterPage() {
             }} />
 
             {/* Glass Navigation Bar */}
-            <div className="sticky top-0 z-50 bg-white/60 dark:bg-[#0A0A0B]/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 pt-safe">
+            <div className="sticky top-0 z-50 bg-white/60 dark:bg-black/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 pt-safe">
                 <div className="px-4 h-14 flex items-center justify-between max-w-lg mx-auto">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
@@ -448,7 +448,7 @@ export default function OfficialQuizStarterPage() {
             </main>
 
             {/* Fixed Bottom Start Button - Balanced */}
-            <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-[#0A0A0B]/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+            <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
                 <div className="max-w-lg mx-auto">
                     <Button
                         variant="primary"

@@ -359,13 +359,13 @@ export default function OnboardingSpotlight() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 20, scale: 0.95 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-                            className="absolute bg-white dark:bg-slate-900 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)] p-6 max-w-xs w-[320px] pointer-events-auto border border-slate-100 dark:border-slate-800"
+                            className="absolute bg-white dark:bg-black rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)] p-6 max-w-xs w-[320px] pointer-events-auto border border-slate-100 dark:border-slate-800"
                             style={getTooltipStyle()}
                         >
                             {/* Close button */}
                             <button
                                 onClick={handleSkip}
-                                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-[#111] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -396,7 +396,7 @@ export default function OnboardingSpotlight() {
                             )}
 
                             {/* Progress bar */}
-                            <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mb-5 overflow-hidden">
+                            <div className="h-1.5 bg-slate-100 dark:bg-[#111] rounded-full mb-5 overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${progress}%` }}
@@ -418,7 +418,7 @@ export default function OnboardingSpotlight() {
                                     {currentStepIndex > 0 && currentStepIndex < steps.length - 1 && (
                                         <button
                                             onClick={handlePrevious}
-                                            className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1"
+                                            className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#111] hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1"
                                         >
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>

@@ -43,7 +43,7 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                     onMouseEnter={handleMouseEnter}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700"
+                    className="bg-white dark:bg-[#111] rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700"
                 >
                     <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -146,7 +146,7 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                 onMouseEnter={handleMouseEnter}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-[#111] rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow"
             >
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">

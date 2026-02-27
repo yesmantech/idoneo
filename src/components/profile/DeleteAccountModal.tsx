@@ -45,7 +45,7 @@ export default function DeleteAccountModal({
             />
 
             {/* Modal */}
-            <div className="relative bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="relative bg-white dark:bg-[#111] w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
 
                 {/* Header with warning icon */}
                 <div className="pt-8 pb-4 px-6 text-center">

@@ -421,7 +421,7 @@ export default function QuizStatsPage() {
                         <div className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-bold text-text-primary">Cronologia Tentativi</h3>
-                                <span className="text-[10px] font-bold bg-canvas-light dark:bg-slate-800 text-text-tertiary px-3 py-1.5 rounded-pill uppercase tracking-wider">Ultimi 50</span>
+                                <span className="text-[10px] font-bold bg-canvas-light dark:bg-[#111] text-text-tertiary px-3 py-1.5 rounded-pill uppercase tracking-wider">Ultimi 50</span>
                             </div>
                             <AttemptsHistoryTable attempts={attempts as any} quizId={quizId} />
                         </div>

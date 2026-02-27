@@ -189,7 +189,7 @@ export default function BandiAlertsPage() {
             {/* Sticky Compact Header (appears on scroll) */}
             <motion.div
                 style={{ opacity: headerOpacity }}
-                className="fixed top-0 left-0 right-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50"
+                className="fixed top-0 left-0 right-0 z-30 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50"
             >
                 <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
                     <button
@@ -240,7 +240,7 @@ export default function BandiAlertsPage() {
                         className="relative overflow-hidden rounded-3xl bg-[var(--card)] border border-[var(--card-border)] shadow-sm"
                     >
                         {/* Card Header */}
-                        <div className="relative p-5 sm:p-6 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-slate-800/20">
+                        <div className="relative p-5 sm:p-6 border-b border-[var(--card-border)] bg-slate-50/50 dark:bg-[#111]/20">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-[14px] bg-[#00B1FF]/10 flex items-center justify-center border border-[#00B1FF]/20 shadow-sm">
                                     <Settings2 className="w-6 h-6 text-[#00B1FF]" />
@@ -415,7 +415,7 @@ function AlertCard({
                 {/* Icon */}
                 <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center border text-xl shrink-0 transition-colors ${alert.is_active
                     ? 'bg-[#00B1FF]/10 text-[#00B1FF] border-[#00B1FF]/20 shadow-sm'
-                    : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-400'
+                    : 'bg-slate-50 dark:bg-[#111]/50 border-slate-200 dark:border-slate-700 text-slate-400'
                     }`}>
                     {alert.category?.icon || '📋'}
                 </div>
@@ -447,7 +447,7 @@ function AlertCard({
                         onClick={onToggle}
                         className={`p-3 rounded-[14px] transition-all border ${alert.is_active
                             ? 'bg-[var(--card)] border-[var(--card-border)] text-[#00B1FF]'
-                            : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-400'
+                            : 'bg-slate-50 dark:bg-[#111]/50 border-slate-200 dark:border-slate-700 text-slate-400'
                             }`}
                     >
                         {alert.is_active ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
@@ -477,7 +477,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
             animate={{ opacity: 1, scale: 1 }}
             className="relative overflow-hidden rounded-3xl bg-[var(--card)] border border-dashed border-[var(--card-border)] p-10 text-center"
         >
-            <div className="w-20 h-20 mx-auto mb-5 rounded-[22px] bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+            <div className="w-20 h-20 mx-auto mb-5 rounded-[22px] bg-slate-50 dark:bg-[#111] flex items-center justify-center border border-slate-100 dark:border-slate-700">
                 <BellOff className="w-8 h-8 text-slate-400" />
             </div>
             <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -509,7 +509,7 @@ function LoadingState() {
             {[1, 2, 3].map(i => (
                 <div
                     key={i}
-                    className="h-20 rounded-2xl bg-slate-200/50 dark:bg-slate-800/50 animate-pulse"
+                    className="h-20 rounded-2xl bg-slate-200/50 dark:bg-[#111]/50 animate-pulse"
                 />
             ))}
         </div>
@@ -570,7 +570,7 @@ function CreateAlertModal({ categories, onSave, onClose }: CreateAlertModalProps
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="relative bg-white dark:bg-slate-900 rounded-t-[28px] sm:rounded-3xl w-full sm:max-w-md max-h-[85vh] overflow-hidden shadow-2xl"
+                className="relative bg-white dark:bg-black rounded-t-[28px] sm:rounded-3xl w-full sm:max-w-md max-h-[85vh] overflow-hidden shadow-2xl"
             >
                 {/* Header */}
                 <div className="relative p-5 border-b border-slate-100 dark:border-slate-800">
@@ -680,7 +680,7 @@ function CreateAlertModal({ categories, onSave, onClose }: CreateAlertModalProps
                 </div>
 
                 {/* Footer */}
-                <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex gap-3 safe-area-bottom">
+                <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111]/50 flex gap-3 safe-area-bottom">
                     <button
                         onClick={onClose}
                         className="flex-1 py-3.5 border border-slate-200 dark:border-slate-700 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

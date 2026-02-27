@@ -104,7 +104,7 @@ export default function LeaderboardSelector({
                         <input
                             type="text"
                             placeholder="Cerca concorso..."
-                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40"
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#111] border border-slate-100 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             autoFocus

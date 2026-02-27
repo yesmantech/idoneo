@@ -139,7 +139,7 @@ export default function AdminSidebar() {
     };
 
     return (
-        <aside className={`${isCollapsed ? 'w-[72px]' : 'w-[280px]'} bg-[#E9EEF4] dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-800 hidden lg:flex flex-col h-screen sticky top-0 z-20 transition-all duration-300`}>
+        <aside className={`${isCollapsed ? 'w-[72px]' : 'w-[280px]'} bg-[#E9EEF4] dark:bg-black border-r border-slate-200/50 dark:border-slate-800 hidden lg:flex flex-col h-screen sticky top-0 z-20 transition-all duration-300`}>
             {/* Logo / Brand */}
             <div className={`p-4 ${isCollapsed ? 'pb-4' : 'p-6 pb-8'}`}>
                 <Link to="/admin" className="flex items-center gap-3 hover:opacity-80 transition-opacity justify-center lg:justify-start">
@@ -188,7 +188,7 @@ export default function AdminSidebar() {
                                     to={item.children ? item.children[0].path : item.path}
                                     className={`w-full flex items-center justify-center p-3 rounded-2xl text-sm font-semibold transition-all duration-200 group
                                         ${isActive
-                                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                                            ? 'bg-white dark:bg-[#111] text-slate-900 dark:text-white shadow-sm'
                                             : 'text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
                                     title={item.label}
@@ -207,7 +207,7 @@ export default function AdminSidebar() {
                                     onClick={() => toggleExpanded(item.path)}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 group justify-between
                                         ${isActive
-                                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                                            ? 'bg-white dark:bg-[#111] text-slate-900 dark:text-white shadow-sm'
                                             : 'text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
                                 >
@@ -251,7 +251,7 @@ export default function AdminSidebar() {
                                 to={item.path}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 group
                                     ${isActive
-                                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                                        ? 'bg-white dark:bg-[#111] text-slate-900 dark:text-white shadow-sm'
                                         : 'text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300'
                                     }`}
                             >

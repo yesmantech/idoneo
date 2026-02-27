@@ -39,7 +39,7 @@ export default function BandoSkeleton({ variant = 'card' }: BandoSkeletonProps) 
     }
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 animate-pulse">
+        <div className="bg-white dark:bg-[#111] rounded-2xl p-4 animate-pulse">
             <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 space-y-3">
                     <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded" />

@@ -44,13 +44,13 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
         return (
             <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6 animate-pulse">
                 <div className="flex items-end justify-center gap-4 w-full">
-                    <div className="w-20 h-24 bg-slate-100 dark:bg-slate-800 rounded-t-2xl"></div>
-                    <div className="w-24 h-32 bg-slate-100 dark:bg-slate-800 rounded-t-2xl"></div>
-                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-t-2xl"></div>
+                    <div className="w-20 h-24 bg-slate-100 dark:bg-[#111] rounded-t-2xl"></div>
+                    <div className="w-24 h-32 bg-slate-100 dark:bg-[#111] rounded-t-2xl"></div>
+                    <div className="w-20 h-20 bg-slate-100 dark:bg-[#111] rounded-t-2xl"></div>
                 </div>
                 <div className="space-y-3 w-full">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="w-full h-14 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+                        <div key={i} className="w-full h-14 bg-slate-100 dark:bg-[#111] rounded-xl"></div>
                     ))}
                 </div>
             </div>
@@ -233,7 +233,7 @@ const RankingRow = ({ entry, metricLabel }: { key?: React.Key, entry: Leaderboar
                     {entry.rank}
                 </span>
 
-                <div className="w-10 h-10 rounded-[16px] bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0 shadow-sm border border-[var(--card-border)]">
+                <div className="w-10 h-10 rounded-[16px] bg-slate-100 dark:bg-[#111] overflow-hidden flex-shrink-0 shadow-sm border border-[var(--card-border)]">
                     <img
                         src={getAvatarUrl(entry.user.avatarUrl, entry.user.nickname)}
                         alt="Avatar"

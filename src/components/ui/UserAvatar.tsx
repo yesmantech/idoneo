@@ -40,7 +40,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 
     if (src && !imgError) {
         return (
-            <div className={`relative rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ${sizeClasses[size]} ${className}`}>
+            <div className={`relative rounded-full overflow-hidden bg-slate-100 dark:bg-[#111] ${sizeClasses[size]} ${className}`}>
                 <img
                     src={src}
                     alt={alt || name}

@@ -89,7 +89,7 @@ function QuickAction({ icon: Icon, iconBg, iconColor, label, description, to }: 
 function EmptyActivityState() {
     return (
         <div className="bg-[var(--card)] rounded-[20px] p-10 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-[var(--card-border)] text-center transition-colors">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-black/50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-8 h-8 text-[var(--foreground)] opacity-20" />
             </div>
             <h3 className="text-lg font-semibold text-[var(--foreground)] opacity-80 mb-2">Nessuna attività recente</h3>

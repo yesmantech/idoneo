@@ -170,14 +170,14 @@ export default function AdminBlogEditorPage() {
                                         placeholder="Titolo dell'articolo"
                                         value={formState.title}
                                         onChange={(e) => handleTitleChange(e.target.value)}
-                                        className="w-full px-4 py-3 text-xl font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-[var(--foreground)]/30"
+                                        className="w-full px-4 py-3 text-xl font-bold bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-[var(--foreground)]/30"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Sottotitolo / Hook (opzionale)"
                                         value={formState.subtitle}
                                         onChange={(e) => updateField('subtitle', e.target.value)}
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-70 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-[var(--foreground)]/30"
+                                        className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-70 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-[var(--foreground)]/30"
                                     />
                                 </div>
 
@@ -190,7 +190,7 @@ export default function AdminBlogEditorPage() {
                                             <select
                                                 value={formState.categoryId}
                                                 onChange={(e) => updateField('categoryId', e.target.value)}
-                                                className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-80 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] opacity-80 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                             >
                                                 <option value="">Seleziona categoria...</option>
                                                 {categories.map(cat => (
@@ -200,7 +200,7 @@ export default function AdminBlogEditorPage() {
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-[var(--foreground)] opacity-60 mb-2">Tag</label>
-                                            <div className="flex flex-wrap gap-2 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg min-h-[42px]">
+                                            <div className="flex flex-wrap gap-2 p-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg min-h-[42px]">
                                                 {allTags.slice(0, 10).map(tag => (
                                                     <label key={tag.id} className="flex items-center gap-1 text-sm text-[var(--foreground)] opacity-60 cursor-pointer hover:opacity-100">
                                                         <input
@@ -212,7 +212,7 @@ export default function AdminBlogEditorPage() {
                                                                     : formState.selectedTags.filter(t => t !== tag.id);
                                                                 updateField('selectedTags', newTags);
                                                             }}
-                                                            className="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                                                            className="rounded border-slate-300 dark:border-slate-700 dark:bg-[#111] text-emerald-500 focus:ring-emerald-500"
                                                         />
                                                         {tag.name}
                                                     </label>
@@ -240,7 +240,7 @@ export default function AdminBlogEditorPage() {
                             <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] p-6 space-y-6">
                                 <h2 className="font-bold text-lg text-[var(--foreground)]">Immagine di Copertina</h2>
                                 {/* Upload Area */}
-                                <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors relative group cursor-pointer bg-slate-50/50 dark:bg-slate-900/20">
+                                <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors relative group cursor-pointer bg-slate-50/50 dark:bg-black/20">
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -266,7 +266,7 @@ export default function AdminBlogEditorPage() {
                                         placeholder="https://..."
                                         value={formState.coverImageUrl}
                                         onChange={(e) => updateField('coverImageUrl', e.target.value)}
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
                                 {/* Preview */}
@@ -277,12 +277,12 @@ export default function AdminBlogEditorPage() {
                                             <img
                                                 src={formState.coverImageUrl}
                                                 alt="Preview"
-                                                className="rounded-lg border border-[var(--card-border)] w-full shadow-sm bg-slate-50 dark:bg-slate-900"
+                                                className="rounded-lg border border-[var(--card-border)] w-full shadow-sm bg-slate-50 dark:bg-black"
                                                 onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400?text=Immagine+non+valida')}
                                             />
                                             <button
                                                 onClick={() => updateField('coverImageUrl', '')}
-                                                className="absolute top-2 right-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-rose-500 p-2 rounded-full shadow-md transition-colors"
+                                                className="absolute top-2 right-2 bg-white dark:bg-[#111] hover:bg-slate-100 dark:hover:bg-slate-700 text-rose-500 p-2 rounded-full shadow-md transition-colors"
                                                 title="Rimuovi immagine"
                                             >
                                                 ✕
@@ -307,7 +307,7 @@ export default function AdminBlogEditorPage() {
                                         type="text"
                                         value={formState.slug}
                                         onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
 
@@ -321,7 +321,7 @@ export default function AdminBlogEditorPage() {
                                         value={formState.seoTitle}
                                         onChange={(e) => updateField('seoTitle', e.target.value)}
                                         placeholder={formState.title || 'Titolo per i motori di ricerca'}
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
 
@@ -334,7 +334,7 @@ export default function AdminBlogEditorPage() {
                                         value={formState.seoDescription}
                                         onChange={(e) => updateField('seoDescription', e.target.value)}
                                         placeholder="Descrizione che apparirà nei risultati di ricerca..."
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[80px]"
+                                        className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[80px]"
                                     />
                                 </div>
 
@@ -345,7 +345,7 @@ export default function AdminBlogEditorPage() {
                                         value={formState.canonicalUrl}
                                         onChange={(e) => updateField('canonicalUrl', e.target.value)}
                                         placeholder="https://idoneo.it/blog/..."
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     />
                                 </div>
 
@@ -354,7 +354,7 @@ export default function AdminBlogEditorPage() {
                                         type="checkbox"
                                         checked={formState.isNoindex}
                                         onChange={(e) => updateField('isNoindex', e.target.checked)}
-                                        className="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-amber-500 focus:ring-amber-500"
+                                        className="rounded border-slate-300 dark:border-slate-700 dark:bg-[#111] text-amber-500 focus:ring-amber-500"
                                     />
                                     <div>
                                         <div className="font-medium text-amber-800 dark:text-amber-400">Nascondi dai motori di ricerca (noindex)</div>
@@ -374,7 +374,7 @@ export default function AdminBlogEditorPage() {
                                     <select
                                         value={formState.status}
                                         onChange={(e) => updateField('status', e.target.value as typeof formState.status)}
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     >
                                         <option value="draft">📝 Bozza</option>
                                         <option value="scheduled">⏰ Programmato</option>
@@ -390,7 +390,7 @@ export default function AdminBlogEditorPage() {
                                             type="datetime-local"
                                             value={formState.publishedAt}
                                             onChange={(e) => updateField('publishedAt', e.target.value)}
-                                            className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                            className="w-full px-4 py-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                         />
                                     </div>
                                 )}
@@ -400,7 +400,7 @@ export default function AdminBlogEditorPage() {
                                         type="checkbox"
                                         checked={formState.isFeatured}
                                         onChange={(e) => updateField('isFeatured', e.target.checked)}
-                                        className="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                                        className="rounded border-slate-300 dark:border-slate-700 dark:bg-[#111] text-emerald-500 focus:ring-emerald-500"
                                     />
                                     <div>
                                         <div className="font-medium text-emerald-800 dark:text-emerald-400">⭐ Articolo in evidenza</div>

@@ -128,7 +128,7 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
                                             : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 bg-[var(--card)]'
                                             }`}
                                     >
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-slate-800 text-[var(--foreground)] opacity-40'
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-[#111] text-[var(--foreground)] opacity-40'
                                             }`}>
                                             <Icon className="w-5 h-5" />
                                         </div>
@@ -161,7 +161,7 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
                                 placeholder={selectedOption.placeholder}
                                 min={selectedOption.min}
                                 max={selectedOption.max}
-                                className="w-full px-4 py-3 pr-16 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 focus:border-brand-cyan dark:focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-[var(--foreground)] font-bold text-lg transition-all"
+                                className="w-full px-4 py-3 pr-16 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-black/50 focus:border-brand-cyan dark:focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-[var(--foreground)] font-bold text-lg transition-all"
                                 required
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40 font-bold">
@@ -182,7 +182,7 @@ export default function GoalCreationModal({ isOpen, quizId, onClose, onSubmit }:
                                 value={deadline}
                                 onChange={(e) => setDeadline(e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
-                                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 focus:border-brand-cyan dark:focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-[var(--foreground)] font-medium transition-all"
+                                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-black/50 focus:border-brand-cyan dark:focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 outline-none text-[var(--foreground)] font-medium transition-all"
                             />
                         </div>
                     </div>

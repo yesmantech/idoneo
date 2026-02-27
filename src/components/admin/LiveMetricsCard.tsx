@@ -68,7 +68,7 @@ function MetricCard({
     const animatedValue = useAnimatedCounter(value);
 
     return (
-        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-[20px] shadow-sm group hover:shadow-lg transition-all duration-300">
+        <div className="relative overflow-hidden bg-white dark:bg-black border border-slate-200 dark:border-slate-800 p-5 rounded-[20px] shadow-sm group hover:shadow-lg transition-all duration-300">
             {/* Glow effect */}
             <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-5 transition-opacity`} />
 

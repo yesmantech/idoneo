@@ -77,7 +77,7 @@ export default function ThemeToggle({ className = '', compact = false }: ThemeTo
                     const nextIndex = (currentIndex + 1) % themes.length;
                     handleChange(themes[nextIndex]);
                 }}
-                className={`p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all btn-bounce ${className}`}
+                className={`p-3 rounded-xl bg-slate-100 dark:bg-[#111] hover:bg-slate-200 dark:hover:bg-slate-700 transition-all btn-bounce ${className}`}
                 aria-label="Cambia tema"
             >
                 {theme === 'light' && <Sun className="w-5 h-5 text-amber-500" />}
@@ -88,7 +88,7 @@ export default function ThemeToggle({ className = '', compact = false }: ThemeTo
     }
 
     return (
-        <div className={`bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl inline-flex ${className}`}>
+        <div className={`bg-slate-100 dark:bg-[#111] p-1 rounded-2xl inline-flex ${className}`}>
             {options.map((option) => {
                 const isActive = theme === option.value;
                 const Icon = option.icon;

@@ -151,7 +151,7 @@ export function StreakCelebration() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     // THEME-AWARE BACKGROUND:
                     // Uses explicit slate colors for reliability with opacity
-                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-xl"
+                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-50/95 dark:bg-black/95 backdrop-blur-xl"
                 >
                     <Confetti
                         width={windowSize.width}

@@ -249,12 +249,12 @@ export default function OnboardingWelcome({ onStartTour, onSkip }: OnboardingWel
                 initial={{ scale: 0.9, y: 40, opacity: 0 }}
                 animate={{ scale: 1, y: 0, opacity: 1 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300, delay: 0.1 }}
-                className="relative w-full max-w-[340px] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden"
+                className="relative w-full max-w-[340px] bg-white dark:bg-black rounded-3xl shadow-2xl overflow-hidden"
             >
                 {/* Skip button */}
                 <button
                     onClick={handleSkip}
-                    className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-[#111] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                     <X className="w-4 h-4" />
                 </button>
@@ -302,7 +302,7 @@ export default function OnboardingWelcome({ onStartTour, onSkip }: OnboardingWel
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.55 + i * 0.08 }}
-                                className="flex items-center gap-2.5 px-3 py-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl"
+                                className="flex items-center gap-2.5 px-3 py-2.5 bg-slate-50 dark:bg-[#111]/50 rounded-xl"
                             >
                                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#00B1FF]/20 to-[#00D4AA]/20 flex items-center justify-center flex-shrink-0">
                                     <item.icon className="w-3.5 h-3.5 text-[#00B1FF]" />

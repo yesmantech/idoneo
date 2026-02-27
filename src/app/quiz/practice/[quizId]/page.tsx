@@ -294,7 +294,7 @@ export default function PracticeStartPage() {
                                     onClick={() => toggleSubject(subject.id)}
                                     className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${isSelected
                                         ? 'bg-brand-cyan/10 border border-brand-cyan/30'
-                                        : 'bg-slate-50 dark:bg-slate-800/50 border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800'
+                                        : 'bg-slate-50 dark:bg-[#111]/50 border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800'
                                         }`}
                                 >
                                     <span className={`font-medium ${isSelected ? 'text-brand-cyan' : 'text-[var(--foreground)]'}`}>
@@ -329,8 +329,8 @@ export default function PracticeStartPage() {
                                 className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${questionCount === count
                                     ? 'bg-brand-cyan text-white'
                                     : count > totalAvailableQuestions
-                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                        ? 'bg-slate-100 dark:bg-[#111] text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                                        : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {count}

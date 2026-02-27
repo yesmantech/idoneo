@@ -112,7 +112,7 @@ export default function AdminEntiListPage() {
                 </div>
 
                 {/* Search */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-4 mb-4">
+                <div className="bg-white dark:bg-[#111] rounded-xl p-4 mb-4">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input
@@ -139,7 +139,7 @@ export default function AdminEntiListPage() {
                         filteredEnti.map(ente => (
                             <div
                                 key={ente.id}
-                                className="bg-white dark:bg-slate-800 rounded-xl p-4 flex flex-col"
+                                className="bg-white dark:bg-[#111] rounded-xl p-4 flex flex-col"
                             >
                                 <div className="flex items-start gap-3 mb-3">
                                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
@@ -240,8 +240,8 @@ function EnteModal({ ente, saving, onSave, onClose }: EnteModalProps) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-            <div className="relative bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white dark:bg-slate-800 p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div className="relative bg-white dark:bg-[#111] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white dark:bg-[#111] p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                         {ente ? 'Modifica Ente' : 'Nuovo Ente'}
                     </h2>
@@ -260,7 +260,7 @@ function EnteModal({ ente, saving, onSave, onClose }: EnteModalProps) {
                             value={formData.name}
                             onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                         />
                     </div>
 
@@ -271,7 +271,7 @@ function EnteModal({ ente, saving, onSave, onClose }: EnteModalProps) {
                         <select
                             value={formData.type}
                             onChange={(e) => setFormData(p => ({ ...p, type: e.target.value }))}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                         >
                             <option value="">Seleziona...</option>
                             {ENTE_TYPES.map(t => (
@@ -288,7 +288,7 @@ function EnteModal({ ente, saving, onSave, onClose }: EnteModalProps) {
                             <select
                                 value={formData.region}
                                 onChange={(e) => setFormData(p => ({ ...p, region: e.target.value }))}
-                                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                             >
                                 <option value="">Seleziona...</option>
                                 {ITALIAN_REGIONS.map(r => (
@@ -304,7 +304,7 @@ function EnteModal({ ente, saving, onSave, onClose }: EnteModalProps) {
                                 type="text"
                                 value={formData.city}
                                 onChange={(e) => setFormData(p => ({ ...p, city: e.target.value }))}
-                                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                             />
                         </div>
                     </div>
@@ -318,7 +318,7 @@ function EnteModal({ ente, saving, onSave, onClose }: EnteModalProps) {
                             value={formData.website}
                             onChange={(e) => setFormData(p => ({ ...p, website: e.target.value }))}
                             placeholder="https://..."
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-black"
                         />
                     </div>
 

@@ -56,7 +56,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div className="p-6 border-b border-[var(--card-border)] flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 rounded-t-xl">
+                <div className="p-6 border-b border-[var(--card-border)] flex justify-between items-center bg-slate-50 dark:bg-black/50 rounded-t-xl">
                     <h3 className="font-bold text-xl text-[var(--foreground)]">🤖 Importa da AI Script</h3>
                     <div className="flex items-center gap-2">
                         <button
@@ -81,7 +81,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                         value={jsonInput}
                         onChange={(e) => setJsonInput(e.target.value)}
                         placeholder='{ "title": "...", "content": [...] }'
-                        className="w-full h-64 p-4 font-mono text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:ring-2 focus:ring-emerald-500 focus:outline-none placeholder-[var(--foreground)]/20"
+                        className="w-full h-64 p-4 font-mono text-sm bg-white dark:bg-black border border-slate-200 dark:border-slate-700 rounded-lg text-[var(--foreground)] focus:ring-2 focus:ring-emerald-500 focus:outline-none placeholder-[var(--foreground)]/20"
                     />
 
                     {error && (
@@ -91,7 +91,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     )}
                 </div>
 
-                <div className="p-6 border-t border-[var(--card-border)] bg-slate-50 dark:bg-slate-900/50 rounded-b-xl flex justify-end gap-3">
+                <div className="p-6 border-t border-[var(--card-border)] bg-slate-50 dark:bg-black/50 rounded-b-xl flex justify-end gap-3">
                     <button
                         onClick={onClose}
                         className="px-4 py-2 text-[var(--foreground)] opacity-60 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"

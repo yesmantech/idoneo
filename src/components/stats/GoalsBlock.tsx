@@ -33,7 +33,7 @@ export default function GoalsBlock({ goal, onCreateGoal, onDeleteGoal }: GoalsBl
                     </div>
                 </div>
 
-                <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                <div className="text-center py-8 bg-slate-50 dark:bg-black/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
                     <div className="w-14 h-14 rounded-full bg-[var(--card)] shadow-sm flex items-center justify-center mx-auto mb-3">
                         <Target className="w-6 h-6 text-[var(--foreground)] opacity-30" />
                     </div>
@@ -62,7 +62,7 @@ export default function GoalsBlock({ goal, onCreateGoal, onDeleteGoal }: GoalsBl
         active: { label: 'In corso', color: 'text-brand-cyan bg-brand-cyan/10' },
         achieved: { label: 'Raggiunto! 🎉', color: 'text-emerald-500 bg-emerald-500/10' },
         failed: { label: 'Non raggiunto', color: 'text-rose-500 bg-rose-500/10' },
-        expired: { label: 'Scaduto', color: 'text-[var(--foreground)] opacity-40 bg-slate-100 dark:bg-slate-800' }
+        expired: { label: 'Scaduto', color: 'text-[var(--foreground)] opacity-40 bg-slate-100 dark:bg-[#111]' }
     };
 
     const progressStatus = progress >= 100
@@ -114,7 +114,7 @@ export default function GoalsBlock({ goal, onCreateGoal, onDeleteGoal }: GoalsBl
 
             {/* Progress Bar */}
             <div className="mb-3">
-                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-pill overflow-hidden">
+                <div className="h-3 bg-slate-100 dark:bg-[#111] rounded-pill overflow-hidden">
                     <div
                         className={`h-full rounded-pill transition-all duration-500 ${progress >= 100 ? 'bg-emerald-500' :
                             progressStatus === 'at-risk' ? 'bg-rose-500' :

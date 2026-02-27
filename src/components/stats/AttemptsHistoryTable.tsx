@@ -79,7 +79,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                             <button
                                 key={f.value}
                                 onClick={() => setTypeFilter(f.value as FilterType)}
-                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${typeFilter === f.value ? 'bg-[#00B1FF] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${typeFilter === f.value ? 'bg-[#00B1FF] text-white' : 'bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {f.label}
@@ -97,7 +97,7 @@ export default function AttemptsHistoryTable({ attempts, quizId, onRepeatTest }:
                             <button
                                 key={f.value}
                                 onClick={() => setResultFilter(f.value as ResultFilter)}
-                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${resultFilter === f.value ? 'bg-slate-900 dark:bg-slate-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${resultFilter === f.value ? 'bg-slate-900 dark:bg-slate-700 text-white' : 'bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {f.label}

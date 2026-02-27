@@ -80,7 +80,7 @@ function BandoScadenzaCard({ bando }: { key?: string; bando: Bando }) {
     const getUrgencyStyle = () => {
         if (isUrgent) return { bg: 'bg-rose-500', text: 'text-white', border: 'border-rose-400', glow: 'shadow-rose-500/30' };
         if (isWarning) return { bg: 'bg-amber-500', text: 'text-white', border: 'border-amber-400', glow: 'shadow-amber-500/30' };
-        return { bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-600 dark:text-slate-300', border: 'border-slate-200 dark:border-slate-700', glow: '' };
+        return { bg: 'bg-slate-100 dark:bg-[#111]', text: 'text-slate-600 dark:text-slate-300', border: 'border-slate-200 dark:border-slate-700', glow: '' };
     };
 
     const style = getUrgencyStyle();

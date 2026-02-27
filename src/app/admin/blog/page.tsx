@@ -235,14 +235,14 @@ export default function AdminBlogListPage() {
                         placeholder="Cerca per titolo..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[var(--foreground)] placeholder-[var(--foreground)]/30 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[var(--foreground)] placeholder-[var(--foreground)]/30 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
                     />
                 </div>
 
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as BlogPostStatus | 'all')}
-                    className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[var(--foreground)] opacity-70 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
+                    className="px-4 py-2.5 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[var(--foreground)] opacity-70 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
                 >
                     <option value="all">Tutti gli stati</option>
                     <option value="draft">Bozze</option>
@@ -254,7 +254,7 @@ export default function AdminBlogListPage() {
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[var(--foreground)] opacity-70 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
+                    className="px-4 py-2.5 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[var(--foreground)] opacity-70 focus:outline-none focus:ring-2 focus:ring-[#00B1FF]/50 focus:border-[#00B1FF]"
                 >
                     <option value="all">Tutte le categorie</option>
                     {categories.map(cat => (

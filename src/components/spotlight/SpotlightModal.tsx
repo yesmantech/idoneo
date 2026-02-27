@@ -362,7 +362,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: -20 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-                    className="relative w-full max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[32px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] border border-white/20 dark:border-white/10 overflow-hidden flex flex-col max-h-[75vh]"
+                    className="relative w-full max-w-2xl bg-white/90 dark:bg-black/90 backdrop-blur-2xl rounded-[32px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] border border-white/20 dark:border-white/10 overflow-hidden flex flex-col max-h-[75vh]"
                     onKeyDown={handleKeyDown}
                 >
                     {/* Cinematic Grain Overlay */}
@@ -396,7 +396,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                             />
                             <div className="flex items-center gap-2">
                                 {/* Keyboard hint */}
-                                <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                                <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-[#111] rounded-lg">
                                     <kbd className="text-[10px] font-bold text-slate-500 dark:text-slate-400">ESC</kbd>
                                 </div>
                                 <button
@@ -444,8 +444,8 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                                 <div className={cn(
                                                     "w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 text-xl transition-all",
                                                     selectedIndex === itemIndex
-                                                        ? "bg-white dark:bg-slate-800 shadow-md"
-                                                        : "bg-slate-100 dark:bg-slate-800"
+                                                        ? "bg-white dark:bg-[#111] shadow-md"
+                                                        : "bg-slate-100 dark:bg-[#111]"
                                                 )}>
                                                     {getTypeIcon(item.type)}
                                                 </div>
@@ -472,7 +472,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                 </div>
                             ) : (
                                 <div className="px-6 py-12 text-center">
-                                    <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                    <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-slate-100 dark:bg-[#111] flex items-center justify-center">
                                         <Search className="w-7 h-7 text-slate-300 dark:text-slate-600" />
                                     </div>
                                     <p className="text-slate-500 dark:text-slate-400 font-medium">
@@ -562,11 +562,11 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                                     className={cn(
                                                         "w-full text-left px-4 py-3 rounded-2xl flex items-center gap-4 transition-all duration-150 group",
                                                         selectedIndex === itemIndex
-                                                            ? "bg-slate-100 dark:bg-slate-800"
+                                                            ? "bg-slate-100 dark:bg-[#111]"
                                                             : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
                                                     )}
                                                 >
-                                                    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                                    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#111] flex items-center justify-center shrink-0">
                                                         <Clock className="w-4 h-4 text-slate-400" />
                                                     </div>
                                                     <span className="text-[14px] font-medium text-slate-600 dark:text-slate-300 truncate">
@@ -614,7 +614,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                         {/* Quick Category Filters - Updated style */}
                                         <button
                                             onClick={() => { close(); navigate('/concorsi/forze-armate'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-brand-blue/50 hover:shadow-md hover:shadow-brand-blue/5 transition-all text-left flex items-center gap-3 group"
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-brand-blue/50 hover:shadow-md hover:shadow-brand-blue/5 transition-all text-left flex items-center gap-3 group"
                                         >
                                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 text-blue-600 flex items-center justify-center group-hover:from-blue-500 group-hover:to-blue-600 group-hover:text-white transition-all">
                                                 <Shield className="w-4 h-4" />
@@ -624,7 +624,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
                                         <button
                                             onClick={() => { close(); navigate('/concorsi/amministrativi'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-brand-purple/50 hover:shadow-md hover:shadow-brand-purple/5 transition-all text-left flex items-center gap-3 group"
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-brand-purple/50 hover:shadow-md hover:shadow-brand-purple/5 transition-all text-left flex items-center gap-3 group"
                                         >
                                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/10 text-purple-600 flex items-center justify-center group-hover:from-purple-500 group-hover:to-purple-600 group-hover:text-white transition-all">
                                                 <Briefcase className="w-4 h-4" />
@@ -634,7 +634,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
                                         <button
                                             onClick={() => { close(); navigate('/concorsi/enti-locali'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-brand-orange/50 hover:shadow-md hover:shadow-brand-orange/5 transition-all text-left flex items-center gap-3 group"
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-brand-orange/50 hover:shadow-md hover:shadow-brand-orange/5 transition-all text-left flex items-center gap-3 group"
                                         >
                                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 text-orange-600 flex items-center justify-center group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all">
                                                 <MapPin className="w-4 h-4" />
@@ -644,7 +644,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
                                         <button
                                             onClick={() => { close(); navigate('/concorsi/sanita'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-rose-500/50 hover:shadow-md hover:shadow-rose-500/5 transition-all text-left flex items-center gap-3 group"
+                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-rose-500/50 hover:shadow-md hover:shadow-rose-500/5 transition-all text-left flex items-center gap-3 group"
                                         >
                                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-600/10 text-rose-600 flex items-center justify-center group-hover:from-rose-500 group-hover:to-rose-600 group-hover:text-white transition-all">
                                                 <Activity className="w-4 h-4" />
@@ -658,7 +658,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                     </div>
 
                     {/* Footer with keyboard hints */}
-                    <div className="hidden sm:flex px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-[11px] font-bold text-slate-400 shrink-0">
+                    <div className="hidden sm:flex px-6 py-3 bg-slate-50 dark:bg-[#111]/50 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-[11px] font-bold text-slate-400 shrink-0">
                         <div className="flex items-center gap-4">
                             <span className="flex items-center gap-1.5">
                                 <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded shadow-sm">↑</kbd>

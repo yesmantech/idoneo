@@ -140,7 +140,7 @@ export default function RulesPage() {
       }} />
 
       {/* Glass Navigation Bar */}
-      <div className="sticky top-0 z-50 bg-white/60 dark:bg-[#0A0A0B]/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 pt-safe">
+      <div className="sticky top-0 z-50 bg-white/60 dark:bg-black/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 pt-safe">
         <div className="px-4 h-16 flex items-center justify-between max-w-lg mx-auto">
           <motion.button
             whileTap={{ scale: 0.95 }}

@@ -128,7 +128,7 @@ export default function AdminBandoEditorPage() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
             {/* Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+            <div className="bg-white dark:bg-black border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link to="/admin/bandi" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
@@ -185,7 +185,7 @@ export default function AdminBandoEditorPage() {
                                     value={formData.title}
                                     onChange={(e) => handleChange('title', e.target.value)}
                                     required
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                     placeholder="Es: Concorso 100 Allievi Agenti Polizia di Stato"
                                 />
                             </div>
@@ -196,7 +196,7 @@ export default function AdminBandoEditorPage() {
                                 <select
                                     value={formData.ente_id || ''}
                                     onChange={(e) => handleChange('ente_id', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 >
                                     <option value="">Seleziona ente...</option>
                                     {enti.map(ente => (
@@ -211,7 +211,7 @@ export default function AdminBandoEditorPage() {
                                 <select
                                     value={formData.category_id || ''}
                                     onChange={(e) => handleChange('category_id', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 >
                                     <option value="">Seleziona categoria...</option>
                                     {categories.map(cat => (
@@ -226,7 +226,7 @@ export default function AdminBandoEditorPage() {
                                 <select
                                     value={formData.status}
                                     onChange={(e) => handleChange('status', e.target.value)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 >
                                     <option value="draft">Bozza</option>
                                     <option value="review">In Revisione</option>
@@ -262,7 +262,7 @@ export default function AdminBandoEditorPage() {
                                     type="date"
                                     value={formData.publication_date || ''}
                                     onChange={(e) => handleChange('publication_date', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -274,7 +274,7 @@ export default function AdminBandoEditorPage() {
                                     value={formData.deadline?.split('T')[0] || ''}
                                     onChange={(e) => handleChange('deadline', e.target.value)}
                                     required
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -285,7 +285,7 @@ export default function AdminBandoEditorPage() {
                                     type="date"
                                     value={formData.exam_date || ''}
                                     onChange={(e) => handleChange('exam_date', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                         </div>
@@ -302,7 +302,7 @@ export default function AdminBandoEditorPage() {
                                     type="number"
                                     value={formData.seats_total || ''}
                                     onChange={(e) => handleChange('seats_total', e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -313,7 +313,7 @@ export default function AdminBandoEditorPage() {
                                     type="number"
                                     value={formData.seats_reserved || ''}
                                     onChange={(e) => handleChange('seats_reserved', e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -323,7 +323,7 @@ export default function AdminBandoEditorPage() {
                                 <select
                                     value={formData.contract_type || ''}
                                     onChange={(e) => handleChange('contract_type', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 >
                                     <option value="">Seleziona...</option>
                                     {CONTRACT_TYPES.map(type => (
@@ -340,7 +340,7 @@ export default function AdminBandoEditorPage() {
                                     value={formData.salary_range || ''}
                                     onChange={(e) => handleChange('salary_range', e.target.value || null)}
                                     placeholder="Es: €1.500 - €2.000"
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                         </div>
@@ -356,7 +356,7 @@ export default function AdminBandoEditorPage() {
                                 <select
                                     value={formData.region || ''}
                                     onChange={(e) => handleChange('region', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 >
                                     <option value="">Seleziona regione...</option>
                                     {ITALIAN_REGIONS.map(region => (
@@ -372,7 +372,7 @@ export default function AdminBandoEditorPage() {
                                     type="text"
                                     value={formData.province || ''}
                                     onChange={(e) => handleChange('province', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -383,7 +383,7 @@ export default function AdminBandoEditorPage() {
                                     type="text"
                                     value={formData.city || ''}
                                     onChange={(e) => handleChange('city', e.target.value || null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -438,7 +438,7 @@ export default function AdminBandoEditorPage() {
                                     type="number"
                                     value={formData.age_min || ''}
                                     onChange={(e) => handleChange('age_min', e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -449,7 +449,7 @@ export default function AdminBandoEditorPage() {
                                     type="number"
                                     value={formData.age_max || ''}
                                     onChange={(e) => handleChange('age_max', e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                         </div>
@@ -467,7 +467,7 @@ export default function AdminBandoEditorPage() {
                                     value={formData.application_url || ''}
                                     onChange={(e) => handleChange('application_url', e.target.value || null)}
                                     placeholder="https://..."
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -479,7 +479,7 @@ export default function AdminBandoEditorPage() {
                                     value={formData.application_method || ''}
                                     onChange={(e) => handleChange('application_method', e.target.value || null)}
                                     placeholder="Es: Online tramite portale inPA"
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                         </div>
@@ -497,7 +497,7 @@ export default function AdminBandoEditorPage() {
                                     onChange={(e) => handleChange('short_description', e.target.value || null)}
                                     rows={2}
                                     placeholder="Breve riassunto per le card..."
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                             <div>
@@ -509,7 +509,7 @@ export default function AdminBandoEditorPage() {
                                     onChange={(e) => handleChange('description', e.target.value || null)}
                                     rows={6}
                                     placeholder="Descrizione dettagliata del bando..."
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                                    className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111]"
                                 />
                             </div>
                         </div>
@@ -526,7 +526,7 @@ export default function AdminBandoEditorPage() {
                                 onChange={(e) => handleChange('source_urls', e.target.value.split('\n').filter(Boolean))}
                                 rows={3}
                                 placeholder="https://www.gazzettaufficiale.it/..."
-                                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-sm"
+                                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-[#111] font-mono text-sm"
                             />
                         </div>
                     </FormSection>
@@ -538,7 +538,7 @@ export default function AdminBandoEditorPage() {
 
 function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6">
+        <div className="bg-white dark:bg-[#111] rounded-xl p-6">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{title}</h2>
             {children}
         </div>

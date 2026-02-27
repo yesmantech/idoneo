@@ -43,7 +43,7 @@ export default function SearchSection({ items = [] }: SearchSectionProps) {
                 </div>
 
                 {/* Keyboard Shortcut Hint (Desktop only) */}
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight group-hover:border-[#00B1FF]/20 group-hover:bg-[#00B1FF]/5 transition-all">
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-[#111] text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight group-hover:border-[#00B1FF]/20 group-hover:bg-[#00B1FF]/5 transition-all">
                     <Command className="w-3 h-3" />
                     <span>K</span>
                 </div>

@@ -177,7 +177,7 @@ export default function StatsKPIGrid({
                                 }`}>
                                 {readiness.label}
                             </div>
-                            <div className="w-4 h-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                            <div className="w-4 h-4 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400">
                                 <Info className="w-2.5 h-2.5" />
                             </div>
                         </div>
@@ -259,7 +259,7 @@ export default function StatsKPIGrid({
                         >
                             <button
                                 onClick={() => setExplanation(null)}
-                                className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-[var(--foreground)] opacity-40 hover:opacity-100 transition-colors"
+                                className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-[#111] rounded-full text-[var(--foreground)] opacity-40 hover:opacity-100 transition-colors"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -331,7 +331,7 @@ function StatsCard({
 
                     <button
                         onClick={(e) => { e.stopPropagation(); onInfo(); }}
-                        className="p-1.5 rounded-full bg-slate-50 dark:bg-slate-800 text-[var(--foreground)] opacity-20 hover:opacity-100 hover:text-brand-blue hover:bg-brand-blue/5 transition-all"
+                        className="p-1.5 rounded-full bg-slate-50 dark:bg-[#111] text-[var(--foreground)] opacity-20 hover:opacity-100 hover:text-brand-blue hover:bg-brand-blue/5 transition-all"
                     >
                         <Info className="w-3.5 h-3.5" />
                     </button>

@@ -116,7 +116,7 @@ function FallbackBarChart({ data }: { data: SubjectData[] }) {
                         <span className="text-sm font-bold text-[var(--foreground)] opacity-60">{d.subject}</span>
                         <span className="text-sm font-bold text-[var(--foreground)]">{d.accuracy.toFixed(0)}%</span>
                     </div>
-                    <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-pill overflow-hidden">
+                    <div className="h-2 w-full bg-slate-100 dark:bg-[#111] rounded-pill overflow-hidden">
                         <div
                             className={`h-full rounded-pill transition-all duration-500 ${d.accuracy >= 70 ? 'bg-emerald-500' : d.accuracy >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`}
                             style={{ width: `${d.accuracy}%` }}

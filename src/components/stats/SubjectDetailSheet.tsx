@@ -100,7 +100,7 @@ export default function SubjectDetailSheet({
                 <div className="p-6 space-y-6">
                     {/* Main Stats */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                        <div className="bg-slate-50 dark:bg-black/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
                             <p className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest mb-1">Accuratezza</p>
                             <p className={`text-3xl font-black ${statusStyle.textColor}`}>
                                 {subject.accuracy.toFixed(0)}%
@@ -114,7 +114,7 @@ export default function SubjectDetailSheet({
                             </div>
                         </div>
 
-                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                        <div className="bg-slate-50 dark:bg-black/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
                             <p className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest mb-1">Domande</p>
                             <p className="text-3xl font-black text-[var(--foreground)]">
                                 {subject.totalQuestions}
@@ -148,7 +148,7 @@ export default function SubjectDetailSheet({
 
                     {/* Average Response Time (if available) */}
                     {subject.avgResponseTimeMs && (
-                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                        <div className="bg-slate-50 dark:bg-black/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
                             <p className="text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest mb-1">Tempo medio per risposta</p>
                             <p className="text-2xl font-black text-[var(--foreground)]">
                                 {(subject.avgResponseTimeMs / 1000).toFixed(1)}s

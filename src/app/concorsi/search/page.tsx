@@ -157,7 +157,7 @@ export default function ConcorsiSearchPage() {
                         onClick={() => setShowFilters(true)}
                         className={`w-10 h-10 flex items-center justify-center rounded-full transition-all relative ${activeFiltersCount > 0
                             ? 'bg-brand-blue text-white'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300'
                             }`}
                     >
                         <Filter className="w-5 h-5" />
@@ -183,7 +183,7 @@ export default function ConcorsiSearchPage() {
                             placeholder="Cerca concorso..."
                             value={filters.search}
                             onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                            className="w-full h-[52px] pl-12 pr-5 bg-slate-100 dark:bg-slate-800/50 
+                            className="w-full h-[52px] pl-12 pr-5 bg-slate-100 dark:bg-[#111]/50 
                                        text-[16px] font-medium text-[var(--foreground)] placeholder:text-slate-400/70
                                        border-transparent rounded-2xl
                                        focus:bg-white dark:focus:bg-slate-900 focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/10 
@@ -197,7 +197,7 @@ export default function ConcorsiSearchPage() {
                             onClick={() => setFilters(prev => ({ ...prev, categorySlug: undefined, offset: 0 }))}
                             className={`flex-shrink-0 px-4 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all border snap-start ${!filters.categorySlug
                                 ? 'bg-brand-blue text-white border-transparent'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
+                                : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
                                 }`}
                         >
                             Tutti
@@ -208,7 +208,7 @@ export default function ConcorsiSearchPage() {
                                 onClick={() => toggleCategory(cat.slug)}
                                 className={`flex-shrink-0 px-4 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all border snap-start ${filters.categorySlug === cat.slug
                                     ? 'bg-brand-blue text-white border-transparent'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
+                                    : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
                                     }`}
                             >
                                 {cat.title}
@@ -269,7 +269,7 @@ export default function ConcorsiSearchPage() {
                     <button
                         onClick={handleLoadMore}
                         disabled={loadingMore}
-                        className="w-full mt-8 py-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-[28px] font-bold text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 group"
+                        className="w-full mt-8 py-4 bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-800 rounded-[28px] font-bold text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 group"
                     >
                         {loadingMore ? 'Caricamento...' : (
                             <>
@@ -341,7 +341,7 @@ function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
                     </h3>
 
                     <div className="flex flex-wrap gap-2">
-                        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 text-slate-500">
+                        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-[#111] border border-slate-200/50 dark:border-slate-700/50 text-slate-500">
                             <Calendar className="w-3 h-3" />
                             <span className="text-[11px] font-bold">{quiz.year}</span>
                         </div>
@@ -361,7 +361,7 @@ function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
                 <span className="text-[13px] font-bold text-slate-500 truncate pr-4">
                     Vedi dettagli concorso
                 </span>
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-brand-blue transition-all group-hover:translate-x-1">
+                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-500 group-hover:text-brand-blue transition-all group-hover:translate-x-1">
                     <ArrowRight className="w-4 h-4" />
                 </div>
             </div>
@@ -425,7 +425,7 @@ function TierSFilterModal({
                                         onClick={() => setFilters(f => ({ ...f, categorySlug: undefined, offset: 0 }))}
                                         className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${!filters.categorySlug
                                             ? 'bg-brand-blue text-white border-transparent'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
+                                            : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                     >
                                         Tutti
                                     </button>
@@ -435,7 +435,7 @@ function TierSFilterModal({
                                             onClick={() => setFilters(f => ({ ...f, categorySlug: cat.slug, offset: 0 }))}
                                             className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${filters.categorySlug === cat.slug
                                                 ? 'bg-brand-blue text-white border-transparent'
-                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
+                                                : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                         >
                                             {cat.title}
                                         </button>
@@ -451,7 +451,7 @@ function TierSFilterModal({
                                         onClick={() => setFilters(f => ({ ...f, year: undefined, offset: 0 }))}
                                         className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${!filters.year
                                             ? 'bg-brand-blue text-white border-transparent'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
+                                            : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                     >
                                         Tutti
                                     </button>
@@ -461,7 +461,7 @@ function TierSFilterModal({
                                             onClick={() => setFilters(f => ({ ...f, year: y, offset: 0 }))}
                                             className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all border ${filters.year === y
                                                 ? 'bg-brand-blue text-white border-transparent'
-                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
+                                                : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'}`}
                                         >
                                             {y}
                                         </button>
@@ -500,7 +500,7 @@ function TierSFilterModal({
                                     setFilters({ search: '', categorySlug: undefined, offset: 0 });
                                     onClose();
                                 }}
-                                className="py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[24px] font-black text-sm hover:bg-slate-200 transition-all"
+                                className="py-4 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 rounded-[24px] font-black text-sm hover:bg-slate-200 transition-all"
                             >
                                 Reset
                             </button>

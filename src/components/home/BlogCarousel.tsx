@@ -86,7 +86,7 @@ function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
                 to={`/blog/${post.slug}`}
                 className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] 
                            shadow-lg transition-transform duration-500 ease-out 
-                           active:scale-[0.98] bg-white dark:bg-slate-800 
+                           active:scale-[0.98] bg-white dark:bg-[#111] 
                            border border-slate-100 dark:border-slate-700/50 group"
                 style={{ aspectRatio: '16 / 9' }}
             >

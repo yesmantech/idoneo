@@ -132,7 +132,7 @@ function TableSkeleton({ columns }: { columns: number }) {
             {[1, 2, 3, 4, 5].map(row => (
                 <div key={row} className="flex gap-4 px-4 py-3 border-b border-[var(--card-border)]">
                     {Array.from({ length: columns }).map((_, col) => (
-                        <div key={col} className="flex-1 h-4 bg-slate-100 dark:bg-slate-800 rounded" />
+                        <div key={col} className="flex-1 h-4 bg-slate-100 dark:bg-[#111] rounded" />
                     ))}
                 </div>
             ))}
@@ -172,7 +172,7 @@ export default function AdminTable<T>({
             <div className="overflow-x-auto overflow-y-visible">
                 <table className="w-full text-left text-sm">
                     {/* Header */}
-                    <thead className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-[var(--card-border)]">
+                    <thead className="bg-slate-50/50 dark:bg-[#111]/30 border-b border-[var(--card-border)]">
                         <tr>
                             {columns.map(col => (
                                 <th

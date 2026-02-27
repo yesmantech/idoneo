@@ -65,7 +65,7 @@ export default function ProgressLineChart({
                             <button
                                 key={m}
                                 onClick={() => setMetric(m)}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {metricConfig[m].label}
@@ -77,7 +77,7 @@ export default function ProgressLineChart({
                             <button
                                 key={t}
                                 onClick={() => setTimeRange(t)}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {t === 'all' ? 'Tutto' : t}
@@ -132,7 +132,7 @@ export default function ProgressLineChart({
                         <button
                             key={m}
                             onClick={() => setMetric(m)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                 }`}
                         >
                             {metricConfig[m].label}
@@ -144,7 +144,7 @@ export default function ProgressLineChart({
                         <button
                             key={t}
                             onClick={() => setTimeRange(t)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-slate-800 text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                                 }`}
                         >
                             {t === 'all' ? 'Tutto' : t}

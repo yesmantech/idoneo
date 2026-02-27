@@ -347,7 +347,7 @@ export default function ReviewPage() {
                 {showAnswer && (
                     <div className="mt-6">
                         {currentQuestion.explanation ? (
-                            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-blue-100 dark:border-blue-900/50 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                            <div className="bg-white dark:bg-black rounded-3xl p-6 border border-blue-100 dark:border-blue-900/50 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
                                 {/* Decorative background element */}
                                 <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                                     <Lightbulb className="w-32 h-32 text-blue-500" />

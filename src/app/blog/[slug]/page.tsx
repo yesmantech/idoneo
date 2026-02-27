@@ -117,7 +117,7 @@ function ContentRenderer({ blocks }: { blocks: ContentBlock[] }) {
                     case 'image':
                         return (
                             <figure key={idx} className="my-12">
-                                <div className="rounded-[32px] overflow-hidden shadow-soft bg-slate-100 dark:bg-slate-800">
+                                <div className="rounded-[32px] overflow-hidden shadow-soft bg-slate-100 dark:bg-[#111]">
                                     <img src={block.url} alt={block.alt} className="w-full h-auto" />
                                 </div>
                                 {block.caption && (
@@ -130,10 +130,10 @@ function ContentRenderer({ blocks }: { blocks: ContentBlock[] }) {
 
                     case 'table':
                         return (
-                            <div key={idx} className="my-10 overflow-hidden rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-soft bg-white dark:bg-slate-900/50">
+                            <div key={idx} className="my-10 overflow-hidden rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-soft bg-white dark:bg-black/50">
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-800">
-                                        <thead className="bg-slate-50/80 dark:bg-slate-800/80">
+                                        <thead className="bg-slate-50/80 dark:bg-[#111]/80">
                                             <tr>
                                                 {block.headers.map((h, i) => (
                                                     <th key={i} className="text-left px-6 py-4 font-black text-slate-900 dark:text-white text-[13px] uppercase tracking-wider">
@@ -179,7 +179,7 @@ function FAQItem({ item }: { key?: React.Key; item: { question: string; answer: 
                     {item.question}
                 </span>
                 <div className={cn(
-                    "w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 transition-transform duration-300",
+                    "w-8 h-8 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center shrink-0 transition-transform duration-300",
                     isOpen ? "rotate-180 bg-[#00B1FF]/10 text-[#00B1FF]" : "text-slate-400 dark:text-slate-500"
                 )}>
                     <ChevronDown className="w-5 h-5" />
@@ -211,7 +211,7 @@ function RelatedPostCard({ post, formatDate }: { key?: React.Key; post: BlogPost
             <div className="flex gap-4">
                 {/* Cover Mini */}
                 {post.cover_image_url && (
-                    <div className="w-24 h-24 lg:w-32 lg:h-32 overflow-hidden rounded-[20px] bg-slate-50 dark:bg-slate-800 shrink-0">
+                    <div className="w-24 h-24 lg:w-32 lg:h-32 overflow-hidden rounded-[20px] bg-slate-50 dark:bg-[#111] shrink-0">
                         <img
                             src={post.cover_image_url}
                             alt={post.title}
@@ -374,7 +374,7 @@ export default function BlogPostPage() {
             {/* ============================================================= */}
             {/* HEADER - Glassmorphism UI */}
             {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 pt-safe transition-colors">
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-black/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 pt-safe transition-colors">
                 <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
                     <button
                         onClick={() => { hapticLight(); navigate('/blog'); }}
@@ -387,7 +387,7 @@ export default function BlogPostPage() {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={copyLink}
-                            className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors relative"
+                            className="w-10 h-10 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors relative"
                         >
                             <LinkIcon className="w-4 h-4" />
                             <AnimatePresence>
@@ -477,7 +477,7 @@ export default function BlogPostPage() {
                                 target="_blank"
                                 rel="noopener"
                                 onClick={() => hapticLight()}
-                                className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-sky-500 hover:border-sky-500 transition-all shadow-sm"
+                                className="w-12 h-12 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-sky-500 hover:border-sky-500 transition-all shadow-sm"
                             >
                                 <Twitter className="w-5 h-5" />
                             </a>
@@ -486,13 +486,13 @@ export default function BlogPostPage() {
                                 target="_blank"
                                 rel="noopener"
                                 onClick={() => hapticLight()}
-                                className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all shadow-sm"
+                                className="w-12 h-12 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all shadow-sm"
                             >
                                 <Linkedin className="w-5 h-5" />
                             </a>
                             <button
                                 onClick={copyLink}
-                                className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-[#00B1FF] hover:border-[#00B1FF] transition-all shadow-sm"
+                                className="w-12 h-12 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-[#00B1FF] hover:border-[#00B1FF] transition-all shadow-sm"
                             >
                                 <LinkIcon className="w-5 h-5" />
                             </button>

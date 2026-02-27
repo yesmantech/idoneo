@@ -95,7 +95,7 @@ export default function BlogIndexPage() {
             {/* ============================================================= */}
             {/* HEADER - Glassmorphism UI */}
             {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 pt-safe transition-colors">
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-black/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 pt-safe transition-colors">
                 <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
                     {/* Left: Back Button */}
                     {!isSearchOpen && (
@@ -103,7 +103,7 @@ export default function BlogIndexPage() {
                             onClick={() => { hapticLight(); navigate('/'); }}
                             className="flex items-center gap-2 group p-1 -ml-1"
                         >
-                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
                                 <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                             </div>
                             <span className="font-bold text-[15px] text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Indietro</span>
@@ -129,7 +129,7 @@ export default function BlogIndexPage() {
                                         placeholder="Cerca un argomento..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full h-10 pl-10 pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[15px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 border-none outline-none focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium"
+                                        className="w-full h-10 pl-10 pr-4 bg-slate-100 dark:bg-[#111] rounded-2xl text-[15px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 border-none outline-none focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium"
                                         autoFocus
                                     />
                                     {searchQuery && (
@@ -234,7 +234,7 @@ export default function BlogIndexPage() {
                                     <div className="flex flex-col md:flex-row gap-6">
                                         {/* Cover */}
                                         {featuredPost.cover_image_url && (
-                                            <div className="w-full md:w-2/5 aspect-[4/3] md:aspect-square overflow-hidden rounded-[24px] bg-slate-50 dark:bg-slate-800 shrink-0">
+                                            <div className="w-full md:w-2/5 aspect-[4/3] md:aspect-square overflow-hidden rounded-[24px] bg-slate-50 dark:bg-[#111] shrink-0">
                                                 <img
                                                     src={featuredPost.cover_image_url}
                                                     alt={featuredPost.title}
@@ -250,7 +250,7 @@ export default function BlogIndexPage() {
                                                     In evidenza
                                                 </span>
                                                 {featuredPost.category && (
-                                                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full text-[11px] font-black uppercase tracking-wider">
+                                                    <span className="px-3 py-1 bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400 rounded-full text-[11px] font-black uppercase tracking-wider">
                                                         {featuredPost.category.name}
                                                     </span>
                                                 )}
@@ -305,7 +305,7 @@ export default function BlogIndexPage() {
                                         >
                                             {/* Mini Cover */}
                                             {post.cover_image_url && (
-                                                <div className="aspect-[16/10] overflow-hidden rounded-[24px] mb-4 bg-slate-50 dark:bg-slate-800">
+                                                <div className="aspect-[16/10] overflow-hidden rounded-[24px] mb-4 bg-slate-50 dark:bg-[#111]">
                                                     <img
                                                         src={post.cover_image_url}
                                                         alt={post.title}
@@ -350,7 +350,7 @@ export default function BlogIndexPage() {
                             animate={{ opacity: 1, scale: 1 }}
                             className="bg-white dark:bg-[var(--card)] rounded-[32px] py-16 px-6 text-center shadow-soft"
                         >
-                            <div className="w-20 h-20 rounded-full bg-[#F3F5F7] dark:bg-slate-800 flex items-center justify-center mx-auto mb-6 text-4xl">
+                            <div className="w-20 h-20 rounded-full bg-[#F3F5F7] dark:bg-[#111] flex items-center justify-center mx-auto mb-6 text-4xl">
                                 🔍
                             </div>
                             <h3 className="text-xl font-black text-slate-900 dark:text-[var(--foreground)] mb-2">Articoli non trovati</h3>
