@@ -70,8 +70,7 @@ export default function BottomNavigation() {
                             <item.Icon
                                 size={26}
                                 color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
-                                fill={isActive ? ACTIVE_COLOR : 'none'}
-                                strokeWidth={isActive ? 2 : 1.8}
+                                strokeWidth={2}
                                 style={{ transition: 'color 0.15s ease' }}
                             />
                             <span
