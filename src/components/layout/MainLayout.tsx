@@ -41,7 +41,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         location.pathname === '/profile/settings' ||
         location.pathname.startsWith('/profile/stats') ||
         location.pathname.startsWith('/preparazione') ||
-        location.pathname === '/ai-assistant' ||
         (location.pathname.startsWith('/bandi/') && location.pathname !== '/bandi/watchlist');
 
     // Pages that handle their own safe area in their headers

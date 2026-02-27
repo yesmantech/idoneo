@@ -1,27 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Capacitor } from '@capacitor/core';
 
 /**
  * Praktika-style bottom navigation (Skitla reference).
  *
- * Design system replicated from the reference:
  * - Solid white background (no glass, no blur)
- * - Filled/solid icons — active = deep purple, inactive = gray
+ * - Filled icons active = brand blue, outlined inactive = gray
  * - Bold label when active, medium when inactive
- * - No sliding pill, no highlight background
- * - Large icons (~26px), labels ~11px
- * - Deep purple (#6D28D9) active color
- * - Gray (#9CA3AF) inactive color
+ * - 5 tabs: Home, Bandi, AI (center), Classifiche, Profilo
+ * - Brand blue (#0095FF) active color
  */
 
 // ──────────────────────────────────────
-// Custom SVG Icons (filled style, matching Praktika)
+// Custom SVG Icons (filled active / outline inactive)
 // ──────────────────────────────────────
 
 function HomeIcon({ active }: { active: boolean }) {
-    // Filled house icon
     return active ? (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M12.71 2.29a1 1 0 00-1.42 0l-9 9a1 1 0 001.42 1.42L4 12.41V21a1 1 0 001 1h5a1 1 0 001-1v-5h2v5a1 1 0 001 1h5a1 1 0 001-1v-8.59l.29.3a1 1 0 001.42-1.42l-9-9z" />
@@ -34,7 +30,6 @@ function HomeIcon({ active }: { active: boolean }) {
 }
 
 function BandiIcon({ active }: { active: boolean }) {
-    // Filled scroll/document icon
     return active ? (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
@@ -51,8 +46,22 @@ function BandiIcon({ active }: { active: boolean }) {
     );
 }
 
+function AiIcon({ active }: { active: boolean }) {
+    // Sparkles/AI icon
+    return active ? (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9.937 15.5A2 2 0 008.5 14.063l-6.135-1.582a.5.5 0 010-.962L8.5 9.936A2 2 0 009.937 8.5l1.582-6.135a.5.5 0 01.962 0L14.063 8.5A2 2 0 0015.5 9.937l6.135 1.582a.5.5 0 010 .962L15.5 14.063a2 2 0 00-1.437 1.437l-1.582 6.135a.5.5 0 01-.962 0z" />
+            <path d="M20 3v4M22 5h-4" strokeWidth="1.5" stroke="currentColor" strokeLinecap="round" />
+        </svg>
+    ) : (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9.937 15.5A2 2 0 008.5 14.063l-6.135-1.582a.5.5 0 010-.962L8.5 9.936A2 2 0 009.937 8.5l1.582-6.135a.5.5 0 01.962 0L14.063 8.5A2 2 0 0015.5 9.937l6.135 1.582a.5.5 0 010 .962L15.5 14.063a2 2 0 00-1.437 1.437l-1.582 6.135a.5.5 0 01-.962 0z" />
+            <path d="M20 3v4M22 5h-4" />
+        </svg>
+    );
+}
+
 function ClassificheIcon({ active }: { active: boolean }) {
-    // Filled trophy icon
     return active ? (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 4V2h10v2h3a1 1 0 011 1v3c0 2.21-1.79 4-4 4h-.53A5.99 5.99 0 0113 15.92V18h2a3 3 0 013 3H6a3 3 0 013-3h2v-2.08A5.99 5.99 0 017.53 12H7c-2.21 0-4-1.79-4-4V5a1 1 0 011-1h3zm-3 1v3c0 1.66 1.34 3 3 3h.68A6.02 6.02 0 017 8.5V5H4zm16 0h-3v3.5A6.02 6.02 0 0116.32 11H17c1.66 0 3-1.34 3-3V5z" />
@@ -70,7 +79,6 @@ function ClassificheIcon({ active }: { active: boolean }) {
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
-    // Filled person icon (solid silhouette like Praktika)
     return active ? (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="7" r="4" />
@@ -91,11 +99,12 @@ function ProfileIcon({ active }: { active: boolean }) {
 const NAV_ITEMS = [
     { label: 'Home', path: '/', IconComponent: HomeIcon },
     { label: 'Bandi', path: '/bandi', IconComponent: BandiIcon },
+    { label: 'AI', path: '/ai-assistant', IconComponent: AiIcon },
     { label: 'Classifiche', path: '/leaderboard', IconComponent: ClassificheIcon },
     { label: 'Profilo', path: '/profile', IconComponent: ProfileIcon },
 ];
 
-const ACTIVE_COLOR = '#6D28D9';   // Deep purple (Praktika-style)
+const ACTIVE_COLOR = '#0095FF';   // Brand blue
 const INACTIVE_COLOR = '#9CA3AF'; // Gray
 
 // ──────────────────────────────────────
@@ -168,7 +177,7 @@ export default function BottomNavigation() {
                             </motion.div>
                             <span
                                 style={{
-                                    fontSize: '11px',
+                                    fontSize: '10px',
                                     fontWeight: isActive ? 700 : 500,
                                     color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR,
                                     transition: 'color 0.15s ease, font-weight 0.15s ease',
