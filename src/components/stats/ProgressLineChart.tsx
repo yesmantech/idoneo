@@ -20,7 +20,7 @@ interface ProgressLineChartProps {
 }
 
 const metricConfig = {
-    score: { label: 'Punteggio', unit: 'pt', color: '#7C5CFC' },
+    score: { label: 'Punteggio', unit: 'pt', color: '#00B1FF' },
     accuracy: { label: 'Accuratezza', unit: '%', color: '#22C55E' },
     responseTime: { label: 'Tempo medio', unit: 's', color: '#F59E0B' }
 };
@@ -66,7 +66,7 @@ export default function ProgressLineChart({
                                 key={m}
                                 onClick={() => setMetric(m)}
                                 className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${metric === m
-                                    ? 'bg-[#7C5CFC] text-white'
+                                    ? 'bg-[#00B1FF] text-white'
                                     : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
                                     }`}
                             >
@@ -150,7 +150,7 @@ export default function ProgressLineChart({
                             key={m}
                             onClick={() => setMetric(m)}
                             className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${metric === m
-                                ? 'bg-[#7C5CFC] text-white'
+                                ? 'bg-[#00B1FF] text-white'
                                 : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
                                 }`}
                         >
@@ -241,7 +241,7 @@ export default function ProgressLineChart({
                         {filteredData[hoveredPoint].id && (
                             <Link
                                 to={`/quiz/results/${filteredData[hoveredPoint].id}`}
-                                className="text-[10px] font-bold text-[#7C5CFC] hover:underline pointer-events-auto"
+                                className="text-[10px] font-bold text-[#00B1FF] hover:underline pointer-events-auto"
                             >
                                 Vedi dettagli →
                             </Link>
