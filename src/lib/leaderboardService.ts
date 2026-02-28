@@ -376,7 +376,8 @@ export const leaderboardService = {
                     title, 
                     year, 
                     category_id,
-                    slug
+                    slug,
+                    category:categories ( title )
                 )
             `)
             .eq("user_id", userId)
@@ -384,7 +385,6 @@ export const leaderboardService = {
 
         if (error) {
             console.error("Error fetching active quizzes from leaderboard:", error);
-            // Fallback to empty, or could try attempts as backup (omitted for cleaner logic)
             return [];
         }
 
@@ -394,15 +394,14 @@ export const leaderboardService = {
             // Flatten the structure
             const quizData = row.quiz as any;
             const quiz = Array.isArray(quizData) ? quizData[0] : quizData;
+            // Extract category title from nested join
+            const categoryData = quiz?.category as any;
+            const categoryTitle = Array.isArray(categoryData) ? categoryData[0]?.title : categoryData?.title;
 
             return {
                 ...quiz,
-                // Use the official preparation score (0-100)
+                category: categoryTitle || undefined,
                 accuracy: Math.round(row.score || 0),
-                // We don't have exact attempts count here easily without another join, 
-                // but for dashboard "progress" visual, score is what matters.
-                // We could rename 'accuracy' to 'score' in the component later if needed, 
-                // but keeping 'accuracy' key for compatibility.
                 lastPlayed: row.last_calculated_at
             };
         });
