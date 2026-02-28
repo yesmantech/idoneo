@@ -20,7 +20,7 @@ interface ProgressLineChartProps {
 }
 
 const metricConfig = {
-    score: { label: 'Punteggio', unit: 'pt', color: '#06D6D3' },
+    score: { label: 'Punteggio', unit: 'pt', color: '#7C5CFC' },
     accuracy: { label: 'Accuratezza', unit: '%', color: '#22C55E' },
     responseTime: { label: 'Tempo medio', unit: 's', color: '#F59E0B' }
 };
@@ -60,24 +60,28 @@ export default function ProgressLineChart({
             <div className="space-y-4">
                 {/* Filters */}
                 <div className="flex flex-wrap gap-2 justify-between items-center">
-                    <div className="flex gap-1">
+                    <div className="flex gap-1.5">
                         {(['score', 'accuracy'] as MetricType[]).map(m => (
                             <button
                                 key={m}
                                 onClick={() => setMetric(m)}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${metric === m
+                                    ? 'bg-[#7C5CFC] text-white'
+                                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
                                     }`}
                             >
                                 {metricConfig[m].label}
                             </button>
                         ))}
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1.5">
                         {(['7d', '30d', 'all'] as TimeRange[]).map(t => (
                             <button
                                 key={t}
                                 onClick={() => setTimeRange(t)}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                className={`px-3 py-2 text-xs font-bold rounded-full transition-all ${timeRange === t
+                                    ? 'bg-white dark:bg-white text-black'
+                                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
                                     }`}
                             >
                                 {t === 'all' ? 'Tutto' : t}
@@ -85,7 +89,7 @@ export default function ProgressLineChart({
                         ))}
                     </div>
                 </div>
-                <div className="h-48 flex items-center justify-center text-slate-400 italic text-sm">
+                <div className="h-48 flex items-center justify-center text-slate-400 dark:text-white/30 italic text-sm">
                     Non ci sono abbastanza dati per questo periodo.
                 </div>
             </div>
@@ -111,14 +115,27 @@ export default function ProgressLineChart({
         return height - padding - ((value - minValue) / valueRange) * (height - padding * 2);
     };
 
-    // Path
-    const pathD = filteredData.map((d, i) => {
-        const x = getX(i);
-        const y = getY(getValue(d));
-        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-    }).join(' ');
+    // Smooth curve path using cardinal spline
+    const points = filteredData.map((d, i) => ({
+        x: getX(i),
+        y: getY(getValue(d))
+    }));
 
-    // Area Path
+    // Simple smooth path with quadratic bezier curves
+    let pathD = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+        const prev = points[i - 1];
+        const curr = points[i];
+        const cpX = (prev.x + curr.x) / 2;
+        pathD += ` Q ${cpX} ${prev.y}, ${(cpX + curr.x) / 2} ${(prev.y + curr.y) / 2}`;
+    }
+    // Final point
+    if (points.length > 1) {
+        const last = points[points.length - 1];
+        pathD += ` T ${last.x} ${last.y}`;
+    }
+
+    // Area Path  
     const areaD = `${pathD} L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`;
 
     const config = metricConfig[metric];
@@ -127,24 +144,28 @@ export default function ProgressLineChart({
         <div className="space-y-4">
             {/* Filters */}
             <div className="flex flex-wrap gap-2 justify-between items-center">
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                     {(['score', 'accuracy'] as MetricType[]).map(m => (
                         <button
                             key={m}
                             onClick={() => setMetric(m)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${metric === m ? 'bg-brand-cyan text-white' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${metric === m
+                                ? 'bg-[#7C5CFC] text-white'
+                                : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
                                 }`}
                         >
                             {metricConfig[m].label}
                         </button>
                     ))}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                     {(['7d', '30d', 'all'] as TimeRange[]).map(t => (
                         <button
                             key={t}
                             onClick={() => setTimeRange(t)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-pill transition-all ${timeRange === t ? 'bg-[var(--foreground)] text-[var(--background)]' : 'bg-slate-100 dark:bg-[#111] text-text-secondary dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            className={`px-3 py-2 text-xs font-bold rounded-full transition-all ${timeRange === t
+                                ? 'bg-white dark:bg-white text-black'
+                                : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
                                 }`}
                         >
                             {t === 'all' ? 'Tutto' : t}
@@ -159,7 +180,8 @@ export default function ProgressLineChart({
                     {/* Gradient Definition */}
                     <defs>
                         <linearGradient id={`gradient-${metric}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={config.color} stopOpacity="0.2" />
+                            <stop offset="0%" stopColor={config.color} stopOpacity="0.25" />
+                            <stop offset="60%" stopColor={config.color} stopOpacity="0.08" />
                             <stop offset="100%" stopColor={config.color} stopOpacity="0" />
                         </linearGradient>
                     </defs>
@@ -170,8 +192,8 @@ export default function ProgressLineChart({
                         const y = getY(value);
                         return (
                             <g key={t}>
-                                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1.5" strokeDasharray="4" />
-                                <text x={padding - 8} y={y + 4} textAnchor="end" className="text-[10px] fill-[var(--foreground)] opacity-40 font-medium">
+                                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="currentColor" className="text-slate-200 dark:text-white/[0.06]" strokeWidth="1" strokeDasharray="4 4" />
+                                <text x={padding - 8} y={y + 4} textAnchor="end" className="text-[10px] fill-slate-400 dark:fill-white/25 font-medium">
                                     {value.toFixed(0)}
                                 </text>
                             </g>
@@ -181,8 +203,8 @@ export default function ProgressLineChart({
                     {/* Area */}
                     <path d={areaD} fill={`url(#gradient-${metric})`} />
 
-                    {/* Line */}
-                    <path d={pathD} fill="none" stroke={config.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Line — smooth curve */}
+                    <path d={pathD} fill="none" stroke={config.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 
                     {/* Dots */}
                     {filteredData.map((d, i) => (
@@ -190,10 +212,10 @@ export default function ProgressLineChart({
                             <circle
                                 cx={getX(i)}
                                 cy={getY(getValue(d))}
-                                r={hoveredPoint === i ? 8 : 5}
-                                fill="var(--card)"
+                                r={hoveredPoint === i ? 7 : 4}
+                                fill="#1C1C1E"
                                 stroke={config.color}
-                                strokeWidth="3"
+                                strokeWidth="2.5"
                                 className="cursor-pointer transition-all"
                                 onMouseEnter={() => setHoveredPoint(i)}
                                 onMouseLeave={() => setHoveredPoint(null)}
@@ -205,21 +227,21 @@ export default function ProgressLineChart({
                 {/* Tooltip */}
                 {hoveredPoint !== null && filteredData[hoveredPoint] && (
                     <div
-                        className="absolute bg-[var(--card)] rounded-xl shadow-lg border border-[var(--card-border)] p-3 z-10 pointer-events-none transition-colors"
+                        className="absolute bg-white dark:bg-[#2C2C2E] rounded-2xl shadow-xl border border-slate-100 dark:border-white/[0.06] p-3 z-10 pointer-events-none"
                         style={{
                             left: `${(getX(hoveredPoint) / width) * 100}%`,
                             top: `${(getY(getValue(filteredData[hoveredPoint])) / height) * 100 - 20}%`,
                             transform: 'translateX(-50%)'
                         }}
                     >
-                        <p className="text-xs text-[var(--foreground)] opacity-40 mb-1">{filteredData[hoveredPoint].date}</p>
-                        <p className="text-sm font-bold text-[var(--foreground)]">
+                        <p className="text-xs text-slate-500 dark:text-white/35 mb-1">{filteredData[hoveredPoint].date}</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">
                             {getValue(filteredData[hoveredPoint]).toFixed(1)} {config.unit}
                         </p>
                         {filteredData[hoveredPoint].id && (
                             <Link
                                 to={`/quiz/results/${filteredData[hoveredPoint].id}`}
-                                className="text-[10px] font-bold text-brand-cyan hover:underline pointer-events-auto"
+                                className="text-[10px] font-bold text-[#7C5CFC] hover:underline pointer-events-auto"
                             >
                                 Vedi dettagli →
                             </Link>
@@ -229,7 +251,7 @@ export default function ProgressLineChart({
             </div>
 
             {/* X Axis Labels (First and Last) */}
-            <div className="flex justify-between text-[10px] text-text-tertiary font-medium px-2">
+            <div className="flex justify-between text-[10px] text-slate-400 dark:text-white/25 font-medium px-2">
                 <span>{filteredData[0]?.date}</span>
                 <span>{filteredData[filteredData.length - 1]?.date}</span>
             </div>
