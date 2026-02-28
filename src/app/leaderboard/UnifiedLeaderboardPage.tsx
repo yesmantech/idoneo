@@ -36,7 +36,7 @@ import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { xpService } from '@/lib/xpService';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingProvider';
-import { HelpCircle, Trophy, Zap, Clock } from 'lucide-react';
+import { Trophy, Zap, Clock } from 'lucide-react';
 
 import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/LeaderboardSelector';
 import LeaderboardView from '@/components/leaderboard/LeaderboardView';
@@ -291,13 +291,12 @@ export default function UnifiedLeaderboardPage() {
                             </h1>
                             <p className="text-[var(--foreground)] opacity-50 mt-1">Competi con gli altri studenti e scala la classifica</p>
                         </div>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="h-[48px] w-[48px] p-0 rounded-xl flex items-center justify-center"
+                        <button
                             onClick={handleOpenInfo}
-                            icon={<HelpCircle className="w-5 h-5 opacity-50" />}
-                        />
+                            className="w-10 h-10 rounded-full border-2 border-[var(--foreground)]/15 flex items-center justify-center hover:bg-[var(--foreground)]/5 transition-colors"
+                        >
+                            <span className="text-[16px] font-bold text-[var(--foreground)] opacity-40">?</span>
+                        </button>
                     </div>
 
                     {/* Mobile Header Row */}
@@ -311,13 +310,12 @@ export default function UnifiedLeaderboardPage() {
                                 otherQuizzes={otherQuizzes}
                             />
                         </div>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="h-[44px] w-[44px] p-0 rounded-full flex items-center justify-center"
+                        <button
                             onClick={handleOpenInfo}
-                            icon={<HelpCircle className="w-5 h-5 opacity-50" />}
-                        />
+                            className="w-10 h-10 rounded-full border-2 border-[var(--foreground)]/15 flex items-center justify-center hover:bg-[var(--foreground)]/5 transition-colors"
+                        >
+                            <span className="text-[16px] font-bold text-[var(--foreground)] opacity-40">?</span>
+                        </button>
                     </div>
 
                     {/* Desktop Selector - Centered */}
