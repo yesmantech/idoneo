@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { RotateCcw, X, Zap, Star, TrendingUp } from 'lucide-react';
+import { X, Zap, Star, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,48 +20,32 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
 
     return (
         <>
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-end py-2">
 
-                {/* XP Pill — Blue brand theme — clickable */}
-                <button
-                    onClick={() => setShowXPModal(true)}
-                    className="flex items-center gap-1.5 bg-[#E0F4FF] dark:bg-[#001F3F] px-3.5 py-2 rounded-2xl active:scale-95 transition-transform"
-                >
-                    {/* XP Logo — CSS gradient text */}
-                    <span
-                        className="font-black select-none"
-                        style={{
-                            fontSize: '18px',
-                            lineHeight: 1,
-                            letterSpacing: '-0.5px',
-                            background: 'linear-gradient(180deg, #67E8F9 0%, #00B1FF 50%, #0077CC 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                        }}
-                    >
-                        XP
-                    </span>
-                    {/* Number */}
-                    <span className="text-[17px] font-bold text-[#00B1FF] leading-none">{xp.toLocaleString()}</span>
-                </button>
-
-                {/* Right side: Reset Tour + Avatar (Settings) */}
+                {/* Right side: XP Pill + Avatar (Settings) */}
                 <div className="flex items-center gap-2">
+                    {/* XP Pill — Blue brand theme — clickable */}
                     <button
-                        onClick={() => {
-                            Object.keys(localStorage).forEach(key => {
-                                if (key.startsWith('idoneo_onboarding_') || key === 'idoneo_welcome_shown') {
-                                    localStorage.removeItem(key);
-                                }
-                            });
-                            window.location.href = '/';
-                        }}
-                        className="w-10 h-10 rounded-full bg-slate-100 dark:bg-[#1A1A1A] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all flex items-center justify-center border border-slate-200 dark:border-white/5 shadow-sm group"
-                        title="Ricomincia il Tour"
+                        onClick={() => setShowXPModal(true)}
+                        className="flex items-center gap-1.5 bg-[#E0F4FF] dark:bg-[#001F3F] px-3.5 py-2 rounded-2xl active:scale-95 transition-transform"
                     >
-                        <RotateCcw className="w-4 h-4 group-hover:-rotate-180 transition-transform duration-500" />
+                        <span
+                            className="font-black select-none"
+                            style={{
+                                fontSize: '18px',
+                                lineHeight: 1,
+                                letterSpacing: '-0.5px',
+                                background: 'linear-gradient(180deg, #67E8F9 0%, #00B1FF 50%, #0077CC 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}
+                        >
+                            XP
+                        </span>
+                        <span className="text-[17px] font-bold text-[#00B1FF] leading-none">{xp.toLocaleString()}</span>
                     </button>
+
                     <button
                         onClick={() => navigate('/profile/settings')}
                         data-onboarding="profile-settings"
