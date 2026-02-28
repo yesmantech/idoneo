@@ -300,7 +300,7 @@ export default function PunteggiPage() {
                 >
                     <Link
                         to="/"
-                        className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#00B1FF] to-emerald-500 text-white font-bold rounded-2xl shadow-lg hover:opacity-90 transition-opacity"
+                        className="inline-flex items-center gap-2 px-8 py-4 bg-[#00B1FF] hover:bg-[#0099e6] text-white font-bold rounded-full shadow-lg shadow-[#00B1FF]/30 transition-all active:scale-95"
                     >
                         <Target className="w-5 h-5" />
                         Inizia ad allenarti
