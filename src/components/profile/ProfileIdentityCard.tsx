@@ -10,34 +10,6 @@ interface ProfileIdentityCardProps {
     xp?: number;
 }
 
-/**
- * Custom XP icon - typographic logo rendered as a mini square badge
- * to visually match the 🔥 icon weight in the Duolingo reference.
- */
-function XPIcon() {
-    return (
-        <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-            style={{
-                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                boxShadow: '0 2px 6px rgba(245, 158, 11, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
-            }}
-        >
-            <span
-                className="font-black text-white select-none"
-                style={{
-                    fontSize: '11px',
-                    lineHeight: 1,
-                    letterSpacing: '-0.5px',
-                    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                }}
-            >
-                XP
-            </span>
-        </div>
-    );
-}
-
 export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileIdentityCardProps) {
     const navigate = useNavigate();
 
@@ -47,23 +19,10 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
     return (
         <div className="flex items-center justify-between py-2">
 
-            {/* XP Pill — Duolingo streak-style */}
-            <div
-                className="flex items-center gap-2 rounded-full"
-                style={{
-                    background: 'linear-gradient(135deg, #451A03 0%, #3B1600 100%)',
-                    padding: '5px 14px 5px 5px',
-                    boxShadow: '0 2px 8px rgba(69, 26, 3, 0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(245, 158, 11, 0.12)',
-                }}
-            >
-                <XPIcon />
-                <span
-                    className="font-black text-[#F59E0B] select-none"
-                    style={{ fontSize: '17px', lineHeight: 1, letterSpacing: '-0.3px' }}
-                >
-                    {xp.toLocaleString()}
-                </span>
+            {/* XP Pill — same structure as reference 🔥 0 pill */}
+            <div className="flex items-center gap-1 bg-[#422006] px-3.5 py-2 rounded-2xl">
+                <span className="text-[20px] leading-none select-none" role="img">⚡</span>
+                <span className="text-[16px] font-bold text-[#F59E0B] leading-none">{xp.toLocaleString()}</span>
             </div>
 
             {/* Right side: Reset Tour + Avatar (Settings) */}
