@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { X } from 'lucide-react';
 
 // Types
 export interface QuizOption {
@@ -24,54 +25,54 @@ export default function LeaderboardSelector({
     otherQuizzes
 }: LeaderboardSelectorProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [visible, setVisible] = useState(false);
     const [search, setSearch] = useState('');
-    const containerRef = useRef<HTMLDivElement>(null);
 
-    // Close on click outside
+    // Animate open
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
+        if (isOpen) {
+            requestAnimationFrame(() => setVisible(true));
+        } else {
+            setVisible(false);
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }, [isOpen]);
+
+    const handleClose = () => {
+        setVisible(false);
+        setTimeout(() => setIsOpen(false), 300);
+    };
 
     const handleSelect = (val: 'xp' | string) => {
         onSelect(val);
-        setIsOpen(false);
-        setSearch(''); // Reset search
+        handleClose();
+        setSearch('');
     };
 
-    // Helper to get efficient search text
     const getSearchText = (q: QuizOption) => {
         const rTitle = q.roleTitle || q.role?.title || '';
         return (q.title + ' ' + rTitle).toLowerCase();
     }
 
-    // Filter Logic
     const filteredActive = activeQuizzes.filter(q => getSearchText(q).includes(search.toLowerCase()));
     const filteredOther = otherQuizzes.filter(q => getSearchText(q).includes(search.toLowerCase()));
 
     // Determine Label
     let currentLabel = "Gold League";
-    let icon = <span className="text-brand-orange text-2xl">🏆</span>;
+    let icon = <span className="text-2xl">🏆</span>;
 
     if (currentSelection !== 'xp') {
         const q = [...activeQuizzes, ...otherQuizzes].find(x => x.id === currentSelection);
         if (q) {
-            currentLabel = q.roleTitle || q.role?.title || q.title; // Prefer Role Title for label if available
-            icon = <span className="text-brand-cyan text-2xl">📊</span>;
+            currentLabel = q.roleTitle || q.role?.title || q.title;
+            icon = <span className="text-2xl">📊</span>;
         }
     }
 
     return (
-
-        <div className="relative inline-block" ref={containerRef}>
+        <>
             {/* Trigger Pill */}
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => setIsOpen(true)}
                 className={`flex items-center gap-3 px-5 py-3 bg-[var(--card)] rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] 
                            border transition-all duration-300 active:scale-[0.98]
                            ${isOpen
@@ -79,13 +80,10 @@ export default function LeaderboardSelector({
                         : 'border-[var(--card-border)] hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg'
                     }`}
             >
-                {/* Dynamic Icon */}
                 <span className="scale-110">{icon}</span>
-
                 <span className="text-[17px] font-bold text-[var(--foreground)] tracking-tight min-w-[100px] text-center">
                     {currentLabel}
                 </span>
-
                 <svg
                     className={`w-4 h-4 text-[var(--foreground)] opacity-40 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#00B1FF] !opacity-100' : ''}`}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
@@ -94,90 +92,122 @@ export default function LeaderboardSelector({
                 </svg>
             </button>
 
-            {/* Floating Dropdown Menu */}
+            {/* Bottom Sheet Modal — Same animation as ThemeSelectorModal */}
             {isOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[320px] bg-[var(--card)] rounded-[24px] 
-                                shadow-2xl border border-[var(--card-border)] overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-8">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 transition-colors duration-300"
+                        style={{ backgroundColor: visible ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)' }}
+                        onClick={handleClose}
+                    />
 
-                    {/* Search Bar */}
-                    <div className="p-3 border-b border-[var(--card-border)] opacity-80">
-                        <input
-                            type="text"
-                            placeholder="Cerca concorso..."
-                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#111] border border-slate-100 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            autoFocus
-                        />
-                    </div>
-
-                    <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 p-2 space-y-2">
-
-                        {/* 1. Global XP */}
-                        {search === '' && (
-                            <div>
+                    {/* Floating Bottom Sheet */}
+                    <div
+                        className="relative w-full max-w-[400px] transition-transform duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                        style={{
+                            transform: visible ? 'translateY(0) scale(1)' : 'translateY(120%) scale(0.95)',
+                        }}
+                    >
+                        <div
+                            className="rounded-[32px] overflow-hidden backdrop-blur-3xl border border-white/10 shadow-2xl"
+                            style={{ backgroundColor: '#1C1C1E' }}
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-6 pt-6 pb-2">
+                                <h2 className="text-[17px] font-bold text-white tracking-wide">Classifica</h2>
                                 <button
-                                    onClick={() => handleSelect('xp')}
-                                    className={`w-full text-left px-4 py-3.5 rounded-[16px] flex items-center gap-3 transition-all ${currentSelection === 'xp'
-                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shadow-sm'
-                                        : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-[var(--foreground)] opacity-70 hover:opacity-100'
-                                        }`}
+                                    onClick={handleClose}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center bg-[#2C2C2E] active:scale-95 transition-transform"
                                 >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-black/5 ${currentSelection === 'xp' ? 'bg-amber-100 dark:bg-amber-800 text-amber-600' : 'bg-white dark:bg-slate-700 text-slate-400'}`}>
-                                        🏆
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="font-bold text-[15px]">Gold League</div>
-                                        <div className="text-[11px] uppercase font-bold tracking-wider opacity-60">Classifica Globale</div>
-                                    </div>
-                                    {currentSelection === 'xp' && <CheckIcon color="text-amber-500" />}
+                                    <X className="w-4 h-4 text-white/60" strokeWidth={2.5} />
                                 </button>
                             </div>
-                        )}
-                        {search === '' && <div className="h-px bg-slate-100 mx-2" />}
 
-                        {/* 2. My Concorsi */}
-                        {filteredActive.length > 0 && (
-                            <div>
-                                <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-[var(--foreground)] opacity-40 tracking-widest leading-none mt-2">
-                                    I Tuoi Concorsi ({filteredActive.length})
-                                </div>
-                                {filteredActive.map(q => (
-                                    <OptionRow
-                                        key={q.id}
-                                        quiz={q}
-                                        isSelected={currentSelection === q.id}
-                                        onClick={() => handleSelect(q.id)}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                            <div className="w-[calc(100%-48px)] h-[1px] bg-white/[0.05] mx-6 my-2" />
 
-                        {/* 3. Other Concorsi */}
-                        <div>
-                            {filteredOther.length > 0 && (
-                                <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-[var(--foreground)] opacity-40 tracking-widest mt-2">
-                                    Tutti i Concorsi ({filteredOther.length})
-                                </div>
-                            )}
-                            {filteredOther.map(q => (
-                                <OptionRow
-                                    key={q.id}
-                                    quiz={q}
-                                    isSelected={currentSelection === q.id}
-                                    onClick={() => handleSelect(q.id)}
+                            {/* Search Bar */}
+                            <div className="px-6 pb-3">
+                                <input
+                                    type="text"
+                                    placeholder="Cerca concorso..."
+                                    className="w-full px-4 py-2.5 bg-[#2C2C2E] rounded-xl text-sm outline-none 
+                                             focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium 
+                                             text-white placeholder:text-white/30"
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    autoFocus
                                 />
-                            ))}
-                            {filteredActive.length === 0 && filteredOther.length === 0 && (
-                                <div className="p-4 text-center text-slate-400 text-sm">
-                                    Nessun concorso trovato.
+                            </div>
+
+                            {/* Options List */}
+                            <div className="max-h-[50vh] overflow-y-auto px-4 pb-6 space-y-1">
+
+                                {/* 1. Global XP */}
+                                {search === '' && (
+                                    <button
+                                        onClick={() => handleSelect('xp')}
+                                        className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all active:scale-[0.98] ${currentSelection === 'xp'
+                                            ? 'bg-amber-500/10'
+                                            : 'active:bg-white/[0.04]'
+                                            }`}
+                                    >
+                                        <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center text-lg ${currentSelection === 'xp' ? 'bg-amber-500/15' : 'bg-[#2C2C2E]'}`}>
+                                            🏆
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className={`font-bold text-[15px] ${currentSelection === 'xp' ? 'text-amber-400' : 'text-white'}`}>Gold League</div>
+                                            <div className="text-[11px] uppercase font-bold tracking-widest text-white/30">Classifica Globale</div>
+                                        </div>
+                                        {currentSelection === 'xp' && <CheckIcon color="text-amber-500" />}
+                                    </button>
+                                )}
+                                {search === '' && <div className="h-px bg-white/[0.06] mx-2" />}
+
+                                {/* 2. My Concorsi */}
+                                {filteredActive.length > 0 && (
+                                    <div>
+                                        <div className="px-4 py-2 text-[10px] uppercase font-bold text-white/25 tracking-widest mt-1">
+                                            I Tuoi Concorsi ({filteredActive.length})
+                                        </div>
+                                        {filteredActive.map(q => (
+                                            <OptionRow
+                                                key={q.id}
+                                                quiz={q}
+                                                isSelected={currentSelection === q.id}
+                                                onClick={() => handleSelect(q.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* 3. Other Concorsi */}
+                                <div>
+                                    {filteredOther.length > 0 && (
+                                        <div className="px-4 py-2 text-[10px] uppercase font-bold text-white/25 tracking-widest mt-1">
+                                            Tutti i Concorsi ({filteredOther.length})
+                                        </div>
+                                    )}
+                                    {filteredOther.map(q => (
+                                        <OptionRow
+                                            key={q.id}
+                                            quiz={q}
+                                            isSelected={currentSelection === q.id}
+                                            onClick={() => handleSelect(q.id)}
+                                        />
+                                    ))}
+                                    {filteredActive.length === 0 && filteredOther.length === 0 && (
+                                        <div className="p-4 text-center text-white/30 text-sm">
+                                            Nessun concorso trovato.
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
-        </div >
+        </>
     );
 }
 
@@ -187,28 +217,25 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
     return (
         <button
             onClick={onClick}
-            className={`w-full text-left px-4 py-3 rounded-[16px] flex items-center gap-3 transition-all mb-1 ${isSelected
-                ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 shadow-sm'
-                : 'bg-transparent text-[var(--foreground)] opacity-70 hover:opacity-100 hover:bg-slate-50 dark:hover:bg-slate-800'
+            className={`w-full text-left px-4 py-3 rounded-2xl flex items-center gap-3 transition-all mb-0.5 active:scale-[0.98] ${isSelected
+                ? 'bg-[#00B1FF]/10'
+                : 'active:bg-white/[0.04]'
                 }`}
         >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black border border-black/5 dark:border-white/5 shadow-sm ${isSelected ? 'bg-cyan-100 dark:bg-cyan-800 text-cyan-600' : 'bg-white dark:bg-slate-700 text-slate-400'}`}>
-                {/* Use Role initial if available, else Title */}
+            <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center text-xs font-black ${isSelected ? 'bg-[#00B1FF]/15 text-[#00B1FF]' : 'bg-[#2C2C2E] text-white/40'}`}>
                 {(roleTitle || quiz.title).substring(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-                <div className="font-bold text-[14px] truncate">
-                    {/* Show Role Title as main text - User wants "Concorsi" list */}
+                <div className={`font-bold text-[14px] truncate ${isSelected ? 'text-[#00B1FF]' : 'text-white'}`}>
                     {roleTitle || quiz.title}
                 </div>
-                {/* Only show subtitle if it's different and relevant, otherwise keep it clean */}
                 {roleTitle && roleTitle !== quiz.title && (
-                    <div className="text-[11px] opacity-50 truncate">
+                    <div className="text-[11px] text-white/25 truncate">
                         {quiz.title}
                     </div>
                 )}
             </div>
-            {isSelected && <CheckIcon color="text-cyan-500" />}
+            {isSelected && <CheckIcon color="text-[#00B1FF]" />}
         </button>
     );
 }
