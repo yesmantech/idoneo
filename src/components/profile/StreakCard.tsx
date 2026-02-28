@@ -9,7 +9,7 @@ import { ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 
-const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
+const DAYS = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'] as const;
 
 interface DayState {
     label: string;
@@ -78,7 +78,7 @@ export default function StreakCard() {
                     className="font-bold text-white"
                     style={{ fontSize: 22, letterSpacing: '-0.02em' }}
                 >
-                    Streak
+                    Streak Giornaliero
                 </h3>
                 <ChevronRight
                     className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors"
@@ -136,7 +136,7 @@ export default function StreakCard() {
                             marginBottom: 8,
                         }}
                     >
-                        Current Streak
+                        Streak Attuale
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
                         <span style={{ fontSize: 26, lineHeight: 1 }}>🔥</span>
@@ -144,7 +144,7 @@ export default function StreakCard() {
                             className="font-bold text-white"
                             style={{ fontSize: 24, letterSpacing: '-0.02em' }}
                         >
-                            {streakCurrent} {streakCurrent === 1 ? 'day' : 'days'}
+                            {streakCurrent} {streakCurrent === 1 ? 'giorno' : 'giorni'}
                         </span>
                     </div>
                 </div>
@@ -160,7 +160,7 @@ export default function StreakCard() {
                             marginBottom: 8,
                         }}
                     >
-                        Best Streak
+                        Miglior Streak
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
                         <span style={{ fontSize: 26, lineHeight: 1 }}>🟣</span>
@@ -168,7 +168,7 @@ export default function StreakCard() {
                             className="font-bold text-white"
                             style={{ fontSize: 24, letterSpacing: '-0.02em' }}
                         >
-                            {streakMax} {streakMax === 1 ? 'day' : 'days'}
+                            {streakMax} {streakMax === 1 ? 'giorno' : 'giorni'}
                         </span>
                     </div>
                 </div>
