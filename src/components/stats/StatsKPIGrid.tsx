@@ -107,15 +107,15 @@ export default function StatsKPIGrid({
     };
 
     return (
-        <div className="space-y-4 mb-6">
+        <div className="space-y-6 mb-8">
 
             {/* 2x2 Grid */}
-            <div data-onboarding="stats-kpi" className="grid grid-cols-2 gap-3">
+            <div data-onboarding="stats-kpi" className="grid grid-cols-2 gap-4">
 
                 {/* 1. Total Tests */}
                 <StatsCard
-                    icon={<FileText className="w-5 h-5 text-white" />}
-                    iconBg="bg-[#8B5CF6]"
+                    icon={<FileText className="w-5 h-5 text-brand-purple" />}
+                    iconBg="bg-brand-purple/10"
                     badgeColor="bg-brand-purple/10 text-brand-purple"
                     label="Test fatti"
                     value={totalTests.toString()}
@@ -125,8 +125,8 @@ export default function StatsKPIGrid({
 
                 {/* 2. Best Score */}
                 <StatsCard
-                    icon={<Trophy className="w-5 h-5 text-white" />}
-                    iconBg="bg-[#F59E0B]"
+                    icon={<Trophy className="w-5 h-5 text-brand-orange" />}
+                    iconBg="bg-brand-orange/10"
                     badgeColor="bg-brand-orange/10 text-brand-orange"
                     label="Miglior voto"
                     value={`${bestScore.toFixed(0)}/${maxPossibleScore}`}
@@ -136,8 +136,8 @@ export default function StatsKPIGrid({
 
                 {/* 3. Avg Score */}
                 <StatsCard
-                    icon={<BarChart3 className="w-5 h-5 text-white" />}
-                    iconBg="bg-[#00B1FF]"
+                    icon={<BarChart3 className="w-5 h-5 text-brand-blue" />}
+                    iconBg="bg-brand-blue/10"
                     badgeColor="bg-brand-blue/10 text-brand-blue"
                     label="Media voto"
                     value={avgScore.toFixed(1)}
@@ -147,8 +147,8 @@ export default function StatsKPIGrid({
 
                 {/* 4. Accuracy */}
                 <StatsCard
-                    icon={<Target className="w-5 h-5 text-white" />}
-                    iconBg="bg-[#10B981]"
+                    icon={<Target className="w-5 h-5 text-semantic-success" />}
+                    iconBg="bg-semantic-success/10"
                     badgeColor="bg-semantic-success/10 text-semantic-success"
                     label="Accuratezza"
                     value={`${accuracy.toFixed(0)}%`}
@@ -163,28 +163,30 @@ export default function StatsKPIGrid({
                 <div
                     data-onboarding="stats-readiness"
                     onClick={handleReadinessClick}
-                    className="group relative bg-slate-50 dark:bg-[#1C1C1E] p-6 rounded-2xl flex items-center justify-between overflow-hidden cursor-pointer active:scale-[0.98] active:opacity-80 transition-all"
+                    className="group relative bg-[var(--card)] p-6 rounded-[32px] shadow-soft flex items-center justify-between overflow-hidden border border-[var(--card-border)] cursor-pointer hover:border-[#00B1FF]/30 transition-all"
                 >
+                    {/* Background Decorator */}
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#00B1FF] to-emerald-500 opacity-[0.05] rounded-bl-[100px] pointer-events-none" />
 
                     {/* Text Content */}
                     <div className="flex-1 pr-4 z-10">
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${readiness.level === 'high' ? 'bg-emerald-500/10 text-emerald-400' :
-                                readiness.level === 'medium' ? 'bg-amber-500/10 text-amber-400' :
-                                    'bg-red-500/10 text-red-400'
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${readiness.level === 'high' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
+                                readiness.level === 'medium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
+                                    'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                                 }`}>
                                 {readiness.label}
                             </div>
-                            <div className="w-4 h-4 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-white/20">
+                            <div className="w-4 h-4 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400">
                                 <Info className="w-2.5 h-2.5" />
                             </div>
                         </div>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 leading-tight">
+                        <h3 className="text-xl font-black text-[var(--foreground)] mb-1 leading-tight">
                             {readiness.level === 'high' ? 'Sei pronto!' :
                                 readiness.level === 'medium' ? 'A buon punto' :
                                     'Sei all\'inizio'}
                         </h3>
-                        <p className="text-[14px] text-slate-500 dark:text-white/40 leading-snug">
+                        <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-snug">
                             {readiness.level === 'high' ? 'Ottima costanza. Sei pronto per la prova ufficiale.' :
                                 readiness.level === 'medium' ? 'Continua così, manca poco per l\'eccellenza.' :
                                     'Serve più allenamento. Non mollare!'}
@@ -201,7 +203,7 @@ export default function StatsKPIGrid({
                                 stroke="currentColor"
                                 strokeWidth="6"
                                 fill="transparent"
-                                className="text-slate-100 dark:text-white/5"
+                                className="text-slate-100 dark:text-slate-800"
                             />
                             <motion.circle
                                 initial={{ strokeDasharray: 200, strokeDashoffset: 200 }}
@@ -219,17 +221,17 @@ export default function StatsKPIGrid({
                         {/* Icon in Center */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                             {readiness.score !== undefined ? (
-                                <span className={`text-lg font-black ${readiness.level === 'high' ? 'text-emerald-400' : readiness.level === 'medium' ? 'text-amber-400' : 'text-red-400'}`}>
+                                <span className={`text-lg font-black ${readiness.level === 'high' ? 'text-emerald-600' : readiness.level === 'medium' ? 'text-amber-600' : 'text-red-600'}`}>
                                     {Math.round(readiness.score)}
                                 </span>
                             ) : (
                                 <>
                                     {readiness.level === 'high' ? (
-                                        <Trophy className="w-6 h-6 text-emerald-400" />
+                                        <Trophy className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                                     ) : readiness.level === 'medium' ? (
-                                        <TrendingUp className="w-6 h-6 text-amber-400" />
+                                        <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                                     ) : (
-                                        <Target className="w-6 h-6 text-red-400" />
+                                        <Target className="w-6 h-6 text-red-600 dark:text-red-400" />
                                     )}
                                 </>
                             )}
@@ -307,29 +309,29 @@ function StatsCard({
     return (
         <div
             onClick={onInfo}
-            className="bg-slate-50 dark:bg-[#1C1C1E] p-[18px] rounded-2xl transition-all duration-200 group flex flex-col justify-between h-[155px] relative overflow-hidden cursor-pointer active:scale-[0.97] active:opacity-80"
+            className="bg-[var(--card)] p-4 rounded-[24px] shadow-soft border border-[var(--card-border)] hover:shadow-card transition-all duration-300 group flex flex-col justify-between h-[150px] relative overflow-hidden cursor-pointer active:scale-95"
         >
-            {/* Top Row — Icon */}
+            {/* Top Row */}
             <div className="flex justify-between items-start z-10 relative">
-                <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${iconBg}`}>
+                <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${iconBg} transition-transform group-hover:scale-110 duration-300`}>
                     {icon}
                 </div>
             </div>
 
-            {/* Bottom Content */}
+            {/* Middle Content */}
             <div className="z-10 relative">
-                <div className="text-[34px] font-black text-slate-900 dark:text-white leading-none tracking-tight mb-1.5">
+                <div className="text-[32px] font-black text-[var(--foreground)] leading-none tracking-tight mb-1">
                     {value}
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest">
+                    <p className="text-[11px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-wide">
                         {subLabel}
                     </p>
 
                     <button
                         onClick={(e) => { e.stopPropagation(); onInfo(); }}
-                        className="p-1 rounded-full text-slate-300 dark:text-white/15 hover:text-[#00B1FF] transition-colors"
+                        className="p-1.5 rounded-full bg-slate-50 dark:bg-[#111] text-[var(--foreground)] opacity-20 hover:opacity-100 hover:text-brand-blue hover:bg-brand-blue/5 transition-all"
                     >
                         <Info className="w-3.5 h-3.5" />
                     </button>
