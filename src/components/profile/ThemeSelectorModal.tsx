@@ -63,9 +63,9 @@ export default function ThemeSelectorModal({
     };
 
     const themes = [
-        { id: 'system' as const, label: 'System', icon: <SystemIcon className="w-[30px] h-[30px]" /> },
-        { id: 'light' as const, label: 'Light', icon: <LightIcon className="w-[30px] h-[30px]" /> },
-        { id: 'dark' as const, label: 'Dark', icon: <DarkIcon className="w-[30px] h-[30px]" /> },
+        { id: 'system' as const, label: 'Automatico', icon: <SystemIcon className="w-[30px] h-[30px]" /> },
+        { id: 'light' as const, label: 'Chiaro', icon: <LightIcon className="w-[30px] h-[30px]" /> },
+        { id: 'dark' as const, label: 'Scuro', icon: <DarkIcon className="w-[30px] h-[30px]" /> },
     ];
 
     return (
@@ -90,7 +90,7 @@ export default function ThemeSelectorModal({
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-6 pt-6 pb-2">
-                        <h2 className="text-[17px] font-bold text-white tracking-wide">Appearance</h2>
+                        <h2 className="text-[17px] font-bold text-white tracking-wide">Aspetto</h2>
                         <button
                             onClick={handleClose}
                             className="w-8 h-8 rounded-full flex items-center justify-center bg-[#2C2C2E] active:scale-95 transition-transform"
