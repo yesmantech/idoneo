@@ -309,8 +309,8 @@ export default function QuizStatsPage() {
                         icon={<ChevronLeft className="w-6 h-6" />}
                     />
                     <div className="flex-1 text-center">
-                        <h1 className="text-xl font-black text-text-primary leading-tight line-clamp-1">{quizTitle}</h1>
-                        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mt-0.5">Statistiche Dettagliate</p>
+                        <h1 className="text-xl font-black text-slate-900 dark:text-white leading-tight line-clamp-1">{quizTitle}</h1>
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest mt-0.5">Statistiche Dettagliate</p>
                     </div>
                     <div className="w-12" /> {/* Layout balancer */}
                 </div>
@@ -361,35 +361,35 @@ export default function QuizStatsPage() {
                 )}
 
                 {/* 3. Main Performance Area (Grid) */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                     {/* Left: Radar Chart + Goals */}
-                    <div className="lg:col-span-5 space-y-6">
-                        <div data-onboarding="stats-subjects" className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft flex flex-col items-center">
-                            <h3 className="text-lg font-bold text-text-primary mb-6 w-full">Performance per Materia</h3>
+                    <div className="lg:col-span-5 space-y-4">
+                        <div data-onboarding="stats-subjects" className="bg-white dark:bg-[#1C212B] p-6 rounded-[20px] border border-slate-100 dark:border-transparent flex flex-col items-center">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 w-full">Performance per Materia</h3>
                             <SubjectRadarChart data={subjectData} />
 
                             <div className="mt-8 w-full">
-                                <h4 className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-3">Dettaglio Materie</h4>
+                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest mb-3">Dettaglio Materie</h4>
                                 <div className="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
                                     {subjectData.map((s, idx) => {
                                         const status = s.accuracy >= 70 ? 'good' : s.accuracy >= 50 ? 'warning' : 'critical';
-                                        const statusColor = status === 'good' ? 'bg-semantic-success' : status === 'warning' ? 'bg-brand-orange' : 'bg-semantic-error';
+                                        const statusColor = status === 'good' ? 'bg-emerald-500' : status === 'warning' ? 'bg-amber-500' : 'bg-red-500';
                                         const perfData = subjectPerformanceData[idx];
 
                                         return (
                                             <button
                                                 key={s.subject}
                                                 onClick={() => perfData && setSelectedSubject(perfData)}
-                                                className="w-full flex justify-between items-center text-sm border-b border-canvas-light dark:border-slate-800 pb-2 group cursor-pointer hover:bg-canvas-light/50 dark:hover:bg-slate-800/50 -mx-2 px-2 rounded-lg transition-colors"
+                                                className="w-full flex justify-between items-center text-sm border-b border-slate-100 dark:border-white/[0.04] pb-2 group cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.03] -mx-2 px-2 rounded-lg transition-colors"
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <div className={`w-2 h-2 rounded-full ${statusColor}`}></div>
-                                                    <span className="font-bold text-text-secondary dark:text-slate-400 truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
+                                                    <span className="font-bold text-slate-600 dark:text-white/50 truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-xs text-text-tertiary">({s.total})</span>
-                                                    <span className={`font-black ${s.accuracy > 70 ? 'text-semantic-success' : s.accuracy > 50 ? 'text-brand-orange' : 'text-semantic-error'}`}>
+                                                    <span className="text-xs text-slate-400 dark:text-white/20">({s.total})</span>
+                                                    <span className={`font-black ${s.accuracy > 70 ? 'text-emerald-500' : s.accuracy > 50 ? 'text-amber-500' : 'text-red-500'}`}>
                                                         {s.accuracy.toFixed(0)}%
                                                     </span>
                                                 </div>
@@ -409,19 +409,19 @@ export default function QuizStatsPage() {
                     </div>
 
                     {/* Right: Trend & History */}
-                    <div className="lg:col-span-7 space-y-8">
+                    <div className="lg:col-span-7 space-y-4">
 
                         {/* Trend Chart */}
-                        <div className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft">
-                            <h3 className="text-lg font-bold text-text-primary mb-4">Andamento nel Tempo</h3>
+                        <div className="bg-white dark:bg-[#1C212B] p-6 rounded-[20px] border border-slate-100 dark:border-transparent">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Andamento nel Tempo</h3>
                             <ProgressLineChart data={trendData} />
                         </div>
 
                         {/* History Table */}
-                        <div className="bg-white dark:bg-[var(--card)] p-6 rounded-card shadow-soft">
+                        <div className="bg-white dark:bg-[#1C212B] p-6 rounded-[20px] border border-slate-100 dark:border-transparent">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-bold text-text-primary">Cronologia Tentativi</h3>
-                                <span className="text-[10px] font-bold bg-canvas-light dark:bg-[#111] text-text-tertiary px-3 py-1.5 rounded-pill uppercase tracking-wider">Ultimi 50</span>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cronologia Tentativi</h3>
+                                <span className="text-[10px] font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-400 dark:text-white/30 px-3 py-1.5 rounded-full uppercase tracking-widest">Ultimi 50</span>
                             </div>
                             <AttemptsHistoryTable attempts={attempts as any} quizId={quizId} />
                         </div>

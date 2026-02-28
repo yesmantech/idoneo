@@ -73,7 +73,7 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-[var(--card)] rounded-[32px] shadow-soft p-6 border border-[var(--card-border)] transition-colors overflow-hidden"
+            className="relative bg-white dark:bg-[#1C212B] rounded-[20px] p-6 border border-slate-100 dark:border-transparent transition-colors overflow-hidden"
         >
             {/* Background Decorator */}
             <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#00B1FF]/5 to-emerald-500/5 rounded-bl-[100px] pointer-events-none" />
@@ -81,8 +81,8 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
             {/* Header */}
             <div className="flex items-center justify-between mb-6 relative z-10">
                 <div>
-                    <h3 className="text-xl font-black text-[var(--foreground)]">Cosa fare adesso</h3>
-                    <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5">Suggerimenti personalizzati per te</p>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Cosa fare adesso</h3>
+                    <p className="text-[13px] text-slate-500 dark:text-white/40 mt-0.5">Suggerimenti personalizzati per te</p>
                 </div>
                 <motion.div
                     animate={{ rotate: [0, 10, -10, 0] }}
@@ -106,7 +106,7 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
                             onClick={() => handleAction(rec)}
-                            className={`w-full flex items-center gap-4 p-4 rounded-[20px] bg-white dark:bg-[#111]/50 border border-slate-100 dark:border-slate-700/50 ${config.borderHover} hover:shadow-md active:scale-[0.98] transition-all text-left group relative overflow-hidden`}
+                            className={`w-full flex items-center gap-4 p-4 rounded-[16px] bg-slate-50 dark:bg-white/[0.04] border border-slate-100 dark:border-white/[0.04] ${config.borderHover} hover:bg-slate-100 dark:hover:bg-white/[0.07] active:scale-[0.98] transition-all text-left group relative overflow-hidden`}
                         >
                             {/* Subtle background glow */}
                             <div className={`absolute inset-0 ${config.bgGlow} opacity-0 group-hover:opacity-100 transition-opacity`} />
@@ -118,13 +118,13 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
 
                             {/* Content */}
                             <div className="flex-1 min-w-0 relative z-10">
-                                <p className="text-[15px] font-bold text-slate-900 dark:text-slate-100 leading-tight">{rec.title}</p>
-                                <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{rec.description}</p>
+                                <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">{rec.title}</p>
+                                <p className="text-[13px] text-slate-500 dark:text-white/40 mt-0.5 line-clamp-1">{rec.description}</p>
                             </div>
 
                             {/* Arrow */}
-                            <div className="relative z-10 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-slate-600 transition-colors flex-shrink-0">
-                                <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                            <div className="relative z-10 w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors flex-shrink-0">
+                                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-white/30 group-hover:translate-x-0.5 transition-transform" />
                             </div>
                         </motion.button>
                     );
@@ -132,8 +132,8 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
             </div>
 
             {/* Footer Hint */}
-            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 relative z-10">
-                <p className="text-[12px] text-slate-400 dark:text-slate-500 text-center">
+            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.04] relative z-10">
+                <p className="text-[12px] text-slate-400 dark:text-white/20 text-center">
                     💡 Completa queste azioni per migliorare il tuo punteggio
                 </p>
             </div>
