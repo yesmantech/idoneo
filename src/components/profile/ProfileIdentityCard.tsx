@@ -21,7 +21,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
 
             {/* XP Pill — Blue brand theme */}
             <div className="flex items-center gap-1.5 bg-[#001F3F] px-3.5 py-2 rounded-2xl">
-                {/* XP Logo — pure CSS gradient text */}
+                {/* XP Logo — CSS gradient text (no filter to avoid rendering issues) */}
                 <span
                     className="font-black select-none"
                     style={{
@@ -32,7 +32,6 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
-                        filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
                     }}
                 >
                     XP
