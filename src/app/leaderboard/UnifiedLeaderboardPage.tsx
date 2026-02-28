@@ -36,7 +36,7 @@ import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { xpService } from '@/lib/xpService';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingProvider';
-import { Trophy, Zap, Clock } from 'lucide-react';
+import { Info, Trophy, Zap, Clock } from 'lucide-react';
 
 import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/LeaderboardSelector';
 import LeaderboardView from '@/components/leaderboard/LeaderboardView';
@@ -293,9 +293,9 @@ export default function UnifiedLeaderboardPage() {
                         </div>
                         <button
                             onClick={handleOpenInfo}
-                            className="w-10 h-10 rounded-full border-2 border-[var(--foreground)]/15 flex items-center justify-center hover:bg-[var(--foreground)]/5 transition-colors"
+                            className="w-10 h-10 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <span className="text-[16px] font-bold text-[var(--foreground)] opacity-40">?</span>
+                            <Info className="w-5 h-5 text-[var(--foreground)] opacity-40" />
                         </button>
                     </div>
 
@@ -312,9 +312,9 @@ export default function UnifiedLeaderboardPage() {
                         </div>
                         <button
                             onClick={handleOpenInfo}
-                            className="w-10 h-10 rounded-full border-2 border-[var(--foreground)]/15 flex items-center justify-center hover:bg-[var(--foreground)]/5 transition-colors"
+                            className="w-10 h-10 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <span className="text-[16px] font-bold text-[var(--foreground)] opacity-40">?</span>
+                            <Info className="w-5 h-5 text-[var(--foreground)] opacity-40" />
                         </button>
                     </div>
 
