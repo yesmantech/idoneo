@@ -248,8 +248,6 @@ export default function ProfileSettingsPage() {
                         )}
                     </button>
 
-                    <Divider />
-
                     {/* Nickname Row */}
                     {editingNickname ? (
                         <div className="flex items-center gap-3 px-4 py-3.5">
@@ -281,16 +279,12 @@ export default function ProfileSettingsPage() {
                         />
                     )}
 
-                    <Divider />
-
                     {/* Email Row (read-only) */}
-                    <SettingsRow
-                        icon={<AtSign className="w-5 h-5" />}
-                        label="Email"
-                        value={user?.email || ''}
-                    />
-
-                    <Divider />
+                    <div className="w-full flex items-center gap-4 px-4 py-4">
+                        <span className="text-[var(--foreground)] opacity-40 flex-shrink-0"><AtSign className="w-5 h-5" /></span>
+                        <span className="flex-1 text-left text-[15px] font-semibold text-[var(--foreground)]">Email</span>
+                        <span className="text-[14px] text-[var(--foreground)] opacity-40 font-medium truncate max-w-[160px]">{user?.email || ''}</span>
+                    </div>
 
                     {/* Invite Friend Row */}
                     <div className="w-full flex items-center gap-4 px-4 py-4">
@@ -369,14 +363,12 @@ export default function ProfileSettingsPage() {
                         external
                         onClick={() => window.open('mailto:supporto@idoneo.ai', '_blank')}
                     />
-                    <Divider />
                     <SettingsRow
                         icon={<FileText className="w-5 h-5" />}
                         label="Termini e Condizioni"
                         external
                         onClick={() => window.open('https://idoneo.ai/legal/terms', '_blank')}
                     />
-                    <Divider />
                     <SettingsRow
                         icon={<Shield className="w-5 h-5" />}
                         label="Privacy Policy"
@@ -386,18 +378,16 @@ export default function ProfileSettingsPage() {
                 </div>
 
                 {/* ─── SIGN OUT ─── */}
-                <div className="bg-[var(--card)] rounded-2xl border border-[var(--card-border)] overflow-hidden mb-8">
-                    <button
-                        onClick={async () => {
-                            await supabase.auth.signOut();
-                            navigate('/', { replace: true });
-                        }}
-                        className="w-full flex items-center gap-4 px-4 py-4 active:bg-slate-50 dark:active:bg-white/5 transition-colors"
-                    >
-                        <LogOut className="w-5 h-5 text-[var(--foreground)] opacity-40" />
-                        <span className="text-[15px] font-semibold text-[var(--foreground)]">Esci</span>
-                    </button>
-                </div>
+                <button
+                    onClick={async () => {
+                        await supabase.auth.signOut();
+                        navigate('/', { replace: true });
+                    }}
+                    className="w-full flex items-center gap-4 px-4 py-4 mb-6 active:opacity-70 transition-opacity"
+                >
+                    <LogOut className="w-5 h-5 text-[var(--foreground)] opacity-40" />
+                    <span className="text-[15px] font-semibold text-[var(--foreground)]">Sign Out</span>
+                </button>
 
                 {/* ─── Danger Zone (subtle) ─── */}
                 <p className="text-center text-[12px] text-[var(--foreground)] opacity-30 mb-2">
