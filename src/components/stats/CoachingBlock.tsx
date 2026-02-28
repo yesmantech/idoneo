@@ -22,19 +22,23 @@ interface CoachingBlockProps {
 const typeConfig = {
     review: {
         icon: RefreshCcw,
-        iconBg: 'bg-amber-500',
+        iconBg: 'bg-amber-500/10',
+        iconColor: 'text-amber-500',
     },
     practice: {
         icon: Target,
-        iconBg: 'bg-rose-500',
+        iconBg: 'bg-rose-500/10',
+        iconColor: 'text-rose-500',
     },
     simulation: {
         icon: Zap,
-        iconBg: 'bg-[#00B1FF]',
+        iconBg: 'bg-[#00B1FF]/10',
+        iconColor: 'text-[#00B1FF]',
     },
     goal: {
         icon: Flag,
-        iconBg: 'bg-emerald-500',
+        iconBg: 'bg-emerald-500/10',
+        iconColor: 'text-emerald-500',
     }
 };
 
@@ -77,7 +81,7 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
                     >
                         {/* Icon */}
                         <div className={`w-[46px] h-[46px] rounded-[14px] ${config.iconBg} flex items-center justify-center flex-shrink-0`}>
-                            <Icon className="w-[22px] h-[22px] text-white" />
+                            <Icon className={`w-[22px] h-[22px] ${config.iconColor}`} />
                         </div>
 
                         {/* Content */}
