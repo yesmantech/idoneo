@@ -63,7 +63,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
             <div className="md:hidden pt-2">
                 <button
                     onClick={() => navigate('/')}
-                    className="w-full py-4 rounded-full border-2 border-dashed border-white/20 text-white/50 font-bold hover:bg-white/5 hover:text-white transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-4 rounded-full border-2 border-dashed border-slate-300 dark:border-white/20 text-slate-400 dark:text-white/50 font-bold hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-600 dark:hover:text-white transition-colors flex items-center justify-center gap-2"
                 >
                     <span className="text-xl leading-none mb-0.5">+</span> Aggiungi corsi
                 </button>

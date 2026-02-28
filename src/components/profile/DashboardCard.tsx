@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryIcons';
+import { useTheme } from '@/context/ThemeContext';
 
 export interface DashboardCardProps {
     key?: React.Key;
@@ -13,7 +14,9 @@ export interface DashboardCardProps {
 }
 
 export default function DashboardCard({ title, category, progress, onClick }: DashboardCardProps) {
-    const { Icon, color, bg } = getCategoryStyle(category || title);
+    const { Icon, color, bg, bgLight } = getCategoryStyle(category || title);
+    const { resolvedTheme } = useTheme();
+    const iconBg = resolvedTheme === 'light' ? bgLight : bg;
 
     return (
         <button
@@ -23,7 +26,7 @@ export default function DashboardCard({ title, category, progress, onClick }: Da
             {/* Icon Avatar — iOS flat colored square */}
             <div
                 className="w-[46px] h-[46px] rounded-[14px] flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: bg }}
+                style={{ backgroundColor: iconBg }}
             >
                 <Icon className="w-[20px] h-[20px]" style={{ color }} strokeWidth={2} />
             </div>

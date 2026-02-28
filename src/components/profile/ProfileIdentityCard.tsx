@@ -34,7 +34,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                             size="lg"
                         />
                     </button>
-                    <h3 className="text-[20px] font-bold text-white tracking-wide">La tua Dashboard</h3>
+                    <h3 className="text-[20px] font-bold text-slate-900 dark:text-white tracking-wide">La tua Dashboard</h3>
                 </div>
                 {/* XP Pill */}
                 <button
