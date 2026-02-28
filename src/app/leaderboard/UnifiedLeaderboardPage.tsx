@@ -280,7 +280,7 @@ export default function UnifiedLeaderboardPage() {
             />
 
             {/* Header Area - Desktop Optimized */}
-            <div className="flex-none p-4 lg:p-8 pt-safe relative z-40">
+            <div className="flex-none p-4 lg:p-8 mt-3 pt-safe relative z-40">
                 <div className="max-w-5xl mx-auto px-2">
                     {/* Desktop Header Row */}
                     <div className="hidden lg:flex items-center justify-between mb-8">
