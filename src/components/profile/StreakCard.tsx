@@ -4,10 +4,9 @@
  * Pixel-perfect match of the Skitla reference design.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabaseClient';
 
 const DAYS = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'] as const;
 
@@ -18,48 +17,29 @@ interface DayState {
 }
 
 export default function StreakCard() {
-    const { user, profile } = useAuth();
-    const [activeDays, setActiveDays] = useState<Set<number>>(new Set());
+    const { profile } = useAuth();
 
     const streakCurrent = profile?.streak_current || 0;
     const streakMax = profile?.streak_max || 0;
 
-    useEffect(() => {
-        if (!user) return;
-
-        async function fetchWeekActivity() {
-            const now = new Date();
-            const dayOfWeek = now.getDay();
-            const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-            const monday = new Date(now);
-            monday.setDate(now.getDate() + mondayOffset);
-            monday.setHours(0, 0, 0, 0);
-
-            const { data } = await supabase
-                .from('quiz_attempts')
-                .select('completed_at')
-                .eq('user_id', user!.id)
-                .gte('completed_at', monday.toISOString())
-                .order('completed_at', { ascending: true });
-
-            if (data) {
-                const active = new Set<number>();
-                data.forEach(attempt => {
-                    const d = new Date(attempt.completed_at);
-                    const day = d.getDay();
-                    const idx = day === 0 ? 6 : day - 1;
-                    active.add(idx);
-                });
-                setActiveDays(active);
-            }
-        }
-
-        fetchWeekActivity();
-    }, [user]);
-
+    // Calculate today's index (0=Mon ... 6=Sun)
     const now = new Date();
     const todayDow = now.getDay();
     const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
+
+    // Derive which days this week had activity based on streak count.
+    // If streak = 16, the last 16 consecutive days were active — so all days
+    // from today backwards that fall in this week should be blue.
+    const activeDays = new Set<number>();
+    if (streakCurrent > 0) {
+        for (let d = 0; d < Math.min(streakCurrent, 7); d++) {
+            const dayIdx = todayIdx - d;
+            if (dayIdx >= 0) {
+                activeDays.add(dayIdx);
+            }
+            // If streak extends before Monday (dayIdx < 0), those days are in last week
+        }
+    }
 
     const days: DayState[] = DAYS.map((label, i) => ({
         label,
