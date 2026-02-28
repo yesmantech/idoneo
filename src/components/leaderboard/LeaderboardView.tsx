@@ -62,7 +62,7 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-[var(--foreground)] opacity-40 p-8">
                 <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-sm border border-[var(--card-border)] ${isGold ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-500' : 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-500'}`}>
-                    {isGold ? <Trophy className="w-10 h-10" /> : <span className="text-3xl">📊</span>}
+                    {isGold ? <Trophy className="w-10 h-10" /> : <Medal className="w-10 h-10" />}
                 </div>
                 <h3 className="font-bold text-xl text-[var(--foreground)] mb-2">Classifica Vuota</h3>
                 <p className="text-center text-[var(--foreground)] opacity-50 max-w-[200px] leading-relaxed">

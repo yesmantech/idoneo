@@ -140,7 +140,7 @@ export default function UnifiedLeaderboardPage() {
                         id: a.id,
                         title: a.title,
                         slug: a.slug,
-                        category: a.category_id
+                        category: a.category
                     }));
                     myIds = new Set(myQuizzes.map(q => q.id));
                     setActiveQuizzes(myQuizzes);
@@ -148,18 +148,23 @@ export default function UnifiedLeaderboardPage() {
 
                 const { data: allQuizzes } = await supabase
                     .from('quizzes')
-                    .select('id, title, slug, category_id')
+                    .select('id, title, slug, category:categories ( title )')
                     .eq('is_archived', false)
                     .order('title', { ascending: true })
                     .limit(100);
 
                 if (allQuizzes) {
                     const others = allQuizzes
-                        .map(q => ({
-                            id: q.id,
-                            title: q.title,
-                            slug: (q as any).slug || 'no-slug',
-                        }))
+                        .map(q => {
+                            const catData = (q as any).category;
+                            const catTitle = Array.isArray(catData) ? catData[0]?.title : catData?.title;
+                            return {
+                                id: q.id,
+                                title: q.title,
+                                slug: (q as any).slug || 'no-slug',
+                                category: catTitle || undefined,
+                            };
+                        })
                         .filter(q => !myIds.has(q.id));
 
                     setOtherQuizzes(others);

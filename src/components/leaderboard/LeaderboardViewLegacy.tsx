@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { LeaderboardEntry } from '@/lib/leaderboardService';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Crown } from 'lucide-react';
+import { Crown, Medal } from 'lucide-react';
 
 interface LeaderboardViewProps {
     data: LeaderboardEntry[];
@@ -43,7 +43,7 @@ export default function LeaderboardViewLegacy({ data, loading, theme, metricLabe
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-text-tertiary p-8">
                 <div className={`w-16 h-16 rounded-squircle flex items-center justify-center text-3xl mb-4 ${bgColor} ${accentColor}`}>
-                    {isGold ? '🏆' : '📊'}
+                    {isGold ? '🏆' : <Medal className="w-7 h-7" />}
                 </div>
                 <p className="font-bold text-lg text-text-primary">Nessun dato disponibile</p>
                 <p className="text-sm mt-2">{emptyMessage || "La classifica è vuota. Partecipa per primo!"}</p>

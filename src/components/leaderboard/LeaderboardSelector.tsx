@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { getCategoryStyle } from '@/lib/categoryIcons';
 
 // Types
 export interface QuizOption {
@@ -77,7 +78,12 @@ export default function LeaderboardSelector({
         const q = [...activeQuizzes, ...otherQuizzes].find(x => x.id === currentSelection);
         if (q) {
             currentLabel = q.roleTitle || q.role?.title || q.title;
-            icon = <span className="text-brand-cyan text-2xl">📊</span>;
+            const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(q.category || q.title);
+            icon = (
+                <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ backgroundColor: catBg }}>
+                    <CatIcon className="w-4 h-4" style={{ color: catColor }} />
+                </div>
+            );
         }
     }
 
@@ -226,9 +232,13 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
                 : 'active:bg-white/[0.04]'
                 }`}
         >
-            <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center text-xs font-black ${isSelected ? 'bg-[#00B1FF]/15 text-[#00B1FF]' : 'bg-[#2C2C2E] text-white/40'}`}>
-                {(roleTitle || quiz.title).substring(0, 2).toUpperCase()}
-            </div>
+            {(() => {
+                const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(quiz.category || quiz.title); return (
+                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${isSelected ? '' : ''}`} style={{ backgroundColor: isSelected ? catBg : '#2C2C2E' }}>
+                        <CatIcon className="w-5 h-5" style={{ color: isSelected ? catColor : 'rgba(255,255,255,0.4)' }} />
+                    </div>
+                );
+            })()}
             <div className="flex-1 min-w-0">
                 <div className={`font-bold text-[14px] truncate ${isSelected ? 'text-[#00B1FF]' : 'text-white'}`}>
                     {roleTitle || quiz.title}
