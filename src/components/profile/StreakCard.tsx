@@ -2,6 +2,7 @@
  * @file StreakCard.tsx
  * @description Weekly streak tracker card for the profile page.
  * Pixel-perfect match of the Skitla reference design.
+ * Supports both light and dark mode.
  */
 
 import React, { useState } from 'react';
@@ -30,8 +31,6 @@ export default function StreakCard() {
     const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
 
     // Derive which days this week had activity based on streak count.
-    // If streak = 16, the last 16 consecutive days were active — so all days
-    // from today backwards that fall in this week should be blue.
     const activeDays = new Set<number>();
     if (streakCurrent > 0) {
         for (let d = 0; d < Math.min(streakCurrent, 7); d++) {
@@ -39,7 +38,6 @@ export default function StreakCard() {
             if (dayIdx >= 0) {
                 activeDays.add(dayIdx);
             }
-            // If streak extends before Monday (dayIdx < 0), those days are in last week
         }
     }
 
@@ -50,23 +48,17 @@ export default function StreakCard() {
     }));
 
     return (
-        <div
-            className="rounded-[22px] p-6"
-            style={{ backgroundColor: '#1C1C1E' }}
-        >
-            {/* Header — "Streak >" */}
+        <div className="bg-white dark:bg-[#1C1C1E] rounded-[22px] p-6 shadow-sm dark:shadow-none border border-slate-100 dark:border-transparent">
+            {/* Header — "Streak Giornaliero >" */}
             <button
                 className="flex items-center gap-0.5 mb-6 group"
                 onClick={() => setCalendarOpen(true)}
             >
-                <h3
-                    className="font-bold text-white"
-                    style={{ fontSize: 22, letterSpacing: '-0.02em' }}
-                >
+                <h3 className="font-bold text-slate-900 dark:text-white text-[22px] tracking-tight">
                     Streak Giornaliero
                 </h3>
                 <ChevronRight
-                    className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors"
+                    className="w-5 h-5 text-slate-400 dark:text-white/40 group-hover:text-slate-600 dark:group-hover:text-white/60 transition-colors"
                     style={{ marginTop: 2 }}
                     strokeWidth={3}
                 />
@@ -75,30 +67,25 @@ export default function StreakCard() {
             {/* ── Week Row ── */}
             <div className="flex justify-between items-start" style={{ paddingInline: 2 }}>
                 {days.map((day, i) => {
-                    // Color logic:
-                    // - Active day (streak conquered): blue fill + blue ring
-                    // - Today (current): orange ring + amber tint fill
-                    // - Active + today: blue fill + orange ring
-                    // - Inactive: dark grey
                     const isActive = day.isActive;
                     const isToday = day.isToday;
 
-                    let bg = '#2C2C2E';
+                    let bg = '';
                     let border = '2.5px solid transparent';
-                    let labelColor = 'rgba(255,255,255,0.35)';
+                    let labelClass = 'text-slate-300 dark:text-white/35';
 
                     if (isActive && isToday) {
                         bg = 'rgba(56, 189, 248, 0.45)';
                         border = '3px solid #38BDF8';
-                        labelColor = '#38BDF8';
+                        labelClass = 'text-sky-400';
                     } else if (isActive) {
-                        bg = 'rgba(0, 177, 255, 0.25)';
+                        bg = 'rgba(0, 177, 255, 0.2)';
                         border = '2.5px solid #00B1FF';
-                        labelColor = '#00B1FF';
+                        labelClass = 'text-[#00B1FF]';
                     } else if (isToday) {
                         bg = 'rgba(56, 189, 248, 0.35)';
                         border = '3px solid #38BDF8';
-                        labelColor = '#38BDF8';
+                        labelClass = 'text-sky-400';
                     }
 
                     const shadow = isToday
@@ -107,29 +94,19 @@ export default function StreakCard() {
 
                     return (
                         <div key={i} className="flex flex-col items-center" style={{ gap: 10 }}>
-                            {/* Circle */}
                             <div
-                                className="flex items-center justify-center"
+                                className="flex items-center justify-center bg-slate-100 dark:bg-[#2C2C2E]"
                                 style={{
                                     width: 48,
                                     height: 48,
                                     borderRadius: 16,
-                                    backgroundColor: bg,
+                                    ...(bg ? { backgroundColor: bg } : {}),
                                     border,
                                     boxShadow: shadow,
                                     transition: 'all 0.3s ease',
                                 }}
                             />
-
-                            {/* Day Label */}
-                            <span
-                                className="font-bold"
-                                style={{
-                                    fontSize: 14,
-                                    color: labelColor,
-                                    letterSpacing: '0.02em',
-                                }}
-                            >
+                            <span className={`font-bold text-[14px] tracking-wide ${labelClass}`}>
                                 {day.label}
                             </span>
                         </div>
@@ -141,23 +118,12 @@ export default function StreakCard() {
             <div className="flex" style={{ marginTop: 28, gap: 16 }}>
                 {/* Current Streak */}
                 <div className="flex-1">
-                    <div
-                        className="font-extrabold uppercase"
-                        style={{
-                            fontSize: 11,
-                            letterSpacing: '0.12em',
-                            color: 'rgba(255,255,255,0.3)',
-                            marginBottom: 8,
-                        }}
-                    >
+                    <div className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-white/30 mb-2">
                         Streak Attuale
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
                         <span style={{ fontSize: 26, lineHeight: 1 }}>🔥</span>
-                        <span
-                            className="font-bold text-white"
-                            style={{ fontSize: 24, letterSpacing: '-0.02em' }}
-                        >
+                        <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakCurrent} {streakCurrent === 1 ? 'giorno' : 'giorni'}
                         </span>
                     </div>
@@ -165,23 +131,12 @@ export default function StreakCard() {
 
                 {/* Best Streak */}
                 <div className="flex-1">
-                    <div
-                        className="font-extrabold uppercase"
-                        style={{
-                            fontSize: 11,
-                            letterSpacing: '0.12em',
-                            color: 'rgba(255,255,255,0.3)',
-                            marginBottom: 8,
-                        }}
-                    >
+                    <div className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-white/30 mb-2">
                         Miglior Streak
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
                         <span style={{ fontSize: 26, lineHeight: 1 }}>🟣</span>
-                        <span
-                            className="font-bold text-white"
-                            style={{ fontSize: 24, letterSpacing: '-0.02em' }}
-                        >
+                        <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakMax} {streakMax === 1 ? 'giorno' : 'giorni'}
                         </span>
                     </div>
