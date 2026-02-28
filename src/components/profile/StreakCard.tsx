@@ -4,9 +4,10 @@
  * Pixel-perfect match of the Skitla reference design.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import StreakCalendarModal from './StreakCalendarModal';
 
 const DAYS = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'] as const;
 
@@ -18,6 +19,7 @@ interface DayState {
 
 export default function StreakCard() {
     const { profile } = useAuth();
+    const [calendarOpen, setCalendarOpen] = useState(false);
 
     const streakCurrent = profile?.streak_current || 0;
     const streakMax = profile?.streak_max || 0;
@@ -53,7 +55,10 @@ export default function StreakCard() {
             style={{ backgroundColor: '#1C1C1E' }}
         >
             {/* Header — "Streak >" */}
-            <button className="flex items-center gap-0.5 mb-6 group">
+            <button
+                className="flex items-center gap-0.5 mb-6 group"
+                onClick={() => setCalendarOpen(true)}
+            >
                 <h3
                     className="font-bold text-white"
                     style={{ fontSize: 22, letterSpacing: '-0.02em' }}
@@ -182,6 +187,14 @@ export default function StreakCard() {
                     </div>
                 </div>
             </div>
+
+            {/* Calendar Modal */}
+            <StreakCalendarModal
+                isOpen={calendarOpen}
+                onClose={() => setCalendarOpen(false)}
+                streakCurrent={streakCurrent}
+                streakMax={streakMax}
+            />
         </div>
     );
 }
