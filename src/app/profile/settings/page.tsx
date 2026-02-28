@@ -212,7 +212,7 @@ export default function ProfileSettingsPage() {
                     onClick={() => window.open('https://instagram.com/idoneo.app', '_blank')}
                     className="w-full mb-6 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
                 >
-                    <div className="relative bg-gradient-to-r from-[#833AB4] via-[#C13584] to-[#E1306C] p-4 flex items-center gap-4">
+                    <div className="relative bg-[#00B1FF] p-4 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
                             <Instagram className="w-6 h-6 text-white" />
                         </div>
