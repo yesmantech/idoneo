@@ -32,6 +32,7 @@ import DashboardList from '@/components/profile/DashboardList';
 import BadgesBlock from '@/components/profile/BadgesBlock';
 import FriendsBlock from '@/components/profile/FriendsBlock';
 import { ProfileBackgroundDecor } from '@/components/ui/ProfileBackgroundDecor';
+import StreakCard from '@/components/profile/StreakCard';
 import SEOHead from '@/components/seo/SEOHead';
 
 import { xpService } from '@/lib/xpService';
@@ -113,6 +114,9 @@ export default function ProfilePage() {
                     <div className="space-y-6 mt-6 lg:mt-0">
                         {/* Dashboard List */}
                         <DashboardList userId={user?.id || ''} />
+
+                        {/* Streak Card */}
+                        <StreakCard />
 
                         {/* Friends Block */}
                         <FriendsBlock userId={user?.id || ''} />
