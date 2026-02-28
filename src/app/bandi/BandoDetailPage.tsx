@@ -26,6 +26,7 @@ import {
     Shield
 } from 'lucide-react';
 import { fetchBandoBySlug, saveBando, unsaveBando, isUserSaved, Bando, EDUCATION_LEVELS } from '@/lib/bandiService';
+import { getCategoryStyle } from '@/lib/categoryIcons';
 import BandoSkeleton from '@/components/bandi/BandoSkeleton';
 import { useAuth } from '@/context/AuthContext';
 import { hapticLight, hapticSuccess } from '@/lib/haptics';
@@ -176,14 +177,18 @@ export default function BandoDetailPage() {
 
                 {/* 3. INFO GRID (Glass Cards) */}
                 <div className="grid grid-cols-3 gap-3">
-                    <InfoTile
-                        icon={BookOpen}
-                        label="Categoria"
-                        value={bando.category?.name}
-                        delay={0.2}
-                        color="text-brand-purple"
-                        bg="bg-brand-purple/10"
-                    />
+                    {(() => {
+                        const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(bando.category?.name); return (
+                            <InfoTile
+                                icon={CatIcon}
+                                label="Categoria"
+                                value={bando.category?.name}
+                                delay={0.2}
+                                color={`text-[${catColor}]`}
+                                bg={`bg-[${catBg}]`}
+                            />
+                        );
+                    })()}
                     <InfoTile
                         icon={GraduationCap}
                         label="Titolo"

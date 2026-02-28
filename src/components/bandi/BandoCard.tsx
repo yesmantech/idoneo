@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Bando } from '@/lib/bandiService';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { getCategoryStyle } from '@/lib/categoryIcons';
 
 interface BandoCardProps {
     bando: Bando;
@@ -91,9 +92,13 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                     <div className="p-6 flex flex-col h-full relative z-10 space-y-4">
                         {/* Header: Icon & Ente Name */}
                         <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-[14px] bg-[#00B1FF]/10 flex items-center justify-center border border-[#00B1FF]/20 shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                                <Building2 className="w-5 h-5 text-[#00B1FF]" />
-                            </div>
+                            {(() => {
+                                const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(bando.category?.name); return (
+                                    <div className="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500" style={{ backgroundColor: catBg }}>
+                                        <CatIcon className="w-5 h-5" style={{ color: catColor }} />
+                                    </div>
+                                );
+                            })()}
                             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider line-clamp-2 leading-tight flex-1 pt-1">
                                 {bando.ente?.name || 'Ente Non Specificato'}
                             </span>
@@ -124,8 +129,8 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
 
                             {/* Urgency Badge (Tier S Style) */}
                             <div className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 border transition-colors ${daysRemaining <= 3
-                                    ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 shadow-[0_0_15px_-3px_rgba(225,29,72,0.1)]'
-                                    : 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 shadow-[0_0_15px_-3px_rgba(245,158,11,0.1)]'
+                                ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 shadow-[0_0_15px_-3px_rgba(225,29,72,0.1)]'
+                                : 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 shadow-[0_0_15px_-3px_rgba(245,158,11,0.1)]'
                                 }`}>
                                 <Clock className={`w-4 h-4 ${daysRemaining <= 3 ? 'animate-pulse' : ''}`} />
                                 <span className="text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
@@ -194,13 +199,16 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                         </div>
 
                         {/* Tags */}
-                        {bando.category && (
-                            <div className="mt-3">
-                                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-xs font-medium text-slate-600 dark:text-slate-300">
-                                    {bando.category.icon} {bando.category.name}
-                                </span>
-                            </div>
-                        )}
+                        {bando.category && (() => {
+                            const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(bando.category.name); return (
+                                <div className="mt-3">
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold" style={{ backgroundColor: catBg, color: catColor }}>
+                                        <CatIcon className="w-3.5 h-3.5" style={{ color: catColor }} />
+                                        {bando.category.name}
+                                    </span>
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* Right side: Status + Save */}
