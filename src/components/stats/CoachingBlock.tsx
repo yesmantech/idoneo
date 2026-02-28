@@ -73,28 +73,29 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-white dark:bg-[#1C212B] rounded-[20px] p-6 border border-slate-100 dark:border-transparent transition-colors overflow-hidden"
+            className="relative bg-white dark:bg-gradient-to-br dark:from-[#1C212B] dark:to-[#171C26] rounded-[20px] p-6 border border-slate-100 dark:border-white/[0.03] transition-colors overflow-hidden shadow-sm dark:shadow-none"
         >
-            {/* Background Decorator */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#00B1FF]/5 to-emerald-500/5 rounded-bl-[100px] pointer-events-none" />
+            {/* Background Decorators */}
+            <div className="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-[#00B1FF]/[0.03] to-emerald-500/[0.03] rounded-bl-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-purple-500/[0.02] to-transparent rounded-tr-[80px] pointer-events-none" />
 
             {/* Header */}
             <div className="flex items-center justify-between mb-6 relative z-10">
                 <div>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Cosa fare adesso</h3>
-                    <p className="text-[13px] text-slate-500 dark:text-white/40 mt-0.5">Suggerimenti personalizzati per te</p>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Cosa fare adesso</h3>
+                    <p className="text-[13px] text-slate-500 dark:text-white/35 mt-0.5">Suggerimenti personalizzati per te</p>
                 </div>
                 <motion.div
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-[#00B1FF] to-emerald-500 flex items-center justify-center shadow-lg"
+                    className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-[#00B1FF] to-emerald-500 flex items-center justify-center shadow-lg shadow-[#00B1FF]/20"
                 >
                     <Sparkles className="w-7 h-7 text-white" />
                 </motion.div>
             </div>
 
             {/* Recommendations */}
-            <div className="space-y-3 relative z-10">
+            <div className="space-y-2.5 relative z-10">
                 {recommendations.map((rec, index) => {
                     const config = typeConfig[rec.type];
                     const Icon = config.icon;
@@ -106,24 +107,24 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
                             onClick={() => handleAction(rec)}
-                            className={`w-full flex items-center gap-4 p-4 rounded-[16px] bg-slate-50 dark:bg-white/[0.04] border border-slate-100 dark:border-white/[0.04] ${config.borderHover} hover:bg-slate-100 dark:hover:bg-white/[0.07] active:scale-[0.98] transition-all text-left group relative overflow-hidden`}
+                            className="w-full flex items-center gap-4 p-4 rounded-[16px] bg-slate-50 dark:bg-white/[0.035] border border-slate-100/80 dark:border-white/[0.03] hover:bg-slate-100 dark:hover:bg-white/[0.06] active:scale-[0.98] transition-all text-left group relative overflow-hidden"
                         >
-                            {/* Subtle background glow */}
-                            <div className={`absolute inset-0 ${config.bgGlow} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                            {/* Subtle background glow on hover */}
+                            <div className={`absolute inset-0 ${config.bgGlow} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
 
                             {/* Gradient Icon */}
-                            <div className={`relative w-12 h-12 rounded-2xl ${config.iconBg} flex items-center justify-center flex-shrink-0 shadow-md`}>
-                                <Icon className="w-5 h-5 text-white" />
+                            <div className={`relative w-[52px] h-[52px] rounded-[18px] ${config.iconBg} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                                <Icon className="w-[22px] h-[22px] text-white" />
                             </div>
 
                             {/* Content */}
                             <div className="flex-1 min-w-0 relative z-10">
                                 <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">{rec.title}</p>
-                                <p className="text-[13px] text-slate-500 dark:text-white/40 mt-0.5 line-clamp-1">{rec.description}</p>
+                                <p className="text-[13px] text-slate-500 dark:text-white/35 mt-0.5 line-clamp-1">{rec.description}</p>
                             </div>
 
                             {/* Arrow */}
-                            <div className="relative z-10 w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors flex-shrink-0">
+                            <div className="relative z-10 w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-white/[0.12] transition-colors flex-shrink-0">
                                 <ChevronRight className="w-4 h-4 text-slate-400 dark:text-white/30 group-hover:translate-x-0.5 transition-transform" />
                             </div>
                         </motion.button>
@@ -132,8 +133,8 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
             </div>
 
             {/* Footer Hint */}
-            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.04] relative z-10">
-                <p className="text-[12px] text-slate-400 dark:text-white/20 text-center">
+            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.03] relative z-10">
+                <p className="text-[12px] text-slate-400 dark:text-white/15 text-center">
                     💡 Completa queste azioni per migliorare il tuo punteggio
                 </p>
             </div>
