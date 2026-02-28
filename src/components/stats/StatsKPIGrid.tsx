@@ -114,8 +114,8 @@ export default function StatsKPIGrid({
 
                 {/* 1. Total Tests */}
                 <StatsCard
-                    icon={<FileText className="w-5 h-5 text-[#8B5CF6]" />}
-                    iconBg="bg-[#8B5CF6]/15 dark:bg-[#8B5CF6]/10"
+                    icon={<FileText className="w-5 h-5 text-white" />}
+                    iconBg="bg-[#8B5CF6]"
                     badgeColor="bg-brand-purple/10 text-brand-purple"
                     label="Test fatti"
                     value={totalTests.toString()}
@@ -125,8 +125,8 @@ export default function StatsKPIGrid({
 
                 {/* 2. Best Score */}
                 <StatsCard
-                    icon={<Trophy className="w-5 h-5 text-[#F59E0B]" />}
-                    iconBg="bg-[#F59E0B]/15 dark:bg-[#F59E0B]/10"
+                    icon={<Trophy className="w-5 h-5 text-white" />}
+                    iconBg="bg-[#F59E0B]"
                     badgeColor="bg-brand-orange/10 text-brand-orange"
                     label="Miglior voto"
                     value={`${bestScore.toFixed(0)}/${maxPossibleScore}`}
@@ -136,8 +136,8 @@ export default function StatsKPIGrid({
 
                 {/* 3. Avg Score */}
                 <StatsCard
-                    icon={<BarChart3 className="w-5 h-5 text-[#00B1FF]" />}
-                    iconBg="bg-[#00B1FF]/15 dark:bg-[#00B1FF]/10"
+                    icon={<BarChart3 className="w-5 h-5 text-white" />}
+                    iconBg="bg-[#00B1FF]"
                     badgeColor="bg-brand-blue/10 text-brand-blue"
                     label="Media voto"
                     value={avgScore.toFixed(1)}
@@ -147,8 +147,8 @@ export default function StatsKPIGrid({
 
                 {/* 4. Accuracy */}
                 <StatsCard
-                    icon={<Target className="w-5 h-5 text-[#10B981]" />}
-                    iconBg="bg-[#10B981]/15 dark:bg-[#10B981]/10"
+                    icon={<Target className="w-5 h-5 text-white" />}
+                    iconBg="bg-[#10B981]"
                     badgeColor="bg-semantic-success/10 text-semantic-success"
                     label="Accuratezza"
                     value={`${accuracy.toFixed(0)}%`}
@@ -163,10 +163,8 @@ export default function StatsKPIGrid({
                 <div
                     data-onboarding="stats-readiness"
                     onClick={handleReadinessClick}
-                    className="group relative bg-white dark:bg-[#1C212B] p-6 rounded-[20px] flex items-center justify-between overflow-hidden border border-slate-100 dark:border-transparent cursor-pointer hover:dark:bg-[#222838] transition-all"
+                    className="group relative bg-slate-50 dark:bg-[#1C1C1E] p-6 rounded-2xl flex items-center justify-between overflow-hidden cursor-pointer active:scale-[0.98] active:opacity-80 transition-all"
                 >
-                    {/* Background Decorator */}
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#00B1FF] to-emerald-500 opacity-[0.04] rounded-bl-[100px] pointer-events-none" />
 
                     {/* Text Content */}
                     <div className="flex-1 pr-4 z-10">
@@ -309,11 +307,11 @@ function StatsCard({
     return (
         <div
             onClick={onInfo}
-            className="bg-white dark:bg-[#1C212B] p-[18px] rounded-[20px] border border-slate-100 dark:border-transparent hover:dark:bg-[#222838] transition-all duration-300 group flex flex-col justify-between h-[155px] relative overflow-hidden cursor-pointer active:scale-[0.97]"
+            className="bg-slate-50 dark:bg-[#1C1C1E] p-[18px] rounded-2xl transition-all duration-200 group flex flex-col justify-between h-[155px] relative overflow-hidden cursor-pointer active:scale-[0.97] active:opacity-80"
         >
             {/* Top Row — Icon */}
             <div className="flex justify-between items-start z-10 relative">
-                <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${iconBg} transition-transform group-hover:scale-110 duration-300`}>
+                <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${iconBg}`}>
                     {icon}
                 </div>
             </div>

@@ -365,7 +365,7 @@ export default function QuizStatsPage() {
 
                     {/* Left: Radar Chart + Goals */}
                     <div className="lg:col-span-5 space-y-4">
-                        <div data-onboarding="stats-subjects" className="bg-white dark:bg-[#1C212B] p-6 rounded-[20px] border border-slate-100 dark:border-transparent flex flex-col items-center">
+                        <div data-onboarding="stats-subjects" className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-slate-100 dark:border-transparent flex flex-col items-center">
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 w-full">Performance per Materia</h3>
                             <SubjectRadarChart data={subjectData} />
 
@@ -412,13 +412,13 @@ export default function QuizStatsPage() {
                     <div className="lg:col-span-7 space-y-4">
 
                         {/* Trend Chart */}
-                        <div className="bg-white dark:bg-[#1C212B] p-6 rounded-[20px] border border-slate-100 dark:border-transparent">
+                        <div className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-slate-100 dark:border-transparent">
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Andamento nel Tempo</h3>
                             <ProgressLineChart data={trendData} />
                         </div>
 
                         {/* History Table */}
-                        <div className="bg-white dark:bg-[#1C212B] p-6 rounded-[20px] border border-slate-100 dark:border-transparent">
+                        <div className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-slate-100 dark:border-transparent">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cronologia Tentativi</h3>
                                 <span className="text-[10px] font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-400 dark:text-white/30 px-3 py-1.5 rounded-full uppercase tracking-widest">Ultimi 50</span>

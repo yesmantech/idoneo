@@ -22,35 +22,19 @@ interface CoachingBlockProps {
 const typeConfig = {
     review: {
         icon: RefreshCcw,
-        gradient: 'from-amber-500 to-orange-500',
-        bgGlow: 'bg-gradient-to-br from-amber-500/10 to-orange-500/10',
-        iconBg: 'bg-gradient-to-br from-amber-500 to-orange-500',
-        accentColor: 'text-amber-600 dark:text-amber-400',
-        borderHover: 'hover:border-amber-300 dark:hover:border-amber-600'
+        iconBg: 'bg-amber-500',
     },
     practice: {
         icon: Target,
-        gradient: 'from-rose-500 to-pink-500',
-        bgGlow: 'bg-gradient-to-br from-rose-500/10 to-pink-500/10',
-        iconBg: 'bg-gradient-to-br from-rose-500 to-pink-500',
-        accentColor: 'text-rose-600 dark:text-rose-400',
-        borderHover: 'hover:border-rose-300 dark:hover:border-rose-600'
+        iconBg: 'bg-rose-500',
     },
     simulation: {
         icon: Zap,
-        gradient: 'from-[#00B1FF] to-cyan-400',
-        bgGlow: 'bg-gradient-to-br from-[#00B1FF]/10 to-cyan-400/10',
-        iconBg: 'bg-gradient-to-br from-[#00B1FF] to-cyan-400',
-        accentColor: 'text-[#00B1FF]',
-        borderHover: 'hover:border-cyan-300 dark:hover:border-cyan-600'
+        iconBg: 'bg-[#00B1FF]',
     },
     goal: {
         icon: Flag,
-        gradient: 'from-emerald-500 to-green-500',
-        bgGlow: 'bg-gradient-to-br from-emerald-500/10 to-green-500/10',
-        iconBg: 'bg-gradient-to-br from-emerald-500 to-green-500',
-        accentColor: 'text-emerald-600 dark:text-emerald-400',
-        borderHover: 'hover:border-emerald-300 dark:hover:border-emerald-600'
+        iconBg: 'bg-emerald-500',
     }
 };
 
@@ -70,74 +54,43 @@ export default function CoachingBlock({ recommendations, onSetGoal }: CoachingBl
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative bg-white dark:bg-gradient-to-br dark:from-[#1C212B] dark:to-[#171C26] rounded-[20px] p-6 border border-slate-100 dark:border-white/[0.03] transition-colors overflow-hidden shadow-sm dark:shadow-none"
-        >
-            {/* Background Decorators */}
-            <div className="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-[#00B1FF]/[0.03] to-emerald-500/[0.03] rounded-bl-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-purple-500/[0.02] to-transparent rounded-tr-[80px] pointer-events-none" />
-
+        <div className="space-y-3">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6 relative z-10">
-                <div>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Cosa fare adesso</h3>
-                    <p className="text-[13px] text-slate-500 dark:text-white/35 mt-0.5">Suggerimenti personalizzati per te</p>
-                </div>
-                <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-[#00B1FF] to-emerald-500 flex items-center justify-center shadow-lg shadow-[#00B1FF]/20"
-                >
-                    <Sparkles className="w-7 h-7 text-white" />
-                </motion.div>
+            <div className="px-1 mb-1">
+                <h3 className="text-[20px] font-bold text-slate-900 dark:text-white tracking-tight">Cosa fare adesso</h3>
+                <p className="text-[13px] text-slate-500 dark:text-white/40 mt-0.5">Suggerimenti personalizzati per te</p>
             </div>
 
-            {/* Recommendations */}
-            <div className="space-y-2.5 relative z-10">
-                {recommendations.map((rec, index) => {
-                    const config = typeConfig[rec.type];
-                    const Icon = config.icon;
+            {/* Recommendation Rows */}
+            {recommendations.map((rec, index) => {
+                const config = typeConfig[rec.type];
+                const Icon = config.icon;
 
-                    return (
-                        <motion.button
-                            key={rec.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            onClick={() => handleAction(rec)}
-                            className="w-full flex items-center gap-4 p-4 rounded-[16px] bg-slate-50 dark:bg-white/[0.035] border border-slate-100/80 dark:border-white/[0.03] hover:bg-slate-100 dark:hover:bg-white/[0.06] active:scale-[0.98] transition-all text-left group relative overflow-hidden"
-                        >
-                            {/* Subtle background glow on hover */}
-                            <div className={`absolute inset-0 ${config.bgGlow} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                return (
+                    <motion.button
+                        key={rec.id}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.06 }}
+                        onClick={() => handleAction(rec)}
+                        className="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-[#1C1C1E] active:scale-[0.98] active:opacity-80 transition-all text-left group"
+                    >
+                        {/* Icon */}
+                        <div className={`w-[46px] h-[46px] rounded-[14px] ${config.iconBg} flex items-center justify-center flex-shrink-0`}>
+                            <Icon className="w-[22px] h-[22px] text-white" />
+                        </div>
 
-                            {/* Gradient Icon */}
-                            <div className={`relative w-[52px] h-[52px] rounded-[18px] ${config.iconBg} flex items-center justify-center flex-shrink-0 shadow-md`}>
-                                <Icon className="w-[22px] h-[22px] text-white" />
-                            </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[15px] font-semibold text-slate-900 dark:text-white leading-tight">{rec.title}</p>
+                            <p className="text-[13px] text-slate-500 dark:text-white/40 mt-0.5 line-clamp-1">{rec.description}</p>
+                        </div>
 
-                            {/* Content */}
-                            <div className="flex-1 min-w-0 relative z-10">
-                                <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">{rec.title}</p>
-                                <p className="text-[13px] text-slate-500 dark:text-white/35 mt-0.5 line-clamp-1">{rec.description}</p>
-                            </div>
-
-                            {/* Arrow */}
-                            <div className="relative z-10 w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-white/[0.12] transition-colors flex-shrink-0">
-                                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-white/30 group-hover:translate-x-0.5 transition-transform" />
-                            </div>
-                        </motion.button>
-                    );
-                })}
-            </div>
-
-            {/* Footer Hint */}
-            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.03] relative z-10">
-                <p className="text-[12px] text-slate-400 dark:text-white/15 text-center">
-                    💡 Completa queste azioni per migliorare il tuo punteggio
-                </p>
-            </div>
-        </motion.div>
+                        {/* Chevron */}
+                        <ChevronRight className="w-[18px] h-[18px] text-slate-300 dark:text-white/20 flex-shrink-0" />
+                    </motion.button>
+                );
+            })}
+        </div>
     );
 }

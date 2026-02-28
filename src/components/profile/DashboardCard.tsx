@@ -31,10 +31,10 @@ export default function DashboardCard({ title, category, progress, onClick }: Da
     return (
         <button
             onClick={onClick}
-            className="w-full bg-white dark:bg-[#1C212B] rounded-[20px] p-[18px] flex items-center gap-[18px] active:scale-[0.98] transition-all text-left group"
+            className="w-full bg-white dark:bg-[#1C1C1E] rounded-2xl p-[18px] flex items-center gap-[18px] active:scale-[0.98] active:opacity-80 transition-all text-left group"
         >
             {/* Icon Avatar */}
-            <div className="w-[46px] h-[46px] rounded-full flex items-center justify-center bg-[#E0F2FE] dark:bg-[#12161E] flex-shrink-0 border border-transparent dark:border-[#00B1FF]/[0.15]">
+            <div className="w-[46px] h-[46px] rounded-[14px] flex items-center justify-center bg-[#E0F2FE] dark:bg-[#111] flex-shrink-0">
                 <CategoryIcon className="w-[20px] h-[20px] text-[#00B1FF]" strokeWidth={2} />
             </div>
 
