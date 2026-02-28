@@ -206,7 +206,7 @@ export default function BadgesBlock() {
             <div className="flex items-center justify-between mb-4 px-2">
                 <div className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-amber-500" />
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">I tuoi Badge</h3>
+                    <h3 className="text-xl font-black text-[var(--foreground)] tracking-tight">I tuoi Badge</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     {isAdmin && (
