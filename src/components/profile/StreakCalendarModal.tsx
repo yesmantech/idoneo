@@ -1,13 +1,15 @@
 /**
  * @file StreakCalendarModal.tsx
- * @description Full calendar modal showing streak history.
+ * @description Full calendar modal showing all login/activity history.
  * Opens when tapping "Streak Giornaliero >" in the StreakCard.
- * Shows the current month with streak days highlighted in brand blue.
+ * Fetches real activity data from quiz_attempts to show all active days.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Flame } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabaseClient';
 
 interface StreakCalendarModalProps {
     isOpen: boolean;
@@ -28,24 +30,43 @@ export default function StreakCalendarModal({
     streakCurrent,
     streakMax,
 }: StreakCalendarModalProps) {
+    const { user } = useAuth();
     const [viewDate, setViewDate] = useState(new Date());
-
-    // Calculate streak active dates (going backwards from today)
-    const streakDates = useMemo(() => {
-        const dates = new Set<string>();
-        if (streakCurrent > 0) {
-            const today = new Date();
-            for (let i = 0; i < streakCurrent; i++) {
-                const d = new Date(today);
-                d.setDate(today.getDate() - i);
-                dates.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
-            }
-        }
-        return dates;
-    }, [streakCurrent]);
+    const [activeDates, setActiveDates] = useState<Set<string>>(new Set());
+    const [loading, setLoading] = useState(false);
 
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
+
+    // Fetch activity dates for the viewed month from quiz_attempts
+    useEffect(() => {
+        if (!isOpen || !user) return;
+
+        async function fetchMonthActivity() {
+            setLoading(true);
+            const startOfMonth = new Date(year, month, 1);
+            const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+
+            const { data } = await supabase
+                .from('quiz_attempts')
+                .select('completed_at')
+                .eq('user_id', user!.id)
+                .gte('completed_at', startOfMonth.toISOString())
+                .lte('completed_at', endOfMonth.toISOString());
+
+            if (data) {
+                const dates = new Set<string>();
+                data.forEach(row => {
+                    const d = new Date(row.completed_at);
+                    dates.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+                });
+                setActiveDates(dates);
+            }
+            setLoading(false);
+        }
+
+        fetchMonthActivity();
+    }, [isOpen, user, year, month]);
 
     // Build calendar grid
     const calendarDays = useMemo(() => {
@@ -53,13 +74,12 @@ export default function StreakCalendarModal({
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
 
-        // Get day of week for first day (0=Sun, adjust to Mon=0)
+        // Get day of week for first day (Mon=0)
         let startDow = firstDay.getDay();
-        startDow = startDow === 0 ? 6 : startDow - 1; // Mon=0
+        startDow = startDow === 0 ? 6 : startDow - 1;
 
         const days: Array<{ date: number; isActive: boolean; isToday: boolean; inMonth: boolean }> = [];
 
-        // Empty slots before month starts
         for (let i = 0; i < startDow; i++) {
             days.push({ date: 0, isActive: false, isToday: false, inMonth: false });
         }
@@ -71,19 +91,21 @@ export default function StreakCalendarModal({
             const key = `${year}-${month}-${d}`;
             days.push({
                 date: d,
-                isActive: streakDates.has(key),
+                isActive: activeDates.has(key),
                 isToday: key === todayKey,
                 inMonth: true,
             });
         }
 
         return days;
-    }, [year, month, streakDates]);
+    }, [year, month, activeDates]);
+
+    // Count active days in this month
+    const activeDaysCount = calendarDays.filter(d => d.inMonth && d.isActive).length;
 
     const goToPrevMonth = () => setViewDate(new Date(year, month - 1, 1));
     const goToNextMonth = () => setViewDate(new Date(year, month + 1, 1));
 
-    // Don't allow navigating past current month
     const now = new Date();
     const canGoNext = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth());
 
@@ -107,7 +129,7 @@ export default function StreakCalendarModal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed inset-x-4 top-[15%] z-50 mx-auto max-w-[420px]"
+                        className="fixed inset-x-4 top-[12%] z-50 mx-auto max-w-[420px]"
                     >
                         <div
                             className="rounded-[24px] overflow-hidden"
@@ -127,7 +149,7 @@ export default function StreakCalendarModal({
                             </div>
 
                             {/* Stats Summary */}
-                            <div className="flex gap-4 px-6 pb-5">
+                            <div className="flex gap-3 px-6 pb-5">
                                 <div className="flex-1 bg-white/[0.04] rounded-2xl px-4 py-3">
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">
                                         Streak Attuale
@@ -160,9 +182,16 @@ export default function StreakCalendarModal({
                                 >
                                     <ChevronLeft className="w-4 h-4 text-white/60" />
                                 </button>
-                                <span className="text-[15px] font-bold text-white">
-                                    {MONTHS_IT[month]} {year}
-                                </span>
+                                <div className="text-center">
+                                    <span className="text-[15px] font-bold text-white">
+                                        {MONTHS_IT[month]} {year}
+                                    </span>
+                                    {!loading && (
+                                        <div className="text-[11px] text-white/30 mt-0.5">
+                                            {activeDaysCount} {activeDaysCount === 1 ? 'giorno attivo' : 'giorni attivi'}
+                                        </div>
+                                    )}
+                                </div>
                                 <button
                                     onClick={goToNextMonth}
                                     disabled={!canGoNext}
@@ -185,59 +214,68 @@ export default function StreakCalendarModal({
                             </div>
 
                             {/* Calendar Grid */}
-                            <div className="grid grid-cols-7 gap-y-1 px-5 pb-6">
-                                {calendarDays.map((day, idx) => {
-                                    if (!day.inMonth) {
-                                        return <div key={idx} className="aspect-square" />;
-                                    }
+                            <div className="grid grid-cols-7 gap-y-1 px-5 pb-5">
+                                {loading ? (
+                                    // Loading skeleton
+                                    Array.from({ length: 35 }).map((_, idx) => (
+                                        <div key={idx} className="flex items-center justify-center">
+                                            <div className="w-9 h-9 rounded-xl bg-white/[0.03] animate-pulse" />
+                                        </div>
+                                    ))
+                                ) : (
+                                    calendarDays.map((day, idx) => {
+                                        if (!day.inMonth) {
+                                            return <div key={idx} className="aspect-square" />;
+                                        }
 
-                                    const isActive = day.isActive;
-                                    const isToday = day.isToday;
+                                        const isActive = day.isActive;
+                                        const isToday = day.isToday;
 
-                                    return (
-                                        <div
-                                            key={idx}
-                                            className="flex items-center justify-center"
-                                        >
+                                        return (
                                             <div
-                                                className="flex items-center justify-center transition-all duration-200"
-                                                style={{
-                                                    width: 36,
-                                                    height: 36,
-                                                    borderRadius: 12,
-                                                    backgroundColor: isActive
-                                                        ? isToday
-                                                            ? 'rgba(56, 189, 248, 0.45)'
-                                                            : 'rgba(0, 177, 255, 0.25)'
-                                                        : 'transparent',
-                                                    border: isToday
-                                                        ? '2px solid #38BDF8'
-                                                        : isActive
-                                                            ? '2px solid #00B1FF'
-                                                            : '2px solid transparent',
-                                                    boxShadow: isToday
-                                                        ? '0 0 10px rgba(56, 189, 248, 0.4)'
-                                                        : 'none',
-                                                }}
+                                                key={idx}
+                                                className="flex items-center justify-center"
                                             >
-                                                <span
-                                                    className="font-bold"
+                                                <div
+                                                    className="flex items-center justify-center transition-all duration-200"
                                                     style={{
-                                                        fontSize: 13,
-                                                        color: isActive || isToday
-                                                            ? '#fff'
-                                                            : 'rgba(255,255,255,0.3)',
+                                                        width: 36,
+                                                        height: 36,
+                                                        borderRadius: 12,
+                                                        backgroundColor: isActive
+                                                            ? isToday
+                                                                ? 'rgba(56, 189, 248, 0.45)'
+                                                                : 'rgba(0, 177, 255, 0.25)'
+                                                            : 'transparent',
+                                                        border: isToday
+                                                            ? '2px solid #38BDF8'
+                                                            : isActive
+                                                                ? '2px solid #00B1FF'
+                                                                : '2px solid transparent',
+                                                        boxShadow: isToday
+                                                            ? '0 0 10px rgba(56, 189, 248, 0.4)'
+                                                            : 'none',
                                                     }}
                                                 >
-                                                    {day.date}
-                                                </span>
+                                                    <span
+                                                        className="font-bold"
+                                                        style={{
+                                                            fontSize: 13,
+                                                            color: isActive || isToday
+                                                                ? '#fff'
+                                                                : 'rgba(255,255,255,0.3)',
+                                                        }}
+                                                    >
+                                                        {day.date}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })
+                                )}
                             </div>
 
-                            {/* Streak Info Footer */}
+                            {/* Footer */}
                             <div className="px-6 pb-6">
                                 <div className="bg-white/[0.04] rounded-2xl px-4 py-3 flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-[12px] bg-[#00B1FF]/20 flex items-center justify-center">
