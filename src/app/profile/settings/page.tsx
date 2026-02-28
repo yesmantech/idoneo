@@ -248,6 +248,8 @@ export default function ProfileSettingsPage() {
                         )}
                     </button>
 
+                    <Divider />
+
                     {/* Nickname Row */}
                     {editingNickname ? (
                         <div className="flex items-center gap-3 px-4 py-3.5">
@@ -279,12 +281,16 @@ export default function ProfileSettingsPage() {
                         />
                     )}
 
+                    <Divider />
+
                     {/* Email Row (read-only) */}
                     <div className="w-full flex items-center gap-4 px-4 py-4">
                         <span className="text-[var(--foreground)] opacity-40 flex-shrink-0"><AtSign className="w-5 h-5" /></span>
                         <span className="flex-1 text-left text-[15px] font-semibold text-[var(--foreground)]">Email</span>
                         <span className="text-[14px] text-[var(--foreground)] opacity-40 font-medium truncate max-w-[160px]">{user?.email || ''}</span>
                     </div>
+
+                    <Divider />
 
                     {/* Invite Friend Row */}
                     <div className="w-full flex items-center gap-4 px-4 py-4">
@@ -304,7 +310,7 @@ export default function ProfileSettingsPage() {
                                     showToast('success', 'Link copiato!');
                                 }
                             }}
-                            className="px-4 py-1.5 rounded-full bg-[#00B1FF] text-white text-[13px] font-bold active:scale-95 transition-transform"
+                            className="px-4 py-1.5 rounded-full bg-[#7C3AED] text-white text-[13px] font-bold active:scale-95 transition-transform"
                         >
                             Invita
                         </button>
@@ -363,12 +369,14 @@ export default function ProfileSettingsPage() {
                         external
                         onClick={() => window.open('mailto:supporto@idoneo.ai', '_blank')}
                     />
+                    <Divider />
                     <SettingsRow
                         icon={<FileText className="w-5 h-5" />}
                         label="Termini e Condizioni"
                         external
                         onClick={() => window.open('https://idoneo.ai/legal/terms', '_blank')}
                     />
+                    <Divider />
                     <SettingsRow
                         icon={<Shield className="w-5 h-5" />}
                         label="Privacy Policy"
@@ -378,31 +386,36 @@ export default function ProfileSettingsPage() {
                 </div>
 
                 {/* ─── SIGN OUT ─── */}
-                <button
-                    onClick={async () => {
-                        await supabase.auth.signOut();
-                        navigate('/', { replace: true });
-                    }}
-                    className="w-full flex items-center gap-4 px-4 py-4 mb-6 active:opacity-70 transition-opacity"
-                >
-                    <LogOut className="w-5 h-5 text-[var(--foreground)] opacity-40" />
-                    <span className="text-[15px] font-semibold text-[var(--foreground)]">Sign Out</span>
-                </button>
+                <div className="bg-[var(--card)] rounded-2xl border border-[var(--card-border)] overflow-hidden mb-6">
+                    <button
+                        onClick={async () => {
+                            await supabase.auth.signOut();
+                            navigate('/', { replace: true });
+                        }}
+                        className="w-full flex items-center gap-4 px-4 py-4 active:bg-slate-50 dark:active:bg-white/5 transition-colors"
+                    >
+                        <LogOut className="w-5 h-5 text-[var(--foreground)] opacity-40" />
+                        <span className="text-[15px] font-semibold text-[var(--foreground)]">Sign Out</span>
+                    </button>
+                </div>
 
                 {/* ─── Danger Zone (subtle) ─── */}
-                <p className="text-center text-[12px] text-[var(--foreground)] opacity-30 mb-2">
-                    Per eliminare il tuo account e tutti i dati,
+                <p className="text-center text-[13px] text-[var(--foreground)] opacity-30 mb-10">
+                    Per eliminare il tuo account e tutti i dati,{' '}
+                    <button
+                        onClick={handleDeleteAccount}
+                        className="text-[#00B1FF] font-semibold hover:underline"
+                    >
+                        tocca qui
+                    </button>
                 </p>
-                <button
-                    onClick={handleDeleteAccount}
-                    className="block mx-auto text-[12px] font-bold text-rose-500 hover:text-rose-400 transition-colors mb-12"
-                >
-                    tocca qui
-                </button>
 
                 {/* ─── Footer ─── */}
-                <div className="flex flex-col items-center gap-1 pb-8">
-                    <span className="text-[15px] font-black text-[var(--foreground)] opacity-20">Idoneo</span>
+                <div className="flex flex-col items-center gap-1.5 pb-8">
+                    <div className="w-10 h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] flex items-center justify-center">
+                        <span className="text-[16px] font-black text-[var(--foreground)] opacity-30">i</span>
+                    </div>
+                    <span className="text-[14px] font-bold text-[var(--foreground)] opacity-20">Idoneo</span>
                     <span className="text-[11px] text-[var(--foreground)] opacity-15 font-medium">
                         Versione 1.0.0
                     </span>
@@ -428,9 +441,12 @@ export default function ProfileSettingsPage() {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
-        <p className="text-[11px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest px-1 mb-2 mt-2">
-            {children}
-        </p>
+        <div className="flex items-center gap-3 px-1 mb-2 mt-4">
+            <span className="text-[11px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest whitespace-nowrap">
+                {children}
+            </span>
+            <div className="flex-1 h-px bg-[var(--card-border)]" />
+        </div>
     );
 }
 
