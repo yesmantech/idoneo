@@ -1,6 +1,6 @@
 import React from 'react';
 import { User } from '@supabase/supabase-js';
-import { Trophy, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
@@ -19,15 +19,12 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
     return (
         <div className="flex items-center justify-between py-2">
 
-            {/* XP Pill - Left (Duolingo-style) */}
-            <div className="flex items-center gap-2 bg-amber-950/40 dark:bg-amber-900/30 px-3 py-2 rounded-2xl">
-                <div className="w-8 h-8 rounded-xl bg-amber-900/60 dark:bg-amber-800/50 flex items-center justify-center">
-                    <Trophy className="w-4 h-4 text-amber-500" fill="currentColor" />
+            {/* XP Pill - Compact single row */}
+            <div className="flex items-center gap-1.5 bg-amber-900/25 dark:bg-amber-900/30 pl-1.5 pr-3 py-1.5 rounded-full">
+                <div className="w-7 h-7 rounded-full bg-amber-900/40 dark:bg-amber-800/50 flex items-center justify-center">
+                    <span className="text-[14px] leading-none">🏆</span>
                 </div>
-                <div className="flex flex-col">
-                    <span className="text-lg font-black text-[var(--foreground)] leading-tight tracking-tight">{xp.toLocaleString()}</span>
-                    <span className="text-[8px] font-bold text-amber-500 uppercase tracking-widest leading-none">XP Totali</span>
-                </div>
+                <span className="text-[15px] font-extrabold text-amber-500 tracking-tight">{xp.toLocaleString()}</span>
             </div>
 
             {/* Right side: Reset Tour + Avatar (Settings) */}
@@ -44,7 +41,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                     className="w-9 h-9 rounded-full bg-slate-100/80 dark:bg-[#1E1E1E] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center justify-center"
                     title="Ricomincia il Tour"
                 >
-                    <RotateCcw className="w-4 h-4 group-hover:-rotate-180 transition-transform duration-500" />
+                    <RotateCcw className="w-4 h-4" />
                 </button>
                 <button
                     onClick={() => navigate('/profile/settings')}
