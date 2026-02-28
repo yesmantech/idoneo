@@ -83,18 +83,22 @@ export default function StreakCard() {
                     let labelColor = 'rgba(255,255,255,0.35)';
 
                     if (isActive && isToday) {
-                        bg = 'rgba(0, 177, 255, 0.35)';
-                        border = '2.5px solid #38BDF8';
+                        bg = 'rgba(56, 189, 248, 0.45)';
+                        border = '3px solid #38BDF8';
                         labelColor = '#38BDF8';
                     } else if (isActive) {
-                        bg = 'rgba(0, 177, 255, 0.3)';
+                        bg = 'rgba(0, 177, 255, 0.25)';
                         border = '2.5px solid #00B1FF';
                         labelColor = '#00B1FF';
                     } else if (isToday) {
-                        bg = 'rgba(56, 189, 248, 0.15)';
-                        border = '2.5px solid #38BDF8';
+                        bg = 'rgba(56, 189, 248, 0.35)';
+                        border = '3px solid #38BDF8';
                         labelColor = '#38BDF8';
                     }
+
+                    const shadow = isToday
+                        ? '0 0 12px rgba(56, 189, 248, 0.5)'
+                        : 'none';
 
                     return (
                         <div key={i} className="flex flex-col items-center" style={{ gap: 10 }}>
@@ -102,11 +106,12 @@ export default function StreakCard() {
                             <div
                                 className="flex items-center justify-center"
                                 style={{
-                                    width: 48,
-                                    height: 48,
+                                    width: isToday ? 52 : 48,
+                                    height: isToday ? 52 : 48,
                                     borderRadius: 16,
                                     backgroundColor: bg,
                                     border,
+                                    boxShadow: shadow,
                                     transition: 'all 0.3s ease',
                                 }}
                             />
