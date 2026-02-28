@@ -36,7 +36,7 @@ import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { xpService } from '@/lib/xpService';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingProvider';
-import { Info, Trophy, Zap, Clock } from 'lucide-react';
+import { HelpCircle, Trophy, Zap, Clock } from 'lucide-react';
 
 import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/LeaderboardSelector';
 import LeaderboardView from '@/components/leaderboard/LeaderboardView';
@@ -294,9 +294,9 @@ export default function UnifiedLeaderboardPage() {
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="h-[48px] w-[48px] p-0 rounded-xl"
+                            className="h-[48px] w-[48px] p-0 rounded-xl flex items-center justify-center"
                             onClick={handleOpenInfo}
-                            icon={<Info className="w-5 h-5 opacity-50" />}
+                            icon={<HelpCircle className="w-5 h-5 opacity-50" />}
                         />
                     </div>
 
@@ -314,9 +314,9 @@ export default function UnifiedLeaderboardPage() {
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="h-[44px] w-[44px] p-0 rounded-full"
+                            className="h-[44px] w-[44px] p-0 rounded-full flex items-center justify-center"
                             onClick={handleOpenInfo}
-                            icon={<Info className="w-6 h-6 opacity-50" />}
+                            icon={<HelpCircle className="w-5 h-5 opacity-50" />}
                         />
                     </div>
 
