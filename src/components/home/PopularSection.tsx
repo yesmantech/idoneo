@@ -25,7 +25,7 @@ export default function PopularSection({ quizzes }: PopularSectionProps) {
             <div className="flex justify-between items-center px-4 lg:px-8 mb-4 lg:mb-6">
                 <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-[12px] bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                        <Trophy className="w-4 h-4 lg:w-5 lg:h-5 text-amber-600" fill="currentColor" />
+                        <span className="text-[18px] lg:text-[20px] leading-none">🏆</span>
                     </div>
                     <div>
                         <h2 className="text-[17px] lg:text-xl font-bold text-[var(--foreground)] leading-none">
