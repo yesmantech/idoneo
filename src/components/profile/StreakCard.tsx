@@ -1,23 +1,20 @@
 /**
  * @file StreakCard.tsx
  * @description Weekly streak tracker card for the profile page.
- * Shows 7 days of the week with activity indicators plus current/best streak stats.
- * Design matches the iOS-native flat style reference.
+ * Pixel-perfect match of the Skitla reference design.
  */
 
 import React, { useEffect, useState } from 'react';
-import { ChevronRight, Flame } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 
 const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
-// Italian day labels
-const DAYS_IT = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'] as const;
 
-interface DayActivity {
+interface DayState {
     label: string;
     isToday: boolean;
-    isActive: boolean; // had activity that day
+    isActive: boolean;
 }
 
 export default function StreakCard() {
@@ -31,15 +28,13 @@ export default function StreakCard() {
         if (!user) return;
 
         async function fetchWeekActivity() {
-            // Get the start of the current week (Monday)
             const now = new Date();
-            const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ...
+            const dayOfWeek = now.getDay();
             const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
             const monday = new Date(now);
             monday.setDate(now.getDate() + mondayOffset);
             monday.setHours(0, 0, 0, 0);
 
-            // Query quiz_attempts for this week
             const { data } = await supabase
                 .from('quiz_attempts')
                 .select('completed_at')
@@ -51,8 +46,7 @@ export default function StreakCard() {
                 const active = new Set<number>();
                 data.forEach(attempt => {
                     const d = new Date(attempt.completed_at);
-                    const day = d.getDay(); // 0=Sun
-                    // Convert to 0=Mon index
+                    const day = d.getDay();
                     const idx = day === 0 ? 6 : day - 1;
                     active.add(idx);
                 });
@@ -63,71 +57,93 @@ export default function StreakCard() {
         fetchWeekActivity();
     }, [user]);
 
-    // Determine today's index (0=Mon ... 6=Sun)
     const now = new Date();
     const todayDow = now.getDay();
     const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
 
-    const days: DayActivity[] = DAYS_IT.map((label, i) => ({
+    const days: DayState[] = DAYS.map((label, i) => ({
         label,
         isToday: i === todayIdx,
         isActive: activeDays.has(i),
     }));
 
     return (
-        <div className="bg-[#1C1C1E] rounded-[20px] p-5 space-y-5">
-            {/* Header */}
-            <button className="flex items-center gap-1 group">
-                <h3 className="text-[20px] font-bold text-white tracking-tight">Streak</h3>
-                <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors mt-0.5" />
+        <div
+            className="rounded-[22px] p-6"
+            style={{ backgroundColor: '#1C1C1E' }}
+        >
+            {/* Header — "Streak >" */}
+            <button className="flex items-center gap-0.5 mb-6 group">
+                <h3
+                    className="font-bold text-white"
+                    style={{ fontSize: 22, letterSpacing: '-0.02em' }}
+                >
+                    Streak
+                </h3>
+                <ChevronRight
+                    className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors"
+                    style={{ marginTop: 2 }}
+                    strokeWidth={3}
+                />
             </button>
 
-            {/* Week Days Row */}
-            <div className="flex justify-between px-1">
-                {days.map((day, i) => (
-                    <div key={i} className="flex flex-col items-center gap-2.5">
-                        {/* Circle */}
-                        <div
-                            className={`w-[42px] h-[42px] rounded-full flex items-center justify-center transition-all duration-300
-                                ${day.isToday && day.isActive
-                                    ? 'bg-orange-500/30 ring-[2.5px] ring-orange-500'
-                                    : day.isToday
-                                        ? 'bg-orange-500/20 ring-[2.5px] ring-orange-500'
-                                        : day.isActive
-                                            ? 'bg-orange-500/30 ring-[2.5px] ring-orange-500'
-                                            : 'bg-[#2C2C2E]'
-                                }`}
-                        >
-                            {day.isActive && (
-                                <Flame className="w-5 h-5 text-orange-400" />
-                            )}
+            {/* ── Week Row ── */}
+            <div className="flex justify-between items-start" style={{ paddingInline: 2 }}>
+                {days.map((day, i) => {
+                    const isHighlighted = day.isToday || day.isActive;
+
+                    return (
+                        <div key={i} className="flex flex-col items-center" style={{ gap: 10 }}>
+                            {/* Circle */}
+                            <div
+                                className="flex items-center justify-center"
+                                style={{
+                                    width: 48,
+                                    height: 48,
+                                    borderRadius: 16,
+                                    backgroundColor: isHighlighted ? 'rgba(245, 158, 11, 0.25)' : '#2C2C2E',
+                                    border: isHighlighted ? '2.5px solid #F59E0B' : '2.5px solid transparent',
+                                    transition: 'all 0.3s ease',
+                                }}
+                            />
+
+                            {/* Day Label */}
+                            <span
+                                className="font-bold"
+                                style={{
+                                    fontSize: 14,
+                                    color: day.isToday ? '#F59E0B' : 'rgba(255,255,255,0.35)',
+                                    letterSpacing: '0.02em',
+                                }}
+                            >
+                                {day.label}
+                            </span>
                         </div>
-                        {/* Label */}
-                        <span className={`text-[13px] font-bold tracking-wide
-                            ${day.isToday
-                                ? 'text-orange-500'
-                                : 'text-white/40'
-                            }`}
-                        >
-                            {day.label}
-                        </span>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
-            {/* Divider */}
-            <div className="h-px bg-white/[0.06]" />
-
-            {/* Stats Row */}
-            <div className="flex gap-4">
+            {/* ── Stats Row ── */}
+            <div className="flex" style={{ marginTop: 28, gap: 16 }}>
                 {/* Current Streak */}
                 <div className="flex-1">
-                    <div className="text-[11px] font-extrabold uppercase tracking-widest text-white/30 mb-2">
+                    <div
+                        className="font-extrabold uppercase"
+                        style={{
+                            fontSize: 11,
+                            letterSpacing: '0.12em',
+                            color: 'rgba(255,255,255,0.3)',
+                            marginBottom: 8,
+                        }}
+                    >
                         Current Streak
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl">🔥</span>
-                        <span className="text-[22px] font-bold text-white tracking-tight">
+                    <div className="flex items-center" style={{ gap: 8 }}>
+                        <span style={{ fontSize: 26, lineHeight: 1 }}>🔥</span>
+                        <span
+                            className="font-bold text-white"
+                            style={{ fontSize: 24, letterSpacing: '-0.02em' }}
+                        >
                             {streakCurrent} {streakCurrent === 1 ? 'day' : 'days'}
                         </span>
                     </div>
@@ -135,12 +151,23 @@ export default function StreakCard() {
 
                 {/* Best Streak */}
                 <div className="flex-1">
-                    <div className="text-[11px] font-extrabold uppercase tracking-widest text-white/30 mb-2">
+                    <div
+                        className="font-extrabold uppercase"
+                        style={{
+                            fontSize: 11,
+                            letterSpacing: '0.12em',
+                            color: 'rgba(255,255,255,0.3)',
+                            marginBottom: 8,
+                        }}
+                    >
                         Best Streak
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl">🔮</span>
-                        <span className="text-[22px] font-bold text-white tracking-tight">
+                    <div className="flex items-center" style={{ gap: 8 }}>
+                        <span style={{ fontSize: 26, lineHeight: 1 }}>🟣</span>
+                        <span
+                            className="font-bold text-white"
+                            style={{ fontSize: 24, letterSpacing: '-0.02em' }}
+                        >
                             {streakMax} {streakMax === 1 ? 'day' : 'days'}
                         </span>
                     </div>
