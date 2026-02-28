@@ -37,6 +37,7 @@ import BandoDetailPage from './app/bandi/BandoDetailPage';
 import BandiWatchlistPage from './app/bandi/BandiWatchlistPage';
 import BandiAlertsPage from './app/bandi/alerts/page';
 import FlamesDemoPage from './app/demo/flames/page';
+import IconsDemoPage from './app/demo/icons/page';
 
 // ============================================================================
 // LAZY-LOADED PAGES (Admin only — rarely accessed)
@@ -246,6 +247,7 @@ export default function App() {
 
                                                     {/* Demo Pages */}
                                                     <Route path="/demo/flames" element={<FlamesDemoPage />} />
+                                                    <Route path="/demo/icons" element={<IconsDemoPage />} />
 
                                                     {/* Skitla Landing Page */}
 
