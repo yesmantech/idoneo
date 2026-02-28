@@ -20,19 +20,43 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
 
     return (
         <>
-            <div className="flex items-center justify-end py-2">
-                <button
-                    onClick={() => navigate('/profile/settings')}
-                    data-onboarding="profile-settings"
-                    className="rounded-full ring-2 ring-slate-200 dark:ring-white/10 hover:ring-amber-400 dark:hover:ring-amber-500 transition-all active:scale-95 shadow-sm"
-                    title="Impostazioni"
-                >
-                    <UserAvatar
-                        src={avatarUrl}
-                        name={nickname}
-                        size="lg"
-                    />
-                </button>
+            <div className="flex items-center justify-between py-2">
+                <h3 className="text-[20px] font-bold text-white tracking-wide">La tua Dashboard</h3>
+                <div className="flex items-center gap-2">
+                    {/* XP Pill */}
+                    <button
+                        onClick={() => setShowXPModal(true)}
+                        className="flex items-center gap-1.5 bg-[#E0F4FF] dark:bg-[#001F3F] px-3.5 py-2 rounded-2xl active:scale-95 transition-transform"
+                    >
+                        <span
+                            className="font-black select-none"
+                            style={{
+                                fontSize: '18px',
+                                lineHeight: 1,
+                                letterSpacing: '-0.5px',
+                                background: 'linear-gradient(180deg, #67E8F9 0%, #00B1FF 50%, #0077CC 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}
+                        >
+                            XP
+                        </span>
+                        <span className="text-[17px] font-bold text-[#00B1FF] leading-none">{xp.toLocaleString()}</span>
+                    </button>
+                    <button
+                        onClick={() => navigate('/profile/settings')}
+                        data-onboarding="profile-settings"
+                        className="rounded-full ring-2 ring-slate-200 dark:ring-white/10 hover:ring-amber-400 dark:hover:ring-amber-500 transition-all active:scale-95 shadow-sm"
+                        title="Impostazioni"
+                    >
+                        <UserAvatar
+                            src={avatarUrl}
+                            name={nickname}
+                            size="lg"
+                        />
+                    </button>
+                </div>
             </div>
 
             {/* XP Info Modal — Simple XP-only explanation */}

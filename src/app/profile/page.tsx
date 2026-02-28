@@ -112,7 +112,7 @@ export default function ProfilePage() {
                     {/* Right Column: Dashboard + More */}
                     <div className="space-y-6 mt-6 lg:mt-0">
                         {/* Dashboard List */}
-                        <DashboardList userId={user?.id || ''} xp={xp} />
+                        <DashboardList userId={user?.id || ''} />
 
                         {/* Friends Block */}
                         <FriendsBlock userId={user?.id || ''} />

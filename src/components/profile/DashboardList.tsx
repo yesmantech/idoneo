@@ -5,10 +5,9 @@ import DashboardCard from './DashboardCard';
 
 interface DashboardListProps {
     userId: string;
-    xp?: number;
 }
 
-export default function DashboardList({ userId, xp = 0 }: DashboardListProps) {
+export default function DashboardList({ userId }: DashboardListProps) {
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -46,27 +45,6 @@ export default function DashboardList({ userId, xp = 0 }: DashboardListProps) {
 
     return (
         <div className="space-y-4 mb-8">
-            <div className="flex items-center justify-between px-2">
-                <h3 className="text-[20px] font-bold text-white tracking-wide">La tua Dashboard</h3>
-                {/* XP Pill */}
-                <div className="flex items-center gap-1.5 bg-[#E0F4FF] dark:bg-[#001F3F] px-3.5 py-2 rounded-2xl">
-                    <span
-                        className="font-black select-none"
-                        style={{
-                            fontSize: '18px',
-                            lineHeight: 1,
-                            letterSpacing: '-0.5px',
-                            background: 'linear-gradient(180deg, #67E8F9 0%, #00B1FF 50%, #0077CC 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                        }}
-                    >
-                        XP
-                    </span>
-                    <span className="text-[17px] font-bold text-[#00B1FF] leading-none">{xp.toLocaleString()}</span>
-                </div>
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {quizzes.map((q) => (
