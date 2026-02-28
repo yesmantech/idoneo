@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Sun, Moon, Smartphone } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface ThemeSelectorModalProps {
     isOpen: boolean;
@@ -7,6 +7,27 @@ interface ThemeSelectorModalProps {
     currentTheme: 'light' | 'dark' | 'system';
     onSelectTheme: (theme: 'light' | 'dark' | 'system') => void;
 }
+
+/* Custom matching icons based on the reference image */
+const SystemIcon = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="6.5" y="3" width="11" height="18" rx="2.5" />
+        <path d="M12 17v.01" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+);
+
+const LightIcon = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M3 12h2M19 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+    </svg>
+);
+
+const DarkIcon = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" />
+    </svg>
+);
 
 export default function ThemeSelectorModal({
     isOpen,
@@ -42,9 +63,9 @@ export default function ThemeSelectorModal({
     };
 
     const themes = [
-        { id: 'system' as const, label: 'System', icon: <Smartphone className="w-[22px] h-[22px]" strokeWidth={2} /> },
-        { id: 'light' as const, label: 'Light', icon: <Sun className="w-[22px] h-[22px]" strokeWidth={2} /> },
-        { id: 'dark' as const, label: 'Dark', icon: <Moon className="w-[22px] h-[22px]" strokeWidth={2} /> },
+        { id: 'system' as const, label: 'System', icon: <SystemIcon className="w-[30px] h-[30px]" /> },
+        { id: 'light' as const, label: 'Light', icon: <LightIcon className="w-[30px] h-[30px]" /> },
+        { id: 'dark' as const, label: 'Dark', icon: <DarkIcon className="w-[30px] h-[30px]" /> },
     ];
 
     return (
