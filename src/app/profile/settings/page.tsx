@@ -12,6 +12,7 @@ import {
     User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus
 } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
+import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
 import { hapticLight } from '@/lib/haptics';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
@@ -40,6 +41,7 @@ export default function ProfileSettingsPage() {
     // Inline edit states
     const [editingNickname, setEditingNickname] = useState(false);
     const [showThemeSelector, setShowThemeSelector] = useState(false);
+    const [themeLabel, setThemeLabel] = useState<string>('Auto'); // Added themeLabel state
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const nicknameInputRef = useRef<HTMLInputElement>(null);
@@ -54,7 +56,10 @@ export default function ProfileSettingsPage() {
             setNickname(profile.nickname || '');
             setAvatarUrl(profile.avatar_url);
         }
-    }, [user, profile, loading, navigate]);
+        // Initialize themeLabel based on currentTheme
+        const initialThemeLabel = currentTheme === 'light' ? 'Chiaro' : currentTheme === 'dark' ? 'Scuro' : 'Automatico';
+        setThemeLabel(initialThemeLabel);
+    }, [user, profile, loading, navigate, currentTheme]); // Added currentTheme to dependencies
 
     // Cleanup: Reset to actual persisted theme if user leaves without saving
     useEffect(() => {
@@ -142,6 +147,9 @@ export default function ProfileSettingsPage() {
         persistTheme(t);
         setHasSaved(true);
         setShowThemeSelector(false);
+        // Update themeLabel state
+        const newThemeLabel = t === 'light' ? 'Chiaro' : t === 'dark' ? 'Scuro' : 'Automatico';
+        setThemeLabel(newThemeLabel);
     };
 
     const showToast = (type: 'success' | 'error', text: string) => {
@@ -149,8 +157,7 @@ export default function ProfileSettingsPage() {
         setTimeout(() => setMsg(null), 2500);
     };
 
-    // Theme display name
-    const themeLabel = selectedTheme === 'light' ? 'Chiaro' : selectedTheme === 'dark' ? 'Scuro' : 'Automatico';
+    // Theme display name (now derived from selectedTheme for the icon)
     const ThemeIcon = selectedTheme === 'light' ? Sun : selectedTheme === 'dark' ? Moon : Monitor;
 
     // Deletion
@@ -330,31 +337,8 @@ export default function ProfileSettingsPage() {
                         icon={<ThemeIcon className="w-6 h-6" />}
                         label="Tema"
                         value={themeLabel}
-                        onClick={() => setShowThemeSelector(!showThemeSelector)}
+                        onClick={() => setShowThemeSelector(true)}
                     />
-
-                    {/* Theme Selector (expandable) */}
-                    {showThemeSelector && (
-                        <div className="px-5 pb-4 pt-1 flex gap-2">
-                            {([
-                                { key: 'light' as const, label: 'Chiaro', Icon: Sun },
-                                { key: 'dark' as const, label: 'Scuro', Icon: Moon },
-                                { key: 'system' as const, label: 'Auto', Icon: Monitor },
-                            ]).map(({ key, label, Icon }) => (
-                                <button
-                                    key={key}
-                                    onClick={() => selectTheme(key)}
-                                    className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all text-[12px] font-bold ${selectedTheme === key
-                                        ? 'bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/30'
-                                        : 'bg-slate-100 dark:bg-[#111] text-[var(--foreground)] opacity-60 hover:opacity-100'
-                                        }`}
-                                >
-                                    <Icon className="w-5 h-5" />
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 {/* ─── CONTATTO E AIUTO ─── */}
@@ -427,6 +411,14 @@ export default function ProfileSettingsPage() {
                 onConfirm={confirmDeleteAccount}
                 isDeleting={isDeleting}
                 error={deleteError}
+            />
+
+            {/* Theme Selector Modal */}
+            <ThemeSelectorModal
+                isOpen={showThemeSelector}
+                onClose={() => setShowThemeSelector(false)}
+                currentTheme={selectedTheme as 'light' | 'dark' | 'system'}
+                onSelectTheme={selectTheme}
             />
         </div>
     );
