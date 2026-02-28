@@ -307,7 +307,7 @@ export default function ProfileSettingsPage() {
                                     showToast('success', 'Link copiato!');
                                 }
                             }}
-                            className="px-5 py-2 rounded-full bg-[#7C3AED]/20 text-[#A78BFA] text-[14px] font-bold active:scale-95 transition-transform"
+                            className="px-5 py-2 rounded-full bg-[#00B1FF]/20 text-[#00B1FF] text-[14px] font-bold active:scale-95 transition-transform"
                         >
                             Invita
                         </button>
