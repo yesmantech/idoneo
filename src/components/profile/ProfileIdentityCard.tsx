@@ -71,7 +71,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                         <UserAvatar
                             src={avatarUrl}
                             name={nickname}
-                            size="md"
+                            size="lg"
                         />
                     </button>
                 </div>
