@@ -19,10 +19,15 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
     return (
         <div className="flex items-center justify-between py-2">
 
-            {/* XP Pill — same structure as reference 🔥 0 pill */}
-            <div className="flex items-center gap-1 bg-[#422006] px-3.5 py-2 rounded-2xl">
-                <span className="text-[20px] leading-none select-none" role="img">⚡</span>
-                <span className="text-[16px] font-bold text-[#F59E0B] leading-none">{xp.toLocaleString()}</span>
+            {/* XP Pill — Tier S with custom icon */}
+            <div className="flex items-center gap-1.5 bg-[#422006] pl-1 pr-3.5 py-1 rounded-2xl">
+                <img
+                    src="/icons/xp-icon.png"
+                    alt="XP"
+                    className="w-8 h-8 rounded-lg"
+                    draggable={false}
+                />
+                <span className="text-[17px] font-bold text-[#F59E0B] leading-none">{xp.toLocaleString()}</span>
             </div>
 
             {/* Right side: Reset Tour + Avatar (Settings) */}
