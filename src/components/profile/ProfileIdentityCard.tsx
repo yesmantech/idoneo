@@ -19,12 +19,12 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
     return (
         <div className="flex items-center justify-between py-2">
 
-            {/* XP Pill — Tier S with custom icon */}
-            <div className="flex items-center gap-1.5 bg-[#422006] pl-1 pr-3.5 py-1 rounded-2xl">
+            {/* XP Pill — graphic logo + number */}
+            <div className="flex items-center gap-1 bg-[#422006] px-2.5 py-1.5 rounded-2xl">
                 <img
                     src="/icons/xp-icon.png"
                     alt="XP"
-                    className="w-8 h-8 rounded-lg"
+                    className="w-6 h-6 object-contain"
                     draggable={false}
                 />
                 <span className="text-[17px] font-bold text-[#F59E0B] leading-none">{xp.toLocaleString()}</span>
