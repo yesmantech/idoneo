@@ -63,7 +63,7 @@ export default function ThemeSelectorModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
             {/* Backdrop overlay */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 ease-out"
@@ -72,7 +72,7 @@ export default function ThemeSelectorModal({
 
             {/* Modal Dialog */}
             <div
-                className="relative w-full max-w-[350px] bg-[#1c1c1e] rounded-[32px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-[20px] fade-in duration-[400ms] ease-[cubic-bezier(0.33,1,0.68,1)]"
+                className="relative w-full max-w-md bg-[#1c1c1e] rounded-t-[28px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-full fade-in duration-[400ms] ease-[cubic-bezier(0.33,1,0.68,1)]"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header Row */}
@@ -90,7 +90,7 @@ export default function ThemeSelectorModal({
                 <div className="h-[1px] w-full bg-white/[0.06]" />
 
                 {/* Theme Selector Grid */}
-                <div className="grid grid-cols-3 gap-3 p-6 pt-5">
+                <div className="grid grid-cols-3 gap-3 p-6 pt-5 pb-8">
                     {themes.map(({ id, label, Icon }) => {
                         const isActive = themeState === id;
                         return (
@@ -98,8 +98,8 @@ export default function ThemeSelectorModal({
                                 key={id}
                                 onClick={() => handleSelect(id)}
                                 className={`flex flex-col items-center justify-center gap-3 w-full aspect-[4/5] rounded-[20px] transition-all duration-200 active:scale-95 ${isActive
-                                        ? 'bg-white/[0.12] ring-2 ring-white shadow-lg'
-                                        : 'bg-white/[0.05] hover:bg-white/[0.08] ring-0 ring-transparent'
+                                    ? 'bg-white/[0.12] ring-2 ring-white shadow-lg'
+                                    : 'bg-white/[0.05] hover:bg-white/[0.08] ring-0 ring-transparent'
                                     }`}
                             >
                                 <Icon
