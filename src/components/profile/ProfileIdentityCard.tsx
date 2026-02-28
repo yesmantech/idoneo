@@ -21,7 +21,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
             <div className="px-6 pt-6 pb-6">
 
                 {/* Top Row: XP left — Avatar right (settings) */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between">
 
                     {/* XP Badge - Left */}
                     <div className="flex items-center gap-2.5">
@@ -63,14 +63,6 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                             />
                         </button>
                     </div>
-                </div>
-
-                {/* Name & Email - Left aligned */}
-                <div>
-                    <h1 className="text-2xl font-black text-[var(--foreground)] tracking-tight">{nickname}</h1>
-                    <p className="text-[13px] text-[var(--foreground)] opacity-50 font-medium truncate">
-                        {user?.email}
-                    </p>
                 </div>
 
             </div>
