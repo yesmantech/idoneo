@@ -90,7 +90,31 @@ export default function StreakCard() {
             {/* ── Week Row ── */}
             <div className="flex justify-between items-start" style={{ paddingInline: 2 }}>
                 {days.map((day, i) => {
-                    const isHighlighted = day.isToday || day.isActive;
+                    // Color logic:
+                    // - Active day (streak conquered): blue fill + blue ring
+                    // - Today (current): orange ring + amber tint fill
+                    // - Active + today: blue fill + orange ring
+                    // - Inactive: dark grey
+                    const isActive = day.isActive;
+                    const isToday = day.isToday;
+
+                    let bg = '#2C2C2E';
+                    let border = '2.5px solid transparent';
+                    let labelColor = 'rgba(255,255,255,0.35)';
+
+                    if (isActive && isToday) {
+                        bg = 'rgba(0, 177, 255, 0.3)';
+                        border = '2.5px solid #F59E0B';
+                        labelColor = '#F59E0B';
+                    } else if (isActive) {
+                        bg = 'rgba(0, 177, 255, 0.3)';
+                        border = '2.5px solid #00B1FF';
+                        labelColor = '#00B1FF';
+                    } else if (isToday) {
+                        bg = 'rgba(245, 158, 11, 0.2)';
+                        border = '2.5px solid #F59E0B';
+                        labelColor = '#F59E0B';
+                    }
 
                     return (
                         <div key={i} className="flex flex-col items-center" style={{ gap: 10 }}>
@@ -101,8 +125,8 @@ export default function StreakCard() {
                                     width: 48,
                                     height: 48,
                                     borderRadius: 16,
-                                    backgroundColor: isHighlighted ? 'rgba(245, 158, 11, 0.25)' : '#2C2C2E',
-                                    border: isHighlighted ? '2.5px solid #F59E0B' : '2.5px solid transparent',
+                                    backgroundColor: bg,
+                                    border,
                                     transition: 'all 0.3s ease',
                                 }}
                             />
@@ -112,7 +136,7 @@ export default function StreakCard() {
                                 className="font-bold"
                                 style={{
                                     fontSize: 14,
-                                    color: day.isToday ? '#F59E0B' : 'rgba(255,255,255,0.35)',
+                                    color: labelColor,
                                     letterSpacing: '0.02em',
                                 }}
                             >
