@@ -44,13 +44,12 @@ export default function DashboardList({ userId }: DashboardListProps) {
     }
 
     return (
-        <div className="space-y-6 mb-8">
-            <div className="flex items-center justify-between px-1">
-                <h3 className="text-lg font-bold text-[var(--foreground)]">La tua Dashboard</h3>
-
+        <div className="space-y-4 mb-8">
+            <div className="flex items-center justify-between px-2">
+                <h3 className="text-[20px] font-bold text-white tracking-wide">La tua Dashboard</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {quizzes.map((q) => (
                     <DashboardCard
                         key={q.id}
@@ -64,12 +63,12 @@ export default function DashboardList({ userId }: DashboardListProps) {
             </div>
 
             {/* Add Button (Mobile Only / Bottom) */}
-            <div className="md:hidden">
+            <div className="md:hidden pt-2">
                 <button
                     onClick={() => navigate('/')}
-                    className="w-full py-4 rounded-[32px] border-2 border-dashed border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="w-full py-4 rounded-full border-2 border-dashed border-white/20 text-white/50 font-bold hover:bg-white/5 hover:text-white transition-colors flex items-center justify-center gap-2"
                 >
-                    + Aggiungi corsi
+                    <span className="text-xl leading-none mb-0.5">+</span> Aggiungi corsi
                 </button>
             </div>
         </div>

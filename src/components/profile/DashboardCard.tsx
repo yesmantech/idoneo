@@ -31,21 +31,19 @@ export default function DashboardCard({ title, category, progress, onClick }: Da
     return (
         <button
             onClick={onClick}
-            className="w-full bg-white dark:bg-[#1e2330] rounded-[24px] shadow-sm border border-slate-100 dark:border-slate-800 p-5 flex items-center gap-5 active:scale-[0.98] transition-all hover:shadow-md text-left group"
+            className="w-full bg-white dark:bg-[#1E2330] rounded-[24px] p-5 flex items-center gap-5 active:scale-[0.98] transition-all hover:bg-slate-50 dark:hover:bg-[#232938] text-left group border border-slate-100 dark:border-transparent shadow-sm dark:shadow-none"
         >
             {/* Icon Avatar */}
-            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#E0F2FE] dark:bg-[#141820] flex-shrink-0 border border-transparent dark:border-sky-500/20">
-                <CategoryIcon className="w-5 h-5 text-[#00B1FF] dark:text-sky-400" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#E0F2FE] dark:bg-[#111724] flex-shrink-0 border border-transparent dark:border-[#00B1FF]/30">
+                <CategoryIcon className="w-5 h-5 text-[#00B1FF]" strokeWidth={2} />
             </div>
 
-            <div className="flex-1 min-w-0">
-                <div className="flex justify-between mb-2">
-                    <h3 className="font-bold text-slate-900 dark:text-white truncate pr-2 text-[15px]">{title}</h3>
-                </div>
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <h3 className="font-bold text-slate-900 dark:text-white truncate pr-2 text-[15px] mb-2 leading-none">{title}</h3>
 
                 {/* Progress Bar */}
                 <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-slate-100 dark:bg-[#2a3040] rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-slate-100 dark:bg-[#2A3040] rounded-full overflow-hidden">
                         <div
                             className="h-full bg-[#00B1FF] rounded-full"
                             style={{ width: `${progress}%` }}
@@ -55,7 +53,7 @@ export default function DashboardCard({ title, category, progress, onClick }: Da
             </div>
 
             {/* Chevron */}
-            <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-500 flex-shrink-0 group-hover:text-[#00B1FF] transition-colors" />
+            <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-500 flex-shrink-0 group-hover:dark:text-white transition-colors" />
         </button>
     );
 }
