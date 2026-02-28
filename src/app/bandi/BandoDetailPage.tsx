@@ -109,9 +109,11 @@ export default function BandoDetailPage() {
                         >
                             {bando.ente?.logo_url ? (
                                 <img src={bando.ente.logo_url} className="w-full h-full object-contain" alt="Logo" />
-                            ) : (
-                                <Shield className="w-10 h-10 text-brand-blue" />
-                            )}
+                            ) : (() => {
+                                const { Icon: CatIcon, color: catColor } = getCategoryStyle(bando.category?.name); return (
+                                    <CatIcon className="w-10 h-10" style={{ color: catColor }} />
+                                );
+                            })()}
                         </motion.div>
 
                         <motion.h1
