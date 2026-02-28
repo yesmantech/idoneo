@@ -295,7 +295,7 @@ export default function UnifiedLeaderboardPage() {
                             onClick={handleOpenInfo}
                             className="w-10 h-10 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <Info className="w-5 h-5 text-[var(--foreground)] opacity-40" />
+                            <span className="text-[16px] font-bold text-[var(--foreground)] opacity-40 leading-none">?</span>
                         </button>
                     </div>
 
@@ -314,7 +314,7 @@ export default function UnifiedLeaderboardPage() {
                             onClick={handleOpenInfo}
                             className="w-10 h-10 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <Info className="w-5 h-5 text-[var(--foreground)] opacity-40" />
+                            <span className="text-[16px] font-bold text-[var(--foreground)] opacity-40 leading-none">?</span>
                         </button>
                     </div>
 
