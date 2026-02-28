@@ -8,7 +8,7 @@ export interface QuizOption {
     slug?: string;
     category?: string;
     roleTitle?: string;
-    role?: { title: string }; // Handle nested form from activeQuizzes
+    role?: { title: string };
 }
 
 interface LeaderboardSelectorProps {
@@ -27,13 +27,27 @@ export default function LeaderboardSelector({
     const [isOpen, setIsOpen] = useState(false);
     const [visible, setVisible] = useState(false);
     const [search, setSearch] = useState('');
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    // Animate open
+    // Animate open/close
     useEffect(() => {
         if (isOpen) {
             requestAnimationFrame(() => setVisible(true));
         } else {
             setVisible(false);
+        }
+    }, [isOpen]);
+
+    // Close on click outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                handleClose();
+            }
+        }
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => document.removeEventListener("mousedown", handleClickOutside);
         }
     }, [isOpen]);
 
@@ -56,23 +70,22 @@ export default function LeaderboardSelector({
     const filteredActive = activeQuizzes.filter(q => getSearchText(q).includes(search.toLowerCase()));
     const filteredOther = otherQuizzes.filter(q => getSearchText(q).includes(search.toLowerCase()));
 
-    // Determine Label
     let currentLabel = "Gold League";
-    let icon = <span className="text-2xl">🏆</span>;
+    let icon = <span className="text-brand-orange text-2xl">🏆</span>;
 
     if (currentSelection !== 'xp') {
         const q = [...activeQuizzes, ...otherQuizzes].find(x => x.id === currentSelection);
         if (q) {
             currentLabel = q.roleTitle || q.role?.title || q.title;
-            icon = <span className="text-2xl">📊</span>;
+            icon = <span className="text-brand-cyan text-2xl">📊</span>;
         }
     }
 
     return (
-        <>
+        <div className="relative inline-block" ref={containerRef}>
             {/* Trigger Pill */}
             <button
-                onClick={() => setIsOpen(true)}
+                onClick={() => setIsOpen(!isOpen)}
                 className={`flex items-center gap-3 px-5 py-3 bg-[var(--card)] rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] 
                            border transition-all duration-300 active:scale-[0.98]
                            ${isOpen
@@ -92,103 +105,77 @@ export default function LeaderboardSelector({
                 </svg>
             </button>
 
-            {/* Bottom Sheet Modal — Same animation as ThemeSelectorModal */}
+            {/* Floating Dropdown — smooth CSS transition */}
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-8">
-                    {/* Backdrop */}
+                <div
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[320px] z-[100] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                    style={{
+                        opacity: visible ? 1 : 0,
+                        transform: `translateX(-50%) translateY(${visible ? '0' : '-12px'}) scale(${visible ? 1 : 0.96})`,
+                    }}
+                >
                     <div
-                        className="absolute inset-0 transition-colors duration-300"
-                        style={{ backgroundColor: visible ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)' }}
-                        onClick={handleClose}
-                    />
-
-                    {/* Floating Bottom Sheet */}
-                    <div
-                        className="relative w-full max-w-[400px] transition-transform duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                        style={{
-                            transform: visible ? 'translateY(0) scale(1)' : 'translateY(120%) scale(0.95)',
-                        }}
+                        className="rounded-[28px] overflow-hidden backdrop-blur-3xl border border-white/10 shadow-2xl"
+                        style={{ backgroundColor: '#1C1C1E' }}
                     >
-                        <div
-                            className="rounded-[32px] overflow-hidden backdrop-blur-3xl border border-white/10 shadow-2xl"
-                            style={{ backgroundColor: '#1C1C1E' }}
-                        >
-                            {/* Header */}
-                            <div className="flex items-center justify-between px-6 pt-6 pb-2">
-                                <h2 className="text-[17px] font-bold text-white tracking-wide">Classifica</h2>
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 pt-5 pb-1">
+                            <h2 className="text-[15px] font-bold text-white/60 tracking-wide">Seleziona classifica</h2>
+                            <button
+                                onClick={handleClose}
+                                className="w-7 h-7 rounded-full flex items-center justify-center bg-[#2C2C2E] active:scale-95 transition-transform"
+                            >
+                                <X className="w-3.5 h-3.5 text-white/50" strokeWidth={2.5} />
+                            </button>
+                        </div>
+
+                        <div className="w-[calc(100%-40px)] h-[1px] bg-white/[0.05] mx-5 my-2" />
+
+                        {/* Search Bar */}
+                        <div className="px-4 pb-2">
+                            <input
+                                type="text"
+                                placeholder="Cerca concorso..."
+                                className="w-full px-4 py-2.5 bg-[#2C2C2E] rounded-xl text-sm outline-none 
+                                         focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium 
+                                         text-white placeholder:text-white/30"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+
+                        {/* Options List */}
+                        <div className="max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 px-3 pb-4 space-y-1">
+
+                            {/* 1. Global XP */}
+                            {search === '' && (
                                 <button
-                                    onClick={handleClose}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center bg-[#2C2C2E] active:scale-95 transition-transform"
+                                    onClick={() => handleSelect('xp')}
+                                    className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all active:scale-[0.98] ${currentSelection === 'xp'
+                                        ? 'bg-amber-500/10'
+                                        : 'active:bg-white/[0.04]'
+                                        }`}
                                 >
-                                    <X className="w-4 h-4 text-white/60" strokeWidth={2.5} />
-                                </button>
-                            </div>
-
-                            <div className="w-[calc(100%-48px)] h-[1px] bg-white/[0.05] mx-6 my-2" />
-
-                            {/* Search Bar */}
-                            <div className="px-6 pb-3">
-                                <input
-                                    type="text"
-                                    placeholder="Cerca concorso..."
-                                    className="w-full px-4 py-2.5 bg-[#2C2C2E] rounded-xl text-sm outline-none 
-                                             focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium 
-                                             text-white placeholder:text-white/30"
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    autoFocus
-                                />
-                            </div>
-
-                            {/* Options List */}
-                            <div className="max-h-[50vh] overflow-y-auto px-4 pb-6 space-y-1">
-
-                                {/* 1. Global XP */}
-                                {search === '' && (
-                                    <button
-                                        onClick={() => handleSelect('xp')}
-                                        className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all active:scale-[0.98] ${currentSelection === 'xp'
-                                            ? 'bg-amber-500/10'
-                                            : 'active:bg-white/[0.04]'
-                                            }`}
-                                    >
-                                        <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center text-lg ${currentSelection === 'xp' ? 'bg-amber-500/15' : 'bg-[#2C2C2E]'}`}>
-                                            🏆
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className={`font-bold text-[15px] ${currentSelection === 'xp' ? 'text-amber-400' : 'text-white'}`}>Gold League</div>
-                                            <div className="text-[11px] uppercase font-bold tracking-widest text-white/30">Classifica Globale</div>
-                                        </div>
-                                        {currentSelection === 'xp' && <CheckIcon color="text-amber-500" />}
-                                    </button>
-                                )}
-                                {search === '' && <div className="h-px bg-white/[0.06] mx-2" />}
-
-                                {/* 2. My Concorsi */}
-                                {filteredActive.length > 0 && (
-                                    <div>
-                                        <div className="px-4 py-2 text-[10px] uppercase font-bold text-white/25 tracking-widest mt-1">
-                                            I Tuoi Concorsi ({filteredActive.length})
-                                        </div>
-                                        {filteredActive.map(q => (
-                                            <OptionRow
-                                                key={q.id}
-                                                quiz={q}
-                                                isSelected={currentSelection === q.id}
-                                                onClick={() => handleSelect(q.id)}
-                                            />
-                                        ))}
+                                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center text-lg ${currentSelection === 'xp' ? 'bg-amber-500/15' : 'bg-[#2C2C2E]'}`}>
+                                        🏆
                                     </div>
-                                )}
+                                    <div className="flex-1">
+                                        <div className={`font-bold text-[15px] ${currentSelection === 'xp' ? 'text-amber-400' : 'text-white'}`}>Gold League</div>
+                                        <div className="text-[11px] uppercase font-bold tracking-wider text-white/30">Classifica Globale</div>
+                                    </div>
+                                    {currentSelection === 'xp' && <CheckIcon color="text-amber-500" />}
+                                </button>
+                            )}
+                            {search === '' && <div className="h-px bg-white/[0.06] mx-2" />}
 
-                                {/* 3. Other Concorsi */}
+                            {/* 2. My Concorsi */}
+                            {filteredActive.length > 0 && (
                                 <div>
-                                    {filteredOther.length > 0 && (
-                                        <div className="px-4 py-2 text-[10px] uppercase font-bold text-white/25 tracking-widest mt-1">
-                                            Tutti i Concorsi ({filteredOther.length})
-                                        </div>
-                                    )}
-                                    {filteredOther.map(q => (
+                                    <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-white/25 tracking-widest leading-none mt-1">
+                                        I Tuoi Concorsi ({filteredActive.length})
+                                    </div>
+                                    {filteredActive.map(q => (
                                         <OptionRow
                                             key={q.id}
                                             quiz={q}
@@ -196,18 +183,35 @@ export default function LeaderboardSelector({
                                             onClick={() => handleSelect(q.id)}
                                         />
                                     ))}
-                                    {filteredActive.length === 0 && filteredOther.length === 0 && (
-                                        <div className="p-4 text-center text-white/30 text-sm">
-                                            Nessun concorso trovato.
-                                        </div>
-                                    )}
                                 </div>
+                            )}
+
+                            {/* 3. Other Concorsi */}
+                            <div>
+                                {filteredOther.length > 0 && (
+                                    <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-white/25 tracking-widest mt-1">
+                                        Tutti i Concorsi ({filteredOther.length})
+                                    </div>
+                                )}
+                                {filteredOther.map(q => (
+                                    <OptionRow
+                                        key={q.id}
+                                        quiz={q}
+                                        isSelected={currentSelection === q.id}
+                                        onClick={() => handleSelect(q.id)}
+                                    />
+                                ))}
+                                {filteredActive.length === 0 && filteredOther.length === 0 && (
+                                    <div className="p-4 text-center text-white/30 text-sm">
+                                        Nessun concorso trovato.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
 
@@ -222,7 +226,7 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
                 : 'active:bg-white/[0.04]'
                 }`}
         >
-            <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center text-xs font-black ${isSelected ? 'bg-[#00B1FF]/15 text-[#00B1FF]' : 'bg-[#2C2C2E] text-white/40'}`}>
+            <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center text-xs font-black ${isSelected ? 'bg-[#00B1FF]/15 text-[#00B1FF]' : 'bg-[#2C2C2E] text-white/40'}`}>
                 {(roleTitle || quiz.title).substring(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
