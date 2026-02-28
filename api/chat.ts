@@ -97,73 +97,77 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
                         range_days: z.number().describe('Il numero di giorni passati da analizzare (es. 7, 30)')
                     }),
                     execute: async ({ range_days }) => {
-                        const startDate = new Date();
-                        startDate.setDate(startDate.getDate() - range_days);
+                        try {
+                            const startDate = new Date();
+                            startDate.setDate(startDate.getDate() - range_days);
 
-                        const { data: stats, error } = await supabase
-                            .from('quiz_attempts')
-                            .select('correct, wrong, blank, total_questions, duration_seconds, score, quiz_id')
-                            .eq('user_id', userId)
-                            .gte('created_at', startDate.toISOString());
+                            const { data: stats, error } = await supabase
+                                .from('quiz_attempts')
+                                .select('correct, wrong, blank, total_questions, duration_seconds, score, quiz_id')
+                                .eq('user_id', userId)
+                                .gte('created_at', startDate.toISOString());
 
-                        if (error || !stats || stats.length === 0) {
-                            return JSON.stringify({
-                                message: 'Nessun quiz completato nel periodo selezionato',
-                                quiz_completati: 0,
-                                timeframe_days: range_days,
-                                concorsi_attivi: []
-                            });
-                        }
-
-                        const totalCorrect = stats.reduce((acc, s) => acc + (s.correct || 0), 0);
-                        const totalWrong = stats.reduce((acc, s) => acc + (s.wrong || 0), 0);
-                        const totalBlank = stats.reduce((acc, s) => acc + (s.blank || 0), 0);
-                        const totalQuestions = totalCorrect + totalWrong + totalBlank;
-                        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-                        const avgDuration = Math.round(stats.reduce((acc, s) => acc + (s.duration_seconds || 0), 0) / stats.length);
-                        const avgScore = Math.round(stats.reduce((acc, s) => acc + (s.score || 0), 0) / stats.length);
-
-                        // Fetch distinct contests the user has practiced for
-                        const quizIds = [...new Set(stats.map(s => s.quiz_id).filter(Boolean))];
-                        let concorsiAttivi: any[] = [];
-
-                        if (quizIds.length > 0) {
-                            const { data: quizzes } = await supabase
-                                .from('quizzes')
-                                .select('id, title, slug')
-                                .in('id', quizIds);
-
-                            if (quizzes) {
-                                concorsiAttivi = quizzes.map(q => {
-                                    const qStats = stats.filter(s => s.quiz_id === q.id);
-                                    const qCorrect = qStats.reduce((acc, s) => acc + (s.correct || 0), 0);
-                                    const qWrong = qStats.reduce((acc, s) => acc + (s.wrong || 0), 0);
-                                    const qBlank = qStats.reduce((acc, s) => acc + (s.blank || 0), 0);
-                                    const qTotal = qCorrect + qWrong + qBlank;
-                                    return {
-                                        nome_concorso: q.title,
-                                        quiz_completati: qStats.length,
-                                        risposte_corrette: qCorrect,
-                                        risposte_errate: qWrong,
-                                        risposte_omesse: qBlank,
-                                        accuratezza_percentuale: qTotal > 0 ? Math.round((qCorrect / qTotal) * 100) : 0
-                                    };
+                            if (error || !stats || stats.length === 0) {
+                                return JSON.stringify({
+                                    message: 'Nessun quiz completato nel periodo selezionato',
+                                    quiz_completati: 0,
+                                    timeframe_days: range_days,
+                                    concorsi_attivi: []
                                 });
                             }
-                        }
 
-                        return JSON.stringify({
-                            quiz_completati: stats.length,
-                            domande_totali: totalQuestions,
-                            risposte_corrette: totalCorrect,
-                            risposte_errate: totalWrong,
-                            risposte_omesse: totalBlank,
-                            accuratezza_percentuale: accuracy,
-                            punteggio_medio: avgScore,
-                            durata_media_secondi: avgDuration,
-                            timeframe_days: range_days,
-                            concorsi_attivi: concorsiAttivi
-                        });
+                            const totalCorrect = stats.reduce((acc, s) => acc + (s.correct || 0), 0);
+                            const totalWrong = stats.reduce((acc, s) => acc + (s.wrong || 0), 0);
+                            const totalBlank = stats.reduce((acc, s) => acc + (s.blank || 0), 0);
+                            const totalQuestions = totalCorrect + totalWrong + totalBlank;
+                            const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+                            const avgDuration = Math.round(stats.reduce((acc, s) => acc + (s.duration_seconds || 0), 0) / stats.length);
+                            const avgScore = Math.round(stats.reduce((acc, s) => acc + (s.score || 0), 0) / stats.length);
+
+                            const quizIds = [...new Set(stats.map(s => s.quiz_id).filter(Boolean))];
+                            let concorsiAttivi: any[] = [];
+
+                            if (quizIds.length > 0) {
+                                const { data: quizzes } = await supabase
+                                    .from('quizzes')
+                                    .select('id, title, slug')
+                                    .in('id', quizIds);
+
+                                if (quizzes) {
+                                    concorsiAttivi = quizzes.map(q => {
+                                        const qStats = stats.filter(s => s.quiz_id === q.id);
+                                        const qCorrect = qStats.reduce((acc, s) => acc + (s.correct || 0), 0);
+                                        const qWrong = qStats.reduce((acc, s) => acc + (s.wrong || 0), 0);
+                                        const qBlank = qStats.reduce((acc, s) => acc + (s.blank || 0), 0);
+                                        const qTotal = qCorrect + qWrong + qBlank;
+                                        return {
+                                            nome_concorso: q.title,
+                                            quiz_completati: qStats.length,
+                                            risposte_corrette: qCorrect,
+                                            risposte_errate: qWrong,
+                                            risposte_omesse: qBlank,
+                                            accuratezza_percentuale: qTotal > 0 ? Math.round((qCorrect / qTotal) * 100) : 0
+                                        };
+                                    });
+                                }
+                            }
+
+                            return JSON.stringify({
+                                quiz_completati: stats.length,
+                                domande_totali: totalQuestions,
+                                risposte_corrette: totalCorrect,
+                                risposte_errate: totalWrong,
+                                risposte_omesse: totalBlank,
+                                accuratezza_percentuale: accuracy,
+                                punteggio_medio: avgScore,
+                                durata_media_secondi: avgDuration,
+                                timeframe_days: range_days,
+                                concorsi_attivi: concorsiAttivi
+                            });
+                        } catch (e: any) {
+                            console.error('get_user_overview error:', e);
+                            return JSON.stringify({ message: 'Errore temporaneo nel recupero dati. Riprova.', error: e.message });
+                        }
                     }
                 }),
 
@@ -173,70 +177,72 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
                         limit: z.number().describe('Quanti materie restituire al massimo')
                     }),
                     execute: async ({ limit }) => {
-                        const { data: attempts, error } = await supabase
-                            .from('quiz_attempts')
-                            .select('answers')
-                            .eq('user_id', userId)
-                            .order('created_at', { ascending: false })
-                            .limit(30);
+                        try {
+                            const { data: attempts, error } = await supabase
+                                .from('quiz_attempts')
+                                .select('answers')
+                                .eq('user_id', userId)
+                                .order('created_at', { ascending: false })
+                                .limit(30);
 
-                        if (error || !attempts || attempts.length === 0) {
-                            return JSON.stringify({ message: 'Nessun dato disponibile sulle risposte per materia' });
-                        }
+                            if (error || !attempts || attempts.length === 0) {
+                                return JSON.stringify({ message: 'Nessun dato disponibile sulle risposte per materia' });
+                            }
 
-                        // 1. Group stats by subjectId (not subjectName which is wrong)
-                        const statsById: Record<string, { correct: number; wrong: number; skipped: number }> = {};
-                        for (const attempt of attempts) {
-                            if (!attempt.answers || !Array.isArray(attempt.answers)) continue;
-                            for (const ans of attempt.answers as any[]) {
-                                const sId = ans.subjectId;
-                                if (!sId) continue;
+                            const statsById: Record<string, { correct: number; wrong: number; skipped: number }> = {};
+                            for (const attempt of attempts) {
+                                if (!attempt.answers || !Array.isArray(attempt.answers)) continue;
+                                for (const ans of attempt.answers as any[]) {
+                                    const sId = ans.subjectId;
+                                    if (!sId) continue;
 
-                                if (!statsById[sId]) statsById[sId] = { correct: 0, wrong: 0, skipped: 0 };
-                                if (ans.isCorrect === true) {
-                                    statsById[sId].correct++;
-                                } else if (ans.isSkipped === true) {
-                                    statsById[sId].skipped++;
-                                } else {
-                                    statsById[sId].wrong++;
+                                    if (!statsById[sId]) statsById[sId] = { correct: 0, wrong: 0, skipped: 0 };
+                                    if (ans.isCorrect === true) {
+                                        statsById[sId].correct++;
+                                    } else if (ans.isSkipped === true) {
+                                        statsById[sId].skipped++;
+                                    } else {
+                                        statsById[sId].wrong++;
+                                    }
                                 }
                             }
-                        }
 
-                        // 2. Fetch the real names for these subject IDs
-                        const subjectIds = Object.keys(statsById);
-                        let idToNameMap: Record<string, string> = {};
+                            const subjectIds = Object.keys(statsById);
+                            let idToNameMap: Record<string, string> = {};
 
-                        if (subjectIds.length > 0) {
-                            const { data: subjectsData } = await supabase
-                                .from('subjects')
-                                .select('id, name')
-                                .in('id', subjectIds);
+                            if (subjectIds.length > 0) {
+                                const { data: subjectsData } = await supabase
+                                    .from('subjects')
+                                    .select('id, name')
+                                    .in('id', subjectIds);
 
-                            if (subjectsData) {
-                                subjectsData.forEach(s => {
-                                    idToNameMap[s.id] = s.name;
-                                });
+                                if (subjectsData) {
+                                    subjectsData.forEach(s => {
+                                        idToNameMap[s.id] = s.name;
+                                    });
+                                }
                             }
+
+                            const results = Object.entries(statsById)
+                                .map(([sId, s]) => {
+                                    const total = s.correct + s.wrong + s.skipped;
+                                    return {
+                                        materia: idToNameMap[sId] || 'Materia Sconosciuta',
+                                        risposte_corrette: s.correct,
+                                        risposte_errate: s.wrong,
+                                        risposte_omesse: s.skipped,
+                                        domande_totali: total,
+                                        accuratezza_percentuale: total > 0 ? Math.round((s.correct / total) * 100) : 0
+                                    };
+                                })
+                                .sort((a, b) => b.risposte_errate - a.risposte_errate)
+                                .slice(0, limit);
+
+                            return JSON.stringify(results);
+                        } catch (e: any) {
+                            console.error('get_mistakes_by_topic error:', e);
+                            return JSON.stringify({ message: 'Errore temporaneo nel recupero errori per materia.', error: e.message });
                         }
-
-                        // 3. Prepare the final results array
-                        const results = Object.entries(statsById)
-                            .map(([sId, s]) => {
-                                const total = s.correct + s.wrong + s.skipped;
-                                return {
-                                    materia: idToNameMap[sId] || 'Materia Sconosciuta',
-                                    risposte_corrette: s.correct,
-                                    risposte_errate: s.wrong,
-                                    risposte_omesse: s.skipped,
-                                    domande_totali: total,
-                                    accuratezza_percentuale: total > 0 ? Math.round((s.correct / total) * 100) : 0
-                                };
-                            })
-                            .sort((a, b) => b.risposte_errate - a.risposte_errate)
-                            .slice(0, limit);
-
-                        return JSON.stringify(results);
                     }
                 }),
 
@@ -247,69 +253,70 @@ L'utente sta usando l'app web/mobile idoneo.ai. Cerca di inquadrare i tuoi consi
                         limit: z.number().default(20).describe('Numero massimo di domande sbagliate da estrarre per l\'analisi (max 50, default 20).')
                     }),
                     execute: async ({ subject_id, limit }) => {
-                        const { data: attempts, error } = await supabase
-                            .from('quiz_attempts')
-                            .select('answers')
-                            .eq('user_id', userId)
-                            .order('created_at', { ascending: false })
-                            .limit(10); // Look at last 10 quizzes
+                        try {
+                            const { data: attempts, error } = await supabase
+                                .from('quiz_attempts')
+                                .select('answers')
+                                .eq('user_id', userId)
+                                .order('created_at', { ascending: false })
+                                .limit(10);
 
-                        if (error || !attempts || attempts.length === 0) {
-                            return JSON.stringify({ message: 'Nessun quiz superato di recente per poterne estrarre le domande sbagliate.' });
-                        }
+                            if (error || !attempts || attempts.length === 0) {
+                                return JSON.stringify({ message: 'Nessun quiz superato di recente per poterne estrarre le domande sbagliate.' });
+                            }
 
-                        const mistakes = [];
-                        const rawErrors = [];
-                        const uniqueActionSubjectIds = new Set<string>();
+                            const mistakes = [];
+                            const rawErrors = [];
+                            const uniqueActionSubjectIds = new Set<string>();
 
-                        // 1. Collect all mistakes and unique subject IDs
-                        for (const attempt of attempts) {
-                            if (!attempt.answers || !Array.isArray(attempt.answers)) continue;
-                            for (const ans of attempt.answers as any[]) {
-                                if (ans.isCorrect === false || ans.isSkipped === true) {
-                                    rawErrors.push(ans);
-                                    if (ans.subjectId) uniqueActionSubjectIds.add(ans.subjectId);
+                            for (const attempt of attempts) {
+                                if (!attempt.answers || !Array.isArray(attempt.answers)) continue;
+                                for (const ans of attempt.answers as any[]) {
+                                    if (ans.isCorrect === false || ans.isSkipped === true) {
+                                        rawErrors.push(ans);
+                                        if (ans.subjectId) uniqueActionSubjectIds.add(ans.subjectId);
+                                    }
                                 }
                             }
-                        }
 
-                        // 2. Resolve real subject names
-                        const idToNameMap: Record<string, string> = {};
-                        if (uniqueActionSubjectIds.size > 0) {
-                            const subjectIds = Array.from(uniqueActionSubjectIds).filter(id => id.length === 36);
-                            if (subjectIds.length > 0) {
-                                const { data: subjectsData } = await supabase
-                                    .from('subjects')
-                                    .select('id, name')
-                                    .in('id', subjectIds);
-                                if (subjectsData) {
-                                    subjectsData.forEach(s => { idToNameMap[s.id] = s.name; });
+                            const idToNameMap: Record<string, string> = {};
+                            if (uniqueActionSubjectIds.size > 0) {
+                                const subjectIds = Array.from(uniqueActionSubjectIds).filter(id => id.length === 36);
+                                if (subjectIds.length > 0) {
+                                    const { data: subjectsData } = await supabase
+                                        .from('subjects')
+                                        .select('id, name')
+                                        .in('id', subjectIds);
+                                    if (subjectsData) {
+                                        subjectsData.forEach(s => { idToNameMap[s.id] = s.name; });
+                                    }
                                 }
                             }
+
+                            for (const ans of rawErrors) {
+                                const realName = ans.subjectId ? (idToNameMap[ans.subjectId] || ans.subjectName || 'Sconosciuta') : (ans.subjectName || 'Sconosciuta');
+
+                                if (subject_id && !realName.toLowerCase().includes(subject_id.toLowerCase())) continue;
+
+                                mistakes.push({
+                                    materia: realName,
+                                    testo_domanda: ans.text?.substring(0, 150) + '...',
+                                    risposta_esatta: ans.options?.[ans.correctOption]?.substring(0, 100) || 'N/A',
+                                    spiegazione: ans.explanation ? 'Presente' : 'Assente',
+                                });
+
+                                if (mistakes.length >= limit) break;
+                            }
+
+                            if (mistakes.length === 0) {
+                                return JSON.stringify({ message: 'Nessun errore specifico combacia con la materia richiesta nei quiz recenti.' });
+                            }
+
+                            return JSON.stringify(mistakes);
+                        } catch (e: any) {
+                            console.error('analyze_mistake_patterns error:', e);
+                            return JSON.stringify({ message: 'Errore temporaneo nell\'analisi degli errori.', error: e.message });
                         }
-
-                        // 3. Format, filter, and apply limit
-                        for (const ans of rawErrors) {
-                            const realName = ans.subjectId ? (idToNameMap[ans.subjectId] || ans.subjectName || 'Sconosciuta') : (ans.subjectName || 'Sconosciuta');
-
-                            // Apply descriptive subject filter if AI provides one (case insensitive, partial match)
-                            if (subject_id && !realName.toLowerCase().includes(subject_id.toLowerCase())) continue;
-
-                            mistakes.push({
-                                materia: realName,
-                                testo_domanda: ans.text?.substring(0, 150) + '...',
-                                risposta_esatta: ans.options?.[ans.correctOption]?.substring(0, 100) || 'N/A',
-                                spiegazione: ans.explanation ? 'Presente' : 'Assente',
-                            });
-
-                            if (mistakes.length >= limit) break; // Token saving
-                        }
-
-                        if (mistakes.length === 0) {
-                            return JSON.stringify({ message: 'Nessun errore specifico combacia con la materia richiesta nei quiz recenti.' });
-                        }
-
-                        return JSON.stringify(mistakes);
                     }
                 }),
 
