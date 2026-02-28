@@ -72,44 +72,40 @@ export default function StreakCard() {
 
                     let bg = '';
                     let border = '2.5px solid transparent';
-                    let labelClass = 'text-slate-400 dark:text-white/35';
+                    let labelClass = 'text-slate-300 dark:text-white/35';
 
                     if (isActive && isToday) {
-                        bg = 'rgba(0, 177, 255, 0.5)';
-                        border = '3px solid #0094E0';
-                        labelClass = 'text-[#0094E0] dark:text-sky-400';
+                        bg = 'rgba(56, 189, 248, 0.45)';
+                        border = '3px solid #38BDF8';
+                        labelClass = 'text-sky-400';
                     } else if (isActive) {
-                        bg = 'rgba(0, 177, 255, 0.3)';
+                        bg = 'rgba(0, 177, 255, 0.2)';
                         border = '2.5px solid #00B1FF';
-                        labelClass = 'text-[#0094E0] dark:text-[#00B1FF]';
+                        labelClass = 'text-[#00B1FF]';
                     } else if (isToday) {
-                        bg = 'rgba(0, 177, 255, 0.4)';
-                        border = '3px solid #0094E0';
-                        labelClass = 'text-[#0094E0] dark:text-sky-400';
+                        bg = 'rgba(56, 189, 248, 0.35)';
+                        border = '3px solid #38BDF8';
+                        labelClass = 'text-sky-400';
                     }
 
                     const shadow = isToday
-                        ? '0 0 12px rgba(0, 148, 224, 0.4)'
+                        ? '0 0 12px rgba(56, 189, 248, 0.5)'
                         : 'none';
 
                     return (
                         <div key={i} className="flex flex-col items-center" style={{ gap: 10 }}>
                             <div
-                                className="flex items-center justify-center"
+                                className="flex items-center justify-center bg-slate-100 dark:bg-[#2C2C2E]"
                                 style={{
                                     width: 48,
                                     height: 48,
                                     borderRadius: 16,
-                                    backgroundColor: bg || undefined,
+                                    ...(bg ? { backgroundColor: bg } : {}),
                                     border,
                                     boxShadow: shadow,
                                     transition: 'all 0.3s ease',
                                 }}
-                            >
-                                {!bg && (
-                                    <div className="w-full h-full rounded-[14px] bg-slate-200/80 dark:bg-[#2C2C2E]" />
-                                )}
-                            </div>
+                            />
                             <span className={`font-bold text-[14px] tracking-wide ${labelClass}`}>
                                 {day.label}
                             </span>
