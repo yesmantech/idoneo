@@ -32,7 +32,7 @@ export default function DashboardCard({ title, category, progress, onClick }: Da
             </div>
 
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <h3 className="font-semibold text-slate-900 dark:text-white truncate pr-2 text-[15px] mb-[10px] leading-none tracking-wide">{title}</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white truncate pr-2 text-[15px] mb-[6px] leading-tight tracking-wide">{title}</h3>
 
                 {/* Progress Bar */}
                 <div className="flex items-center gap-2">
