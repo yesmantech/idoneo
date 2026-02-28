@@ -19,8 +19,8 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
     return (
         <div className="flex items-center justify-between py-2">
 
-            {/* XP Pill — CSS gradient text logo + number */}
-            <div className="flex items-center gap-1.5 bg-[#422006] px-3.5 py-2 rounded-2xl">
+            {/* XP Pill — Blue brand theme */}
+            <div className="flex items-center gap-1.5 bg-[#001F3F] px-3.5 py-2 rounded-2xl">
                 {/* XP Logo — pure CSS gradient text */}
                 <span
                     className="font-black select-none"
@@ -28,7 +28,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                         fontSize: '18px',
                         lineHeight: 1,
                         letterSpacing: '-0.5px',
-                        background: 'linear-gradient(180deg, #FCD34D 0%, #F59E0B 50%, #D97706 100%)',
+                        background: 'linear-gradient(180deg, #67E8F9 0%, #00B1FF 50%, #0077CC 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
@@ -38,7 +38,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                     XP
                 </span>
                 {/* Number */}
-                <span className="text-[17px] font-bold text-[#FBBF24] leading-none">{xp.toLocaleString()}</span>
+                <span className="text-[17px] font-bold text-[#00B1FF] leading-none">{xp.toLocaleString()}</span>
             </div>
 
             {/* Right side: Reset Tour + Avatar (Settings) */}
