@@ -38,12 +38,28 @@ export default function StreakCalendarModal({
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
 
-    // Fetch activity dates for the viewed month from quiz_attempts
+    // Fetch activity dates: merge streak-based consecutive days + quiz_attempts
     useEffect(() => {
         if (!isOpen || !user) return;
 
         async function fetchMonthActivity() {
             setLoading(true);
+            const dates = new Set<string>();
+
+            // 1. Add streak-based consecutive days (backwards from today)
+            if (streakCurrent > 0) {
+                const today = new Date();
+                for (let i = 0; i < streakCurrent; i++) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - i);
+                    // Only add if falls in viewed month
+                    if (d.getFullYear() === year && d.getMonth() === month) {
+                        dates.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+                    }
+                }
+            }
+
+            // 2. Also fetch quiz_attempts for additional activity days
             const startOfMonth = new Date(year, month, 1);
             const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
 
@@ -55,18 +71,18 @@ export default function StreakCalendarModal({
                 .lte('completed_at', endOfMonth.toISOString());
 
             if (data) {
-                const dates = new Set<string>();
                 data.forEach(row => {
                     const d = new Date(row.completed_at);
                     dates.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
                 });
-                setActiveDates(dates);
             }
+
+            setActiveDates(dates);
             setLoading(false);
         }
 
         fetchMonthActivity();
-    }, [isOpen, user, year, month]);
+    }, [isOpen, user, year, month, streakCurrent]);
 
     // Build calendar grid
     const calendarDays = useMemo(() => {
