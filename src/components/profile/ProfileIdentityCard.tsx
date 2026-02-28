@@ -25,7 +25,7 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                 {/* XP Pill — Blue brand theme — clickable */}
                 <button
                     onClick={() => setShowXPModal(true)}
-                    className="flex items-center gap-1.5 bg-[#001F3F] px-3.5 py-2 rounded-2xl active:scale-95 transition-transform"
+                    className="flex items-center gap-1.5 bg-[#E0F4FF] dark:bg-[#001F3F] px-3.5 py-2 rounded-2xl active:scale-95 transition-transform"
                 >
                     {/* XP Logo — CSS gradient text */}
                     <span
