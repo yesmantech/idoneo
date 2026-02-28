@@ -106,8 +106,8 @@ export default function StreakCard() {
                             <div
                                 className="flex items-center justify-center"
                                 style={{
-                                    width: isToday ? 52 : 48,
-                                    height: isToday ? 52 : 48,
+                                    width: 48,
+                                    height: 48,
                                     borderRadius: 16,
                                     backgroundColor: bg,
                                     border,
