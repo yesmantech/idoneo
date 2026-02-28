@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Trophy } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryIcons';
 
 // Types
@@ -72,7 +72,11 @@ export default function LeaderboardSelector({
     const filteredOther = otherQuizzes.filter(q => getSearchText(q).includes(search.toLowerCase()));
 
     let currentLabel = "Gold League";
-    let icon = <span className="text-brand-orange text-2xl">🏆</span>;
+    let icon = (
+        <div className="w-8 h-8 rounded-[10px] flex items-center justify-center bg-amber-500/15">
+            <Trophy className="w-4 h-4 text-amber-400" />
+        </div>
+    );
 
     if (currentSelection !== 'xp') {
         const q = [...activeQuizzes, ...otherQuizzes].find(x => x.id === currentSelection);
@@ -163,8 +167,8 @@ export default function LeaderboardSelector({
                                         : 'active:bg-white/[0.04]'
                                         }`}
                                 >
-                                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center text-lg ${currentSelection === 'xp' ? 'bg-amber-500/15' : 'bg-[#2C2C2E]'}`}>
-                                        🏆
+                                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${currentSelection === 'xp' ? 'bg-amber-500/15' : 'bg-[#2C2C2E]'}`}>
+                                        <Trophy className={`w-5 h-5 ${currentSelection === 'xp' ? 'text-amber-400' : 'text-white/40'}`} />
                                     </div>
                                     <div className="flex-1">
                                         <div className={`font-bold text-[15px] ${currentSelection === 'xp' ? 'text-amber-400' : 'text-white'}`}>Gold League</div>
