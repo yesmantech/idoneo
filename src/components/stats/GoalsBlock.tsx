@@ -25,24 +25,24 @@ const goalTypeLabels = {
 export default function GoalsBlock({ goal, onCreateGoal, onDeleteGoal }: GoalsBlockProps) {
     if (!goal) {
         return (
-            <div className="bg-[var(--card)] rounded-card shadow-soft p-6 border border-[var(--card-border)]">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-[var(--foreground)]">Il tuo obiettivo</h3>
-                    <div className="w-10 h-10 rounded-squircle bg-brand-cyan/10 flex items-center justify-center">
-                        <Flag className="w-5 h-5 text-brand-cyan" />
+            <div className="bg-slate-50 dark:bg-[#1C1C1E] rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Il tuo obiettivo</h3>
+                    <div className="w-10 h-10 rounded-[14px] bg-[#00B1FF]/10 flex items-center justify-center">
+                        <Flag className="w-5 h-5 text-[#00B1FF]" />
                     </div>
                 </div>
 
-                <div className="text-center py-8 bg-slate-50 dark:bg-black/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                    <div className="w-14 h-14 rounded-full bg-[var(--card)] shadow-sm flex items-center justify-center mx-auto mb-3">
-                        <Target className="w-6 h-6 text-[var(--foreground)] opacity-30" />
+                <div className="text-center py-8 bg-white dark:bg-black/40 rounded-2xl border border-dashed border-slate-200 dark:border-white/[0.06]">
+                    <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-white/[0.04] flex items-center justify-center mx-auto mb-3">
+                        <Target className="w-6 h-6 text-slate-400 dark:text-white/25" />
                     </div>
-                    <p className="text-sm font-medium text-[var(--foreground)] opacity-50 mb-4">
+                    <p className="text-sm font-medium text-slate-500 dark:text-white/40 mb-4">
                         Imposta un obiettivo per rimanere motivato
                     </p>
                     <button
                         onClick={onCreateGoal}
-                        className="px-6 py-2.5 bg-brand-cyan text-white font-bold text-sm rounded-pill hover:bg-brand-cyan/90 active:scale-95 transition-all shadow-sm"
+                        className="px-6 py-2.5 bg-[#00B1FF] text-white font-bold text-sm rounded-full hover:bg-[#00B1FF]/90 active:scale-95 transition-all"
                     >
                         Imposta obiettivo
                     </button>
@@ -59,10 +59,10 @@ export default function GoalsBlock({ goal, onCreateGoal, onDeleteGoal }: GoalsBl
         : null;
 
     const statusConfig = {
-        active: { label: 'In corso', color: 'text-brand-cyan bg-brand-cyan/10' },
+        active: { label: 'In corso', color: 'text-[#00B1FF] bg-[#00B1FF]/10' },
         achieved: { label: 'Raggiunto! 🎉', color: 'text-emerald-500 bg-emerald-500/10' },
         failed: { label: 'Non raggiunto', color: 'text-rose-500 bg-rose-500/10' },
-        expired: { label: 'Scaduto', color: 'text-[var(--foreground)] opacity-40 bg-slate-100 dark:bg-[#111]' }
+        expired: { label: 'Scaduto', color: 'text-white/40 bg-white/[0.04]' }
     };
 
     const progressStatus = progress >= 100
@@ -81,45 +81,45 @@ export default function GoalsBlock({ goal, onCreateGoal, onDeleteGoal }: GoalsBl
     };
 
     return (
-        <div className="bg-[var(--card)] rounded-card shadow-soft p-6 border border-[var(--card-border)]">
+        <div className="bg-slate-50 dark:bg-[#1C1C1E] rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-[var(--foreground)]">Il tuo obiettivo</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Il tuo obiettivo</h3>
                 <div className="flex items-center gap-2">
-                    <span className={`px-2.5 py-1 rounded-pill text-[10px] font-bold uppercase tracking-wide ${statusConfig[goal.status].color}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${statusConfig[goal.status].color}`}>
                         {statusConfig[goal.status].label}
                     </span>
                     {onDeleteGoal && goal.status === 'active' && (
                         <button
                             onClick={() => onDeleteGoal(goal.id)}
-                            className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            className="p-1.5 rounded-full hover:bg-white/[0.06] transition-colors"
                         >
-                            <X className="w-4 h-4 text-[var(--foreground)] opacity-40" />
+                            <X className="w-4 h-4 text-white/30" />
                         </button>
                     )}
                 </div>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-brand-cyan/10 flex items-center justify-center">
-                    <Icon className="w-6 h-6 text-brand-cyan" />
+                <div className="w-12 h-12 rounded-[14px] bg-[#00B1FF]/10 flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-[#00B1FF]" />
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-medium text-[var(--foreground)] opacity-50">{config.label}</p>
-                    <p className="text-2xl font-black text-[var(--foreground)]">
-                        {goal.current_value.toFixed(0)}<span className="opacity-30">/{goal.target_value.toFixed(0)}</span>
-                        <span className="text-sm font-bold opacity-30 ml-1">{config.unit}</span>
+                    <p className="text-sm font-medium text-slate-500 dark:text-white/40">{config.label}</p>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white">
+                        {goal.current_value.toFixed(0)}<span className="text-slate-300 dark:text-white/20">/{goal.target_value.toFixed(0)}</span>
+                        <span className="text-sm font-bold text-slate-300 dark:text-white/20 ml-1">{config.unit}</span>
                     </p>
                 </div>
             </div>
 
             {/* Progress Bar */}
             <div className="mb-3">
-                <div className="h-3 bg-slate-100 dark:bg-[#111] rounded-pill overflow-hidden">
+                <div className="h-2.5 bg-white dark:bg-white/[0.04] rounded-full overflow-hidden">
                     <div
-                        className={`h-full rounded-pill transition-all duration-500 ${progress >= 100 ? 'bg-emerald-500' :
+                        className={`h-full rounded-full transition-all duration-500 ${progress >= 100 ? 'bg-emerald-500' :
                             progressStatus === 'at-risk' ? 'bg-rose-500' :
                                 progressStatus === 'behind' ? 'bg-amber-500' :
-                                    'bg-brand-cyan'
+                                    'bg-[#00B1FF]'
                             }`}
                         style={{ width: `${progress}%` }}
                     />
@@ -131,12 +131,12 @@ export default function GoalsBlock({ goal, onCreateGoal, onDeleteGoal }: GoalsBl
                 <span className={`font-bold ${progressStatus === 'achieved' ? 'text-emerald-500' :
                     progressStatus === 'at-risk' ? 'text-rose-500' :
                         progressStatus === 'behind' ? 'text-amber-500' :
-                            'text-[var(--foreground)] opacity-50'
+                            'text-slate-500 dark:text-white/40'
                     }`}>
                     {progressStatusLabel[progressStatus]}
                 </span>
                 {daysRemaining !== null && (
-                    <span className="text-[var(--foreground)] opacity-30 flex items-center gap-1">
+                    <span className="text-slate-400 dark:text-white/20 flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {daysRemaining === 0 ? 'Scade oggi' : `${daysRemaining} giorni rimasti`}
                     </span>
