@@ -215,7 +215,7 @@ export default function StreakCalendarModal({
                             <div className="grid grid-cols-7 px-5 pb-2">
                                 {WEEKDAYS.map(wd => (
                                     <div key={wd} className="text-center">
-                                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 dark:text-white/25">
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/25">
                                             {wd}
                                         </span>
                                     </div>
@@ -252,16 +252,16 @@ export default function StreakCalendarModal({
                                                         borderRadius: 12,
                                                         backgroundColor: isActive
                                                             ? isToday
-                                                                ? 'rgba(0, 177, 255, 0.35)'
-                                                                : 'rgba(0, 177, 255, 0.15)'
+                                                                ? 'rgba(0, 177, 255, 0.4)'
+                                                                : 'rgba(0, 177, 255, 0.2)'
                                                             : 'transparent',
                                                         border: isToday
-                                                            ? '2px solid #38BDF8'
+                                                            ? '2px solid #0094E0'
                                                             : isActive
                                                                 ? '2px solid #00B1FF'
                                                                 : '2px solid transparent',
                                                         boxShadow: isToday
-                                                            ? '0 0 10px rgba(56, 189, 248, 0.4)'
+                                                            ? '0 0 10px rgba(0, 148, 224, 0.35)'
                                                             : 'none',
                                                     }}
                                                 >
@@ -273,7 +273,7 @@ export default function StreakCalendarModal({
                                                                 : undefined,
                                                         }}
                                                     >
-                                                        <span className={!(isActive || isToday) ? 'text-slate-400 dark:text-white/30' : ''}>
+                                                        <span className={!(isActive || isToday) ? 'text-slate-500 dark:text-white/30' : ''}>
                                                             {day.date}
                                                         </span>
                                                     </span>
