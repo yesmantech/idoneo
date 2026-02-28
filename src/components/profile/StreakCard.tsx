@@ -83,17 +83,17 @@ export default function StreakCard() {
                     let labelColor = 'rgba(255,255,255,0.35)';
 
                     if (isActive && isToday) {
-                        bg = 'rgba(0, 177, 255, 0.3)';
-                        border = '2.5px solid #F59E0B';
-                        labelColor = '#F59E0B';
+                        bg = 'rgba(0, 177, 255, 0.35)';
+                        border = '2.5px solid #38BDF8';
+                        labelColor = '#38BDF8';
                     } else if (isActive) {
                         bg = 'rgba(0, 177, 255, 0.3)';
                         border = '2.5px solid #00B1FF';
                         labelColor = '#00B1FF';
                     } else if (isToday) {
-                        bg = 'rgba(245, 158, 11, 0.2)';
-                        border = '2.5px solid #F59E0B';
-                        labelColor = '#F59E0B';
+                        bg = 'rgba(56, 189, 248, 0.15)';
+                        border = '2.5px solid #38BDF8';
+                        labelColor = '#38BDF8';
                     }
 
                     return (
