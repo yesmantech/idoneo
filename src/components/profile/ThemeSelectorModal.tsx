@@ -113,7 +113,7 @@ export default function ThemeSelectorModal({
                                     style={{
                                         aspectRatio: '1 / 1.3',
                                         backgroundColor: isActive ? '#2C2C2E' : '#2C2C2E',
-                                        border: isActive ? '2px solid white' : '2px solid transparent',
+                                        border: isActive ? '2px solid #00B1FF' : '2px solid transparent',
                                         opacity: isActive ? 1 : 0.8
                                     }}
                                 >
