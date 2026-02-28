@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, ChevronRight, Pencil, Check, AlertTriangle, Loader2,
     Sun, Moon, Monitor, LogOut, Mail, FileText, Shield,
-    User, Palette, ExternalLink, X
+    User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus
 } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import { hapticLight } from '@/lib/haptics';
@@ -199,13 +199,32 @@ export default function ProfileSettingsPage() {
                 {/* ─── Toast ─── */}
                 {msg && (
                     <div className={`mb-4 p-3 rounded-2xl text-[13px] text-center font-semibold flex items-center justify-center gap-2 animate-in fade-in duration-200 ${msg.type === 'success'
-                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
+                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
                         }`}>
                         {msg.type === 'success' ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                         {msg.text}
                     </div>
                 )}
+
+                {/* ─── Instagram Banner ─── */}
+                <button
+                    onClick={() => window.open('https://instagram.com/idoneo.app', '_blank')}
+                    className="w-full mb-6 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
+                >
+                    <div className="relative bg-gradient-to-r from-[#833AB4] via-[#C13584] to-[#E1306C] p-4 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                            <Instagram className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1 text-left">
+                            <h3 className="text-[15px] font-bold text-white">Seguici su Instagram</h3>
+                            <p className="text-[12px] text-white/70">News, consigli e aggiornamenti</p>
+                        </div>
+                        <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-[13px] font-bold flex-shrink-0">
+                            Seguici
+                        </span>
+                    </div>
+                </button>
 
                 {/* ─── PROFILO ─── */}
                 <SectionLabel>Profilo</SectionLabel>
@@ -261,6 +280,41 @@ export default function ProfileSettingsPage() {
                             onClick={() => setEditingNickname(true)}
                         />
                     )}
+
+                    <Divider />
+
+                    {/* Email Row (read-only) */}
+                    <SettingsRow
+                        icon={<AtSign className="w-5 h-5" />}
+                        label="Email"
+                        value={user?.email || ''}
+                    />
+
+                    <Divider />
+
+                    {/* Invite Friend Row */}
+                    <div className="w-full flex items-center gap-4 px-4 py-4">
+                        <span className="text-[var(--foreground)] opacity-40 flex-shrink-0"><UserPlus className="w-5 h-5" /></span>
+                        <span className="flex-1 text-left text-[15px] font-semibold text-[var(--foreground)]">Invita un Amico</span>
+                        <button
+                            onClick={() => {
+                                const shareData = {
+                                    title: 'Idoneo',
+                                    text: 'Preparati ai concorsi pubblici con Idoneo! Quiz, simulazioni e classifiche.',
+                                    url: 'https://idoneo.ai'
+                                };
+                                if (navigator.share) {
+                                    navigator.share(shareData);
+                                } else {
+                                    navigator.clipboard.writeText('https://idoneo.ai');
+                                    showToast('success', 'Link copiato!');
+                                }
+                            }}
+                            className="px-4 py-1.5 rounded-full bg-[#00B1FF] text-white text-[13px] font-bold active:scale-95 transition-transform"
+                        >
+                            Invita
+                        </button>
+                    </div>
                 </div>
 
                 <input
@@ -294,8 +348,8 @@ export default function ProfileSettingsPage() {
                                     key={key}
                                     onClick={() => selectTheme(key)}
                                     className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all text-[12px] font-bold ${selectedTheme === key
-                                            ? 'bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/30'
-                                            : 'bg-slate-100 dark:bg-[#111] text-[var(--foreground)] opacity-60 hover:opacity-100'
+                                        ? 'bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/30'
+                                        : 'bg-slate-100 dark:bg-[#111] text-[var(--foreground)] opacity-60 hover:opacity-100'
                                         }`}
                                 >
                                     <Icon className="w-5 h-5" />
