@@ -6,10 +6,18 @@ import { useTheme } from '@/context/ThemeContext';
 import { supabase } from '@/lib/supabaseClient';
 import { deleteUserAccount } from '@/lib/accountService';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Pencil, Check, AlertTriangle, Loader2, Sun, Moon, Monitor } from 'lucide-react';
+import {
+    ArrowLeft, ChevronRight, Pencil, Check, AlertTriangle, Loader2,
+    Sun, Moon, Monitor, LogOut, Mail, FileText, Shield,
+    User, Palette, ExternalLink, X
+} from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import { hapticLight } from '@/lib/haptics';
-import { Button } from '@/components/ui/Button';
+import { UserAvatar } from '@/components/ui/UserAvatar';
+
+// =============================================================================
+// SETTINGS PAGE — Praktika Style
+// =============================================================================
 
 export default function ProfileSettingsPage() {
     const { user, profile, loading, refreshProfile } = useAuth();
@@ -24,13 +32,17 @@ export default function ProfileSettingsPage() {
 
     // Form States
     const [saving, setSaving] = useState(false);
-    const [showSuccess, setShowSuccess] = useState(false);
     const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
 
+    // Inline edit states
+    const [editingNickname, setEditingNickname] = useState(false);
+    const [showThemeSelector, setShowThemeSelector] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const nicknameInputRef = useRef<HTMLInputElement>(null);
 
     // Initialize state from context
     useEffect(() => {
@@ -54,6 +66,14 @@ export default function ProfileSettingsPage() {
         };
     }, [hasSaved, setTheme]);
 
+    // Focus nickname input when editing
+    useEffect(() => {
+        if (editingNickname && nicknameInputRef.current) {
+            nicknameInputRef.current.focus();
+            nicknameInputRef.current.select();
+        }
+    }, [editingNickname]);
+
     // Handle File Upload
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
@@ -63,64 +83,75 @@ export default function ProfileSettingsPage() {
             setSaving(true);
             const fileExt = file.name.split('.').pop();
             const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, file);
-
+                .upload(fileName, file);
             if (uploadError) throw uploadError;
 
-            const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-            setAvatarUrl(data.publicUrl);
-            setMsg({ type: 'success', text: 'Immagine caricata. Ricordati di salvare!' });
+            const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+            const newUrl = data.publicUrl;
+            setAvatarUrl(newUrl);
+
+            // Auto-save avatar
+            await supabase.from('profiles').upsert({
+                id: user?.id,
+                avatar_url: newUrl,
+                updated_at: new Date().toISOString()
+            });
+            await refreshProfile();
+            showToast('success', 'Foto aggiornata!');
         } catch (error: any) {
             console.error('Upload Error:', error);
-            setMsg({ type: 'error', text: 'Errore durante il caricamento immagine.' });
+            showToast('error', 'Errore caricamento foto.');
         } finally {
             setSaving(false);
         }
     };
 
-    // Handle Save Profile
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
+    // Save nickname
+    const saveNickname = async () => {
+        const clean = DOMPurify.sanitize(nickname.trim());
+        if (!clean || clean.length < 3) {
+            showToast('error', 'Il nickname deve avere almeno 3 caratteri.');
+            return;
+        }
         setSaving(true);
-        setMsg(null);
-
         try {
-            // Persist theme selection
-            persistTheme(selectedTheme);
-
-            // Sanitization: Clean the nickname to prevent XSS
-            const cleanNickname = DOMPurify.sanitize(nickname.trim());
-
-            const { error } = await supabase
-                .from('profiles')
-                .upsert({
-                    id: user?.id,
-                    email: user?.email,
-                    nickname: cleanNickname,
-                    avatar_url: avatarUrl,
-                    updated_at: new Date().toISOString()
-                });
-
-            if (error) throw error;
-
+            await supabase.from('profiles').upsert({
+                id: user?.id,
+                email: user?.email,
+                nickname: clean,
+                updated_at: new Date().toISOString()
+            });
             await refreshProfile();
-            setHasSaved(true);
-            setShowSuccess(true);
-            setTimeout(() => {
-                setShowSuccess(false);
-                setHasSaved(false);
-            }, 2000);
+            setEditingNickname(false);
+            showToast('success', 'Nickname salvato!');
         } catch (err: any) {
-            console.error(err);
-            setMsg({ type: 'error', text: `Errore: ${err.message || 'Salvataggio fallito'}` });
+            showToast('error', err.message || 'Errore salvataggio');
         } finally {
             setSaving(false);
         }
     };
+
+    // Save theme
+    const selectTheme = (t: 'light' | 'dark' | 'system') => {
+        hapticLight();
+        setSelectedTheme(t);
+        setTheme(t);
+        persistTheme(t);
+        setHasSaved(true);
+        setShowThemeSelector(false);
+    };
+
+    const showToast = (type: 'success' | 'error', text: string) => {
+        setMsg({ type, text });
+        setTimeout(() => setMsg(null), 2500);
+    };
+
+    // Theme display name
+    const themeLabel = selectedTheme === 'light' ? 'Chiaro' : selectedTheme === 'dark' ? 'Scuro' : 'Automatico';
+    const ThemeIcon = selectedTheme === 'light' ? Sun : selectedTheme === 'dark' ? Moon : Monitor;
 
     // Deletion
     const handleDeleteAccount = () => {
@@ -131,14 +162,10 @@ export default function ProfileSettingsPage() {
     const confirmDeleteAccount = async () => {
         setIsDeleting(true);
         setDeleteError(null);
-
         const result = await deleteUserAccount();
-
         if (result.success) {
-            // Account deleted successfully, redirect to home
             navigate('/', { replace: true });
         } else {
-            // Show error and allow retry
             setDeleteError(result.error || 'Errore durante l\'eliminazione');
             setIsDeleting(false);
         }
@@ -146,167 +173,195 @@ export default function ProfileSettingsPage() {
 
     if (loading) return (
         <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
         </div>
     );
 
     return (
         <div className="min-h-screen bg-[var(--background)] pb-28 transition-colors duration-300">
 
-            {/* Header */}
+            {/* ─── Header ─── */}
             <header className="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md pt-safe">
                 <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        className="w-10 h-10 p-0 rounded-full"
+                    <button
                         onClick={() => navigate('/profile')}
-                        icon={<ArrowLeft className="w-5 h-5 text-[var(--foreground)]" />}
-                    />
-                    <h1 className="text-[17px] font-bold text-[var(--foreground)]">Impostazioni Profilo</h1>
+                        className="w-10 h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] flex items-center justify-center"
+                    >
+                        <ArrowLeft className="w-5 h-5 text-[var(--foreground)]" />
+                    </button>
+                    <h1 className="text-[17px] font-bold text-[var(--foreground)]">Impostazioni</h1>
                     <div className="w-10" />
                 </div>
             </header>
 
-            <div className="max-w-md mx-auto px-5 pt-8">
+            <div className="max-w-md mx-auto px-4 pt-4">
 
-                {/* Avatar Section */}
-                <div className="flex flex-col items-center mb-10">
-                    <div
-                        className="relative cursor-pointer group"
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <div className="w-28 h-28 rounded-[32px] bg-[var(--card)] shadow-lg overflow-hidden transition-all group-hover:shadow-xl group-active:scale-95">
-                            {avatarUrl ? (
-                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl bg-slate-100 dark:bg-slate-700">👤</div>
-                            )}
-                        </div>
-
-                        <div className="absolute -bottom-1 -right-1 w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 border-[3px] border-[var(--background)] transition-all group-hover:scale-110">
-                            <Pencil className="w-4 h-4 text-white" />
-                        </div>
-                    </div>
-
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                    />
-                    <p className="text-[13px] text-[var(--foreground)] opacity-50 mt-4 font-medium">Tocca per cambiare foto</p>
-                </div>
-
-                {/* Message Toast */}
+                {/* ─── Toast ─── */}
                 {msg && (
-                    <div className={`mb-6 p-4 rounded-2xl text-[14px] text-center font-semibold flex items-center justify-center gap-2 ${msg.type === 'success'
-                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800'
-                        : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800'
+                    <div className={`mb-4 p-3 rounded-2xl text-[13px] text-center font-semibold flex items-center justify-center gap-2 animate-in fade-in duration-200 ${msg.type === 'success'
+                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
                         }`}>
                         {msg.type === 'success' ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                         {msg.text}
                     </div>
                 )}
 
-                {/* Theme Selector */}
-                <div className="bg-[var(--card)] rounded-2xl p-5 shadow-sm border border-[var(--card-border)] mb-6">
-                    <label className="block text-[11px] font-bold text-[var(--foreground)] opacity-50 uppercase tracking-widest mb-4">
-                        Tema
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                        <Button
-                            variant={selectedTheme === 'light' ? 'primary' : 'secondary'}
-                            size="sm"
-                            className="flex-col h-auto py-3 gap-2"
-                            onClick={() => { hapticLight(); setSelectedTheme('light'); setTheme('light'); }}
-                            icon={<Sun className="w-5 h-5" />}
-                        >
-                            Chiaro
-                        </Button>
-                        <Button
-                            variant={selectedTheme === 'dark' ? 'primary' : 'secondary'}
-                            size="sm"
-                            className="flex-col h-auto py-3 gap-2"
-                            onClick={() => { hapticLight(); setSelectedTheme('dark'); setTheme('dark'); }}
-                            icon={<Moon className="w-5 h-5" />}
-                        >
-                            Scuro
-                        </Button>
-                        <Button
-                            variant={selectedTheme === 'system' ? 'primary' : 'secondary'}
-                            size="sm"
-                            className="flex-col h-auto py-3 gap-2"
-                            onClick={() => { hapticLight(); setSelectedTheme('system'); setTheme('system'); }}
-                            icon={<Monitor className="w-5 h-5" />}
-                        >
-                            Auto
-                        </Button>
-                    </div>
+                {/* ─── PROFILO ─── */}
+                <SectionLabel>Profilo</SectionLabel>
+                <div className="bg-[var(--card)] rounded-2xl border border-[var(--card-border)] overflow-hidden mb-6">
+                    {/* Avatar Row */}
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center gap-4 px-4 py-3.5 active:bg-slate-50 dark:active:bg-white/5 transition-colors"
+                    >
+                        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-[var(--card-border)]">
+                            <UserAvatar src={avatarUrl} name={nickname || 'U'} size="md" />
+                        </div>
+                        <div className="flex-1 text-left">
+                            <span className="text-[15px] font-semibold text-[var(--foreground)]">Foto profilo</span>
+                            <p className="text-[12px] text-[var(--foreground)] opacity-40">Tocca per cambiare</p>
+                        </div>
+                        {saving ? (
+                            <Loader2 className="w-4 h-4 text-[#00B1FF] animate-spin" />
+                        ) : (
+                            <Pencil className="w-4 h-4 text-[var(--foreground)] opacity-30" />
+                        )}
+                    </button>
+
+                    <Divider />
+
+                    {/* Nickname Row */}
+                    {editingNickname ? (
+                        <div className="flex items-center gap-3 px-4 py-3.5">
+                            <User className="w-5 h-5 text-[var(--foreground)] opacity-40 flex-shrink-0" />
+                            <input
+                                ref={nicknameInputRef}
+                                type="text"
+                                value={nickname}
+                                onChange={e => setNickname(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') saveNickname(); if (e.key === 'Escape') setEditingNickname(false); }}
+                                className="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--foreground)] border-b-2 border-[#00B1FF] py-1"
+                                placeholder="Nickname"
+                                minLength={3}
+                                maxLength={20}
+                            />
+                            <button onClick={saveNickname} className="p-1.5 rounded-full bg-[#00B1FF] text-white">
+                                <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => { setEditingNickname(false); setNickname(profile?.nickname || ''); }} className="p-1.5 rounded-full bg-slate-200 dark:bg-slate-700 text-[var(--foreground)]">
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    ) : (
+                        <SettingsRow
+                            icon={<User className="w-5 h-5" />}
+                            label="Nickname"
+                            value={nickname || 'Non impostato'}
+                            onClick={() => setEditingNickname(true)}
+                        />
+                    )}
                 </div>
 
-                {/* Nickname Input */}
-                <form onSubmit={handleSave} className="space-y-8">
-                    <div className="bg-[var(--card)] rounded-2xl p-5 shadow-sm border border-[var(--card-border)]">
-                        <label className="block text-[11px] font-bold text-[var(--foreground)] opacity-50 uppercase tracking-widest mb-3">
-                            Nickname
-                        </label>
-                        <input
-                            type="text"
-                            value={nickname}
-                            onChange={(e) => setNickname(e.target.value)}
-                            className="w-full px-0 py-2 bg-transparent border-b-2 border-slate-200 dark:border-slate-600 focus:border-emerald-400 outline-none transition-all text-[18px] font-bold text-[var(--foreground)] placeholder-slate-400"
-                            placeholder="Come vuoi chiamarti?"
-                            required
-                            minLength={3}
-                            maxLength={20}
-                        />
-                        <p className="text-[12px] text-[var(--foreground)] opacity-50 mt-3">
-                            Questo nome sarà visibile nelle classifiche.
-                        </p>
-                    </div>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                />
 
-                    {/* Save Button */}
-                    <Button
-                        type="submit"
-                        variant="primary"
-                        size="lg"
-                        fullWidth
-                        isLoading={saving}
-                        icon={showSuccess ? <Check className="w-5 h-5" /> : undefined}
-                    >
-                        {showSuccess ? 'Salvato!' : 'Salva modifiche'}
-                    </Button>
-                </form>
+                {/* ─── GENERALE ─── */}
+                <SectionLabel>Generale</SectionLabel>
+                <div className="bg-[var(--card)] rounded-2xl border border-[var(--card-border)] overflow-hidden mb-6">
+                    {/* Theme Row */}
+                    <SettingsRow
+                        icon={<ThemeIcon className="w-5 h-5" />}
+                        label="Tema"
+                        value={themeLabel}
+                        onClick={() => setShowThemeSelector(!showThemeSelector)}
+                    />
 
-                {/* Danger Zone */}
-                <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
-                    <h3 className="text-[12px] font-bold text-[var(--foreground)] opacity-50 uppercase tracking-widest mb-4">
-                        Zona pericolo
-                    </h3>
-                    <Button
-                        variant="outline"
-                        fullWidth
-                        onClick={handleDeleteAccount}
-                        className="border-rose-200 dark:border-rose-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 font-bold"
-                    >
-                        Elimina account
-                    </Button>
-                    <Button
-                        variant="outline"
-                        fullWidth
-                        className="mt-4"
+                    {/* Theme Selector (expandable) */}
+                    {showThemeSelector && (
+                        <div className="px-4 pb-4 pt-1 flex gap-2">
+                            {([
+                                { key: 'light' as const, label: 'Chiaro', Icon: Sun },
+                                { key: 'dark' as const, label: 'Scuro', Icon: Moon },
+                                { key: 'system' as const, label: 'Auto', Icon: Monitor },
+                            ]).map(({ key, label, Icon }) => (
+                                <button
+                                    key={key}
+                                    onClick={() => selectTheme(key)}
+                                    className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all text-[12px] font-bold ${selectedTheme === key
+                                            ? 'bg-[#00B1FF] text-white shadow-lg shadow-[#00B1FF]/30'
+                                            : 'bg-slate-100 dark:bg-[#111] text-[var(--foreground)] opacity-60 hover:opacity-100'
+                                        }`}
+                                >
+                                    <Icon className="w-5 h-5" />
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* ─── CONTATTO E AIUTO ─── */}
+                <SectionLabel>Contatto e aiuto</SectionLabel>
+                <div className="bg-[var(--card)] rounded-2xl border border-[var(--card-border)] overflow-hidden mb-6">
+                    <SettingsRow
+                        icon={<Mail className="w-5 h-5" />}
+                        label="Contattaci via Email"
+                        external
+                        onClick={() => window.open('mailto:supporto@idoneo.ai', '_blank')}
+                    />
+                    <Divider />
+                    <SettingsRow
+                        icon={<FileText className="w-5 h-5" />}
+                        label="Termini e Condizioni"
+                        external
+                        onClick={() => window.open('https://idoneo.ai/legal/terms', '_blank')}
+                    />
+                    <Divider />
+                    <SettingsRow
+                        icon={<Shield className="w-5 h-5" />}
+                        label="Privacy Policy"
+                        external
+                        onClick={() => window.open('https://idoneo.ai/legal/privacy', '_blank')}
+                    />
+                </div>
+
+                {/* ─── SIGN OUT ─── */}
+                <div className="bg-[var(--card)] rounded-2xl border border-[var(--card-border)] overflow-hidden mb-8">
+                    <button
                         onClick={async () => {
-                            if (window.confirm('Vuoi davvero ripristinare il tutorial iniziale?')) {
-                                await resetOnboarding();
-                                alert('Tutorial ripristinato! Torna alla Home per vederlo.');
-                                navigate('/');
-                            }
+                            await supabase.auth.signOut();
+                            navigate('/', { replace: true });
                         }}
+                        className="w-full flex items-center gap-4 px-4 py-4 active:bg-slate-50 dark:active:bg-white/5 transition-colors"
                     >
-                        Ripristina Tutorial
-                    </Button>
+                        <LogOut className="w-5 h-5 text-[var(--foreground)] opacity-40" />
+                        <span className="text-[15px] font-semibold text-[var(--foreground)]">Esci</span>
+                    </button>
+                </div>
+
+                {/* ─── Danger Zone (subtle) ─── */}
+                <p className="text-center text-[12px] text-[var(--foreground)] opacity-30 mb-2">
+                    Per eliminare il tuo account e tutti i dati,
+                </p>
+                <button
+                    onClick={handleDeleteAccount}
+                    className="block mx-auto text-[12px] font-bold text-rose-500 hover:text-rose-400 transition-colors mb-12"
+                >
+                    tocca qui
+                </button>
+
+                {/* ─── Footer ─── */}
+                <div className="flex flex-col items-center gap-1 pb-8">
+                    <span className="text-[15px] font-black text-[var(--foreground)] opacity-20">Idoneo</span>
+                    <span className="text-[11px] text-[var(--foreground)] opacity-15 font-medium">
+                        Versione 1.0.0
+                    </span>
                 </div>
 
             </div>
@@ -320,5 +375,47 @@ export default function ProfileSettingsPage() {
                 error={deleteError}
             />
         </div>
+    );
+}
+
+// =============================================================================
+// HELPER COMPONENTS
+// =============================================================================
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+    return (
+        <p className="text-[11px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-widest px-1 mb-2 mt-2">
+            {children}
+        </p>
+    );
+}
+
+function Divider() {
+    return <div className="h-px bg-[var(--card-border)] mx-4" />;
+}
+
+function SettingsRow({ icon, label, value, external, onClick }: {
+    icon: React.ReactNode;
+    label: string;
+    value?: string;
+    external?: boolean;
+    onClick?: () => void;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            className="w-full flex items-center gap-4 px-4 py-4 active:bg-slate-50 dark:active:bg-white/5 transition-colors"
+        >
+            <span className="text-[var(--foreground)] opacity-40 flex-shrink-0">{icon}</span>
+            <span className="flex-1 text-left text-[15px] font-semibold text-[var(--foreground)]">{label}</span>
+            {value && (
+                <span className="text-[14px] text-[var(--foreground)] opacity-40 font-medium truncate max-w-[140px]">{value}</span>
+            )}
+            {external ? (
+                <ExternalLink className="w-4 h-4 text-[var(--foreground)] opacity-25 flex-shrink-0" />
+            ) : (
+                <ChevronRight className="w-4 h-4 text-[var(--foreground)] opacity-25 flex-shrink-0" />
+            )}
+        </button>
     );
 }
