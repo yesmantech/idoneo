@@ -137,7 +137,7 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
 // =============================================================================
 // CAROUSEL SECTION (Desktop: Grid / Mobile: Carousel)
 // =============================================================================
-export default function ConcorsiSection({ title, contests, icon: IconOverride }: { title: string; contests: Category[]; icon?: React.ComponentType<any> }) {
+export default function ConcorsiSection({ title, contests, icon: IconOverride, iconBg, iconColor }: { title: string; contests: Category[]; icon?: React.ComponentType<any>; iconBg?: string; iconColor?: string }) {
     const SectionIcon = IconOverride || Sparkles;
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -155,8 +155,8 @@ export default function ConcorsiSection({ title, contests, icon: IconOverride }:
             {/* Header Row */}
             <div className="flex justify-between items-center px-4 lg:px-8 mb-4 lg:mb-6">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-[12px] bg-[#E0F2FE] dark:bg-cyan-900/30 flex items-center justify-center">
-                        <SectionIcon className="w-4 h-4 lg:w-5 lg:h-5 text-[#00B1FF]" fill={IconOverride ? undefined : '#00B1FF'} />
+                    <div className={`w-9 h-9 lg:w-10 lg:h-10 rounded-[12px] flex items-center justify-center ${iconBg || 'bg-[#E0F2FE] dark:bg-cyan-900/30'}`}>
+                        <SectionIcon className={`w-4 h-4 lg:w-5 lg:h-5 ${iconColor || 'text-[#00B1FF]'}`} fill={IconOverride ? undefined : (iconColor ? undefined : '#00B1FF')} />
                     </div>
                     <h2 className="text-[17px] lg:text-xl font-bold text-[var(--foreground)] leading-none">
                         {title}

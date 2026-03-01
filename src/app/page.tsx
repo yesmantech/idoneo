@@ -137,6 +137,8 @@ export default function HomePage() {
                 title="Aggiunti di recente"
                 contests={recentCategories}
                 icon={Plus}
+                iconBg="bg-emerald-50 dark:bg-emerald-900/30"
+                iconColor="text-emerald-500"
               />
             </Reveal>
           </section>
