@@ -122,7 +122,7 @@ export default function StreakCard() {
                         Streak Attuale
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
-                        <span style={{ fontSize: 26, lineHeight: 1 }}>🔥</span>
+                        <img src="/icons/flame-orange.png" alt="streak" style={{ width: 28, height: 28 }} />
                         <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakCurrent} {streakCurrent === 1 ? 'giorno' : 'giorni'}
                         </span>
@@ -135,7 +135,7 @@ export default function StreakCard() {
                         Miglior Streak
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
-                        <span style={{ fontSize: 26, lineHeight: 1 }}>🟣</span>
+                        <img src="/icons/flame-purple.png" alt="best" style={{ width: 28, height: 28 }} />
                         <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakMax} {streakMax === 1 ? 'giorno' : 'giorni'}
                         </span>
