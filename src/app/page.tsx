@@ -14,7 +14,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-
+import { PlusCircle } from "lucide-react";
 import { getCategories, getAllSearchableItems, type Category, type SearchItem } from "../lib/data";
 import { useAuth } from "@/context/AuthContext";
 import { useOnboarding } from "@/context/OnboardingProvider";
@@ -136,6 +136,7 @@ export default function HomePage() {
               <ConcorsiSection
                 title="Aggiunti di recente"
                 contests={recentCategories}
+                icon={PlusCircle}
               />
             </Reveal>
           </section>
