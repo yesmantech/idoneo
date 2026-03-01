@@ -139,21 +139,13 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                         Non hai ancora amici. <br />
                         Cerca per nickname o invitali!
                     </p>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() => setShowAddModal(true)}
-                            className="px-5 py-2.5 bg-white dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
-                        >
-                            Cerca
-                        </button>
-                        <button
-                            onClick={handleInvite}
-                            className="px-5 py-2.5 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all text-sm"
-                        >
-                            <Gift className="w-4 h-4" />
-                            Invita
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleInvite}
+                        className="px-5 py-2.5 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all text-sm"
+                    >
+                        <Gift className="w-4 h-4" />
+                        Invita
+                    </button>
                 </div>
             ) : (
                 // Friends List
