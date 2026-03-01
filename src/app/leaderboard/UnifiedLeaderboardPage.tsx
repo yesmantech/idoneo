@@ -298,9 +298,9 @@ export default function UnifiedLeaderboardPage() {
                         </div>
                         <button
                             onClick={handleOpenInfo}
-                            className="w-10 h-10 flex items-center justify-center hover:opacity-70 transition-opacity"
+                            className="w-9 h-9 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <Info className="w-[22px] h-[22px] text-[var(--foreground)] opacity-30" />
+                            <span className="text-[15px] font-semibold text-[var(--foreground)] opacity-30 select-none" style={{ marginTop: -1 }}>?</span>
                         </button>
                     </div>
 
@@ -317,9 +317,9 @@ export default function UnifiedLeaderboardPage() {
                         </div>
                         <button
                             onClick={handleOpenInfo}
-                            className="w-10 h-10 flex items-center justify-center hover:opacity-70 transition-opacity"
+                            className="w-9 h-9 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <Info className="w-[22px] h-[22px] text-[var(--foreground)] opacity-30" />
+                            <span className="text-[15px] font-semibold text-[var(--foreground)] opacity-30 select-none" style={{ marginTop: -1 }}>?</span>
                         </button>
                     </div>
 
