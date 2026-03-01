@@ -37,6 +37,7 @@ import BandoDetailPage from './app/bandi/BandoDetailPage';
 import BandiWatchlistPage from './app/bandi/BandiWatchlistPage';
 import BandiAlertsPage from './app/bandi/alerts/page';
 import FlamesDemoPage from './app/demo/flames/page';
+import Flame3DPage from './app/demo/flame-3d/page';
 import IconsDemoPage from './app/demo/icons/page';
 
 // ============================================================================
@@ -247,6 +248,7 @@ export default function App() {
 
                                                     {/* Demo Pages */}
                                                     <Route path="/demo/flames" element={<FlamesDemoPage />} />
+                                                    <Route path="/demo/flame-3d" element={<Flame3DPage />} />
                                                     <Route path="/demo/icons" element={<IconsDemoPage />} />
 
                                                     {/* Skitla Landing Page */}
