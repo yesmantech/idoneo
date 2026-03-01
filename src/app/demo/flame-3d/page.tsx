@@ -259,9 +259,9 @@ export default function Flame3DPage() {
                         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
                         <motion.img
-                            src="/icons/flame-purple.png"
+                            src="/icons/flame-3d.png"
                             alt="Flame"
-                            style={{ width: 200, height: 'auto' }}
+                            style={{ width: 260, height: 'auto', imageRendering: 'auto' }}
                             initial={{ scale: 0.3, opacity: 0 }}
                             animate={ignited
                                 ? { scale: [1, 1.04, 1], opacity: 1 }
