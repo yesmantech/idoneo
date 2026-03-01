@@ -371,7 +371,7 @@ function MessageActions({ text }: { text: string }) {
     const reactionSpring = { type: 'spring' as const, stiffness: 500, damping: 15 };
 
     return (
-        <div className="flex items-center gap-3 mt-1.5 text-gray-400 dark:text-gray-500">
+        <div className="group/actions flex items-center gap-2.5 mt-1 text-gray-400 dark:text-gray-500 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200 max-h-0 group-hover/msg:max-h-10 overflow-hidden">
             {/* Floating Feedback Toast */}
             <AnimatePresence>
                 {toastMessage && (
@@ -582,13 +582,13 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     });
 
     const isStreaming = status === 'streaming' || status === 'submitted';
-    
+
     // Solo se stiamo aspettando la prima risposta, NON se l'assistant sta già scrivendo
     const isWaitingForResponse = isStreaming && (() => {
         const lastMsg = messages[messages.length - 1];
         if (!lastMsg) return true;
         if (lastMsg.role === 'user') return true;
-        
+
         // Se l'ultimo messaggio è dell'assistant, mostra i pallini SOLO se è completamente vuoto
         // (niente testo e niente tool calls finora)
         const hasText = getMessageText(lastMsg).length > 0;
@@ -682,7 +682,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-4 pb-32 pt-2 space-y-6"
+                className="flex-1 overflow-y-auto px-4 pb-32 pt-2 space-y-[2px]"
             >
                 <AnimatePresence initial={false}>
                     {(messages || []).map((m: any) => {
@@ -704,12 +704,12 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                                 transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
                                 className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
-                                <div className={`max-w-[85%] ${m.role === 'user'
-                                    ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
-                                    : 'bg-[#F2F2F7] dark:bg-[#1C1C1E] text-black dark:text-white rounded-[20px] rounded-bl-[12px] px-4 py-3 pb-2.5'
+                                <div className={`max-w-[80%] group/msg ${m.role === 'user'
+                                    ? 'bg-[#007AFF] text-white rounded-[18px] rounded-br-[4px] px-[14px] py-[8px]'
+                                    : 'bg-[#E9E9EB] dark:bg-[#262628] text-black dark:text-white rounded-[18px] rounded-bl-[4px] px-[14px] py-[8px]'
                                     }`}>
                                     {textContent && (
-                                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                                        <div className={`prose prose-[15px] max-w-none prose-p:leading-snug prose-p:my-1 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 ${m.role === 'user' ? 'prose-invert' : 'dark:prose-invert'}`}>
                                             <ReactMarkdown>{textContent}</ReactMarkdown>
                                         </div>
                                     )}
@@ -785,7 +785,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex gap-3 justify-start"
                     >
-                        <div className="bg-[#F2F2F7] dark:bg-[#1C1C1E] rounded-[20px] rounded-bl-[12px] px-4 py-3 flex items-center gap-2">
+                        <div className="bg-[#E9E9EB] dark:bg-[#262628] rounded-[18px] rounded-bl-[4px] px-4 py-3 flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce"></span>
