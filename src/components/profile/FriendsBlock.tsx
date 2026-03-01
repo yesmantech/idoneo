@@ -130,33 +130,30 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
                     ))}
                 </div>
             ) : friends.length === 0 ? (
-                // Empty State — Praktika-style vibrant card
-                <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-[#8B5CF6] via-[#A855F7] to-[#C084FC] px-6 pt-6 pb-5">
-                    {/* Decorative blurred orbs */}
-                    <div className="absolute -top-6 -left-6 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
-                    <div className="absolute -bottom-8 -right-8 w-36 h-36 bg-purple-400/20 rounded-full blur-3xl" />
-
-                    {/* 3D-style person + plus icon */}
-                    <div className="absolute top-4 right-4 w-16 h-16">
-                        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full drop-shadow-lg">
-                            <circle cx="28" cy="20" r="10" fill="white" fillOpacity="0.85" />
-                            <path d="M12 52c0-8.8 7.2-16 16-16s16 7.2 16 16" stroke="white" strokeOpacity="0.85" strokeWidth="5" strokeLinecap="round" fill="none" />
-                            <circle cx="50" cy="36" r="12" fill="#38BDF8" />
-                            <path d="M50 30v12M44 36h12" stroke="white" strokeWidth="3" strokeLinecap="round" />
-                        </svg>
+                // Empty State with CTA
+                <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50 dark:bg-[#111]/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                    <div className="w-16 h-16 rounded-full bg-[#E0F2FE] dark:bg-blue-900/20 flex items-center justify-center mb-3">
+                        <Users className="w-7 h-7 text-[#00B1FF]" />
                     </div>
-
-                    <p className="text-[26px] font-extrabold italic text-white leading-[1.15] mb-1 max-w-[72%]">
-                        Condividi Idoneo con i tuoi amici per studiare insieme!
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 px-4">
+                        Non hai ancora amici. <br />
+                        Cerca per nickname o invitali!
                     </p>
-                    <div className="h-4" />
-
-                    <button
-                        onClick={handleInvite}
-                        className="w-full py-4 bg-white/90 backdrop-blur-sm text-black font-extrabold rounded-full text-[17px] shadow-lg hover:bg-white active:scale-[0.98] transition-all"
-                    >
-                        Invita amici
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="px-5 py-2.5 bg-white dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+                        >
+                            Cerca
+                        </button>
+                        <button
+                            onClick={handleInvite}
+                            className="px-5 py-2.5 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all text-sm"
+                        >
+                            <Gift className="w-4 h-4" />
+                            Invita
+                        </button>
+                    </div>
                 </div>
             ) : (
                 // Friends List
