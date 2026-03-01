@@ -36,7 +36,7 @@ import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { xpService } from '@/lib/xpService';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingProvider';
-import { Info, Trophy, Zap, Clock, HelpCircle } from 'lucide-react';
+import { Info, Trophy, Zap, Clock } from 'lucide-react';
 
 import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/LeaderboardSelector';
 import LeaderboardView from '@/components/leaderboard/LeaderboardView';
@@ -298,9 +298,9 @@ export default function UnifiedLeaderboardPage() {
                         </div>
                         <button
                             onClick={handleOpenInfo}
-                            className="w-10 h-10 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
+                            className="w-10 h-10 flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <HelpCircle className="w-[18px] h-[18px] text-[var(--foreground)] opacity-40" />
+                            <Info className="w-[22px] h-[22px] text-[var(--foreground)] opacity-30" />
                         </button>
                     </div>
 
@@ -317,9 +317,9 @@ export default function UnifiedLeaderboardPage() {
                         </div>
                         <button
                             onClick={handleOpenInfo}
-                            className="w-10 h-10 rounded-full border border-[var(--card-border)] bg-[var(--card)] flex items-center justify-center hover:opacity-70 transition-opacity"
+                            className="w-10 h-10 flex items-center justify-center hover:opacity-70 transition-opacity"
                         >
-                            <HelpCircle className="w-[18px] h-[18px] text-[var(--foreground)] opacity-40" />
+                            <Info className="w-[22px] h-[22px] text-[var(--foreground)] opacity-30" />
                         </button>
                     </div>
 
