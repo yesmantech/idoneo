@@ -682,7 +682,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-4 pb-32 pt-2 space-y-[2px]"
+                className="flex-1 overflow-y-auto px-3 pb-32 pt-2 space-y-[6px]"
             >
                 <AnimatePresence initial={false}>
                     {(messages || []).map((m: any) => {
@@ -704,12 +704,15 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                                 transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
                                 className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
-                                <div className={`max-w-[80%] group/msg ${m.role === 'user'
-                                    ? 'bg-[#007AFF] text-white rounded-[18px] rounded-br-[4px] px-[14px] py-[8px]'
-                                    : 'bg-[#E9E9EB] dark:bg-[#262628] text-black dark:text-white rounded-[18px] rounded-bl-[4px] px-[14px] py-[8px]'
-                                    }`}>
+                                <div
+                                    className={`max-w-[85%] group/msg ${m.role === 'user'
+                                        ? 'bubble-tail-right bg-[#34C759] text-white rounded-[20px] rounded-br-[4px] px-[14px] py-[9px]'
+                                        : 'bubble-tail-left bg-[#E9E9EB] dark:bg-[#3A3A3C] text-black dark:text-white rounded-[20px] rounded-bl-[4px] px-[14px] py-[9px]'
+                                        }`}
+                                    style={{ '--bubble-color': m.role === 'user' ? '#34C759' : '' } as React.CSSProperties}
+                                >
                                     {textContent && (
-                                        <div className={`prose prose-[15px] max-w-none prose-p:leading-snug prose-p:my-1 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 ${m.role === 'user' ? 'prose-invert' : 'dark:prose-invert'}`}>
+                                        <div className={`prose prose-[15px] max-w-none prose-p:leading-snug prose-p:my-0.5 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0 ${m.role === 'user' ? 'prose-invert' : 'dark:prose-invert'}`}>
                                             <ReactMarkdown>{textContent}</ReactMarkdown>
                                         </div>
                                     )}
@@ -785,7 +788,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex gap-3 justify-start"
                     >
-                        <div className="bg-[#E9E9EB] dark:bg-[#262628] rounded-[18px] rounded-bl-[4px] px-4 py-3 flex items-center gap-2">
+                        <div className="bubble-tail-left bg-[#E9E9EB] dark:bg-[#3A3A3C] rounded-[20px] rounded-bl-[4px] px-4 py-3 flex items-center gap-2" style={{ '--bubble-color': '' } as React.CSSProperties}>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce"></span>
@@ -844,7 +847,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                             whileHover={{ scale: 0.96 }}
                             whileTap={{ scale: 0.9 }}
                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${inputValue.trim()
-                                ? 'bg-[#00B1FF] text-white hover:bg-[#009ee0]'
+                                ? 'bg-[#34C759] text-white hover:bg-[#2DB950]'
                                 : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
                                 }`}
                         >

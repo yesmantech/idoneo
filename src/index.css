@@ -458,3 +458,44 @@ a,
 .bottom-safe {
   bottom: env(safe-area-inset-bottom);
 }
+
+/* ===== iMessage Bubble Tails ===== */
+:root {
+  --bubble-ai-color: #E9E9EB;
+}
+
+.dark {
+  --bubble-ai-color: #3A3A3C;
+}
+
+.bubble-tail-right {
+  position: relative;
+}
+
+.bubble-tail-right::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -8px;
+  width: 16px;
+  height: 20px;
+  background: var(--bubble-color);
+  border-bottom-left-radius: 12px;
+  clip-path: polygon(0 0, 0% 100%, 100% 100%);
+}
+
+.bubble-tail-left {
+  position: relative;
+}
+
+.bubble-tail-left::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -8px;
+  width: 16px;
+  height: 20px;
+  background: var(--bubble-ai-color);
+  border-bottom-right-radius: 12px;
+  clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+}
