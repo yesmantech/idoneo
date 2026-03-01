@@ -180,14 +180,15 @@ export default function BandoDetailPage() {
                 {/* 3. INFO GRID (Glass Cards) */}
                 <div className="grid grid-cols-3 gap-3">
                     {(() => {
-                        const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(bando.category?.name); return (
+                        const { Icon: CatIcon, color: catColor, bg: catBg, bgLight: catBgLight } = getCategoryStyle(bando.category?.name); return (
                             <InfoTile
                                 icon={CatIcon}
                                 label="Categoria"
                                 value={bando.category?.name}
                                 delay={0.2}
-                                color={`text-[${catColor}]`}
-                                bg={`bg-[${catBg}]`}
+                                iconColor={catColor}
+                                iconBgLight={catBgLight}
+                                iconBgDark={catBg}
                             />
                         );
                     })()}
@@ -306,7 +307,7 @@ function DateBox({ label, date, color, icon: Icon }: { label: string, date?: str
     );
 }
 
-function InfoTile({ icon: Icon, label, value, delay, color, bg }: { icon: any, label: string, value?: string, delay: number, color: string, bg: string }) {
+function InfoTile({ icon: Icon, label, value, delay, color, bg, iconColor, iconBgLight, iconBgDark }: { icon: any, label: string, value?: string, delay: number, color?: string, bg?: string, iconColor?: string, iconBgLight?: string, iconBgDark?: string }) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -315,8 +316,11 @@ function InfoTile({ icon: Icon, label, value, delay, color, bg }: { icon: any, l
             className="flex flex-col items-center p-4 rounded-[24px] bg-white dark:bg-black/60 border border-slate-100 dark:border-white/5 shadow-soft text-center h-full min-h-[140px]"
         >
             <div className="flex-1 flex flex-col items-center justify-start pt-2">
-                <div className={`w-12 h-12 rounded-[18px] ${bg} ${color} flex items-center justify-center mb-3`}>
-                    <Icon className="w-6 h-6" />
+                <div
+                    className={`w-12 h-12 rounded-[18px] flex items-center justify-center mb-3 ${!iconColor ? `${bg || ''} ${color || ''}` : 'cat-icon-bg'}`}
+                    style={iconColor ? { '--cat-bg-light': iconBgLight, '--cat-bg-dark': iconBgDark, backgroundColor: iconBgLight, color: iconColor } as React.CSSProperties : undefined}
+                >
+                    <Icon className="w-6 h-6" style={iconColor ? { color: iconColor } : undefined} />
                 </div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{label}</p>
                 <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight line-clamp-2">

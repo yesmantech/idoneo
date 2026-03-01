@@ -82,9 +82,9 @@ export default function LeaderboardSelector({
         const q = [...activeQuizzes, ...otherQuizzes].find(x => x.id === currentSelection);
         if (q) {
             currentLabel = q.roleTitle || q.role?.title || q.title;
-            const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(q.category || q.title);
+            const { Icon: CatIcon, color: catColor, bg: catBg, bgLight: catBgLight } = getCategoryStyle(q.category || q.title);
             icon = (
-                <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ backgroundColor: catBg }}>
+                <div className="w-8 h-8 rounded-[10px] flex items-center justify-center cat-icon-bg" style={{ '--cat-bg-light': catBgLight, '--cat-bg-dark': catBg, backgroundColor: catBgLight } as React.CSSProperties}>
                     <CatIcon className="w-4 h-4" style={{ color: catColor }} />
                 </div>
             );
@@ -237,9 +237,9 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
                 }`}
         >
             {(() => {
-                const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(quiz.category || quiz.title); return (
-                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${isSelected ? '' : ''}`} style={{ backgroundColor: isSelected ? catBg : '#2C2C2E' }}>
-                        <CatIcon className="w-5 h-5" style={{ color: isSelected ? catColor : 'rgba(255,255,255,0.4)' }} />
+                const { Icon: CatIcon, color: catColor, bg: catBg, bgLight: catBgLight } = getCategoryStyle(quiz.category || quiz.title); return (
+                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center cat-icon-bg`} style={{ '--cat-bg-light': catBgLight, '--cat-bg-dark': isSelected ? catBg : '#2C2C2E', backgroundColor: isSelected ? catBgLight : '#f1f5f9' } as React.CSSProperties}>
+                        <CatIcon className="w-5 h-5" style={{ color: isSelected ? catColor : 'rgba(0,0,0,0.3)' }} />
                     </div>
                 );
             })()}

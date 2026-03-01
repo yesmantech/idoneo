@@ -458,3 +458,8 @@ a,
 .bottom-safe {
   bottom: env(safe-area-inset-bottom);
 }
+
+/* Category icon bg — light/dark adaptive */
+.dark .cat-icon-bg {
+  background-color: var(--cat-bg-dark) !important;
+}

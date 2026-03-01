@@ -93,8 +93,8 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                         {/* Header: Icon & Ente Name */}
                         <div className="flex items-start gap-3">
                             {(() => {
-                                const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(bando.category?.name); return (
-                                    <div className="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500" style={{ backgroundColor: catBg }}>
+                                const { Icon: CatIcon, color: catColor, bg: catBg, bgLight: catBgLight } = getCategoryStyle(bando.category?.name); return (
+                                    <div className="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 cat-icon-bg" style={{ '--cat-bg-light': catBgLight, '--cat-bg-dark': catBg, backgroundColor: catBgLight } as React.CSSProperties}>
                                         <CatIcon className="w-5 h-5" style={{ color: catColor }} />
                                     </div>
                                 );
@@ -200,9 +200,9 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
 
                         {/* Tags */}
                         {bando.category && (() => {
-                            const { Icon: CatIcon, color: catColor, bg: catBg } = getCategoryStyle(bando.category.name); return (
+                            const { Icon: CatIcon, color: catColor, bg: catBg, bgLight: catBgLight } = getCategoryStyle(bando.category.name); return (
                                 <div className="mt-3">
-                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold" style={{ backgroundColor: catBg, color: catColor }}>
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold cat-icon-bg" style={{ '--cat-bg-light': catBgLight, '--cat-bg-dark': catBg, backgroundColor: catBgLight, color: catColor } as React.CSSProperties}>
                                         <CatIcon className="w-3.5 h-3.5" style={{ color: catColor }} />
                                         {bando.category.name}
                                     </span>
