@@ -122,7 +122,17 @@ export default function StreakCard() {
                         Streak Attuale
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
-                        <img src="/icons/flame-orange.png" alt="streak" style={{ width: 36, height: 36 }} />
+                        <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+                            <defs>
+                                <radialGradient id="flameOrange" cx="50%" cy="60%" r="50%">
+                                    <stop offset="0%" stopColor="#FFD54F" />
+                                    <stop offset="50%" stopColor="#FF9800" />
+                                    <stop offset="100%" stopColor="#E65100" />
+                                </radialGradient>
+                            </defs>
+                            <path d="M32 4C32 4 18 20 18 36C18 44.8 24.3 52 32 56C39.7 52 46 44.8 46 36C46 20 32 4 32 4Z" fill="url(#flameOrange)" />
+                            <path d="M32 18C32 18 25 28 25 38C25 43.5 28 48 32 50C36 48 39 43.5 39 38C39 28 32 18 32 18Z" fill="#FFE082" opacity="0.6" />
+                        </svg>
                         <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakCurrent} {streakCurrent === 1 ? 'giorno' : 'giorni'}
                         </span>
@@ -135,7 +145,17 @@ export default function StreakCard() {
                         Miglior Streak
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
-                        <img src="/icons/flame-purple.png" alt="best" style={{ width: 36, height: 36 }} />
+                        <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+                            <defs>
+                                <radialGradient id="flamePurple" cx="50%" cy="60%" r="50%">
+                                    <stop offset="0%" stopColor="#CE93D8" />
+                                    <stop offset="50%" stopColor="#9C27B0" />
+                                    <stop offset="100%" stopColor="#6A1B9A" />
+                                </radialGradient>
+                            </defs>
+                            <path d="M32 4C32 4 18 20 18 36C18 44.8 24.3 52 32 56C39.7 52 46 44.8 46 36C46 20 32 4 32 4Z" fill="url(#flamePurple)" />
+                            <path d="M32 18C32 18 25 28 25 38C25 43.5 28 48 32 50C36 48 39 43.5 39 38C39 28 32 18 32 18Z" fill="#E1BEE7" opacity="0.5" />
+                        </svg>
                         <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakMax} {streakMax === 1 ? 'giorno' : 'giorni'}
                         </span>
