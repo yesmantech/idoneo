@@ -251,7 +251,7 @@ export default function Flame3DPage() {
                         className="absolute inset-0 flex items-center justify-center z-10"
                         style={{
                             filter: ignited
-                                ? 'drop-shadow(0 0 40px rgba(168,85,247,0.7)) drop-shadow(0 0 80px rgba(124,58,237,0.3))'
+                                ? 'drop-shadow(0 0 20px rgba(168,85,247,0.4))'
                                 : 'grayscale(0.8) brightness(0.3)',
                             transition: 'filter 0.8s ease',
                         }}
