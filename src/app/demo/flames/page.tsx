@@ -1,19 +1,20 @@
 import React from 'react';
-import { AnimatedFlame, FlameTier } from '@/components/gamification/AnimatedFlame';
 import { motion } from 'framer-motion';
 
+type FlameTier = 'bronze' | 'silver' | 'gold' | 'emerald' | 'sapphire' | 'diamond';
+
 /**
- * Demo Page to preview all flame tiers
+ * Demo Page to preview all flame tiers (using 2D PNG icons)
  * Access at: /demo/flames
  */
 export default function FlamesDemoPage() {
-    const tiers: { tier: FlameTier; streak: number; label: string }[] = [
-        { tier: 'bronze', streak: 1, label: '1-6 Giorni' },
-        { tier: 'silver', streak: 7, label: '1 Settimana' },
-        { tier: 'gold', streak: 14, label: '2 Settimane' },
-        { tier: 'emerald', streak: 30, label: '1 Mese' },
-        { tier: 'sapphire', streak: 60, label: '2 Mesi' },
-        { tier: 'diamond', streak: 100, label: '100+ Giorni' },
+    const tiers: { tier: FlameTier; streak: number; label: string; icon: string }[] = [
+        { tier: 'bronze', streak: 1, label: '1-6 Giorni', icon: '/icons/flame-bronze.png' },
+        { tier: 'silver', streak: 7, label: '1 Settimana', icon: '/icons/flame-silver.png' },
+        { tier: 'gold', streak: 14, label: '2 Settimane', icon: '/icons/flame-gold.png' },
+        { tier: 'emerald', streak: 30, label: '1 Mese', icon: '/icons/flame-emerald.png' },
+        { tier: 'sapphire', streak: 60, label: '2 Mesi', icon: '/icons/flame-sapphire.png' },
+        { tier: 'diamond', streak: 100, label: '100+ Giorni', icon: '/icons/flame-diamond.png' },
     ];
 
     const tierBgColors: Record<FlameTier, string> = {
@@ -32,6 +33,15 @@ export default function FlamesDemoPage() {
         emerald: 'text-emerald-400',
         sapphire: 'text-blue-400',
         diamond: 'text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400',
+    };
+
+    const tierGlow: Record<FlameTier, string> = {
+        bronze: 'drop-shadow(0 0 20px rgba(205,127,50,0.4))',
+        silver: 'drop-shadow(0 0 20px rgba(192,192,192,0.4))',
+        gold: 'drop-shadow(0 0 20px rgba(255,215,0,0.5))',
+        emerald: 'drop-shadow(0 0 20px rgba(80,200,120,0.5))',
+        sapphire: 'drop-shadow(0 0 20px rgba(30,144,255,0.5))',
+        diamond: 'drop-shadow(0 0 25px rgba(255,255,255,0.4))',
     };
 
     return (
@@ -57,7 +67,18 @@ export default function FlamesDemoPage() {
                                 border backdrop-blur-sm
                             `}
                         >
-                            <AnimatedFlame size={120} tier={t.tier} />
+                            <motion.img
+                                src={t.icon}
+                                alt={`${t.tier} flame`}
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    objectFit: 'contain',
+                                    filter: tierGlow[t.tier],
+                                }}
+                                animate={{ y: [0, -4, 0] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                            />
 
                             <span className={`text-4xl font-black mt-4 ${tierTextColors[t.tier]}`}>
                                 {t.streak}
