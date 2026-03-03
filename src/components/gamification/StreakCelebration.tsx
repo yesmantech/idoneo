@@ -224,7 +224,7 @@ export function StreakCelebration() {
                             stiffness: 300,
                             mass: 0.8
                         }}
-                        className="relative w-full max-w-sm px-6 text-center"
+                        className="relative w-full max-w-sm px-6 pb-28 text-center"
                     >
 
 
