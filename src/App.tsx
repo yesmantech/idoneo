@@ -39,6 +39,7 @@ import BandiAlertsPage from './app/bandi/alerts/page';
 import FlamesDemoPage from './app/demo/flames/page';
 import Flame3DPage from './app/demo/flame-3d/page';
 import IconsDemoPage from './app/demo/icons/page';
+import StreakTestPage from './app/demo/streak-test/page';
 
 // ============================================================================
 // LAZY-LOADED PAGES (Admin only — rarely accessed)
@@ -250,6 +251,7 @@ export default function App() {
                                                     <Route path="/demo/flames" element={<FlamesDemoPage />} />
                                                     <Route path="/demo/flame-3d" element={<Flame3DPage />} />
                                                     <Route path="/demo/icons" element={<IconsDemoPage />} />
+                                                    <Route path="/demo/streak-test" element={<StreakTestPage />} />
 
                                                     {/* Skitla Landing Page */}
 
