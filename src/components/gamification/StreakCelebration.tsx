@@ -605,19 +605,19 @@ export function StreakCelebration() {
                             </p>
                         </motion.div>
 
-                        {/* Continue Button */}
+                        {/* Continue Button - fixed at bottom */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5, ease: "easeOut" }}
-                            className="w-full mt-auto"
+                            className="fixed bottom-0 left-0 right-0 px-6 pb-10 pt-4"
                         >
                             <button
                                 onClick={() => {
                                     hapticLight();
                                     setShow(false);
                                 }}
-                                className="w-full py-4 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white text-lg font-bold rounded-2xl shadow-lg shadow-[#00B1FF]/30 transition-all duration-200"
+                                className="w-full py-5 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.97] text-white text-[17px] font-semibold rounded-full transition-all duration-200"
                             >
                                 Continua
                             </button>
