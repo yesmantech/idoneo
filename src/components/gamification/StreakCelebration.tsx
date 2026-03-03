@@ -229,7 +229,7 @@ export function StreakCelebration() {
 
 
                         {/* Flame Animation Container with Tier S Aura */}
-                        <div className="relative mb-10 flex justify-center items-center" style={{ height: 280 }}>
+                        <div className="relative mb-8 flex justify-center items-center" style={{ height: 360 }}>
 
                             {/* === SHARED BASE: Radial Glow === */}
                             <motion.div
@@ -238,8 +238,8 @@ export function StreakCelebration() {
                                 transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
                                 style={{
                                     position: 'absolute',
-                                    width: 280,
-                                    height: 280,
+                                    width: 360,
+                                    height: 360,
                                     borderRadius: '50%',
                                     background: aura.glow,
                                 }}
@@ -552,7 +552,7 @@ export function StreakCelebration() {
                                 animate={{ scale: [1, 1.35, 1], opacity: [0.25, 0, 0.25] }}
                                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' }}
                                 style={{
-                                    position: 'absolute', width: 200, height: 200, borderRadius: '50%',
+                                    position: 'absolute', width: 260, height: 260, borderRadius: '50%',
                                     border: `3px solid ${aura.halo}`,
                                 }}
                             />
@@ -568,86 +568,70 @@ export function StreakCelebration() {
                                     src={FLAME_ICONS[flameTier]}
                                     alt={`${flameTier} flame`}
                                     style={{
-                                        width: 180,
-                                        height: 180,
+                                        width: 240,
+                                        height: 240,
                                         objectFit: 'contain',
-                                        filter: `drop-shadow(0 0 25px ${aura.halo})`,
+                                        filter: `drop-shadow(0 0 30px ${aura.halo})`,
                                     }}
-                                    animate={{ y: [0, -6, 0] }}
+                                    animate={{ y: [0, -8, 0] }}
                                     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                 />
+                                {/* Streak number overlaid on flame */}
+                                <motion.span
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 15 }}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '52%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        fontSize: streak >= 100 ? '3rem' : '4rem',
+                                        fontWeight: 900,
+                                        color: '#FFFFFF',
+                                        textShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 30px rgba(0,0,0,0.2)',
+                                        zIndex: 10,
+                                        lineHeight: 1,
+                                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                                    }}
+                                >
+                                    {streak}
+                                </motion.span>
                             </motion.div>
                         </div>
 
-                        {/* Text Content - Adaptive Color */}
+                        {/* Text Content */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3, ease: "easeOut" }}
+                            className="mb-8"
                         >
-                            <h2 className="text-xl font-bold text-brand-orange uppercase tracking-widest mb-2">
-                                {isTierUnlock ? "Nuovo Grado Sbloccato!" : (isMilestone ? "Traguardo Raggiunto!" : "Streak Aggiornata!")}
+                            <h2 className="text-2xl font-extrabold text-white mb-3">
+                                {isTierUnlock ? "Nuovo Grado Sbloccato!" : (isMilestone ? "Sei fantastico!" : "Ottimo lavoro!")}
                             </h2>
-                            <div className="flex items-center justify-center gap-3 mb-6">
-                                {/* Adaptive Text Color */}
-                                <span className="text-8xl font-black tracking-tighter drop-shadow-lg font-sans text-slate-900 dark:text-white">
-                                    {streak}
-                                </span>
-                                <div className="flex flex-col items-start space-y-1">
-                                    <span className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">GIORNI</span>
-                                    <span className="text-lg font-medium tracking-wide text-slate-500 dark:text-slate-400">CONSECUTIVI</span>
-                                </div>
-                            </div>
-
-                            <p className="text-lg mb-10 max-w-xs mx-auto leading-relaxed font-medium text-slate-600 dark:text-slate-300">
+                            <p className="text-base max-w-xs mx-auto leading-relaxed text-slate-400">
                                 {isMilestone
                                     ? "Stai costruendo un'abitudine di ferro! Continua su questa strada."
-                                    : "Non fermarti ora! La costanza è il segreto per superare il concorso."}
+                                    : "Continua a studiare ogni giorno per mantenere la tua streak."}
                             </p>
                         </motion.div>
 
-                        {/* Buttons with Branding */}
+                        {/* Continue Button */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5, ease: "easeOut" }}
-                            className="flex flex-col gap-4 w-full"
+                            className="w-full mt-auto"
                         >
-                            {/* Primary Action - Brand Blue */}
                             <button
                                 onClick={() => {
                                     hapticLight();
                                     setShow(false);
                                 }}
-                                className="w-full py-4 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white text-lg font-bold rounded-full shadow-lg shadow-[#00B1FF]/25 transition-all flex items-center justify-center gap-2 group duration-200"
+                                className="w-full py-4 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] text-white text-lg font-bold rounded-2xl shadow-lg shadow-[#00B1FF]/30 transition-all duration-200"
                             >
                                 Continua
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </button>
-
-                            {/* Secondary Action - Share (Adaptive) */}
-                            <button
-                                onClick={(e) => {
-                                    hapticLight();
-                                    handleShare(e);
-                                }}
-                                className={`w-full py-4 font-bold rounded-full transition-all flex items-center justify-center gap-2 border backdrop-blur-sm duration-200 active:scale-[0.98]
-                                    ${shareState === 'success'
-                                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/50 dark:bg-emerald-500/20 dark:text-emerald-400'
-                                        : 'bg-slate-100/50 text-slate-700 border-slate-200 hover:bg-slate-200/50 dark:bg-white/10 dark:text-white dark:border-white/10 dark:hover:bg-white/15'
-                                    }`}
-                            >
-                                {shareState === 'success' ? (
-                                    <>
-                                        <Check className="w-5 h-5" />
-                                        Copiato!
-                                    </>
-                                ) : (
-                                    <>
-                                        <Share2 className="w-5 h-5" />
-                                        Condividi
-                                    </>
-                                )}
                             </button>
                         </motion.div>
                     </motion.div>
