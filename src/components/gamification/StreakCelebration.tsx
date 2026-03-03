@@ -25,6 +25,45 @@ const FLAME_ICONS: Record<FlameTier, string> = {
     sapphire: '/icons/flame-sapphire.png',
     diamond: '/icons/flame-diamond.png',
 };
+
+const TIER_AURA: Record<FlameTier, { ring: string; glow: string; halo: string; particles: string[] }> = {
+    bronze: {
+        ring: 'rgba(205,127,50,0.25)',
+        glow: 'radial-gradient(circle, rgba(255,165,80,0.4) 0%, rgba(205,127,50,0.15) 50%, transparent 70%)',
+        halo: 'rgba(255,165,80,0.3)',
+        particles: ['#CD7F32', '#FF9F43', '#E67E22'],
+    },
+    silver: {
+        ring: 'rgba(192,192,192,0.3)',
+        glow: 'radial-gradient(circle, rgba(220,220,230,0.4) 0%, rgba(192,192,192,0.15) 50%, transparent 70%)',
+        halo: 'rgba(200,210,220,0.3)',
+        particles: ['#C0C0C0', '#E8E8E8', '#A8B2BC'],
+    },
+    gold: {
+        ring: 'rgba(255,215,0,0.3)',
+        glow: 'radial-gradient(circle, rgba(255,223,50,0.45) 0%, rgba(255,185,0,0.15) 50%, transparent 70%)',
+        halo: 'rgba(255,215,0,0.35)',
+        particles: ['#FFD700', '#FFA500', '#FFE066'],
+    },
+    emerald: {
+        ring: 'rgba(80,200,120,0.3)',
+        glow: 'radial-gradient(circle, rgba(80,220,120,0.4) 0%, rgba(16,185,129,0.15) 50%, transparent 70%)',
+        halo: 'rgba(52,211,153,0.3)',
+        particles: ['#50C878', '#10B981', '#34D399'],
+    },
+    sapphire: {
+        ring: 'rgba(30,144,255,0.3)',
+        glow: 'radial-gradient(circle, rgba(60,160,255,0.45) 0%, rgba(30,100,220,0.15) 50%, transparent 70%)',
+        halo: 'rgba(59,130,246,0.35)',
+        particles: ['#1E90FF', '#00BFFF', '#3B82F6'],
+    },
+    diamond: {
+        ring: 'rgba(255,255,255,0.25)',
+        glow: 'radial-gradient(circle, rgba(255,200,255,0.4) 0%, rgba(139,92,246,0.2) 40%, rgba(80,200,255,0.1) 60%, transparent 75%)',
+        halo: 'rgba(200,180,255,0.35)',
+        particles: ['#E879F9', '#A78BFA', '#67E8F9', '#FFFFFF'],
+    },
+};
 import { Share } from '@capacitor/share';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { useTheme } from '@/context/ThemeContext';
@@ -149,6 +188,7 @@ export function StreakCelebration() {
 
     // Determine flame tier based on streak count
     const flameTier = getTierFromStreak(streak);
+    const aura = TIER_AURA[flameTier];
 
     return (
         <AnimatePresence>
@@ -186,22 +226,131 @@ export function StreakCelebration() {
                     >
 
 
-                        {/* Flame Animation Container */}
-                        <div className="relative mb-10 flex justify-center">
+                        {/* Flame Animation Container with Tier S Aura */}
+                        <div className="relative mb-10 flex justify-center items-center" style={{ height: 260 }}>
+                            {/* Layer 1: Outer Spinning Ring */}
+                            <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1, rotate: 360 }}
+                                transition={{
+                                    scale: { type: 'spring', stiffness: 100, damping: 15, delay: 0.1 },
+                                    opacity: { duration: 0.5, delay: 0.1 },
+                                    rotate: { duration: 12, repeat: Infinity, ease: 'linear' },
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    width: 240,
+                                    height: 240,
+                                    borderRadius: '50%',
+                                    border: `2px solid ${aura.ring}`,
+                                    borderTopColor: 'transparent',
+                                    borderBottomColor: 'transparent',
+                                }}
+                            />
+
+                            {/* Layer 2: Counter-rotating inner ring */}
+                            <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 0.6, rotate: -360 }}
+                                transition={{
+                                    scale: { type: 'spring', stiffness: 100, damping: 15, delay: 0.15 },
+                                    opacity: { duration: 0.5, delay: 0.15 },
+                                    rotate: { duration: 8, repeat: Infinity, ease: 'linear' },
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    width: 220,
+                                    height: 220,
+                                    borderRadius: '50%',
+                                    border: `1.5px dashed ${aura.ring}`,
+                                }}
+                            />
+
+                            {/* Layer 3: Radial Glow Background */}
+                            <motion.div
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: 'easeInOut',
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    width: 260,
+                                    height: 260,
+                                    borderRadius: '50%',
+                                    background: aura.glow,
+                                }}
+                            />
+
+                            {/* Layer 4: Pulsating Halo */}
+                            <motion.div
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0, 0.3] }}
+                                transition={{
+                                    duration: 2.5,
+                                    repeat: Infinity,
+                                    ease: 'easeOut',
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    width: 200,
+                                    height: 200,
+                                    borderRadius: '50%',
+                                    border: `3px solid ${aura.halo}`,
+                                }}
+                            />
+
+                            {/* Layer 5: Floating Particles */}
+                            {aura.particles.map((color, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{
+                                        scale: [0, 1, 0],
+                                        opacity: [0, 0.8, 0],
+                                        x: [0, Math.cos((i * 2 * Math.PI) / aura.particles.length) * 100],
+                                        y: [0, Math.sin((i * 2 * Math.PI) / aura.particles.length) * 100 - 20],
+                                    }}
+                                    transition={{
+                                        duration: 2.5,
+                                        repeat: Infinity,
+                                        delay: 0.3 + i * 0.4,
+                                        ease: 'easeOut',
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: '50%',
+                                        backgroundColor: color,
+                                        boxShadow: `0 0 8px ${color}`,
+                                    }}
+                                />
+                            ))}
+
+                            {/* Layer 6: The Flame itself */}
                             <motion.div
                                 initial={{ scale: 0, rotate: -30 }}
                                 animate={{ scale: 1, rotate: 0 }}
                                 transition={{
-                                    type: "spring",
+                                    type: 'spring',
                                     stiffness: 200,
                                     damping: 15,
-                                    delay: 0.15
+                                    delay: 0.15,
                                 }}
+                                style={{ position: 'relative', zIndex: 2 }}
                             >
                                 <motion.img
                                     src={FLAME_ICONS[flameTier]}
                                     alt={`${flameTier} flame`}
-                                    style={{ width: 180, height: 180, objectFit: 'contain' }}
+                                    style={{
+                                        width: 180,
+                                        height: 180,
+                                        objectFit: 'contain',
+                                        filter: `drop-shadow(0 0 20px ${aura.halo})`,
+                                    }}
                                     animate={{ y: [0, -6, 0] }}
                                     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                 />
