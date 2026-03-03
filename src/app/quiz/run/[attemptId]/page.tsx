@@ -56,10 +56,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { xpService } from "@/lib/xpService";
-import { statsService } from "@/lib/statsService";
-import { leaderboardService } from "@/lib/leaderboardService";
-import { badgeService } from "@/lib/badgeService";
 import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
 import { hapticLight, hapticSuccess, hapticError, hapticSelection } from "@/lib/haptics";
 import { analytics } from "@/lib/analytics";
@@ -132,6 +128,7 @@ export default function QuizRunnerPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [finished, setFinished] = useState(false);
     const [isSaving, setIsSaving] = useState(false); // Tier S loader state
+    const isFinishing = useRef(false); // Hard lock to prevent double submission
     const [showExitConfirm, setShowExitConfirm] = useState(false); // X button exit
     const [showTerminateConfirm, setShowTerminateConfirm] = useState(false); // Termina Quiz button
     const [showSettings, setShowSettings] = useState(false);
@@ -462,7 +459,9 @@ export default function QuizRunnerPage() {
     }, [currentIndex, drawerExpanded]);
 
     const handleFinish = async () => {
-        if (finished || !quizAttemptId) return;
+        // Double-submit guard: useRef lock (survives React batching)
+        if (isFinishing.current || finished || !quizAttemptId) return;
+        isFinishing.current = true;
         setFinished(true);
         setIsSaving(true); // Show Tier S Loader
 
@@ -483,130 +482,97 @@ export default function QuizRunnerPage() {
             }
         }
 
-        let correct = 0, wrong = 0, blank = 0;
-        let score = 0;
-
-        const finalAnswers = finalAnswersSource.map(a => {
-            const isCorrect = checkIsCorrect(a.selectedOption, a.correctOption, a.options);
-
-            if (a.selectedOption === null) {
-                blank++;
-                score += pointsBlank;
-            } else if (isCorrect) {
-                correct++;
-                score += pointsCorrect;
-            } else {
-                wrong++;
-                score += pointsWrong;
-            }
-            return { ...a, isCorrect, isSkipped: a.selectedOption === null };
-        });
-
-        score = Math.round(score * 100) / 100;
-
-        // OFFLINE SAVE
+        // OFFLINE SAVE (still uses client-side calculation)
         if (quizAttemptId.startsWith('local-')) {
             try {
-                // Get existing to preserve metadata
+                let correct = 0, wrong = 0, blank = 0, score = 0;
+                const finalAnswers = finalAnswersSource.map(a => {
+                    const isCorrect = checkIsCorrect(a.selectedOption, a.correctOption, a.options);
+                    if (a.selectedOption === null) { blank++; score += pointsBlank; }
+                    else if (isCorrect) { correct++; score += pointsCorrect; }
+                    else { wrong++; score += pointsWrong; }
+                    return { ...a, isCorrect, isSkipped: a.selectedOption === null };
+                });
+                score = Math.round(score * 100) / 100;
+
                 const existing = await offlineService.getLocalAttempt(quizAttemptId);
-                const updated = {
+                await offlineService.savePendingAttempt({
                     ...existing,
                     finished_at: new Date().toISOString(),
-                    score,
-                    correct,
-                    wrong,
-                    blank,
-                    answers: finalAnswers, // This saves the selection state
+                    score, correct, wrong, blank,
+                    answers: finalAnswers,
                     duration_seconds: remainingSeconds !== null ? (parseFloat(timeLimitParam || "0") * 60 - remainingSeconds) : 0,
                     is_idoneo: quizConfig?.useCustomPassThreshold ? correct >= (quizConfig.minCorrectForPass || 0) : null,
                     pass_threshold: quizConfig?.useCustomPassThreshold ? quizConfig.minCorrectForPass : null,
-                };
-
-                await offlineService.savePendingAttempt(updated);
+                });
 
                 localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
-
-                // If we are Online, we could try to sync immediately? 
-                // Or just navigate to results which should handle local ID.
-                // syncing happens elsewhere or on user action.
-
                 navigate(`/quiz/results/${quizAttemptId}`);
                 return;
             } catch (e) {
                 console.error("Local save error", e);
                 alert("Errore salvataggio locale.");
+                isFinishing.current = false;
+                setFinished(false);
+                setIsSaving(false);
                 return;
             }
         }
 
-        // ONLINE SAVE
-        const updatePayload = {
-            finished_at: new Date().toISOString(),
-            score,
-            correct,
-            wrong,
-            blank,
-            answers: finalAnswers,
-            duration_seconds: remainingSeconds !== null ? (parseFloat(timeLimitParam || "0") * 60 - remainingSeconds) : 0,
-            is_idoneo: quizConfig?.useCustomPassThreshold ? correct >= (quizConfig.minCorrectForPass || 0) : null,
-            pass_threshold: quizConfig?.useCustomPassThreshold ? quizConfig.minCorrectForPass : null,
-        };
-
-        console.log("[FINISH] Saving attempt:", quizAttemptId, "score:", score, "correct:", correct, "wrong:", wrong, "blank:", blank);
-
-        const { data: updateData, error } = await supabase.from("quiz_attempts").update(updatePayload).eq("id", quizAttemptId).select();
-
-        console.log("[FINISH] Update result - data:", updateData, "error:", error);
-
-        if (error) {
-            console.error("Save error:", error);
-            alert(`Errore salvataggio: ${error.message}`);
-            return;
-        }
-
-        if (!updateData || updateData.length === 0) {
-            console.error("[FINISH] UPDATE returned 0 rows! The RLS policy may be blocking the update.");
-            alert("Errore: il salvataggio non è andato a buon fine. Riprova.");
-            return;
-        }
-
-        // TRIGGER UPDATES (Fire and forget, or await if critical)
+        // ======================================================================
+        // ONLINE SAVE: Single RPC call replaces 5+ sequential API calls
+        // Server recalculates scores by joining answers against questions table
+        // XP is awarded automatically via DB trigger
+        // ======================================================================
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                // 1. Award XP
-                await xpService.awardXpForAttempt(quizAttemptId, user.id);
+            // Build lightweight answer payload (only what the server needs)
+            const answersForServer = finalAnswersSource.map(a => ({
+                questionId: a.questionId,
+                selectedOption: a.selectedOption,
+                text: a.text,
+                subjectId: a.subjectId,
+                subjectName: a.subjectName,
+                explanation: a.explanation,
+                options: a.options
+            }));
 
-                // 2. Update Goals
-                const { data: currentAttempt } = await supabase
-                    .from('quiz_attempts')
-                    .select('quiz_id')
-                    .eq('id', quizAttemptId)
-                    .single();
+            console.log("[FINISH] Calling finish_quiz_attempt RPC for:", quizAttemptId);
 
-                if (currentAttempt?.quiz_id) {
-                    await statsService.updateGoals(user.id, currentAttempt.quiz_id, {
-                        score,
-                        correct,
-                        total: finalAnswers.length
-                    });
+            const { data: result, error: rpcError } = await supabase.rpc('finish_quiz_attempt', {
+                p_attempt_id: quizAttemptId,
+                p_answers: answersForServer,
+                p_scoring: { correct: pointsCorrect, wrong: pointsWrong, blank: pointsBlank }
+            });
 
-                    // 3. Update Leaderboard
-                    await leaderboardService.updateUserScore(user.id, currentAttempt.quiz_id);
-
-                    // 4. Check & Award Badges
-                    await badgeService.checkAndAwardBadges(user.id);
-                }
+            if (rpcError) {
+                console.error("[FINISH] RPC error:", rpcError);
+                throw rpcError;
             }
-        } catch (err) {
-            console.error("Post-finish updates error:", err);
-        }
 
-        localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
-        // Proceed to results
-        navigate(`/quiz/results/${quizAttemptId}`, {
-            state: { updatedAttempt: updateData[0] }
-        });
+            console.log("[FINISH] Server result:", result);
+
+            localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
+
+            // Navigate to results with server-validated scores
+            navigate(`/quiz/results/${quizAttemptId}`, {
+                state: {
+                    updatedAttempt: {
+                        id: quizAttemptId,
+                        correct: result.correct,
+                        wrong: result.wrong,
+                        blank: result.blank,
+                        score: result.score,
+                        is_idoneo: result.is_idoneo
+                    }
+                }
+            });
+        } catch (err: any) {
+            console.error("[FINISH] Error:", err);
+            alert(`Errore salvataggio: ${err.message || 'Errore sconosciuto'}`);
+            isFinishing.current = false;
+            setFinished(false);
+            setIsSaving(false);
+        }
     };
 
     const formatTime = (seconds: number | null) => {
