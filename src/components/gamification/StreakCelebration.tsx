@@ -576,27 +576,6 @@ export function StreakCelebration() {
                                     animate={{ y: [0, -8, 0] }}
                                     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                 />
-                                {/* Streak number overlaid on flame */}
-                                <motion.span
-                                    initial={{ opacity: 0, scale: 0.5 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 15 }}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '52%',
-                                        left: '50%',
-                                        transform: 'translate(-50%, -50%)',
-                                        fontSize: streak >= 100 ? '3rem' : '4rem',
-                                        fontWeight: 900,
-                                        color: '#FFFFFF',
-                                        textShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 30px rgba(0,0,0,0.2)',
-                                        zIndex: 10,
-                                        lineHeight: 1,
-                                        fontFamily: 'system-ui, -apple-system, sans-serif',
-                                    }}
-                                >
-                                    {streak}
-                                </motion.span>
                             </motion.div>
                         </div>
 
@@ -607,9 +586,18 @@ export function StreakCelebration() {
                             transition={{ delay: 0.3, ease: "easeOut" }}
                             className="mb-8"
                         >
-                            <h2 className="text-2xl font-extrabold text-white mb-3">
-                                {isTierUnlock ? "Nuovo Grado Sbloccato!" : (isMilestone ? "Sei fantastico!" : "Ottimo lavoro!")}
+                            <h2 className="text-xl font-bold text-brand-orange uppercase tracking-widest mb-2">
+                                {isTierUnlock ? "Nuovo Grado Sbloccato!" : (isMilestone ? "Traguardo Raggiunto!" : "Streak Aggiornata!")}
                             </h2>
+                            <div className="flex items-center justify-center gap-3 mb-6">
+                                <span className="text-8xl font-black tracking-tighter drop-shadow-lg font-sans text-white">
+                                    {streak}
+                                </span>
+                                <div className="flex flex-col items-start space-y-1">
+                                    <span className="text-2xl font-bold tracking-tight text-white">GIORNI</span>
+                                    <span className="text-lg font-medium tracking-wide text-slate-400">CONSECUTIVI</span>
+                                </div>
+                            </div>
                             <p className="text-base max-w-xs mx-auto leading-relaxed text-slate-400">
                                 {isMilestone
                                     ? "Stai costruendo un'abitudine di ferro! Continua su questa strada."
