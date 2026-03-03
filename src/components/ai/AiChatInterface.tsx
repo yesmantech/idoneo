@@ -436,11 +436,18 @@ function MessageActions({ text }: { text: string }) {
                 <IosShareIcon className="w-[18px] h-[18px]" />
             </motion.button>
 
-            {/* Mount ShareSheet portal when open */}
-            {isShareOpen && <ShareSheet text={text} onClose={() => setIsShareOpen(false)} />}
 
-            {/* Mount Feedback Modal when open */}
-            <FeedbackModal isOpen={feedbackModalState.isOpen} type={feedbackModalState.type} messageContent={text} onClose={() => setFeedbackModalState(prev => ({ ...prev, isOpen: false }))} />
+            {/* Mount ShareSheet portal when open */}
+            {isShareOpen && createPortal(
+                <ShareSheet text={text} onClose={() => setIsShareOpen(false)} />,
+                document.body
+            )}
+
+            {/* Mount Feedback Modal via portal */}
+            {createPortal(
+                <FeedbackModal isOpen={feedbackModalState.isOpen} type={feedbackModalState.type} messageContent={text} onClose={() => setFeedbackModalState(prev => ({ ...prev, isOpen: false }))} />,
+                document.body
+            )}
         </div>
     );
 }
