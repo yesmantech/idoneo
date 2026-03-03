@@ -582,13 +582,13 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     });
 
     const isStreaming = status === 'streaming' || status === 'submitted';
-    
+
     // Solo se stiamo aspettando la prima risposta, NON se l'assistant sta già scrivendo
     const isWaitingForResponse = isStreaming && (() => {
         const lastMsg = messages[messages.length - 1];
         if (!lastMsg) return true;
         if (lastMsg.role === 'user') return true;
-        
+
         // Se l'ultimo messaggio è dell'assistant, mostra i pallini SOLO se è completamente vuoto
         // (niente testo e niente tool calls finora)
         const hasText = getMessageText(lastMsg).length > 0;
@@ -683,6 +683,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto px-4 pb-32 pt-2 space-y-6"
+                style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
             >
                 <AnimatePresence initial={false}>
                     {(messages || []).map((m: any) => {
@@ -703,6 +704,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
                                 className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                style={{ touchAction: 'pan-y' }}
                             >
                                 <div className={`max-w-[85%] ${m.role === 'user'
                                     ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
