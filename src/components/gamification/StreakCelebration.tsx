@@ -15,7 +15,16 @@ import React, { useEffect, useState } from 'react';
 import { Share2, ArrowRight, Check } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AnimatedFlame, getTierFromStreak, TIER_THRESHOLDS } from './AnimatedFlame';
+import { getTierFromStreak, TIER_THRESHOLDS, type FlameTier } from './AnimatedFlame';
+
+const FLAME_ICONS: Record<FlameTier, string> = {
+    bronze: '/icons/flame-bronze.png',
+    silver: '/icons/flame-silver.png',
+    gold: '/icons/flame-gold.png',
+    emerald: '/icons/flame-emerald.png',
+    sapphire: '/icons/flame-sapphire.png',
+    diamond: '/icons/flame-diamond.png',
+};
 import { Share } from '@capacitor/share';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { useTheme } from '@/context/ThemeContext';
@@ -189,7 +198,13 @@ export function StreakCelebration() {
                                     delay: 0.15
                                 }}
                             >
-                                <AnimatedFlame size={180} tier={flameTier} />
+                                <motion.img
+                                    src={FLAME_ICONS[flameTier]}
+                                    alt={`${flameTier} flame`}
+                                    style={{ width: 180, height: 180, objectFit: 'contain' }}
+                                    animate={{ y: [0, -6, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                />
                             </motion.div>
                         </div>
 
