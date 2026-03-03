@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useChat } from '@ai-sdk/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DefaultChatTransport } from 'ai';
@@ -372,23 +373,27 @@ function MessageActions({ text }: { text: string }) {
 
     return (
         <div className="flex items-center gap-3 mt-1.5 text-gray-400 dark:text-gray-500">
-            {/* Floating Feedback Toast */}
-            <AnimatePresence>
-                {toastMessage && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -40, x: '-50%' }}
-                        animate={{ opacity: 1, y: 0, x: '-50%' }}
-                        exit={{ opacity: 0, y: -20, x: '-50%', transition: { duration: 0.2, ease: 'easeIn' } }}
-                        transition={{ duration: 0.3, ease: [0.18, 0.89, 0.32, 1.28] }}
-                        className="fixed top-20 left-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full whitespace-nowrap"
-                    >
-                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                        </div>
-                        <span className="text-[14px] font-medium text-black dark:text-white">{toastMessage}</span>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Floating Feedback Toast — rendered via portal to escape overflow:hidden */}
+            {createPortal(
+                <AnimatePresence>
+                    {toastMessage && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -40, x: '-50%' }}
+                            animate={{ opacity: 1, y: 0, x: '-50%' }}
+                            exit={{ opacity: 0, y: -20, x: '-50%', transition: { duration: 0.2, ease: 'easeIn' } }}
+                            transition={{ duration: 0.3, ease: [0.18, 0.89, 0.32, 1.28] }}
+                            className="fixed left-1/2 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full whitespace-nowrap"
+                            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
+                        >
+                            <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                                <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                            </div>
+                            <span className="text-[14px] font-medium text-black dark:text-white">{toastMessage}</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
 
             {/* Buttons */}
             <motion.button
