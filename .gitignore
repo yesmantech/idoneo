@@ -35,3 +35,4 @@ dev-dist
 .env
 .env.production
 .env.staging
+venv_rembg/
