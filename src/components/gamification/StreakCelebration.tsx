@@ -206,9 +206,11 @@ export function StreakCelebration() {
                         width={windowSize.width}
                         height={windowSize.height}
                         recycle={false}
-                        numberOfPieces={isMilestone ? 800 : 400}
-                        gravity={0.15}
-                        colors={['#FF9F0A', '#00B1FF', '#0095FF', '#E2E8F0']}
+                        numberOfPieces={isMilestone ? 300 : 150}
+                        gravity={0.35}
+                        initialVelocityY={20}
+                        tweenDuration={3000}
+                        colors={aura.particles}
                     />
 
                     {/* Main Content Card */}
