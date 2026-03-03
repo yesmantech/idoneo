@@ -9,6 +9,16 @@ import React, { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import StreakCalendarModal from './StreakCalendarModal';
+import { getTierFromStreak, type FlameTier } from '@/components/gamification/AnimatedFlame';
+
+const FLAME_ICONS: Record<FlameTier, string> = {
+    bronze: '/icons/flame-bronze.png',
+    silver: '/icons/flame-silver.png',
+    gold: '/icons/flame-gold.png',
+    emerald: '/icons/flame-emerald.png',
+    sapphire: '/icons/flame-sapphire.png',
+    diamond: '/icons/flame-diamond.png',
+};
 
 const DAYS = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'] as const;
 
@@ -122,7 +132,7 @@ export default function StreakCard() {
                         Streak Attuale
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
-                        <img src="/icons/flame-orange.png" alt="streak" style={{ height: 32, width: 'auto' }} />
+                        <img src={FLAME_ICONS[getTierFromStreak(streakCurrent)]} alt="streak" style={{ height: 32, width: 'auto' }} />
                         <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakCurrent} {streakCurrent === 1 ? 'giorno' : 'giorni'}
                         </span>
@@ -135,7 +145,7 @@ export default function StreakCard() {
                         Miglior Streak
                     </div>
                     <div className="flex items-center" style={{ gap: 8 }}>
-                        <img src="/icons/flame-purple.png" alt="best" style={{ height: 32, width: 'auto' }} />
+                        <img src={FLAME_ICONS[getTierFromStreak(streakMax)]} alt="best" style={{ height: 32, width: 'auto' }} />
                         <span className="text-[24px] font-bold text-slate-900 dark:text-white tracking-tight">
                             {streakMax} {streakMax === 1 ? 'giorno' : 'giorni'}
                         </span>
