@@ -720,7 +720,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
                                 className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                                style={{ touchAction: 'pan-y' }}
                             >
                                 <div className={`max-w-[85%] ${m.role === 'user'
                                     ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
@@ -823,12 +822,12 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 <div ref={messagesEndRef} className="h-4" />
             </div>
 
-            {/* Input Area (Floating Pill) */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white/90 dark:from-black dark:via-black/90 to-transparent pt-12 z-20">
+            {/* Input Area (Floating Pill) — pointer-events-none on gradient, auto on interactive children */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white/90 dark:from-black dark:via-black/90 to-transparent pt-12 z-20 pointer-events-none">
 
                 {/* Suggestion Chips */}
                 {messages.length <= 1 && (
-                    <div className="flex overflow-x-auto gap-2 pb-4 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">
+                    <div className="flex overflow-x-auto gap-2 pb-4 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1 pointer-events-auto">
                         {SUGGESTIONS.map((suggestion, idx) => (
                             <motion.button
                                 key={idx}
@@ -846,7 +845,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                     </div>
                 )}
 
-                <form onSubmit={handleSend} className="relative flex items-center max-w-3xl mx-auto group">
+                <form onSubmit={handleSend} className="relative flex items-center max-w-3xl mx-auto group pointer-events-auto">
                     <input
                         className="w-full bg-gray-100 dark:bg-[#1E1E1E] text-black dark:text-white rounded-[26px] h-[52px] pl-6 pr-24 outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 transition-all border border-gray-200 dark:border-[#2A2A2A] focus:border-gray-300 dark:focus:border-[#444] placeholder:text-gray-400 dark:placeholder:text-[#666666] text-[15px] shadow-sm"
                         value={inputValue}
