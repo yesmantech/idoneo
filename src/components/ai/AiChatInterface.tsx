@@ -642,7 +642,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     };
 
     return (
-        <div className="relative flex flex-col h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans" style={{ overflow: 'hidden' }}>
+        <div className="flex flex-col h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans">
 
             {/* Header */}
             <div className="flex-none p-4 flex items-center gap-3 z-10">
@@ -690,15 +690,14 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </div>
             </div>
 
-            {/* Messages Area */}
+            {/* Messages Area — overflow-y:scroll (not auto) forces iOS to create scroll layer */}
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 min-h-0 overflow-y-auto px-4 pb-32 pt-2 space-y-6"
+                className="flex-1 min-h-0 px-4 pt-2 pb-4 space-y-6"
                 style={{
+                    overflowY: 'scroll',
                     WebkitOverflowScrolling: 'touch',
-                    touchAction: 'pan-y',
-                    overscrollBehavior: 'auto',
                 }}
             >
                 <AnimatePresence initial={false}>
@@ -822,12 +821,12 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 <div ref={messagesEndRef} className="h-4" />
             </div>
 
-            {/* Input Area (Floating Pill) — pointer-events-none on gradient, auto on interactive children */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white/90 dark:from-black dark:via-black/90 to-transparent pt-12 z-20 pointer-events-none">
+            {/* Input Area — proper flex sibling, NOT absolute overlay */}
+            <div className="flex-shrink-0 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
 
                 {/* Suggestion Chips */}
                 {messages.length <= 1 && (
-                    <div className="flex overflow-x-auto gap-2 pb-4 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1 pointer-events-auto">
+                    <div className="flex overflow-x-auto gap-2 pb-3 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">
                         {SUGGESTIONS.map((suggestion, idx) => (
                             <motion.button
                                 key={idx}
@@ -845,7 +844,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                     </div>
                 )}
 
-                <form onSubmit={handleSend} className="relative flex items-center max-w-3xl mx-auto group pointer-events-auto">
+                <form onSubmit={handleSend} className="relative flex items-center max-w-3xl mx-auto group">
                     <input
                         className="w-full bg-gray-100 dark:bg-[#1E1E1E] text-black dark:text-white rounded-[26px] h-[52px] pl-6 pr-24 outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 transition-all border border-gray-200 dark:border-[#2A2A2A] focus:border-gray-300 dark:focus:border-[#444] placeholder:text-gray-400 dark:placeholder:text-[#666666] text-[15px] shadow-sm"
                         value={inputValue}
@@ -854,7 +853,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                         disabled={isStreaming}
                     />
                     <div className="absolute right-2 flex items-center gap-1">
-
                         <motion.button
                             type="submit"
                             disabled={isStreaming || !inputValue.trim()}
