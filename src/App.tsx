@@ -1,5 +1,6 @@
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { supabase } from '@/lib/supabaseClient';
 
 // ============================================================================
 // DIRECT IMPORTS — User-facing pages (instant navigation, zero delay)
@@ -91,7 +92,7 @@ import OnboardingSpotlight from './components/onboarding/OnboardingSpotlight';
 import SpotlightModal from './components/spotlight/SpotlightModal';
 import { StreakCelebration } from './components/gamification/StreakCelebration';
 import { BadgeUnlockCelebration } from './components/gamification/BadgeUnlockCelebration';
-import { streakService } from './lib/streakService';
+// REMOVED: streakService import — streak is now 100% server-side (handle_new_attempt_xp trigger)
 import { CinematicGrain } from './components/ui/CinematicGrain';
 import { removeBootLoader } from './lib/domUtils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -107,17 +108,21 @@ const queryClient = new QueryClient({
     },
 });
 
-// Component to handle side effects that require AuthContext
-function AppEffects() {
-    const { user } = useAuth();
-
-    useEffect(() => {
-        if (user) {
-            streakService.checkAndUpdateStreak(user.id);
+// V7-RET-1: Daily check-in — streak updates on app engagement, not just quiz completion.
+// The RPC is SECURITY DEFINER and a no-op if already checked in today (zero overhead).
+// Fire-and-forget: no await, no UI blocking.
+function fireDailyCheckin() {
+    supabase.auth.getUser().then(({ data }) => {
+        if (data?.user) {
+            supabase.rpc('daily_checkin').then(({ data: result }) => {
+                if (result?.updated && result?.streak > 1) {
+                    window.dispatchEvent(new CustomEvent('streak_updated', {
+                        detail: { streak: result.streak, isMilestone: result.streak % 7 === 0 }
+                    }));
+                }
+            });
         }
-    }, [user]);
-
-    return null;
+    });
 }
 
 // Loading fallback for lazy-loaded components
@@ -135,6 +140,7 @@ export default function App() {
     useEffect(() => {
         initializeNativeApp();
         removeBootLoader();
+        fireDailyCheckin(); // V7-RET-1: streak on engagement
     }, []);
 
     // Prefetch core page chunks in the background for instant navigation
@@ -177,7 +183,7 @@ export default function App() {
                                 <OnboardingProvider>
                                     <SpotlightProvider>
                                         <LazyMotion features={domAnimation}>
-                                            <AppEffects />
+                                            {/* REMOVED: <AppEffects /> — V3 CRIT-1 */}
                                             <CinematicGrain />
                                             <OnboardingSpotlight />
                                             <SpotlightModal />

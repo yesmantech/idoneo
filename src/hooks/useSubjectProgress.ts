@@ -81,7 +81,7 @@ export function useSubjectProgress(quizId: string | undefined) {
                 // We fetch all question IDs and Subject IDs to count them. 
                 // Using .csv() or .count() is harder with grouping in Supabase client, so we fetch lightweight data.
                 const { data: questions, error: qError } = await supabase
-                    .from("questions")
+                    .from("questions_safe")
                     .select("id, subject_id")
                     .eq("quiz_id", quizId)
                     .eq("is_archived", false);

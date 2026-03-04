@@ -129,6 +129,7 @@ export default function QuizRunnerPage() {
     const [finished, setFinished] = useState(false);
     const [isSaving, setIsSaving] = useState(false); // Tier S loader state
     const isFinishing = useRef(false); // Hard lock to prevent double submission
+    const quizIdRef = useRef<string | null>(null);
     const [showExitConfirm, setShowExitConfirm] = useState(false); // X button exit
     const [showTerminateConfirm, setShowTerminateConfirm] = useState(false); // Termina Quiz button
     const [showSettings, setShowSettings] = useState(false);
@@ -262,7 +263,7 @@ export default function QuizRunnerPage() {
                 const qIds = loadedAnswers.map((a: any) => a.questionId);
                 if (qIds.length > 0) {
                     const { data: freshQuestions } = await supabase
-                        .from('questions')
+                        .from('questions_safe')
                         .select('id, explanation')
                         .in('id', qIds);
 
@@ -282,6 +283,7 @@ export default function QuizRunnerPage() {
                     .select('use_custom_pass_threshold, min_correct_for_pass')
                     .eq('id', data.quiz_id)
                     .single();
+                quizIdRef.current = data.quiz_id;
 
                 if (quizData) {
                     setQuizConfig({
@@ -352,10 +354,8 @@ export default function QuizRunnerPage() {
     const handleReport = async () => {
         if (!reportReason) return alert("Seleziona una motivazione.");
 
-        console.log("Starting report process...");
         // DEBUG: Check answering ref
         const currentQ = answeringRef.current.length > 0 ? answeringRef.current[currentIndex] : answering[currentIndex];
-        console.log("Current Question:", currentQ);
 
         if (!currentQ) {
             alert("Errore: Impossibile identificare la domanda corrente.");
@@ -364,13 +364,11 @@ export default function QuizRunnerPage() {
 
         setIsReporting(true);
         try {
-            console.log("Checking auth...");
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) {
                 console.error("Auth Error:", authError);
                 throw new Error("Devi essere loggato per inviare segnalazioni.");
             }
-            console.log("User found:", user.id);
 
             const payload = {
                 user_id: user.id,
@@ -379,7 +377,6 @@ export default function QuizRunnerPage() {
                 description: reportDescription || "", // Ensure not undefined
                 status: 'pending'
             };
-            console.log("Sending payload:", payload);
 
             const { data, error } = await supabase.from('question_reports').insert(payload).select();
 
@@ -388,7 +385,6 @@ export default function QuizRunnerPage() {
                 throw error;
             }
 
-            console.log("Success! Data:", data);
 
             // Success feedback
             setShowReportModal(false);
@@ -420,26 +416,63 @@ export default function QuizRunnerPage() {
 
         const nextList = [...currentList];
         const shouldLock = instantCheck;
-        const isCorrect = checkIsCorrect(opt, currentQ.correctOption, currentQ.options);
 
-        // TIER S: Haptic Feedback
         if (shouldLock) {
-            if (isCorrect) hapticSuccess();
-            else hapticError();
+            // V11-SEC-2: Server-side answer check via RPC (no correctOption on client)
+            // Immediately show the selection, then resolve correctness async
+            nextList[currentIndex] = {
+                ...currentQ,
+                selectedOption: opt,
+                isCorrect: false,
+                isSkipped: false,
+                isLocked: true
+            };
+            answeringRef.current = nextList;
+            setAnswering(nextList);
+
+            // Async RPC call for instant-check
+            supabase.rpc('check_single_answer', {
+                p_question_id: currentQ.questionId,
+                p_selected_option: opt
+            }).then(({ data, error }) => {
+                if (error || !data) {
+                    console.error("check_single_answer error:", error);
+                    return;
+                }
+                const isCorrect = data.isCorrect === true;
+                const correctOption = data.correctOption || null;
+
+                // Haptic feedback
+                if (isCorrect) hapticSuccess();
+                else hapticError();
+
+                // Update with server-validated result
+                const updatedList = [...answeringRef.current];
+                updatedList[currentIndex] = {
+                    ...updatedList[currentIndex],
+                    isCorrect,
+                    correctOption
+                };
+                answeringRef.current = updatedList;
+                setAnswering(updatedList);
+
+                if (quizAttemptId) {
+                    localStorage.setItem(`quiz_progress_${quizAttemptId}`, JSON.stringify(updatedList));
+                }
+            });
         } else {
+            // Non-instant-check: local-only, server validates on finish
             hapticSelection();
+            nextList[currentIndex] = {
+                ...currentQ,
+                selectedOption: opt,
+                isCorrect: false, // Server will validate
+                isSkipped: false,
+                isLocked: false
+            };
+            answeringRef.current = nextList;
+            setAnswering(nextList);
         }
-
-        nextList[currentIndex] = {
-            ...currentQ,
-            selectedOption: opt,
-            isCorrect: isCorrect,
-            isSkipped: false,
-            isLocked: shouldLock
-        };
-
-        answeringRef.current = nextList;
-        setAnswering(nextList);
 
         if (quizAttemptId) {
             localStorage.setItem(`quiz_progress_${quizAttemptId}`, JSON.stringify(nextList));
@@ -461,6 +494,8 @@ export default function QuizRunnerPage() {
     const handleFinish = async () => {
         // Double-submit guard: useRef lock (survives React batching)
         if (isFinishing.current || finished || !quizAttemptId) return;
+
+
         isFinishing.current = true;
         setFinished(true);
         setIsSaving(true); // Show Tier S Loader
@@ -536,12 +571,10 @@ export default function QuizRunnerPage() {
                 options: a.options
             }));
 
-            console.log("[FINISH] Calling finish_quiz_attempt RPC for:", quizAttemptId);
 
             const { data: result, error: rpcError } = await supabase.rpc('finish_quiz_attempt', {
                 p_attempt_id: quizAttemptId,
-                p_answers: answersForServer,
-                p_scoring: { correct: pointsCorrect, wrong: pointsWrong, blank: pointsBlank }
+                p_answers: answersForServer
             });
 
             if (rpcError) {
@@ -549,23 +582,40 @@ export default function QuizRunnerPage() {
                 throw rpcError;
             }
 
-            console.log("[FINISH] Server result:", result);
-
             localStorage.removeItem(`quiz_progress_${quizAttemptId}`);
 
-            // Navigate to results with server-validated scores
-            navigate(`/quiz/results/${quizAttemptId}`, {
-                state: {
-                    updatedAttempt: {
-                        id: quizAttemptId,
-                        correct: result.correct,
-                        wrong: result.wrong,
-                        blank: result.blank,
-                        score: result.score,
-                        is_idoneo: result.is_idoneo
-                    }
-                }
-            });
+            // Construct attempt data directly from RPC result + local state
+            // (DB reads via connection pooling return stale pre-scored data)
+            const attemptForResults = {
+                id: quizAttemptId,
+                quiz_id: quizIdRef.current,
+                user_id: '',
+                score: result.score,
+                correct: result.correct,
+                wrong: result.wrong,
+                blank: result.blank,
+                total_questions: answersForServer.length,
+                is_idoneo: result.is_idoneo,
+                finished_at: new Date().toISOString(),
+                started_at: new Date().toISOString(),
+                answers: finalAnswersSource.map(a => ({
+                    questionId: a.questionId,
+                    text: a.text,
+                    subjectId: a.subjectId,
+                    subjectName: a.subjectName,
+                    selectedOption: a.selectedOption,
+                    correctOption: a.correctOption,
+                    isCorrect: a.selectedOption != null && a.selectedOption === a.correctOption,
+                    isSkipped: a.selectedOption == null || a.selectedOption === '',
+                    explanation: a.explanation,
+                    options: a.options,
+                })),
+                xp_awarded: false,
+                pass_threshold: null,
+            };
+
+            // Navigate with constructed data — results page uses this directly
+            navigate(`/quiz/results/${quizAttemptId}`, { state: { attempt: attemptForResults } });
         } catch (err: any) {
             console.error("[FINISH] Error:", err);
             alert(`Errore salvataggio: ${err.message || 'Errore sconosciuto'}`);
@@ -696,7 +746,8 @@ export default function QuizRunnerPage() {
                             if (!optText) return null;
 
                             const isSelected = currentQ.selectedOption === optKey;
-                            const isCorrectAnswer = checkIsCorrect(optKey, currentQ.correctOption, currentQ.options);
+                            const hasCorrectInfo = currentQ.correctOption !== null && currentQ.correctOption !== undefined;
+                            const isCorrectAnswer = hasCorrectInfo ? checkIsCorrect(optKey, currentQ.correctOption, currentQ.options) : false;
                             const isDisabled = isLocked;
 
                             // Determine styling
@@ -704,11 +755,12 @@ export default function QuizRunnerPage() {
                             let badgeStyle = "bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400";
                             let textStyle = "text-[var(--foreground)] opacity-80";
 
-                            if (isLocked) {
+                            if (isLocked && hasCorrectInfo) {
+                                // RPC has resolved — show correct/wrong
                                 if (isCorrectAnswer) {
-                                    cardStyle = "bg-emerald-50 border-emerald-500";
+                                    cardStyle = "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500";
                                     badgeStyle = "bg-emerald-500 text-white";
-                                    textStyle = "text-emerald-700";
+                                    textStyle = "text-emerald-700 dark:text-emerald-400";
                                 } else if (isSelected) {
                                     cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500";
                                     badgeStyle = "bg-red-500 text-white";
@@ -716,6 +768,11 @@ export default function QuizRunnerPage() {
                                 } else {
                                     cardStyle = "bg-slate-50 dark:bg-black/50 border-slate-100 dark:border-slate-800 opacity-50";
                                 }
+                            } else if (isLocked && !hasCorrectInfo && isSelected) {
+                                // Locked, RPC in flight — subtle pulse, no blue
+                                cardStyle = "bg-slate-100 dark:bg-white/10 border-slate-300 dark:border-white/20 animate-pulse";
+                                badgeStyle = "bg-slate-400 dark:bg-slate-500 text-white";
+                                textStyle = "text-[var(--foreground)] opacity-60";
                             } else if (isSelected) {
                                 cardStyle = "bg-[#00B1FF]/5 border-[#00B1FF]";
                                 badgeStyle = "bg-[#00B1FF] text-white";

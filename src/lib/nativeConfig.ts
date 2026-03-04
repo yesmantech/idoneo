@@ -81,7 +81,6 @@ export async function initializeNativeApp() {
 
         // Handle app URL open (deep links)
         App.addListener('appUrlOpen', (event) => {
-            console.log('App opened with URL:', event.url);
             // Handle deep link navigation here
             const path = new URL(event.url).pathname;
             if (path) {
@@ -91,11 +90,9 @@ export async function initializeNativeApp() {
 
         // Handle app state changes
         App.addListener('appStateChange', ({ isActive }) => {
-            console.log('App state changed. Is active:', isActive);
             // You can pause/resume activities here
         });
 
-        console.log('Native app initialized successfully');
     } catch (error) {
         console.error('Error initializing native app:', error);
     }

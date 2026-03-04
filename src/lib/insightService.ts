@@ -111,10 +111,8 @@ export const insightService = {
     async generateInsights(): Promise<Insight[]> {
         // Try AI-powered insights first
         try {
-            console.log('insightService: Attempting AI-powered insights...');
             const aiInsights = await this.generateAIInsights();
             if (aiInsights.length > 0) {
-                console.log('insightService: AI insights generated:', aiInsights.length);
                 return aiInsights;
             }
         } catch (err) {
@@ -228,11 +226,11 @@ export const insightService = {
         // 2. USER ENGAGEMENT TRENDS
         // =================================================================
         const { count: totalUsers } = await supabase
-            .from('profiles')
+            .from('profiles_public')  // V6: Use VIEW
             .select('*', { count: 'exact', head: true });
 
         const { count: activeStreaks } = await supabase
-            .from('profiles')
+            .from('profiles_public')  // V6: Use VIEW
             .select('*', { count: 'exact', head: true })
             .gte('streak_current', 3);
 

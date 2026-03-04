@@ -89,7 +89,7 @@ export async function fetchSmartQuestions(
 
     // 1. BATCH FETCH: All questions for all requested subjects (1 query)
     const { data: allQuestions } = await supabase
-        .from("questions")
+        .from("questions_safe")
         .select("id, subject_id")
         .in("subject_id", subjectIds)
         .eq("is_archived", false);
@@ -261,7 +261,11 @@ function selectSmartMix(allIds: string[], history: UserAnswerHistory, count: num
 function shuffleArray<T>(array: T[]): T[] {
     const copy = [...array];
     for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        // Use Web Crypto API for secure randomness instead of Math.random()
+        const arrayBuffer = new Uint32Array(1);
+        crypto.getRandomValues(arrayBuffer);
+        const randomFraction = arrayBuffer[0] / (0xffffffff + 1);
+        const j = Math.floor(randomFraction * (i + 1));
         [copy[i], copy[j]] = [copy[j], copy[i]];
     }
     return copy;

@@ -6,13 +6,23 @@ import { supabase } from "@/lib/supabaseClient";
 import { Clock, Target, ChevronRight, AlertCircle, Play, BookOpen } from "lucide-react";
 import { analytics } from "@/lib/analytics";
 
+// V5 FIX: Fisher-Yates shuffle (replaces biased Array.sort(random))
+function shuffleArray<T>(array: T[]): T[] {
+    const a = [...array];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 // Helper to normalize DB answers
 function normalizeDBAnswer(val: string | null | undefined): string | null {
     if (!val) return null;
     return val.replace(/[.,:;()[\]]/g, "").trim().toLowerCase();
 }
 
-// Robust accessor to find correct answer
+// V6: Re-added — needed for quiz runner instant-check mode
 function getCorrectOption(q: any): string | null {
     if (!q) return null;
     if (q.correct_option) return normalizeDBAnswer(q.correct_option);
@@ -81,7 +91,7 @@ export default function PracticeStartPage() {
                 const subjectsWithCounts: Subject[] = await Promise.all(
                     subjectsData.map(async (s) => {
                         const { count } = await supabase
-                            .from("questions")
+                            .from("questions_safe")
                             .select("*", { count: 'exact', head: true })
                             .eq("subject_id", s.id)
                             .eq("is_archived", false);
@@ -146,26 +156,36 @@ export default function PracticeStartPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Utente non autenticato");
 
-            // Fetch questions from selected subjects
+            // V11-SEC-2: Fetch from questions_safe VIEW (no correct_option)
+            // Answer validation is done server-side by finish_quiz_attempt RPC
             const { data: questions, error: questionsError } = await supabase
-                .from("questions")
-                .select("*, subject:subjects(name)")
+                .from("questions_safe")
+                .select("id, text, subject_id, option_a, option_b, option_c, option_d, explanation, is_archived")
                 .in("subject_id", selectedSubjects)
                 .eq("is_archived", false);
 
             if (questionsError || !questions?.length) throw new Error("Nessuna domanda disponibile");
 
-            // Shuffle and limit
-            const shuffled = questions.sort(() => Math.random() - 0.5);
+            // V5 FIX: Fetch subject names separately
+            const subjectIds = [...new Set(questions.map((q: any) => q.subject_id))];
+            const { data: subjectData } = await supabase
+                .from("subjects")
+                .select("id, name")
+                .in("id", subjectIds);
+            const subjectMap = new Map(subjectData?.map((s: any) => [s.id, s.name]) || []);
+
+            // V5 FIX: Fisher-Yates shuffle and limit
+            const shuffled = shuffleArray(questions);
             const limited = shuffled.slice(0, Math.min(questionCount, shuffled.length));
 
-            const richAnswers = limited.map(q => ({
+            // V11: correctOption null — server handles scoring, RPC handles instant-check
+            const richAnswers = limited.map((q: any) => ({
                 questionId: q.id,
                 text: q.text,
                 subjectId: q.subject_id,
-                subjectName: (q as any).subject?.name || "Materia",
+                subjectName: subjectMap.get(q.subject_id) || "Materia",
                 selectedOption: null,
-                correctOption: getCorrectOption(q),
+                correctOption: null,
                 isCorrect: false,
                 isSkipped: false,
                 explanation: q.explanation || null,

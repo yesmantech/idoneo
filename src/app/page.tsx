@@ -75,7 +75,6 @@ export default function HomePage() {
     import("@/lib/offlineService").then(({ offlineService }) => {
       if (navigator.onLine) {
         offlineService.syncAndClean().then(count => {
-          if (count > 0) console.log(`[Offline Sync] Synced ${count} attempts.`);
         });
       }
     });

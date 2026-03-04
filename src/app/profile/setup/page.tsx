@@ -33,11 +33,22 @@ export default function ProfileSetupPage() {
             }
 
             const file = event.target.files[0];
+
+            // V4 SEC-1: Validate file size (max 2MB) and type
+            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+            const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+            if (file.size > MAX_FILE_SIZE) {
+                throw new Error('L\'immagine è troppo grande. Massimo 2MB.');
+            }
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                throw new Error('Formato non supportato. Usa JPEG, PNG o WebP.');
+            }
+
             const fileExt = file.name.split('.').pop();
             const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
             const filePath = `${fileName}`;
 
-            // Upload to Supabase Storage
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
                 .upload(filePath, file);
@@ -46,7 +57,6 @@ export default function ProfileSetupPage() {
                 throw uploadError;
             }
 
-            // Get Public URL
             const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
             setAvatarUrl(data.publicUrl);
 
@@ -65,150 +75,75 @@ export default function ProfileSetupPage() {
         // If context user is missing, try fetching directly with retries
         // This handles the case where session is still being processed from URL
         if (!currentUser) {
-            console.log("DEBUG: Context user missing, attempting to recover session...");
 
             // First, try to get session (which processes URL tokens if present)
             const { data: sessionData } = await supabase.auth.getSession();
             if (sessionData?.session?.user) {
                 currentUser = sessionData.session.user;
-                console.log("DEBUG: Recovered user from getSession:", currentUser.id);
             }
 
             // If still no user, try getUser
             if (!currentUser) {
                 const { data: userData } = await supabase.auth.getUser();
                 currentUser = userData.user;
-                console.log("DEBUG: Fallback getUser result:", currentUser?.id);
             }
 
             // Last resort: wait a moment and retry (session might still be processing)
             if (!currentUser) {
-                console.log("DEBUG: No user yet, waiting 1s and retrying...");
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 const { data: retryData } = await supabase.auth.getSession();
                 if (retryData?.session?.user) {
                     currentUser = retryData.session.user;
-                    console.log("DEBUG: Recovered user after retry:", currentUser.id);
                 }
             }
         }
 
         if (!currentUser) {
-            console.error("DEBUG: No user found after all attempts!");
-
-            // DEVELOPER FALLBACK for localhost only
-            if (window.location.hostname === 'localhost') {
-                console.warn("DEV MODE: Using fallback user ID to unblock testing!");
-                currentUser = {
-                    id: 'bf8e5a1e-b8b8-4c87-a0a9-3aaf3c5801fe',
-                    email: 'dev@test.com'
-                } as any;
-            } else {
-                setError("Non sei autenticato. Effettua il login.");
-                return;
-            }
+            setError("Non sei autenticato. Effettua il login.");
+            setSaving(false);
+            return;
         }
 
-        console.log("DEBUG: Attempting profile save for user.id:", currentUser.id);
 
         try {
             setSaving(true);
             setError(null);
 
-            // CHECK: Is nickname already taken by another user?
-            const { data: existingNickname, error: checkError } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('nickname', nickname.trim())
-                .neq('id', currentUser.id)
-                .maybeSingle();
+            // V10: Single atomic RPC handles nickname validation + referral + setup
+            // Replaces 5 sequential API calls (all broken by V5 RLS) with 1 server call
+            const storedRefCode = localStorage.getItem('referral_code');
+            const cleanNickname = DOMPurify.sanitize(nickname.trim());
 
-            if (checkError) {
-                console.error("DEBUG: Nickname check error:", checkError);
-                // Don't block on check errors, proceed with save
+            const { data: result, error: rpcError } = await supabase.rpc('setup_profile', {
+                p_nickname: cleanNickname,
+                p_avatar_url: avatarUrl || null,
+                p_referral_code: storedRefCode || null,
+            });
+
+            if (rpcError) {
+                console.error("Profile setup RPC error:", rpcError);
+                throw rpcError;
             }
 
-            if (existingNickname) {
-                // Nickname is already taken!
-                setError('Questo nickname è già in uso. Scegline un altro!');
+            // Handle structured errors from the RPC
+            if (result?.error) {
+                if (result.code === 'NICKNAME_TAKEN') {
+                    setError('Questo nickname è già in uso. Scegline un altro!');
+                } else if (result.code === 'ALREADY_SETUP') {
+                    // Profile already set up, just navigate home
+                    await refreshProfile();
+                    navigate('/');
+                    return;
+                } else {
+                    setError(result.error);
+                }
                 setSaving(false);
                 return;
             }
 
-            // REFERRAL ATTRIBUTION: Check for stored referral code
-            let referredBy: string | null = null;
-            const storedRefCode = localStorage.getItem('referral_code');
-
+            // Cleanup referral code from localStorage
             if (storedRefCode) {
-                // Look up the referrer by their code
-                const { data: referrer } = await supabase
-                    .from('profiles')
-                    .select('id')
-                    .eq('referral_code', storedRefCode.toUpperCase())
-                    .neq('id', currentUser.id) // Prevent self-referral
-                    .maybeSingle();
-
-                if (referrer) {
-                    referredBy = referrer.id;
-                    console.log('Referral attribution:', storedRefCode, '->', referredBy);
-
-                    // INCREMENT the referrer's count directly
-                    // (The INSERT trigger doesn't fire on UPDATE, so we do it manually)
-                    // Fetch current count, then increment
-                    const { data: referrerProfile } = await supabase
-                        .from('profiles')
-                        .select('referral_count')
-                        .eq('id', referrer.id)
-                        .single();
-
-                    const currentCount = referrerProfile?.referral_count || 0;
-                    await supabase
-                        .from('profiles')
-                        .update({ referral_count: currentCount + 1 })
-                        .eq('id', referrer.id);
-
-                    console.log('Incremented referral count for', referrer.id, 'to', currentCount + 1);
-                }
-
-                // Clear the stored code after use
                 localStorage.removeItem('referral_code');
-            }
-
-            // Sanitization: Clean the nickname to prevent XSS
-            const cleanNickname = DOMPurify.sanitize(nickname.trim());
-
-            // Use UPDATE instead of UPSERT to avoid INSERT RLS issues
-            // The profile should already exist (created by trigger on signup)
-            const { error: updateError, data } = await supabase
-                .from('profiles')
-                .update({
-                    nickname: cleanNickname,
-                    avatar_url: avatarUrl,
-                    email: currentUser.email,
-                    referred_by: referredBy,
-                    updated_at: new Date().toISOString(),
-                })
-                .eq('id', currentUser.id);
-
-            console.log("DEBUG: Supabase UPDATE response - error:", updateError, "data:", data);
-
-            if (updateError) {
-                // If UPDATE fails (no row exists), try INSERT as fallback
-                console.log("DEBUG: UPDATE failed, trying INSERT...");
-                const { error: insertError } = await supabase
-                    .from('profiles')
-                    .insert({
-                        id: user.id,
-                        nickname: cleanNickname,
-                        avatar_url: avatarUrl,
-                        email: user.email,
-                        referred_by: referredBy, // FIX: Include referral attribution in INSERT too!
-                    });
-
-                if (insertError) {
-                    console.error("DEBUG: INSERT also failed:", insertError);
-                    throw insertError;
-                }
             }
 
             // Refresh context to reflect changes
@@ -216,11 +151,9 @@ export default function ProfileSetupPage() {
 
             // Success -> Home Page
             navigate('/');
-        } catch (err) {
-            console.error('Error saving profile:', err);
-            // BYPASS: Proceed to success even on error (temporary workaround)
-            console.warn("Bypassing profile save error, proceeding to home page...");
-            navigate('/');
+        } catch (err: any) {
+            // V4 FUNC-2: Show error to user, do NOT navigate away
+            setError(err?.message || 'Errore durante il salvataggio del profilo.');
         } finally {
             setSaving(false);
         }

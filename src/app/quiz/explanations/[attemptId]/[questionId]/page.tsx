@@ -66,49 +66,88 @@ export default function ExplanationPage() {
     const [loading, setLoading] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
 
-    // Load Attempt
+    // Single effect: Load attempt + find answer + fetch question details
     useEffect(() => {
-        if (!attemptId) return;
-        const load = async () => {
-            const { data } = await supabase.from("quiz_attempts").select("*").eq("id", attemptId).single();
-            if (data) setAttempt(data);
-        };
-        load();
-    }, [attemptId]);
+        if (!attemptId || !questionId) return;
 
-    // Set Current Answer & Load Explanation
-    useEffect(() => {
-        if (!attempt || !questionId) {
-            return;
-        }
+        const loadAll = async () => {
+            setLoading(true);
+            setQuestionDetails(null);
+            setCurrentAnswer(null);
 
-        // Reset state so we don't flash previous question's UI
-        setQuestionDetails(null);
-        setLoading(true);
+            // 1. Load the attempt
+            const { data: attemptData } = await supabase
+                .from("quiz_attempts")
+                .select("*")
+                .eq("id", attemptId)
+                .single();
 
-        const ans = attempt.answers.find((a: any) => a.questionId === questionId);
-        setCurrentAnswer(ans || null);
+            if (!attemptData) {
+                setLoading(false);
+                return;
+            }
+            setAttempt(attemptData);
 
-        if (ans) {
-            // Fetch live question details (explanation) with Cache-Control headers
-            const fetchQ = async () => {
-                const { data } = await supabase
-                    .from("questions")
-                    .select("id, explanation, image_url")
-                    .eq("id", ans.questionId)
-                    .setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-                    .setHeader('Pragma', 'no-cache')
-                    .setHeader('Expires', '0')
+            // 2. Try to find the answer in the attempt's answers array
+            const answers = attemptData.answers || [];
+            const ans = answers.find((a: any) =>
+                String(a.questionId || a.question_id || a.id || '') === String(questionId)
+            );
+
+            if (ans) {
+                setCurrentAnswer(ans);
+            } else {
+                // V11 Fallback: if answer not found in attempt (data mismatch),
+                // fetch the question directly and construct a minimal answer
+                const { data: qData } = await supabase
+                    .from("questions_safe")
+                    .select("id, text, subject_id, option_a, option_b, option_c, option_d, explanation")
+                    .eq("id", questionId)
                     .single();
 
-                if (data) setQuestionDetails(data as any);
-                setLoading(false);
-            };
-            fetchQ();
-        } else {
+                if (qData) {
+                    // Try to find which answer was given (by matching question text)
+                    const textMatch = answers.find((a: any) =>
+                        a.text && qData.text && a.text.trim() === qData.text.trim()
+                    );
+
+                    const fallbackAnswer: RichAnswer = {
+                        questionId: qData.id,
+                        text: qData.text || '',
+                        subjectId: qData.subject_id || '',
+                        subjectName: textMatch?.subjectName || '',
+                        selectedOption: textMatch?.selectedOption || null,
+                        correctOption: textMatch?.correctOption || null,
+                        isCorrect: textMatch?.isCorrect || false,
+                        isSkipped: textMatch ? (textMatch.isSkipped || false) : true,
+                        options: {
+                            a: qData.option_a || '',
+                            b: qData.option_b || '',
+                            c: qData.option_c || '',
+                            d: qData.option_d || '',
+                        }
+                    };
+                    setCurrentAnswer(fallbackAnswer);
+                    if (qData.explanation) {
+                        setQuestionDetails({ id: qData.id, explanation: qData.explanation, image_url: null });
+                    }
+                }
+            }
+
+            // 3. Fetch question details (explanation) if not already set
+            const qId = ans ? (ans.questionId || ans.question_id || ans.id) : questionId;
+            const { data: qDetails } = await supabase
+                .from("questions_safe")
+                .select("id, explanation")
+                .eq("id", qId)
+                .single();
+
+            if (qDetails) setQuestionDetails(prev => prev || (qDetails as any));
             setLoading(false);
-        }
-    }, [attempt, questionId]);
+        };
+
+        loadAll();
+    }, [attemptId, questionId]);
 
     const handleGenerateExplanation = async () => {
         if (!currentAnswer || !questionDetails) return;
@@ -161,10 +200,13 @@ export default function ExplanationPage() {
     const goToNextError = () => {
         if (!attempt) return;
         const errors = attempt.answers.filter((a: any) => !a.isCorrect);
-        const currentIndex = errors.findIndex((a: any) => a.questionId === questionId);
+        const currentIndex = errors.findIndex((a: any) =>
+            String(a.questionId || a.question_id || a.id || '') === String(questionId)
+        );
 
         if (currentIndex !== -1 && currentIndex < errors.length - 1) {
-            const nextId = errors[currentIndex + 1].questionId;
+            const next = errors[currentIndex + 1];
+            const nextId = next.questionId || next.question_id || next.id;
             navigate(`/quiz/explanations/${attemptId}/${nextId}`);
         } else {
             // Cycle or stop?
@@ -176,10 +218,13 @@ export default function ExplanationPage() {
     const goToPrevError = () => {
         if (!attempt) return;
         const errors = attempt.answers.filter((a: any) => !a.isCorrect);
-        const currentIndex = errors.findIndex((a: any) => a.questionId === questionId);
+        const currentIndex = errors.findIndex((a: any) =>
+            String(a.questionId || a.question_id || a.id || '') === String(questionId)
+        );
 
         if (currentIndex > 0) {
-            const prevId = errors[currentIndex - 1].questionId;
+            const prev = errors[currentIndex - 1];
+            const prevId = prev.questionId || prev.question_id || prev.id;
             navigate(`/quiz/explanations/${attemptId}/${prevId}`);
         } else {
             navigate(`/quiz/results/${attemptId}`);
@@ -224,31 +269,40 @@ export default function ExplanationPage() {
                     {currentAnswer.text}
                 </h1>
 
-                {/* Options */}
+                {/* Options — styled to match quiz runner */}
                 <div className="space-y-3 mb-12">
                     {['a', 'b', 'c', 'd'].map(optKey => {
                         const text = (currentAnswer.options as any)[optKey];
                         const isSelected = currentAnswer.selectedOption === optKey;
                         const isCorrect = checkIsCorrect(optKey, currentAnswer.correctOption, currentAnswer.options);
 
-                        let style = "bg-[var(--card)] border-[var(--card-border)] text-[var(--foreground)] opacity-70";
+                        // Match quiz runner styling exactly
+                        let cardStyle = "bg-[var(--card)] border-[var(--card-border)]";
+                        let badgeStyle = "bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400";
+                        let textStyle = "text-[var(--foreground)] opacity-80";
                         let icon: React.ReactNode = null;
 
                         if (isCorrect) {
-                            style = "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-900 dark:text-emerald-400 ring-1 ring-emerald-500 shadow-sm shadow-emerald-500/10";
-                            icon = <span className="text-emerald-600 dark:text-emerald-400 text-lg">✓</span>;
+                            cardStyle = "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500";
+                            badgeStyle = "bg-emerald-500 text-white";
+                            textStyle = "text-emerald-700 dark:text-emerald-400";
+                            icon = <span className="text-emerald-500 dark:text-emerald-400 text-lg font-bold">✓</span>;
                         } else if (isSelected) {
-                            style = "bg-rose-50 dark:bg-rose-900/20 border-rose-500 text-rose-900 dark:text-rose-400 ring-1 ring-rose-500 shadow-sm shadow-rose-500/10";
-                            icon = <span className="text-rose-500 dark:text-rose-400 text-lg">✕</span>;
+                            cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500";
+                            badgeStyle = "bg-red-500 text-white";
+                            textStyle = "text-red-700 dark:text-red-400";
+                            icon = <span className="text-red-500 dark:text-red-400 text-lg font-bold">✕</span>;
+                        } else {
+                            cardStyle = "bg-slate-50 dark:bg-black/50 border-slate-100 dark:border-slate-800 opacity-50";
                         }
 
                         return (
-                            <div key={optKey} className={`p-4 rounded-xl border flex items-center justify-between transition-all duration-300 ${style}`}>
+                            <div key={optKey} className={`p-4 rounded-2xl border-2 flex items-center justify-between transition-all duration-300 ${cardStyle}`}>
                                 <div className="flex items-center gap-4">
-                                    <span className="w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold opacity-60">
+                                    <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${badgeStyle}`}>
                                         {optKey.toUpperCase()}
                                     </span>
-                                    <span className="font-medium">{text}</span>
+                                    <span className={`font-medium text-[15px] ${textStyle}`}>{text}</span>
                                 </div>
                                 {icon}
                             </div>

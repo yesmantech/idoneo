@@ -75,7 +75,7 @@ export default function CustomQuizWizardPage() {
             // Single batch query for ALL question counts instead of N separate queries (1 query)
             const subjectIds = sData.map(s => s.id);
             const { data: qRows } = await supabase
-                .from("questions")
+                .from("questions_safe")
                 .select("subject_id")
                 .in("subject_id", subjectIds)
                 .eq("is_archived", false);
@@ -198,8 +198,6 @@ export default function CustomQuizWizardPage() {
                 selectionMode
             );
 
-            console.log("[CustomQuiz] configs:", configs);
-            console.log("[CustomQuiz] selection result:", selection.length);
 
             if (!selection || selection.length === 0) {
                 throw new Error(`Nessuna domanda trovata. Configs: ${JSON.stringify(configs)}, Mode: ${selectionMode}`);
@@ -207,13 +205,13 @@ export default function CustomQuizWizardPage() {
 
             // Batch fetch for large selections (Supabase .in() has limits)
             const BATCH_SIZE = 500;
-            const questionIds = selection.map(s => s.questionId);
+            const questionIds = selection.map((s: any) => s.questionId);
             let fullQuestions: any[] = [];
 
             for (let i = 0; i < questionIds.length; i += BATCH_SIZE) {
                 const batchIds = questionIds.slice(i, i + BATCH_SIZE);
                 const { data: batchData, error: batchError } = await supabase
-                    .from("questions")
+                    .from("questions_safe")
                     .select("*, subject:subjects(name)")
                     .in("id", batchIds);
 
@@ -227,19 +225,18 @@ export default function CustomQuizWizardPage() {
                 }
             }
 
-            console.log("[CustomQuiz] fullQuestions fetched:", fullQuestions.length);
 
             if (fullQuestions.length === 0) throw new Error("Nessuna domanda trovata con questi criteri.");
 
-            const shuffledQ = fullQuestions.sort(() => Math.random() - 0.5);
+            const shuffledQ = fullQuestions.sort((a: any, b: any) => Math.random() - 0.5);
 
-            const richAnswers = shuffledQ.map(q => ({
+            const richAnswers = shuffledQ.map((q: any) => ({
                 questionId: q.id,
                 text: q.text,
                 subjectId: q.subject_id,
                 subjectName: (q as any).subject?.name || "Materia",
                 selectedOption: null,
-                correctOption: getCorrectOption(q),
+                correctOption: null, // SECURITY: Never expose correct option to client
                 isCorrect: false,
                 isSkipped: false,
                 explanation: q.explanation || null,
@@ -571,7 +568,7 @@ export default function CustomQuizWizardPage() {
                             hours={timeHours}
                             minutes={timeMinutes}
                             seconds={timeSeconds}
-                            onSave={(h, m, s) => {
+                            onSave={(h: number, m: number, s: number) => {
                                 setTimeHours(h);
                                 setTimeMinutes(m);
                                 setTimeSeconds(s);

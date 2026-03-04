@@ -32,7 +32,6 @@ export default function RecoverPasswordPage() {
             const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
             const redirectUrl = `${siteUrl}/update-password`;
 
-            console.log('Sending recovery email with redirect to:', redirectUrl);
 
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: redirectUrl,

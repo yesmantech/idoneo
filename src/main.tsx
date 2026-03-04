@@ -11,7 +11,6 @@ import App from "./App";
  */
 
 // Global console log for production verification
-console.log("🚀 IDONEO: App Booting...");
 
 // Function to remove the boot loader (moved to domUtils.ts)
 

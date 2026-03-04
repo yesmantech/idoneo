@@ -16,7 +16,6 @@ export default function WaitlistPage() {
         const refCode = searchParams.get('ref');
         if (refCode) {
             localStorage.setItem('referral_code', refCode.toUpperCase());
-            console.log('Referral code captured:', refCode);
         }
     }, [searchParams]);
 

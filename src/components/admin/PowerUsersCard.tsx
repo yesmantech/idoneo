@@ -27,53 +27,69 @@ export default function PowerUsersCard() {
             if (viewMode === 'streak') {
                 // Top users by current streak
                 const { data } = await supabase
-                    .from('profiles')
-                    .select('id, nickname, avatar_url, streak_current, streak_best')
+                    .from('profiles_public')  // V6: Use VIEW (SEC-2 restricts raw profiles)
+                    .select('id, nickname, avatar_url, streak_current, streak_max')
                     .order('streak_current', { ascending: false })
                     .limit(5);
 
-                setUsers((data || []).map(u => ({
+                setUsers((data || []).map((u: any) => ({
                     ...u,
+                    streak_best: u.streak_max || 0,
                     total_attempts: 0,
                     success_rate: 0
                 })));
             } else {
-                // Top users by quiz volume - need to aggregate from attempts
+                // V7: Batch-fetch pattern (FK JOIN hits RLS on raw profiles)
                 const { data: attempts } = await supabase
                     .from('quiz_attempts')
-                    .select('user_id, is_idoneo, profiles(nickname, avatar_url, streak_current, streak_best)')
+                    .select('user_id, is_idoneo')
                     .not('finished_at', 'is', null)
                     .limit(500);
 
                 // Aggregate by user
-                const userStats: Record<string, PowerUser> = {};
+                const userStats: Record<string, { total: number; success: number }> = {};
                 (attempts || []).forEach((a: any) => {
                     const uid = a.user_id;
                     if (!userStats[uid]) {
-                        userStats[uid] = {
-                            id: uid,
-                            nickname: a.profiles?.nickname || 'Anonimo',
-                            avatar_url: a.profiles?.avatar_url || null,
-                            streak_current: a.profiles?.streak_current || 0,
-                            streak_best: a.profiles?.streak_best || 0,
-                            total_attempts: 0,
-                            success_rate: 0
-                        };
+                        userStats[uid] = { total: 0, success: 0 };
                     }
-                    userStats[uid].total_attempts++;
-                    if (a.is_idoneo) userStats[uid].success_rate++;
+                    userStats[uid].total++;
+                    if (a.is_idoneo) userStats[uid].success++;
                 });
 
-                // Calculate success rate and sort
-                const sorted = Object.values(userStats)
-                    .map(u => ({
-                        ...u,
-                        success_rate: u.total_attempts > 0
-                            ? Math.round((u.success_rate / u.total_attempts) * 100)
+                // Get top 5 by volume
+                const topUserIds = Object.entries(userStats)
+                    .sort(([, a], [, b]) => b.total - a.total)
+                    .slice(0, 5)
+                    .map(([uid]) => uid);
+
+                // Batch-fetch profiles from VIEW
+                const { data: profiles } = topUserIds.length > 0
+                    ? await supabase
+                        .from('profiles_public')
+                        .select('id, nickname, avatar_url, streak_current, streak_max')
+                        .in('id', topUserIds)
+                    : { data: [] };
+
+                const profileMap = new Map(
+                    (profiles || []).map((p: any) => [p.id, p])
+                );
+
+                const sorted: PowerUser[] = topUserIds.map(uid => {
+                    const p = profileMap.get(uid);
+                    const stats = userStats[uid];
+                    return {
+                        id: uid,
+                        nickname: p?.nickname || 'Anonimo',
+                        avatar_url: p?.avatar_url || null,
+                        streak_current: p?.streak_current || 0,
+                        streak_best: p?.streak_max || 0,
+                        total_attempts: stats.total,
+                        success_rate: stats.total > 0
+                            ? Math.round((stats.success / stats.total) * 100)
                             : 0
-                    }))
-                    .sort((a, b) => b.total_attempts - a.total_attempts)
-                    .slice(0, 5);
+                    };
+                });
 
                 setUsers(sorted);
             }
@@ -114,8 +130,8 @@ export default function PowerUsersCard() {
                     <button
                         onClick={() => setViewMode('streak')}
                         className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${viewMode === 'streak'
-                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                : 'text-slate-500'
+                            ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                            : 'text-slate-500'
                             }`}
                     >
                         <Flame className="w-3 h-3 inline mr-1" />
@@ -124,8 +140,8 @@ export default function PowerUsersCard() {
                     <button
                         onClick={() => setViewMode('volume')}
                         className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${viewMode === 'volume'
-                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                : 'text-slate-500'
+                            ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                            : 'text-slate-500'
                             }`}
                     >
                         <Trophy className="w-3 h-3 inline mr-1" />

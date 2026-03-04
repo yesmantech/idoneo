@@ -100,7 +100,6 @@ class AnalyticsService {
             this.initialized = true;
 
             if (import.meta.env.DEV) {
-                console.log('[Analytics] GA4 Initialized', { measurementId });
             }
         } else {
             console.warn('[Analytics] VITE_GA_MEASUREMENT_ID not found. Analytics disabled.');
@@ -129,7 +128,6 @@ class AnalyticsService {
 
         // Log events in development
         if (import.meta.env.DEV) {
-            console.log('[Analytics] Track:', event, enrichedProperties);
         }
 
         // Send to GA4
@@ -151,7 +149,6 @@ class AnalyticsService {
         const path = window.location.pathname + window.location.search;
 
         if (import.meta.env.DEV) {
-            console.log('[Analytics] Page View:', pageName, path);
         }
 
         // Send to GA4
@@ -172,7 +169,6 @@ class AnalyticsService {
         if (!this.initialized) return;
 
         if (import.meta.env.DEV) {
-            console.log('[Analytics] Identify:', userId, properties);
         }
 
         // GA4 User ID
@@ -193,7 +189,6 @@ class AnalyticsService {
         this.userProperties = {};
 
         if (import.meta.env.DEV) {
-            console.log('[Analytics] Reset');
         }
 
         // Clear user ID in GA context is tricky, usually we just set it to null

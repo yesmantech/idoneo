@@ -31,7 +31,6 @@
  *
  * // Get user's XP stats for profile display
  * const stats = await xpService.getUserXp(userId);
- * console.log(`Level ${stats.currentLevel}, ${stats.nextLevelProgress}% to next`);
  * ```
  */
 

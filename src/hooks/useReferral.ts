@@ -99,11 +99,11 @@ export function useReferral() {
 
             // Calculate priority level based on referral count
             const { count: totalUsers } = await supabase
-                .from('profiles')
+                .from('profiles_public')  // V6: Use VIEW
                 .select('*', { count: 'exact', head: true });
 
             const { count: usersAhead } = await supabase
-                .from('profiles')
+                .from('profiles_public')  // V6: Use VIEW
                 .select('*', { count: 'exact', head: true })
                 .gt('referral_count', profile.referral_count || 0);
 

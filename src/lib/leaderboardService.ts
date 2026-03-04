@@ -91,7 +91,6 @@ export const leaderboardService = {
         // We no longer need to fetch attempts or calculate locally.
         // The trigger 'on_new_attempt_score' on 'quiz_attempts' handles this
         // immediately after the attempt is inserted/updated.
-        console.log("updateUserScore: Managed by Server-Side Trigger for user", userId);
         return;
     },
 
@@ -123,7 +122,7 @@ export const leaderboardService = {
         // Fetch Profiles
         const userIds = rankings.map(r => r.user_id);
         const { data: profiles } = await supabase
-            .from('profiles')
+            .from('profiles_public')
             .select('id, nickname, avatar_url')
             .in('id', userIds);
 
@@ -171,7 +170,7 @@ export const leaderboardService = {
             // Fetch Profiles for nicknames
             const userIds = rankings.map(r => r.user_id);
             const { data: profiles, error: profilesError } = await supabase
-                .from('profiles')
+                .from('profiles_public')
                 .select('id, nickname, avatar_url')
                 .in('id', userIds);
 
@@ -197,9 +196,9 @@ export const leaderboardService = {
 
         // Default: Fetch ALL TIME XP from profiles
         const { data: profiles, error } = await supabase
-            .from('profiles')
+            .from('profiles_public')
             .select('id, nickname, avatar_url, total_xp')
-            .order('total_xp', { ascending: false }) // Sorting by total_xp
+            .order('total_xp', { ascending: false })
             .limit(limit);
 
         if (error) {
@@ -232,7 +231,7 @@ export const leaderboardService = {
     },
 
     async getXPParticipantsCount(seasonId: string | null = null): Promise<number> {
-        let query = supabase.from('profiles').select('*', { count: 'exact', head: true });
+        let query = supabase.from('profiles_public').select('*', { count: 'exact', head: true });
 
         if (seasonId) {
             query = supabase
@@ -273,7 +272,7 @@ export const leaderboardService = {
 
         // Get Profile
         const { data: profile } = await supabase
-            .from('profiles')
+            .from('profiles_public')
             .select('id, nickname, avatar_url')
             .eq('id', userId)
             .single();
@@ -319,7 +318,7 @@ export const leaderboardService = {
 
             if (rankError) return null;
 
-            const { data: profile } = await supabase.from('profiles').select('nickname, avatar_url').eq('id', userId).single();
+            const { data: profile } = await supabase.from('profiles_public').select('nickname, avatar_url').eq('id', userId).single();
 
             return {
                 rank: (higherCount || 0) + 1,
@@ -336,7 +335,7 @@ export const leaderboardService = {
         // Default: All Time Rank
         // Fetch user's total_xp
         const { data: profileRow, error: scoreError } = await supabase
-            .from('profiles')
+            .from('profiles_public')
             .select('total_xp, nickname, avatar_url')
             .eq('id', userId)
             .single();
@@ -345,7 +344,7 @@ export const leaderboardService = {
 
         // Count how many have higher XP
         const { count: higherCount, error: rankError } = await supabase
-            .from('profiles')
+            .from('profiles_public')
             .select('*', { count: 'exact', head: true })
             .gt('total_xp', profileRow.total_xp);
 
@@ -405,24 +404,5 @@ export const leaderboardService = {
                 lastPlayed: row.last_calculated_at
             };
         });
-    },
-
-    // --- Mocks for Development ---
-    getMockSkillData(): LeaderboardEntry[] {
-        return [
-            { rank: 1, score: 92.5, user: { nickname: 'Kate', id: '1' } },
-            { rank: 2, score: 89.1, user: { nickname: 'Liana', id: '2' } },
-            { rank: 3, score: 88.4, user: { nickname: 'John', id: '3' } },
-            { rank: 4, score: 85.0, user: { nickname: 'Ethan', id: '4' } },
-            { rank: 5, score: 82.3, user: { nickname: 'Olivia', id: '5' } },
-        ];
-    },
-
-    getMockXPData(): LeaderboardEntry[] {
-        return [
-            { rank: 1, score: 1450, user: { nickname: 'MaxPower', id: 'x1' } },
-            { rank: 2, score: 1320, user: { nickname: 'QuizMaster', id: 'x2' } },
-            { rank: 3, score: 1280, user: { nickname: 'Luna', id: 'x3' } },
-        ];
     }
 };

@@ -10,13 +10,24 @@ import TierSLoader from "@/components/ui/TierSLoader";
 import { hapticLight, hapticSuccess } from "@/lib/haptics";
 import { Button } from "@/components/ui/Button";
 
+// V5 FIX: Fisher-Yates shuffle (replaces biased Array.sort(random))
+function shuffleArray<T>(array: T[]): T[] {
+    const a = [...array];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 // Helper to normalize DB answers
 function normalizeDBAnswer(val: string | null | undefined): string | null {
     if (!val) return null;
     return val.replace(/[.,:;()[\]]/g, "").trim().toLowerCase();
 }
 
-// Robust accessor to find correct answer
+// V6: Re-added — needed for quiz runner instant-check mode
+// Security: finish_quiz_attempt RPC overwrites answers JSONB server-side after submission
 function getCorrectOption(q: any): string | null {
     if (!q) return null;
     if (q.correct_option) return normalizeDBAnswer(q.correct_option);
@@ -163,17 +174,16 @@ export default function OfficialQuizStarterPage() {
             for (const rule of rules) {
                 if (rule.question_count <= 0) continue;
 
-                // Fetch all IDs for this subject
+                // Fetch IDs only from this subject
                 const { data: qIds } = await supabase
-                    .from("questions")
+                    .from("questions_safe")  // V5 FIX: Use safe VIEW (no correct_option)
                     .select("id")
                     .eq("subject_id", rule.subject_id)
                     .eq("is_archived", false);
 
                 if (qIds && qIds.length > 0) {
-                    // Shuffle using Fisher-Yates or simple sort
-                    const shuffled = qIds.sort(() => Math.random() - 0.5);
-                    // Slice to get the exact count
+                    // V5 FIX: Fisher-Yates shuffle (was biased Array.sort)
+                    const shuffled = shuffleArray(qIds);
                     const selected = shuffled.slice(0, rule.question_count);
                     selectedQuestionIds.push(...selected.map(q => q.id));
                 }
@@ -183,25 +193,35 @@ export default function OfficialQuizStarterPage() {
                 throw new Error("Nessuna domanda trovata per le materie configurate.");
             }
 
-            // 3. Fetch Full Details for selected IDs
+            // V11-SEC-2: Fetch from questions_safe VIEW (no correct_option)
+            // Answer validation is done server-side by finish_quiz_attempt RPC
             const { data: questions, error: questionsError } = await supabase
-                .from("questions")
-                .select("*, subject:subjects(name)")
+                .from("questions_safe")
+                .select("id, text, subject_id, option_a, option_b, option_c, option_d, explanation, is_archived")
                 .in("id", selectedQuestionIds)
                 .eq("is_archived", false);
 
             if (questionsError || !questions?.length) throw new Error("Errore nel recupero delle domande.");
 
-            // 4. Shuffle Final Set (so subjects are mixed) & Prepare
-            const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+            // V5 FIX: Fetch subject names separately
+            const subjectIds = [...new Set(questions.map((q: any) => q.subject_id))];
+            const { data: subjects } = await supabase
+                .from("subjects")
+                .select("id, name")
+                .in("id", subjectIds);
+            const subjectMap = new Map(subjects?.map((s: any) => [s.id, s.name]) || []);
 
-            const richAnswers = shuffledQuestions.map(q => ({
+            // 4. Shuffle Final Set with Fisher-Yates & Prepare
+            const shuffledQuestions = shuffleArray(questions);
+
+            // V11: correctOption null — server handles scoring, RPC handles instant-check
+            const richAnswers = shuffledQuestions.map((q: any) => ({
                 questionId: q.id,
                 text: q.text,
                 subjectId: q.subject_id,
-                subjectName: (q as any).subject?.name || "Materia",
+                subjectName: subjectMap.get(q.subject_id) || "Materia",
                 selectedOption: null,
-                correctOption: getCorrectOption(q),
+                correctOption: null,
                 isCorrect: false,
                 isSkipped: false,
                 explanation: q.explanation || null,

@@ -88,7 +88,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         queryKey: ['profile', user?.id],
         queryFn: async () => {
             if (!user?.id) return null;
-            console.log('React Query: Fetching profile for', user.id);
             const { data, error } = await supabase
                 .from('profiles')
                 .select('id, nickname, avatar_url, role, streak_current, streak_max, dismissed_modals, total_xp')

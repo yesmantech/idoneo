@@ -99,8 +99,8 @@ interface Question {
     text: string;
     /** Answer options (JSONB from database) */
     options: any;
-    /** Correct answer key (a, b, c, or d) */
-    correct_option: string;
+    /** Correct answer key (a, b, c, or d) - Optional because safe view hides it */
+    correct_option?: string;
     /** Optional explanation for the correct answer */
     explanation?: string;
     /** Subject UUID for categorization */
@@ -164,7 +164,7 @@ export const offlineService = {
 
         // We might need to count total first for progress
         const { count } = await supabase
-            .from('questions')
+            .from('questions_safe')
             .select('id', { count: 'exact', head: true })
             .in('subject_id', subjectIds);
 
@@ -175,8 +175,8 @@ export const offlineService = {
         let rangeStart = 0;
         while (true) {
             const { data: batch, error } = await supabase
-                .from('questions')
-                .select('id, text, options, correct_option, explanation, subject_id')
+                .from('questions_safe')
+                .select('id, text, options, explanation, subject_id')
                 .in('subject_id', subjectIds)
                 .range(rangeStart, rangeStart + BATCH_SIZE - 1);
 
@@ -307,7 +307,7 @@ export const offlineService = {
             questionId: q.id,
             text: q.text, // Store text to display
             options: q.options,
-            correctOption: q.correct_option,
+            correctOption: null, // SECURITY: Never expose correct option
             explanation: q.explanation,
             selectedOption: null,
             subjectId: q.subject_id
@@ -344,69 +344,9 @@ export const offlineService = {
         });
     },
 
-    // 6. Sync Pending
-    async syncPendingAttempts(): Promise<number> {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return 0; // Can't sync if not logged in
-
-        const db = await this.openDB();
-        const allPending = await new Promise<any[]>((resolve, reject) => {
-            const tx = db.transaction(STORE_PENDING_ATTEMPTS, 'readonly');
-            const req = tx.objectStore(STORE_PENDING_ATTEMPTS).getAll();
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = () => reject(req.error);
-        });
-
-        if (allPending.length === 0) return 0;
-
-        let syncedCount = 0;
-        const tx = db.transaction(STORE_PENDING_ATTEMPTS, 'readwrite');
-        const store = tx.objectStore(STORE_PENDING_ATTEMPTS);
-
-        for (const attempt of allPending) {
-            // Only sync finished attempts
-            if (!attempt.finished_at) continue;
-
-            // PREPARE PAYLOAD FOR SUPABASE
-            // 1. Remove local keys
-            const { localId, synced, id, ...rest } = attempt;
-
-            // 2. Inject User ID
-            const payload = {
-                ...rest,
-                user_id: user.id,
-                // Let Supabase generate a new UUID for 'id' OR format answers if needed
-            };
-
-            // 3. Insert
-            const { error } = await supabase.from('quiz_attempts').insert(payload);
-
-            if (!error) {
-                // Remove from local DB on success
-                // simple store.delete(attempt.localId) might fail if we are inside an async loop 
-                // but usually fine if using the *same* transaction? 
-                // Wait, await supabase breaks the transaction scope in standard IDB!
-                // We must perform deletions in a NEW transaction after the await.
-                syncedCount++;
-            } else {
-                console.error("Sync error for attempt", attempt.localId, error);
-            }
-        }
-
-        // Clean up synced items (Supabase calls are async, so original tx is closed)
-        if (syncedCount > 0) {
-            const cleanupTx = db.transaction(STORE_PENDING_ATTEMPTS, 'readwrite');
-            const cleanupStore = cleanupTx.objectStore(STORE_PENDING_ATTEMPTS);
-            for (const attempt of allPending) {
-                if (attempt.finished_at) { // simplistic check, ideally track IDs successfully synced
-                    // For now, re-reading or assuming success in this flow. 
-                    // Better: track successful IDs.
-                }
-            }
-        }
-
-        return syncedCount;
-    },
+    // 6. syncPendingAttempts REMOVED (V8-SEC-1)
+    // This function was orphaned dead code that bypassed server validation.
+    // The secure sync path is syncAndClean() which uses sync_offline_attempt RPC.
 
     // 6b. Optimized Sync with cleanup
     async syncAndClean(): Promise<number> {
@@ -428,13 +368,35 @@ export const offlineService = {
         for (const attempt of allPending) {
             if (!attempt.finished_at) continue;
 
-            const { localId, synced, id, ...rest } = attempt;
-            const payload = { ...rest, user_id: user.id }; // Auto-gen ID
+            const { localId, synced, id, quiz_id, started_at, finished_at, total_questions, answers } = attempt;
 
-            const { error } = await supabase.from('quiz_attempts').insert(payload);
-            if (!error) {
+            // Simplify answers payload for the server
+            const answersForServer = answers.map((a: any) => ({
+                questionId: a.questionId,
+                selectedOption: a.selectedOption,
+                text: a.text,
+                subjectId: a.subjectId,
+                subjectName: a.subjectName,
+                explanation: a.explanation,
+                options: a.options
+            }));
+
+            // Sync using the secure RPC
+            const { data: result, error: rpcError } = await supabase.rpc('sync_offline_attempt', {
+                p_quiz_id: quiz_id,
+                p_started_at: started_at,
+                p_finished_at: finished_at,
+                p_total_questions: total_questions,
+                p_answers: answersForServer,
+                // Default scoring logic if none explicitly provided
+                p_scoring: { correct: 1, wrong: 0, blank: 0 }
+            });
+
+            if (!rpcError && result) {
                 toDelete.push(attempt.localId);
                 syncedCount++;
+            } else {
+                console.error("Sync error for attempt", attempt.localId, rpcError);
             }
         }
 

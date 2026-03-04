@@ -127,129 +127,31 @@ export const badgeService = {
 
     /**
      * Check and award badges based on current stats
+     * This uses a single highly-optimized Postgres RPC instead of making 6+ sequential client queries.
      * This can be called after significant events (quiz completion, referral, etc.)
      */
     async checkAndAwardBadges(userId: string) {
         try {
-            console.log('Badge Check: Starting for user', userId);
 
-            // Fetch existing badges FIRST to determine which ones are newly unlocked
-            const existingBadges = await this.getUserBadges(userId);
+            // Fetch and evaluate all badges in a single atomic DB transaction
+            const { data: awardedBadges, error } = await supabase
+                .rpc('check_and_award_badges', { p_user_id: userId });
 
-            // 1. Fetch User Profile Stats
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('total_xp, referral_count, streak_current')
-                .eq('id', userId)
-                .single();
-
-            if (profileError) {
-                console.error('Badge Check: Profile Fetch Error', profileError);
+            if (error) {
+                console.error('Badge Check: RPC Error', error);
                 return;
             }
 
-            if (!profile) {
-                console.warn('Badge Check: No profile found for', userId);
-                return;
-            }
+            if (awardedBadges && Array.isArray(awardedBadges) && awardedBadges.length > 0) {
 
-            console.log('Badge Check: Data fetched', profile);
-            console.log('Badge Check: Total XP:', profile.total_xp);
-            console.log('Badge Check: Current Streak:', profile.streak_current);
-
-            // 2. veterano: 1000+ total XP (assuming 1 XP per correct answer)
-            if ((profile.total_xp || 0) >= 1000) {
-                console.log('Badge Check: Awarding veterano');
-                await this.awardBadge(userId, 'veterano', existingBadges);
-            }
-
-            // 3. social: 5+ referrals
-            if ((profile.referral_count || 0) >= 5) {
-                console.log('Badge Check: Awarding social');
-                await this.awardBadge(userId, 'social', existingBadges);
-            }
-
-            // 4. costanza: 7 day streak
-            if ((profile.streak_current || 0) >= 7) {
-                console.log('Badge Check: Awarding costanza');
-                await this.awardBadge(userId, 'costanza', existingBadges);
-            }
-
-            // 5. maratona: 14 day streak (Gold tier)
-            if ((profile.streak_current || 0) >= 14) {
-                console.log('Badge Check: Awarding maratona');
-                await this.awardBadge(userId, 'maratona', existingBadges);
-            }
-
-            // 6. inarrestabile: 30 day streak
-            if ((profile.streak_current || 0) >= 30) {
-                console.log('Badge Check: Awarding inarrestabile');
-                await this.awardBadge(userId, 'inarrestabile', existingBadges);
-            }
-
-            // 7. diamante: 60 day streak (Sapphire tier)
-            if ((profile.streak_current || 0) >= 60) {
-                console.log('Badge Check: Awarding diamante');
-                await this.awardBadge(userId, 'diamante', existingBadges);
-            }
-
-            // 8. immortale: 100 day streak (Diamond tier)
-            if ((profile.streak_current || 0) >= 100) {
-                console.log('Badge Check: Awarding immortale');
-                await this.awardBadge(userId, 'immortale', existingBadges);
-            }
-
-            // 6. hub_master: participation in 5 different quizzes/contests
-            const { data: uniqueData } = await supabase
-                .from('quiz_attempts')
-                .select('quiz_id')
-                .eq('user_id', userId);
-
-            const uniqueIds = new Set(uniqueData?.map(d => d.quiz_id));
-            if (uniqueIds.size >= 5) {
-                console.log('Badge Check: Awarding hub_master');
-                await this.awardBadge(userId, 'hub_master', existingBadges);
-            }
-
-            // 7. nottambulo: 5 attempts between 01:00 and 05:00
-            const { data: nightAttempts } = await supabase
-                .from('quiz_attempts')
-                .select('created_at')
-                .eq('user_id', userId);
-
-            const lateNightCount = nightAttempts?.filter(a => {
-                const hour = new Date(a.created_at).getHours();
-                return hour >= 1 && hour < 5;
-            }).length || 0;
-
-            if (lateNightCount >= 5) {
-                console.log('Badge Check: Awarding nottambulo');
-                await this.awardBadge(userId, 'nottambulo', existingBadges);
-            }
-
-            // 8. secchione: check if any attempt has 100% correct (min 10 questions)
-            const { data: highTotalAttempts } = await supabase
-                .from('quiz_attempts')
-                .select('id, correct, total_questions')
-                .eq('user_id', userId)
-                .gt('total_questions', 9);
-
-            const perfectAttempt = highTotalAttempts?.find(a => a.correct === a.total_questions);
-
-            if (perfectAttempt) {
-                console.log('Badge Check: Awarding secchione');
-                await this.awardBadge(userId, 'secchione', existingBadges);
-            }
-
-            // 9. primo_passo: at least one attempt
-            const { count: attemptCount } = await supabase
-                .from('quiz_attempts')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', userId);
-
-            if (attemptCount && attemptCount > 0) {
-                console.log('Badge Check: Awarding primo_passo');
-                await this.awardBadge(userId, 'primo_passo', existingBadges);
+                // Dispatch events for UI notifications for newly earned badges
+                if (typeof window !== 'undefined') {
+                    for (const badgeId of awardedBadges) {
+                        window.dispatchEvent(new CustomEvent('badge_unlocked', { detail: { badgeId } }));
+                        analytics.track('badge_earned', { badge_id: badgeId });
+                    }
+                }
+            } else {
             }
 
         } catch (error) {

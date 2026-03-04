@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, ChevronRight, Pencil, Check, AlertTriangle, Loader2,
     Sun, Moon, Monitor, LogOut, Mail, FileText, Shield,
-    User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus
+    User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus, PlayCircle
 } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
@@ -338,6 +338,16 @@ export default function ProfileSettingsPage() {
                         label="Tema"
                         value={themeLabel}
                         onClick={() => setShowThemeSelector(true)}
+                    />
+                    <Divider />
+                    {/* Reset Onboarding Row */}
+                    <SettingsRow
+                        icon={<PlayCircle className="w-6 h-6" />}
+                        label="Rivivi Tutorial"
+                        onClick={() => {
+                            resetOnboarding();
+                            showToast('success', 'Tutorial riattivato! Naviga nell\'app per rivederlo.');
+                        }}
                     />
                 </div>
 

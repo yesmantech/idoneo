@@ -91,8 +91,8 @@ function MetricCard({
                 {/* Trend indicator */}
                 {trend && trendValue && (
                     <div className={`flex items-center gap-0.5 text-xs font-bold ${trend === 'up' ? 'text-emerald-500' :
-                            trend === 'down' ? 'text-rose-500' :
-                                'text-slate-400'
+                        trend === 'down' ? 'text-rose-500' :
+                            'text-slate-400'
                         }`}>
                         {trend === 'up' ? <TrendingUp className="w-3 h-3" /> :
                             trend === 'down' ? <TrendingDown className="w-3 h-3" /> : null}
@@ -145,7 +145,7 @@ export default function LiveMetricsCard() {
         try {
             // New users today
             const { count: newUsersToday } = await supabase
-                .from('profiles')
+                .from('profiles_public')  // V6: Use VIEW
                 .select('*', { count: 'exact', head: true })
                 .gte('created_at', todayISO);
 
@@ -170,13 +170,13 @@ export default function LiveMetricsCard() {
 
             // Active streaks (users with streak >= 3)
             const { count: activeStreaks } = await supabase
-                .from('profiles')
+                .from('profiles_public')  // V6: Use VIEW
                 .select('*', { count: 'exact', head: true })
                 .gte('streak_current', 3);
 
             // Yesterday comparison
             const { count: newUsersYesterday } = await supabase
-                .from('profiles')
+                .from('profiles_public')  // V6: Use VIEW
                 .select('*', { count: 'exact', head: true })
                 .gte('created_at', yesterdayISO)
                 .lt('created_at', todayISO);

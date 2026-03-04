@@ -33,16 +33,12 @@ export default function BadgesBlock() {
             return;
         }
         setLoading(true);
-        console.log('BadgesBlock: Fetching badges for', user.id);
         try {
             // First check if any new badges should be awarded
             await badgeService.checkAndAwardBadges(user.id);
-            console.log('BadgesBlock: checkAndAwardBadges completed');
 
             // Then fetch all awarded badges
             const earned = await badgeService.getUserBadges(user.id);
-            console.log('BadgesBlock: User ID:', user.id);
-            console.log('BadgesBlock: Earned badges raw:', earned);
             setUnlockedBadges(earned);
 
             // Fetch debug data for admins

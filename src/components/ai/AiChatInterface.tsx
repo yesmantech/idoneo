@@ -642,7 +642,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     };
 
     return (
-        <div className="relative flex flex-col h-full w-full max-w-3xl mx-auto overflow-hidden bg-white dark:bg-black text-black dark:text-white font-sans">
+        <div className="relative flex flex-col h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans" style={{ overflow: 'hidden' }}>
 
             {/* Header */}
             <div className="flex-none p-4 flex items-center gap-3 z-10">
@@ -694,8 +694,12 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-4 pb-32 pt-2 space-y-6"
-                style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
+                className="flex-1 min-h-0 overflow-y-auto px-4 pb-32 pt-2 space-y-6"
+                style={{
+                    WebkitOverflowScrolling: 'touch',
+                    touchAction: 'pan-y',
+                    overscrollBehavior: 'auto',
+                }}
             >
                 <AnimatePresence initial={false}>
                     {(messages || []).map((m: any) => {

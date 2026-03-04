@@ -45,7 +45,7 @@ export default function QuizStatsPage() {
         queryKey: ['quiz-stats', quizId, user?.id],
         queryFn: async () => {
             if (!user || !quizId) return null;
-            const [quizRes, attemptsRes, goalRes, leaderboardRes] = await Promise.all([
+            const [quizRes, attemptsRes, goalRes, leaderboardRes, rulesRes] = await Promise.all([
                 supabase
                     .from('quizzes')
                     .select('title, total_questions, points_correct, rule_id, simulation_rule:simulation_rules(total_questions, points_correct)')
@@ -53,7 +53,7 @@ export default function QuizStatsPage() {
                     .single(),
                 supabase
                     .from("quiz_attempts")
-                    .select(`*, quiz:quizzes(title), mode`)
+                    .select('id, score, correct, wrong, blank, total_questions, created_at, answers, mode, quiz:quizzes(title)')
                     .eq("user_id", user.id)
                     .eq("quiz_id", quizId)
                     .order("created_at", { ascending: false }),
@@ -69,18 +69,24 @@ export default function QuizStatsPage() {
                     .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
                     .eq('user_id', user.id)
                     .eq('quiz_id', quizId)
-                    .maybeSingle()
+                    .maybeSingle(),
+                // V4 FUNC-3: Fetch subject rules in parallel (was fire-and-forget async)
+                supabase
+                    .from('quiz_subject_rules')
+                    .select('question_count')
+                    .eq('quiz_id', quizId)
             ]);
             return {
                 quiz: quizRes.data,
                 attempts: attemptsRes.data,
                 goal: goalRes.data,
                 leaderboard: leaderboardRes.data,
+                rules: rulesRes.data,
                 error: Object.values({ quizRes, attemptsRes, goalRes, leaderboardRes }).find(r => r.error)?.error
             };
         },
         enabled: !!user && !!quizId,
-        staleTime: 1000 * 60 * 5 // 5 minutes cache
+        staleTime: 1000 * 60 * 5
     });
 
     const [attempts, setAttempts] = useState<AttemptWithDetails[]>([]);
@@ -126,28 +132,20 @@ export default function QuizStatsPage() {
     useEffect(() => {
         if (!fetchedData || !quizId) return;
 
-        const { quiz: quizData, attempts: data, goal: goalData, leaderboard: leaderboardData, error } = fetchedData;
+        const { quiz: quizData, attempts: data, goal: goalData, leaderboard: leaderboardData, rules, error } = fetchedData;
 
         let maxCalc = 0;
 
         if (quizData) {
             setQuizTitle(quizData.title);
 
-            // 1. Check if there are specific subject rules (highest priority)
-            const checkRules = async () => {
-                const { data: rules } = await supabase
-                    .from('quiz_subject_rules')
-                    .select('question_count')
-                    .eq('quiz_id', quizId);
-
-                if (rules && rules.length > 0) {
-                    const totalFromRules = rules.reduce((acc, r) => acc + (r.question_count || 0), 0);
-                    if (totalFromRules > 0) {
-                        maxCalc = totalFromRules * (quizData.points_correct || 1);
-                    }
+            // V4 FUNC-3: Use rules fetched in parallel (no more fire-and-forget async)
+            if (rules && rules.length > 0) {
+                const totalFromRules = rules.reduce((acc: number, r: any) => acc + (r.question_count || 0), 0);
+                if (totalFromRules > 0) {
+                    maxCalc = totalFromRules * (quizData.points_correct || 1);
                 }
-            };
-            checkRules();
+            }
 
             // 2. Fallback to simulation_rule join (legacy)
             if (maxCalc === 0) {

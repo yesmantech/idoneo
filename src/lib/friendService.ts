@@ -82,7 +82,7 @@ export const friendService = {
         if (!query || query.length < 3) return [];
 
         const { data, error } = await supabase
-            .from('profiles')
+            .from('profiles_public')  // V6: Use VIEW (SEC-2 restricts raw profiles to self)
             .select('id, nickname, avatar_url, created_at')
             .ilike('nickname', `%${query}%`)
             .neq('id', currentUserId)
@@ -191,28 +191,35 @@ export const friendService = {
         pendingSent: FriendProfile[]
     }> {
         // 1. Get Referrals (Legacy Friends)
+        // V7: Use RPC (referred_by not in profiles_public VIEW)
         const { data: referrals } = await supabase
-            .from('profiles')
-            .select('id, nickname, avatar_url, created_at')
-            .eq('referred_by', userId)
-            .order('created_at', { ascending: false });
+            .rpc('get_referred_users', { p_user_id: userId });
 
-        const referralFriends: FriendProfile[] = (referrals || []).map(r => ({ ...r, status: 'referral' }));
+        const referralFriends: FriendProfile[] = (referrals || []).map((r: any) => ({ ...r, status: 'referral' }));
 
         // 2. Get Friendships (Accepted & Pending)
-        // We need to know who is who
         const { data: friendships } = await supabase
             .from('friendships')
-            .select(`
-                id,
-                status,
-                user_id,
-                friend_id,
-                created_at,
-                sender:profiles!user_id(id, nickname, avatar_url),
-                receiver:profiles!friend_id(id, nickname, avatar_url)
-            `)
+            .select('id, status, user_id, friend_id, created_at')
             .or(`user_id.eq.${userId},friend_id.eq.${userId}`);
+
+        // V6: Batch-fetch profile data from profiles_public (SEC-2 restricts raw profiles)
+        const friendUserIds = new Set<string>();
+        friendships?.forEach((f: any) => {
+            if (f.user_id !== userId) friendUserIds.add(f.user_id);
+            if (f.friend_id !== userId) friendUserIds.add(f.friend_id);
+        });
+
+        const { data: friendProfiles } = friendUserIds.size > 0
+            ? await supabase
+                .from('profiles_public')
+                .select('id, nickname, avatar_url')
+                .in('id', Array.from(friendUserIds))
+            : { data: [] };
+
+        const profileMap = new Map<string, any>(
+            (friendProfiles || []).map((p: any) => [p.id, p])
+        );
 
         const accepted: FriendProfile[] = [];
         const pendingReceived: FriendProfile[] = [];
@@ -220,7 +227,8 @@ export const friendService = {
 
         friendships?.forEach((f: any) => {
             const isSender = f.user_id === userId;
-            const otherUser = isSender ? f.receiver : f.sender;
+            const otherUserId = isSender ? f.friend_id : f.user_id;
+            const otherUser = profileMap.get(otherUserId);
 
             // Should not happen if DB integrity holds, but handled
             if (!otherUser) return;

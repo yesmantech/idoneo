@@ -68,7 +68,6 @@ export async function initPushNotifications(
     onAction?: ActionHandler
 ): Promise<boolean> {
     if (!Capacitor.isNativePlatform()) {
-        console.log('Push notifications not available on web');
         return false;
     }
 
@@ -82,7 +81,6 @@ export async function initPushNotifications(
         }
 
         if (permStatus.receive !== 'granted') {
-            console.log('Push notification permission not granted');
             return false;
         }
 
@@ -91,7 +89,6 @@ export async function initPushNotifications(
 
         // Listen for registration success
         PushNotifications.addListener('registration', (token: Token) => {
-            console.log('Push registration success, token:', token.value);
             onToken?.(token.value);
         });
 
@@ -102,17 +99,14 @@ export async function initPushNotifications(
 
         // Listen for push notification received (app in foreground)
         PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
-            console.log('Push notification received:', notification);
             onNotification?.(notification);
         });
 
         // Listen for tap on notification
         PushNotifications.addListener('pushNotificationActionPerformed', (action: ActionPerformed) => {
-            console.log('Push notification action performed:', action);
             onAction?.(action);
         });
 
-        console.log('Push notifications initialized successfully');
         return true;
     } catch (error) {
         console.error('Error initializing push notifications:', error);

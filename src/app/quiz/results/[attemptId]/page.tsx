@@ -40,9 +40,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { xpService } from "@/lib/xpService";
-import { offlineService } from "@/lib/offlineService"; // IMPORT OFFLINE SERVICE
-import { analytics } from "@/lib/analytics"; // ANALYTICS
+import { offlineService } from "@/lib/offlineService";
+import { analytics } from "@/lib/analytics";
+import { useAuth } from "@/context/AuthContext";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { X, Minus, ChevronRight, RotateCcw, Trophy, Zap, Check, Target, Clock, BookOpen, AlertCircle } from "lucide-react";
 import { SuccessBadge } from "@/components/ui/SuccessBadge";
@@ -105,14 +105,16 @@ export default function QuizResultsPage() {
     const [xpEarned, setXpEarned] = useState<number | null>(null);
     const xpAwardedRef = useRef(false);
     const confettiFiredRef = useRef(false);
+    const streakCheckedRef = useRef(false);
+    const { profile, refreshProfile } = useAuth();
 
     useEffect(() => {
         if (!attemptId) return;
         const fetchAttempt = async () => {
             // If data was passed from the Quiz completion, use it directly!
             // This prevents stale reads from caching/race conditions.
-            const passedAttempt = (location.state as any)?.updatedAttempt;
-            if (passedAttempt) {
+            const passedAttempt = (location.state as any)?.attempt || (location.state as any)?.updatedAttempt;
+            if (passedAttempt && passedAttempt.answers && (passedAttempt.correct > 0 || passedAttempt.wrong > 0 || passedAttempt.blank > 0)) {
                 setAttempt(passedAttempt as AttemptData);
                 setLoading(false);
                 return;
@@ -149,41 +151,75 @@ export default function QuizResultsPage() {
                 return;
             }
 
-            // ONLINE HANDLING (Cache-busted)
-            const { data, error } = await supabase
-                .from("quiz_attempts")
-                .select("*")
-                .eq("id", attemptId)
-                .single();
+            // ONLINE HANDLING — retry if data looks stale (RPC transaction not yet visible)
+            let retries = 0;
+            const maxRetries = 3;
+            while (retries <= maxRetries) {
+                const { data, error } = await supabase
+                    .from("quiz_attempts")
+                    .select("*")
+                    .eq("id", attemptId)
+                    .single();
 
-            if (error) console.error(error);
-            else setAttempt(data as any);
+                if (error) { console.error(error); break; }
+
+                // Check if data looks stale: finished but all scores are 0 with answers present
+                const looksStale = data && data.finished_at && data.correct === 0 && data.wrong === 0 && data.blank === 0
+                    && Array.isArray(data.answers) && data.answers.length > 0;
+
+                if (!looksStale || retries === maxRetries) {
+                    setAttempt(data as any);
+                    break;
+                }
+
+                // Wait before retrying
+                retries++;
+                await new Promise(r => setTimeout(r, 800));
+            }
             setLoading(false);
         };
         fetchAttempt();
     }, [attemptId]);
 
-    // Handle XP Awarding (Only Online)
+    // XP Display — server trigger awards XP; we just show the correct count.
     useEffect(() => {
-        const awardXP = async () => {
-            if (attemptId?.startsWith('local-')) return;
+        if (attempt && !xpAwardedRef.current) {
+            xpAwardedRef.current = true;
+            setXpEarned(attempt.correct || 0);
+        }
+    }, [attempt]);
 
-            if (attempt && attempt.user_id && attemptId && !xpAwardedRef.current) {
-                xpAwardedRef.current = true;
-                if (attempt.xp_awarded) {
-                    setXpEarned(attempt.correct || 0);
-                    return;
-                }
-                const earned = await xpService.awardXpForAttempt(attemptId, attempt.user_id);
-                if (earned > 0) {
-                    setXpEarned(earned);
-                } else if (earned === 0 && attempt.correct > 0) {
-                    setXpEarned(attempt.correct);
-                }
-            }
-        };
-        awardXP();
-    }, [attempt, attemptId]);
+    // V4 RET-1: Streak celebration trigger.
+    // After quiz completion, the server trigger updates streak_current.
+    // We refresh the profile and dispatch the celebration event if streak changed.
+    useEffect(() => {
+        if (!attempt || attemptId?.startsWith('local-') || streakCheckedRef.current) return;
+        streakCheckedRef.current = true;
+
+        const prevStreak = profile?.streak_current || 0;
+        const userId = profile?.id; // V5 FIX: Use auth profile ID, not attempt.user_id (may be undefined from navigate state)
+
+        if (!userId) return;
+
+        // Refetch profile to get the server-updated streak
+        refreshProfile().then(() => {
+            supabase
+                .from('profiles')
+                .select('streak_current')
+                .eq('id', userId)
+                .single()
+                .then(({ data }: { data: any }) => {
+                    const newStreak = data?.streak_current || 0;
+                    if (newStreak > 0 && newStreak !== prevStreak) {
+                        const MILESTONES = [3, 7, 14, 30, 60, 100, 200, 365];
+                        const isMilestone = MILESTONES.includes(newStreak);
+                        window.dispatchEvent(new CustomEvent('streak_updated', {
+                            detail: { streak: newStreak, isMilestone }
+                        }));
+                    }
+                });
+        });
+    }, [attempt]);
 
     // Confetti celebration
     useEffect(() => {
@@ -271,8 +307,9 @@ export default function QuizResultsPage() {
                 return;
             }
 
-            const newAnswers = errors.map(a => ({
-                ...a,
+            // V3 FIX: Strip correctOption and isCorrect to prevent answer leakage (CRIT-2 + HIGH-5)
+            const newAnswers = errors.map(({ correctOption, isCorrect, ...rest }) => ({
+                ...rest,
                 selectedOption: null,
                 isCorrect: false,
                 isSkipped: false,
@@ -349,22 +386,8 @@ export default function QuizResultsPage() {
         correctAnswer: getOptionText(a, a.correctOption),
     }));
 
-    // Resilient fallback: if DB columns are stale (all 0) but answers array is populated,
-    // recompute the counts from the answers themselves. This handles old attempts that were
-    // saved before the RLS UPDATE policy was deployed.
-    const computedCorrect = correctList.length;
-    const computedWrong = wrongList.length;
-    const computedBlank = skippedList.length;
-    const dbCountsAreStale = (attempt.correct === 0 && attempt.wrong === 0 && attempt.blank === 0)
-        && (computedCorrect + computedWrong + computedBlank) > 0;
-
-    if (dbCountsAreStale) {
-        attempt.correct = computedCorrect;
-        attempt.wrong = computedWrong;
-        attempt.blank = computedBlank;
-        // Recompute score: use default 1pt per correct, -0.25 per wrong, 0 per blank
-        attempt.score = computedCorrect - (computedWrong * 0.25);
-    }
+    // V3 FIX (MED-4): Removed client-side stale score recalculation.
+    // Server is the sole authority for score. If counts are 0, we trust them.
 
     const hasErrors = (wrongList.length + skippedList.length) > 0;
     const total = attempt.total_questions || 1;
