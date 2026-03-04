@@ -422,6 +422,19 @@ a,
   }
 }
 
+/* Chat message fade-in (replaces Framer Motion for scroll perf) */
+@keyframes chatFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-bounce-subtle {
   animation: bounce-subtle 2s ease-in-out infinite;
 }

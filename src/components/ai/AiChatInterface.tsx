@@ -690,7 +690,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </div>
             </div>
 
-            {/* Messages Area — overflow-y:scroll (not auto) forces iOS to create scroll layer */}
+            {/* Messages Area — no Framer Motion in scroll zone for iOS perf */}
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
@@ -698,115 +698,103 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 style={{
                     overflowY: 'scroll',
                     WebkitOverflowScrolling: 'touch',
+                    transform: 'translateZ(0)', // Force GPU compositing
                 }}
             >
-                <AnimatePresence initial={false}>
-                    {(messages || []).map((m: any) => {
-                        if (m.id === 'welcome-msg' && isTypingWelcome) return null;
+                {(messages || []).map((m: any) => {
+                    if (m.id === 'welcome-msg' && isTypingWelcome) return null;
 
-                        const textContent = getMessageText(m);
-                        const toolCalls = getToolInvocations(m);
+                    const textContent = getMessageText(m);
+                    const toolCalls = getToolInvocations(m);
 
-                        // Nascondi il messaggio assistente se è completamente vuoto (evita la doppia bolla di caricamento)
-                        if (m.role === 'assistant' && !textContent && toolCalls.length === 0) {
-                            return null;
-                        }
+                    if (m.role === 'assistant' && !textContent && toolCalls.length === 0) {
+                        return null;
+                    }
 
-                        return (
-                            <motion.div
-                                key={m.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-                                className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div className={`max-w-[85%] ${m.role === 'user'
-                                    ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
-                                    : 'bg-[#F2F2F7] dark:bg-[#1C1C1E] text-black dark:text-white rounded-[20px] rounded-bl-[12px] px-4 py-3 pb-2.5'
-                                    }`}>
-                                    {textContent && (
-                                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
-                                            <ReactMarkdown>{textContent}</ReactMarkdown>
-                                        </div>
-                                    )}
+                    return (
+                        <div
+                            key={m.id}
+                            className={`flex gap-3 animate-[chatFadeIn_0.3s_ease-out] ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                            <div className={`max-w-[85%] ${m.role === 'user'
+                                ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
+                                : 'bg-[#F2F2F7] dark:bg-[#1C1C1E] text-black dark:text-white rounded-[20px] rounded-bl-[12px] px-4 py-3 pb-2.5'
+                                }`}>
+                                {textContent && (
+                                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                                        <ReactMarkdown>{textContent}</ReactMarkdown>
+                                    </div>
+                                )}
 
-                                    {/* AI Action Row */}
-                                    {m.role === 'assistant' && m.id !== 'welcome-msg' && !isStreaming && textContent && (
-                                        <MessageActions text={textContent} />
-                                    )}
+                                {/* AI Action Row */}
+                                {m.role === 'assistant' && m.id !== 'welcome-msg' && !isStreaming && textContent && (
+                                    <MessageActions text={textContent} />
+                                )}
 
-                                    {/* Render UI Components from tool calls */}
-                                    {toolCalls.map((toolPart: any) => {
-                                        const toolInvocation = toolPart.toolInvocation || toolPart;
-                                        const toolCallId = toolInvocation.toolCallId || toolPart.toolCallId;
+                                {/* Render UI Components from tool calls */}
+                                {toolCalls.map((toolPart: any) => {
+                                    const toolInvocation = toolPart.toolInvocation || toolPart;
+                                    const toolCallId = toolInvocation.toolCallId || toolPart.toolCallId;
 
-                                        if (toolInvocation.state === 'call' || !('result' in toolInvocation)) {
+                                    if (toolInvocation.state === 'call' || !('result' in toolInvocation)) {
+                                        return (
+                                            <div
+                                                key={toolCallId}
+                                                className="mt-3 p-3 rounded-[16px] bg-gray-100 dark:bg-[#111111] text-gray-500 dark:text-[#8E8E93] text-xs font-medium flex items-center gap-3 border border-gray-200 dark:border-[#2A2A2A] max-w-fit"
+                                            >
+                                                <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-[#666] border-t-black dark:border-t-white animate-spin"></div>
+                                                Considerando i dati...
+                                            </div>
+                                        );
+                                    }
+
+                                    const resultStr = toolInvocation.result;
+                                    if (!resultStr) return null;
+
+                                    try {
+                                        const result = typeof resultStr === 'string' ? JSON.parse(resultStr) : resultStr;
+
+                                        if (toolInvocation.toolName === 'create_study_sessions' && result.rendered_ui === 'action_plan_card') {
                                             return (
-                                                <motion.div
-                                                    initial={{ scale: 0.95, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    key={toolCallId}
-                                                    className="mt-3 p-3 rounded-[16px] bg-gray-100 dark:bg-[#111111] text-gray-500 dark:text-[#8E8E93] text-xs font-medium flex items-center gap-3 border border-gray-200 dark:border-[#2A2A2A] max-w-fit"
-                                                >
-                                                    <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-[#666] border-t-black dark:border-t-white animate-spin"></div>
-                                                    Considerando i dati...
-                                                </motion.div>
+                                                <div key={toolCallId} className="mt-4 p-4 rounded-[20px] border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#111111]">
+                                                    <h4 className="font-semibold text-sm mb-3 text-black dark:text-white uppercase tracking-wider">{result.goal}</h4>
+                                                    <div className="space-y-2">
+                                                        {result.sessions.map((session: any, idx: number) => (
+                                                            <div key={idx} className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#1E1E1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors">
+                                                                <div>
+                                                                    <div className="font-medium text-black dark:text-white text-sm">{session.title}</div>
+                                                                    <div className="text-xs text-gray-500 dark:text-[#8E8E93] mt-0.5">{session.duration_min} min • {session.mode === 'sim' ? 'Simulazione' : 'Pratica'}</div>
+                                                                </div>
+                                                                <Button onClick={() => alert('Feature coming soon')} size="sm" variant="primary" className="rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-slate-200">
+                                                                    {session.cta_text || 'Avvia'}
+                                                                </Button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             );
                                         }
-
-                                        const resultStr = toolInvocation.result;
-                                        if (!resultStr) return null;
-
-                                        try {
-                                            const result = typeof resultStr === 'string' ? JSON.parse(resultStr) : resultStr;
-
-                                            if (toolInvocation.toolName === 'create_study_sessions' && result.rendered_ui === 'action_plan_card') {
-                                                return (
-                                                    <div key={toolCallId} className="mt-4 p-4 rounded-[20px] border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#111111]">
-                                                        <h4 className="font-semibold text-sm mb-3 text-black dark:text-white uppercase tracking-wider">{result.goal}</h4>
-                                                        <div className="space-y-2">
-                                                            {result.sessions.map((session: any, idx: number) => (
-                                                                <div key={idx} className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#1E1E1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors">
-                                                                    <div>
-                                                                        <div className="font-medium text-black dark:text-white text-sm">{session.title}</div>
-                                                                        <div className="text-xs text-gray-500 dark:text-[#8E8E93] mt-0.5">{session.duration_min} min • {session.mode === 'sim' ? 'Simulazione' : 'Pratica'}</div>
-                                                                    </div>
-                                                                    <Button onClick={() => alert('Feature coming soon')} size="sm" variant="primary" className="rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-slate-200">
-                                                                        {session.cta_text || 'Avvia'}
-                                                                    </Button>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            }
-                                        } catch (e) {
-                                            console.error("Format error in tool result", e);
-                                            return null;
-                                        }
-
+                                    } catch (e) {
+                                        console.error("Format error in tool result", e);
                                         return null;
-                                    })}
-                                </div>
-                            </motion.div>
-                        );
-                    })}
+                                    }
 
-                </AnimatePresence>
+                                    return null;
+                                })}
+                            </div>
+                        </div>
+                    );
+                })}
 
                 {/* Loading indicator */}
                 {(isWaitingForResponse || isTypingWelcome) && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex gap-3 justify-start"
-                    >
+                    <div className="flex gap-3 justify-start animate-[chatFadeIn_0.3s_ease-out]">
                         <div className="bg-[#F2F2F7] dark:bg-[#1C1C1E] rounded-[20px] rounded-bl-[12px] px-4 py-3 flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce"></span>
                         </div>
-                    </motion.div>
+                    </div>
                 )}
 
                 {/* Error display */}
