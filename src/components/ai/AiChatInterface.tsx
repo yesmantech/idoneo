@@ -469,10 +469,13 @@ const SUGGESTIONS = [
 // Outer wrapper: loads saved messages then mounts the inner chat
 // =============================================
 export default function AiChatInterface() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [savedMessages, setSavedMessages] = useState<any[] | null>(null); // null = loading
 
     useEffect(() => {
+        // Don't fetch until auth is resolved
+        if (authLoading) return;
+
         if (!user?.id) {
             setSavedMessages([WELCOME_MESSAGE]);
             return;
@@ -494,7 +497,7 @@ export default function AiChatInterface() {
                 setSavedMessages([WELCOME_MESSAGE]);
             }
         })();
-    }, [user?.id]);
+    }, [user?.id, authLoading]);
 
     // Show loading state while fetching saved messages
     if (savedMessages === null) {
