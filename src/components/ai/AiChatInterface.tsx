@@ -539,7 +539,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     const { user } = useAuth();
     const navigate = useNavigate();
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [inputValue, setInputValue] = useState('');
     const [autoScroll, setAutoScroll] = useState(true);
     const [showMenu, setShowMenu] = useState(false);
@@ -608,25 +607,35 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
         return !hasText && !hasTools;
     })();
 
+    // Window-based scrolling logic
+    const scrollToBottom = () => {
+        if (!autoScroll) return;
+        requestAnimationFrame(() => {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        });
+    };
+
+    const handleScroll = () => {
+        // Calculate distance from bottom using window metrics
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const threshold = document.body.scrollHeight - 100;
+        setAutoScroll(scrollPosition >= threshold);
+    };
+
+    // Attach scroll listener to window
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     const handleNewChat = async () => {
         if (user?.id) {
             await supabase.from('ai_chat_messages').delete().eq('user_id', user.id);
         }
         setMessages([WELCOME_MESSAGE]);
-    };
-
-    const handleScroll = () => {
-        if (!scrollContainerRef.current) return;
-        const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-        const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
-        setAutoScroll(isAtBottom);
-    };
-
-    const scrollToBottom = () => {
-        if (autoScroll) {
-            // Using instant for streaming text so it doesn't jitter, smooth for new messages
-            messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-        }
     };
 
     useEffect(() => {
@@ -642,10 +651,10 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     };
 
     return (
-        <div className="flex flex-col h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans">
+        <div className="flex flex-col min-h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans">
 
-            {/* Header */}
-            <div className="flex-none p-4 flex items-center gap-3 z-10">
+            {/* Header - Sticky Top */}
+            <div className="sticky top-0 p-4 flex items-center gap-3 z-30 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-[#1A1A1A]">
                 <button
                     onClick={() => navigate(-1)}
                     className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] flex items-center justify-center transition-colors"
@@ -690,16 +699,9 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </div>
             </div>
 
-            {/* Messages Area — no Framer Motion in scroll zone for iOS perf */}
+            {/* Messages Area — NO fixed height, NO overflow-y scroll. Let the window scroll natively. */}
             <div
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-                className="flex-1 min-h-0 px-4 pt-2 pb-4 space-y-6"
-                style={{
-                    overflowY: 'scroll',
-                    WebkitOverflowScrolling: 'touch',
-                    transform: 'translateZ(0)', // Force GPU compositing
-                }}
+                className="flex-1 px-4 pt-4 pb-8 space-y-6"
             >
                 {(messages || []).map((m: any) => {
                     if (m.id === 'welcome-msg' && isTypingWelcome) return null;
@@ -809,8 +811,8 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 <div ref={messagesEndRef} className="h-4" />
             </div>
 
-            {/* Input Area — proper flex sibling, NOT absolute overlay */}
-            <div className="flex-shrink-0 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+            {/* Input Area — Sticky Bottom instead of flex-shrink sibling */}
+            <div className="sticky bottom-0 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(env(safe-area-inset-bottom,8px)+8px)] z-30">
 
                 {/* Suggestion Chips */}
                 {messages.length <= 1 && (
