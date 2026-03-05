@@ -607,29 +607,23 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
         return !hasText && !hasTools;
     })();
 
-    // Window-based scrolling logic
+    // Container-based scrolling (body is position:fixed, window doesn't scroll)
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
     const scrollToBottom = () => {
-        if (!autoScroll) return;
+        if (!autoScroll || !scrollContainerRef.current) return;
         requestAnimationFrame(() => {
-            window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: 'smooth'
-            });
+            const el = scrollContainerRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
         });
     };
 
     const handleScroll = () => {
-        // Calculate distance from bottom using window metrics
-        const scrollPosition = window.innerHeight + window.scrollY;
-        const threshold = document.body.scrollHeight - 100;
-        setAutoScroll(scrollPosition >= threshold);
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+        setAutoScroll(isNearBottom);
     };
-
-    // Attach scroll listener to window
-    useEffect(() => {
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     const handleNewChat = async () => {
         if (user?.id) {
@@ -650,11 +644,16 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
         await sendMessage({ text });
     };
 
-    return (
-        <div className="flex flex-col min-h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans">
+    // CSS custom properties for layout dimensions
+    const HEADER_H = '64px';
+    const INPUT_H = '80px'; // approximate input bar height
 
-            {/* Header - Sticky Top */}
-            <div className="sticky top-0 p-4 flex items-center gap-3 z-30 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-[#1A1A1A]">
+    return (
+        <div className="relative h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans">
+
+            {/* ── HEADER (absolute top) ── */}
+            <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-3 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-gray-100 dark:border-[#1A1A1A]"
+                style={{ height: HEADER_H }}>
                 <button
                     onClick={() => navigate(-1)}
                     className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] flex items-center justify-center transition-colors"
@@ -677,8 +676,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                     >
                         <MoreVertical className="w-4 h-4 text-gray-500 dark:text-white" />
                     </button>
-
-                    {/* Dropdown Menu */}
                     {showMenu && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: -4 }}
@@ -699,9 +696,17 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </div>
             </div>
 
-            {/* Messages Area — NO fixed height, NO overflow-y scroll. Let the window scroll natively. */}
+            {/* ── MESSAGES (absolute middle, the ONLY scrollable area) ── */}
             <div
-                className="flex-1 px-4 pt-4 pb-8 space-y-6"
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="absolute left-0 right-0 px-4 pt-4 pb-4 space-y-6"
+                style={{
+                    top: HEADER_H,
+                    bottom: INPUT_H,
+                    overflowY: 'auto',
+                    WebkitOverflowScrolling: 'touch',
+                }}
             >
                 {(messages || []).map((m: any) => {
                     if (m.id === 'welcome-msg' && isTypingWelcome) return null;
@@ -728,20 +733,17 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                                     </div>
                                 )}
 
-                                {/* AI Action Row */}
                                 {m.role === 'assistant' && m.id !== 'welcome-msg' && !isStreaming && textContent && (
                                     <MessageActions text={textContent} />
                                 )}
 
-                                {/* Render UI Components from tool calls */}
                                 {toolCalls.map((toolPart: any) => {
                                     const toolInvocation = toolPart.toolInvocation || toolPart;
                                     const toolCallId = toolInvocation.toolCallId || toolPart.toolCallId;
 
                                     if (toolInvocation.state === 'call' || !('result' in toolInvocation)) {
                                         return (
-                                            <div
-                                                key={toolCallId}
+                                            <div key={toolCallId}
                                                 className="mt-3 p-3 rounded-[16px] bg-gray-100 dark:bg-[#111111] text-gray-500 dark:text-[#8E8E93] text-xs font-medium flex items-center gap-3 border border-gray-200 dark:border-[#2A2A2A] max-w-fit"
                                             >
                                                 <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-[#666] border-t-black dark:border-t-white animate-spin"></div>
@@ -755,7 +757,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
 
                                     try {
                                         const result = typeof resultStr === 'string' ? JSON.parse(resultStr) : resultStr;
-
                                         if (toolInvocation.toolName === 'create_study_sessions' && result.rendered_ui === 'action_plan_card') {
                                             return (
                                                 <div key={toolCallId} className="mt-4 p-4 rounded-[20px] border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#111111]">
@@ -780,7 +781,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                                         console.error("Format error in tool result", e);
                                         return null;
                                     }
-
                                     return null;
                                 })}
                             </div>
@@ -788,7 +788,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                     );
                 })}
 
-                {/* Loading indicator */}
                 {(isWaitingForResponse || isTypingWelcome) && (
                     <div className="flex gap-3 justify-start animate-[chatFadeIn_0.3s_ease-out]">
                         <div className="bg-[#F2F2F7] dark:bg-[#1C1C1E] rounded-[20px] rounded-bl-[12px] px-4 py-3 flex items-center gap-2">
@@ -799,7 +798,6 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                     </div>
                 )}
 
-                {/* Error display */}
                 {error && (
                     <div className="flex gap-3 justify-start">
                         <div className="max-w-[85%] rounded-[20px] px-5 py-3 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 text-sm">
@@ -811,25 +809,23 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 <div ref={messagesEndRef} className="h-4" />
             </div>
 
-            {/* Input Area — Sticky Bottom instead of flex-shrink sibling */}
-            <div className="sticky bottom-0 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(env(safe-area-inset-bottom,8px)+8px)] z-30">
+            {/* ── INPUT (absolute bottom) ── */}
+            <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(env(safe-area-inset-bottom,8px)+8px)]"
+                style={{ minHeight: INPUT_H }}>
 
-                {/* Suggestion Chips */}
                 {messages.length <= 1 && (
                     <div className="flex overflow-x-auto gap-2 pb-3 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">
                         {SUGGESTIONS.map((suggestion, idx) => (
-                            <motion.button
+                            <button
                                 key={idx}
-                                whileHover={{ scale: 0.98 }}
-                                whileTap={{ scale: 0.95 }}
                                 onClick={() => {
                                     setInputValue('');
                                     sendMessage({ text: suggestion });
                                 }}
-                                className="flex-none whitespace-nowrap px-4 py-2.5 rounded-[12px] bg-gray-100 dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] text-sm text-black dark:text-white hover:bg-gray-200 dark:hover:bg-[#1E1E1E] transition-colors"
+                                className="flex-none whitespace-nowrap px-4 py-2.5 rounded-[12px] bg-gray-100 dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] text-sm text-black dark:text-white active:bg-gray-200 dark:active:bg-[#1E1E1E] transition-colors"
                             >
                                 {suggestion}
-                            </motion.button>
+                            </button>
                         ))}
                     </div>
                 )}
@@ -843,18 +839,16 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                         disabled={isStreaming}
                     />
                     <div className="absolute right-2 flex items-center gap-1">
-                        <motion.button
+                        <button
                             type="submit"
                             disabled={isStreaming || !inputValue.trim()}
-                            whileHover={{ scale: 0.96 }}
-                            whileTap={{ scale: 0.9 }}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${inputValue.trim()
-                                ? 'bg-[#00B1FF] text-white hover:bg-[#009ee0]'
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 active:scale-90 ${inputValue.trim()
+                                ? 'bg-[#00B1FF] text-white'
                                 : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
                                 }`}
                         >
                             <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
-                        </motion.button>
+                        </button>
                     </div>
                 </form>
             </div>
