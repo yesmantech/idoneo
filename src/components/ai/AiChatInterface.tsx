@@ -646,7 +646,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
 
     // CSS custom properties for layout dimensions
     const HEADER_H = '64px';
-    const INPUT_H = '80px'; // approximate input bar height
+    const INPUT_H = '140px'; // includes suggestion chips + input + safe-area
 
     return (
         <div className="relative h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans">

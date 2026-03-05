@@ -38,6 +38,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const hideBottomNav = location.pathname.startsWith('/blog') ||
         location.pathname.startsWith('/concorsi') ||
         location.pathname.startsWith('/quiz') ||
+        location.pathname.startsWith('/ai-assistant') ||
         location.pathname === '/profile/settings' ||
         location.pathname.startsWith('/profile/stats') ||
         location.pathname.startsWith('/preparazione') ||
