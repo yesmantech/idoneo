@@ -1,14 +1,25 @@
 /**
  * @file StreakCalendarModal.tsx
  * @description Full calendar modal showing all login/activity history.
+ * Tier S design: spring animations, staggered reveals, tactile interactions.
  * Supports both light and dark mode.
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Flame } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
+import { getTierFromStreak, type FlameTier } from '@/components/gamification/AnimatedFlame';
+
+const FLAME_ICONS: Record<FlameTier, string> = {
+    bronze: '/icons/flame-bronze.png',
+    silver: '/icons/flame-silver.png',
+    gold: '/icons/flame-gold.png',
+    emerald: '/icons/flame-emerald.png',
+    sapphire: '/icons/flame-sapphire.png',
+    diamond: '/icons/flame-diamond.png',
+};
 
 interface StreakCalendarModalProps {
     isOpen: boolean;
@@ -23,6 +34,54 @@ const MONTHS_IT = [
     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
 ];
 
+/* ── Framer Motion variants ── */
+const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+};
+
+const modalVariants = {
+    hidden: { opacity: 0, scale: 0.92, y: 30 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        transition: { type: 'spring' as const, stiffness: 400, damping: 28, mass: 0.8 },
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.92,
+        y: 30,
+        transition: { duration: 0.2, ease: 'easeIn' as const },
+    },
+};
+
+const staggerContainer = {
+    hidden: {},
+    visible: {
+        transition: { staggerChildren: 0.015, delayChildren: 0.15 },
+    },
+};
+
+const dayVariant = {
+    hidden: { opacity: 0, scale: 0.6 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: { type: 'spring', stiffness: 500, damping: 25 },
+    },
+};
+
+const slideUp = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { type: 'spring' as const, stiffness: 300, damping: 24, delay: 0.3 },
+    },
+};
+
 export default function StreakCalendarModal({
     isOpen,
     onClose,
@@ -33,6 +92,7 @@ export default function StreakCalendarModal({
     const [viewDate, setViewDate] = useState(new Date());
     const [activeDates, setActiveDates] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(false);
+    const [tappedStat, setTappedStat] = useState<'current' | 'max' | null>(null);
 
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
@@ -121,108 +181,175 @@ export default function StreakCalendarModal({
     const now = new Date();
     const canGoNext = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth());
 
+    // Flame tap handler — triggers a bounce + wiggle
+    const handleStatTap = (stat: 'current' | 'max') => {
+        setTappedStat(stat);
+        setTimeout(() => setTappedStat(null), 600);
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
                 <>
                     {/* Backdrop */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        variants={overlayVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-50"
+                        className="fixed inset-0 bg-black/50 dark:bg-black/60 z-50"
                         onClick={onClose}
                     />
 
                     {/* Modal */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                        variants={modalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
                         className="fixed inset-x-4 top-[12%] z-50 mx-auto max-w-[420px]"
                     >
-                        <div className="rounded-[24px] overflow-hidden bg-white dark:bg-[#1C1C1E] shadow-xl dark:shadow-none border border-slate-200 dark:border-transparent">
+                        <div className="rounded-[24px] overflow-hidden bg-white dark:bg-[#1C1C1E] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)] dark:shadow-none border border-slate-200 dark:border-transparent">
                             {/* Header */}
                             <div className="flex items-center justify-between px-6 pt-6 pb-4">
-                                <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                <motion.h2
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1, type: 'spring', stiffness: 300, damping: 20 }}
+                                    className="text-xl font-bold text-slate-900 dark:text-white tracking-tight"
+                                >
                                     Streak Giornaliero
-                                </h2>
-                                <button
+                                </motion.h2>
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.85 }}
                                     onClick={onClose}
                                     className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-white/20 transition-colors"
                                 >
                                     <X className="w-4 h-4 text-slate-500 dark:text-white/60" />
-                                </button>
+                                </motion.button>
                             </div>
 
-                            {/* Stats Summary */}
+                            {/* Stats Summary — Interactive */}
                             <div className="flex gap-3 px-6 pb-5">
-                                <div className="flex-1 bg-slate-50 dark:bg-white/[0.04] rounded-2xl px-4 py-3 border border-slate-100 dark:border-transparent">
+                                {/* Current Streak */}
+                                <motion.button
+                                    className="flex-1 bg-slate-50 dark:bg-white/[0.04] rounded-2xl px-4 py-3 border border-slate-100 dark:border-transparent text-left active:bg-slate-100 dark:active:bg-white/[0.08] transition-colors"
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleStatTap('current')}
+                                >
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30 mb-1">
                                         Streak Attuale
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-lg">🔥</span>
+                                        <motion.img
+                                            src={FLAME_ICONS[getTierFromStreak(streakCurrent)]}
+                                            alt="streak"
+                                            style={{ height: 22, width: 'auto' }}
+                                            animate={tappedStat === 'current' ? {
+                                                scale: [1, 1.4, 0.9, 1.2, 1],
+                                                rotate: [0, -15, 15, -8, 0],
+                                            } : {}}
+                                            transition={{ duration: 0.5, ease: 'easeOut' }}
+                                        />
                                         <span className="text-lg font-bold text-slate-900 dark:text-white">
                                             {streakCurrent} {streakCurrent === 1 ? 'giorno' : 'giorni'}
                                         </span>
                                     </div>
-                                </div>
-                                <div className="flex-1 bg-slate-50 dark:bg-white/[0.04] rounded-2xl px-4 py-3 border border-slate-100 dark:border-transparent">
+                                </motion.button>
+
+                                {/* Best Streak */}
+                                <motion.button
+                                    className="flex-1 bg-slate-50 dark:bg-white/[0.04] rounded-2xl px-4 py-3 border border-slate-100 dark:border-transparent text-left active:bg-slate-100 dark:active:bg-white/[0.08] transition-colors"
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleStatTap('max')}
+                                >
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30 mb-1">
                                         Miglior Streak
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-lg">🟣</span>
+                                        <motion.img
+                                            src={FLAME_ICONS[getTierFromStreak(streakMax)]}
+                                            alt="best"
+                                            style={{ height: 22, width: 'auto' }}
+                                            animate={tappedStat === 'max' ? {
+                                                scale: [1, 1.4, 0.9, 1.2, 1],
+                                                rotate: [0, -15, 15, -8, 0],
+                                            } : {}}
+                                            transition={{ duration: 0.5, ease: 'easeOut' }}
+                                        />
                                         <span className="text-lg font-bold text-slate-900 dark:text-white">
                                             {streakMax} {streakMax === 1 ? 'giorno' : 'giorni'}
                                         </span>
                                     </div>
-                                </div>
+                                </motion.button>
                             </div>
 
                             {/* Month Navigation */}
                             <div className="flex items-center justify-between px-6 pb-3">
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.85, x: -3 }}
                                     onClick={goToPrevMonth}
                                     className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
                                 >
                                     <ChevronLeft className="w-4 h-4 text-slate-500 dark:text-white/60" />
-                                </button>
+                                </motion.button>
                                 <div className="text-center">
-                                    <span className="text-[15px] font-bold text-slate-900 dark:text-white">
-                                        {MONTHS_IT[month]} {year}
-                                    </span>
+                                    <AnimatePresence mode="wait">
+                                        <motion.span
+                                            key={`${month}-${year}`}
+                                            initial={{ opacity: 0, y: -8 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 8 }}
+                                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                            className="text-[15px] font-bold text-slate-900 dark:text-white block"
+                                        >
+                                            {MONTHS_IT[month]} {year}
+                                        </motion.span>
+                                    </AnimatePresence>
                                     {!loading && (
-                                        <div className="text-[11px] text-slate-400 dark:text-white/30 mt-0.5">
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.2 }}
+                                            className="text-[11px] text-slate-400 dark:text-white/30 mt-0.5"
+                                        >
                                             {activeDaysCount} {activeDaysCount === 1 ? 'giorno attivo' : 'giorni attivi'}
-                                        </div>
+                                        </motion.div>
                                     )}
                                 </div>
-                                <button
+                                <motion.button
+                                    whileHover={canGoNext ? { scale: 1.1 } : {}}
+                                    whileTap={canGoNext ? { scale: 0.85, x: 3 } : {}}
                                     onClick={goToNextMonth}
                                     disabled={!canGoNext}
                                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors
                                         ${canGoNext ? 'bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/10' : 'opacity-20 cursor-not-allowed'}`}
                                 >
                                     <ChevronRight className="w-4 h-4 text-slate-500 dark:text-white/60" />
-                                </button>
+                                </motion.button>
                             </div>
 
                             {/* Weekday Headers */}
                             <div className="grid grid-cols-7 px-5 pb-2">
-                                {WEEKDAYS.map(wd => (
-                                    <div key={wd} className="text-center">
+                                {WEEKDAYS.map((wd, i) => (
+                                    <motion.div
+                                        key={wd}
+                                        initial={{ opacity: 0, y: -4 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.08 + i * 0.02 }}
+                                        className="text-center"
+                                    >
                                         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/25">
                                             {wd}
                                         </span>
-                                    </div>
+                                    </motion.div>
                                 ))}
                             </div>
 
-                            {/* Calendar Grid */}
+                            {/* Calendar Grid — Staggered entrance */}
                             <div className="grid grid-cols-7 gap-y-1 px-5 pb-5">
                                 {loading ? (
                                     Array.from({ length: 35 }).map((_, idx) => (
@@ -240,9 +367,18 @@ export default function StreakCalendarModal({
                                         const isToday = day.isToday;
 
                                         return (
-                                            <div
-                                                key={idx}
+                                            <motion.div
+                                                key={`${month}-${year}-${idx}`}
+                                                initial={{ opacity: 0, scale: 0.5 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{
+                                                    type: 'spring',
+                                                    stiffness: 500,
+                                                    damping: 25,
+                                                    delay: 0.1 + idx * 0.012,
+                                                }}
                                                 className="flex items-center justify-center"
+                                                whileTap={isActive ? { scale: 0.85 } : {}}
                                             >
                                                 <div
                                                     className="flex items-center justify-center transition-all duration-200"
@@ -278,18 +414,27 @@ export default function StreakCalendarModal({
                                                         </span>
                                                     </span>
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         );
                                     })
                                 )}
                             </div>
 
-                            {/* Footer */}
-                            <div className="px-6 pb-6">
+                            {/* Footer — Slide up */}
+                            <motion.div
+                                variants={slideUp}
+                                initial="hidden"
+                                animate="visible"
+                                className="px-6 pb-6"
+                            >
                                 <div className="bg-slate-50 dark:bg-white/[0.04] rounded-2xl px-4 py-3 flex items-center gap-3 border border-slate-100 dark:border-transparent">
-                                    <div className="w-10 h-10 rounded-[12px] bg-[#00B1FF]/10 dark:bg-[#00B1FF]/20 flex items-center justify-center">
-                                        <Flame className="w-5 h-5 text-[#00B1FF]" />
-                                    </div>
+                                    <motion.div
+                                        className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#00B1FF]/12 to-[#0066FF]/12 dark:from-[#00B1FF]/20 dark:to-[#0066FF]/20 flex items-center justify-center"
+                                        animate={{ scale: [1, 1.05, 1] }}
+                                        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                                    >
+                                        <Sparkles className="w-5 h-5 text-[#00B1FF]" />
+                                    </motion.div>
                                     <div>
                                         <div className="text-[13px] font-bold text-slate-900 dark:text-white">
                                             Continua così!
@@ -299,7 +444,7 @@ export default function StreakCalendarModal({
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
                     </motion.div>
                 </>

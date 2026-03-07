@@ -49,6 +49,7 @@ export interface BandoDocument {
 export interface Bando {
     id: string;
     title: string;
+    short_title?: string;
     slug: string;
     ente_id?: string;
     category_id?: string;

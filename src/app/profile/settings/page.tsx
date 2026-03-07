@@ -257,7 +257,7 @@ export default function ProfileSettingsPage() {
                     {/* Nickname Row */}
                     {editingNickname ? (
                         <div className="flex items-center gap-3 px-5 py-4">
-                            <User className="w-6 h-6 text-[var(--foreground)] opacity-40 flex-shrink-0" />
+                            <User className="w-6 h-6 text-[var(--foreground)] opacity-40 flex-shrink-0" strokeWidth={2.5} />
                             <input
                                 ref={nicknameInputRef}
                                 type="text"
@@ -278,7 +278,7 @@ export default function ProfileSettingsPage() {
                         </div>
                     ) : (
                         <SettingsRow
-                            icon={<User className="w-6 h-6" />}
+                            icon={<User className="w-6 h-6" strokeWidth={2.5} />}
                             label="Nickname"
                             value={nickname || 'Non impostato'}
                             onClick={() => setEditingNickname(true)}
@@ -289,7 +289,7 @@ export default function ProfileSettingsPage() {
 
                     {/* Email Row (read-only, no chevron) */}
                     <div className="w-full flex items-center gap-4 px-5 py-5">
-                        <span className="text-[var(--foreground)] opacity-40 flex-shrink-0"><AtSign className="w-6 h-6" /></span>
+                        <span className="text-[var(--foreground)] opacity-40 flex-shrink-0"><AtSign className="w-6 h-6" strokeWidth={2.5} /></span>
                         <span className="text-[16px] font-semibold text-[var(--foreground)]">Email</span>
                         <span className="flex-1 text-right text-[15px] text-[var(--foreground)] opacity-40 font-normal truncate">{user?.email || ''}</span>
                     </div>
@@ -298,7 +298,7 @@ export default function ProfileSettingsPage() {
 
                     {/* Invite Friend Row */}
                     <div className="w-full flex items-center gap-4 px-5 py-5">
-                        <span className="text-[var(--foreground)] opacity-40 flex-shrink-0"><UserPlus className="w-6 h-6" /></span>
+                        <span className="text-[var(--foreground)] opacity-40 flex-shrink-0"><UserPlus className="w-6 h-6" strokeWidth={2.5} /></span>
                         <span className="flex-1 text-left text-[16px] font-semibold text-[var(--foreground)]">Invita un Amico</span>
                         <button
                             onClick={() => {
@@ -334,7 +334,7 @@ export default function ProfileSettingsPage() {
                 <div className="bg-[var(--card)] rounded-2xl overflow-hidden mb-6">
                     {/* Theme Row */}
                     <SettingsRow
-                        icon={<ThemeIcon className="w-6 h-6" />}
+                        icon={<ThemeIcon className="w-6 h-6" strokeWidth={2.5} />}
                         label="Tema"
                         value={themeLabel}
                         onClick={() => setShowThemeSelector(true)}
@@ -342,7 +342,7 @@ export default function ProfileSettingsPage() {
                     <Divider />
                     {/* Reset Onboarding Row */}
                     <SettingsRow
-                        icon={<PlayCircle className="w-6 h-6" />}
+                        icon={<PlayCircle className="w-6 h-6" strokeWidth={2.5} />}
                         label="Rivivi Tutorial"
                         onClick={() => {
                             resetOnboarding();
@@ -355,21 +355,21 @@ export default function ProfileSettingsPage() {
                 <SectionLabel>Contatto e aiuto</SectionLabel>
                 <div className="bg-[var(--card)] rounded-2xl overflow-hidden mb-6">
                     <SettingsRow
-                        icon={<Mail className="w-6 h-6" />}
+                        icon={<Mail className="w-6 h-6" strokeWidth={2.5} />}
                         label="Contattaci via Email"
                         external
                         onClick={() => window.open('mailto:supporto@idoneo.ai', '_blank')}
                     />
                     <Divider />
                     <SettingsRow
-                        icon={<FileText className="w-6 h-6" />}
+                        icon={<FileText className="w-6 h-6" strokeWidth={2.5} />}
                         label="Termini e Condizioni"
                         external
                         onClick={() => window.open('https://idoneo.ai/legal/terms', '_blank')}
                     />
                     <Divider />
                     <SettingsRow
-                        icon={<Shield className="w-6 h-6" />}
+                        icon={<Shield className="w-6 h-6" strokeWidth={2.5} />}
                         label="Privacy Policy"
                         external
                         onClick={() => window.open('https://idoneo.ai/legal/privacy', '_blank')}
@@ -385,7 +385,7 @@ export default function ProfileSettingsPage() {
                         }}
                         className="w-full flex items-center gap-4 px-5 py-5 active:bg-white/5 transition-colors"
                     >
-                        <LogOut className="w-6 h-6 text-[var(--foreground)] opacity-40" />
+                        <LogOut className="w-6 h-6 text-[var(--foreground)] opacity-40" strokeWidth={2.5} />
                         <span className="text-[16px] font-semibold text-[var(--foreground)]">Sign Out</span>
                     </button>
                 </div>

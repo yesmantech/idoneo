@@ -41,6 +41,7 @@ import FlamesDemoPage from './app/demo/flames/page';
 import Flame3DPage from './app/demo/flame-3d/page';
 import IconsDemoPage from './app/demo/icons/page';
 import StreakTestPage from './app/demo/streak-test/page';
+import ConquistePage from './app/conquiste/page';
 
 // ============================================================================
 // LAZY-LOADED PAGES (Admin only — rarely accessed)
@@ -219,6 +220,9 @@ export default function App() {
                                                             <QuizStatsPage />
                                                         </MainLayout>
                                                     } />
+
+                                                    {/* Conquiste (Badge achievements page) */}
+                                                    <Route path="/conquiste" element={<MainLayout><ConquistePage /></MainLayout>} />
 
                                                     {/* Concorsi Flow (Wrapped) */}
                                                     <Route path="/concorsi/search" element={<MainLayout><ConcorsiSearchPage /></MainLayout>} />

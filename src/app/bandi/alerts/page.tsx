@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import {
@@ -55,8 +55,7 @@ const NOTIFY_OPTIONS = [
 export default function BandiAlertsPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const containerRef = useRef<HTMLDivElement>(null);
-    const { scrollY } = useScroll({ container: containerRef });
+    const { scrollY } = useScroll();
     const headerOpacity = useTransform(scrollY, [0, 60], [0, 1]);
 
     const [loading, setLoading] = useState(true);
@@ -203,7 +202,7 @@ export default function BandiAlertsPage() {
             </motion.div>
 
             {/* Main Content */}
-            <div ref={containerRef} className="relative z-10 pb-24 safe-area-top">
+            <div className="relative z-10 pb-24 safe-area-top">
                 {/* Hero Header */}
                 <div className="px-4 pt-4 pb-6">
                     <div className="flex items-center gap-3 mb-6">

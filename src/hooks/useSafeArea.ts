@@ -45,7 +45,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Capacitor } from '@capacitor/core';
+import { isStandaloneApp } from '@/lib/standalone';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -88,8 +88,8 @@ export function useSafeArea(): SafeAreaInsets {
             });
         };
 
-        // Only calculate on native platforms
-        if (Capacitor.isNativePlatform()) {
+        // Calculate on standalone platforms (native + PWA)
+        if (isStandaloneApp()) {
             // Initial calculation
             updateSafeArea();
 

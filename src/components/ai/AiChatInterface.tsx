@@ -613,6 +613,30 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     // Container-based scrolling (body is position:fixed, window doesn't scroll)
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+    // Lock body scroll when chat is mounted (prevents iOS body bounce interfering)
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        const originalPosition = document.body.style.position;
+        const originalWidth = document.body.style.width;
+        const originalHeight = document.body.style.height;
+        const scrollY = window.scrollY;
+
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        document.body.style.top = `-${scrollY}px`;
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+            document.body.style.position = originalPosition;
+            document.body.style.width = originalWidth;
+            document.body.style.height = originalHeight;
+            document.body.style.top = '';
+            window.scrollTo(0, scrollY);
+        };
+    }, []);
+
     const scrollToBottom = () => {
         if (!autoScroll || !scrollContainerRef.current) return;
         requestAnimationFrame(() => {
@@ -647,213 +671,219 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
         await sendMessage({ text });
     };
 
-    // CSS custom properties for layout dimensions
-    const HEADER_H = '64px';
-    const INPUT_H = '140px'; // includes suggestion chips + input + safe-area
-
     return (
-        <div className="relative h-full w-full max-w-3xl mx-auto bg-white dark:bg-black text-black dark:text-white font-sans">
+        <div className="fixed inset-0 bg-white dark:bg-black text-black dark:text-white font-sans" style={{ overflow: 'hidden' }}>
+            <div className="flex flex-col w-full h-full" style={{ maxWidth: '48rem', margin: '0 auto' }}>
 
-            {/* ── HEADER (absolute top) ── */}
-            <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-3 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-gray-100 dark:border-[#1A1A1A]"
-                style={{ height: HEADER_H }}>
-                <button
-                    onClick={() => navigate(-1)}
-                    className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] flex items-center justify-center transition-colors"
-                    title="Indietro"
-                >
-                    <ArrowLeft className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                </button>
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#1E1E1E] dark:to-[#2A2A2A] border border-gray-200 dark:border-[#333] flex items-center justify-center shadow-inner">
-                    <Sparkles className="w-5 h-5 text-black dark:text-white" />
-                </div>
-                <div className="flex-1">
-                    <h2 className="font-semibold text-[17px] text-black dark:text-white tracking-tight">AI Coach</h2>
-                    <p className="text-xs text-gray-500 dark:text-[#8E8E93] font-medium">Sempre pronto ad aiutarti</p>
-                </div>
-                <div className="relative" ref={menuRef}>
+                {/* ── HEADER ── */}
+                <div className="flex-shrink-0 p-4 flex items-center gap-3 z-20 bg-white dark:bg-black border-b border-gray-100 dark:border-[#1A1A1A]">
                     <button
-                        onClick={() => setShowMenu(!showMenu)}
-                        className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] active:scale-95 flex items-center justify-center transition-all"
-                        title="Menu"
+                        onClick={() => navigate(-1)}
+                        className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] flex items-center justify-center transition-colors"
+                        title="Indietro"
                     >
-                        <MoreVertical className="w-4 h-4 text-gray-500 dark:text-white" />
+                        <ArrowLeft className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     </button>
-                    {showMenu && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="absolute right-0 top-11 w-48 rounded-[14px] bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] shadow-lg z-50 overflow-hidden"
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#1E1E1E] dark:to-[#2A2A2A] border border-gray-200 dark:border-[#333] flex items-center justify-center shadow-inner">
+                        <Sparkles className="w-5 h-5 text-black dark:text-white" />
+                    </div>
+                    <div className="flex-1">
+                        <h2 className="font-semibold text-[17px] text-black dark:text-white tracking-tight">AI Coach</h2>
+                        <p className="text-xs text-gray-500 dark:text-[#8E8E93] font-medium">Sempre pronto ad aiutarti</p>
+                    </div>
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            onClick={() => setShowMenu(!showMenu)}
+                            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] active:scale-95 flex items-center justify-center transition-all"
+                            title="Menu"
                         >
-                            <button
-                                onClick={() => { handleNewChat(); setShowMenu(false); }}
-                                disabled={isStreaming}
-                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors disabled:opacity-50"
+                            <MoreVertical className="w-4 h-4 text-gray-500 dark:text-white" />
+                        </button>
+                        {showMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute right-0 top-11 w-48 rounded-[14px] bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] shadow-lg z-50 overflow-hidden"
                             >
-                                <Trash2 className="w-4 h-4" />
-                                Nuova Chat
-                            </button>
+                                <button
+                                    onClick={() => { handleNewChat(); setShowMenu(false); }}
+                                    disabled={isStreaming}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors disabled:opacity-50"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    Nuova Chat
+                                </button>
+                            </motion.div>
+                        )}
+                    </div>
+                </div>
+
+                {/* ── MESSAGES (flex-1 min-h-0 = iOS scroll fix) ── */}
+                <div
+                    ref={scrollContainerRef}
+                    onScroll={handleScroll}
+                    className="flex-1 min-h-0 px-4 pt-4 pb-4 space-y-6"
+                    style={{
+                        overflowY: 'auto',
+                        WebkitOverflowScrolling: 'touch',
+                    }}
+                >
+                    <AnimatePresence initial={false}>
+                        {(messages || []).map((m: any) => {
+                            if (m.id === 'welcome-msg' && isTypingWelcome) return null;
+
+                            const textContent = getMessageText(m);
+                            const toolCalls = getToolInvocations(m);
+
+                            if (m.role === 'assistant' && !textContent && toolCalls.length === 0) {
+                                return null;
+                            }
+
+                            return (
+                                <motion.div
+                                    key={m.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+                                    className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div className={`max-w-[85%] ${m.role === 'user'
+                                        ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
+                                        : 'bg-[#F2F2F7] dark:bg-[#1C1C1E] text-black dark:text-white rounded-[20px] rounded-bl-[12px] px-4 py-3 pb-2.5'
+                                        }`}>
+                                        {textContent && (
+                                            <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                                                <ReactMarkdown>{textContent}</ReactMarkdown>
+                                            </div>
+                                        )}
+
+                                        {m.role === 'assistant' && m.id !== 'welcome-msg' && !isStreaming && textContent && (
+                                            <MessageActions text={textContent} />
+                                        )}
+
+                                        {toolCalls.map((toolPart: any) => {
+                                            const toolInvocation = toolPart.toolInvocation || toolPart;
+                                            const toolCallId = toolInvocation.toolCallId || toolPart.toolCallId;
+
+                                            if (toolInvocation.state === 'call' || !('result' in toolInvocation)) {
+                                                return (
+                                                    <motion.div
+                                                        initial={{ scale: 0.95, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        key={toolCallId}
+                                                        className="mt-3 p-3 rounded-[16px] bg-gray-100 dark:bg-[#111111] text-gray-500 dark:text-[#8E8E93] text-xs font-medium flex items-center gap-3 border border-gray-200 dark:border-[#2A2A2A] max-w-fit"
+                                                    >
+                                                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-[#666] border-t-black dark:border-t-white animate-spin"></div>
+                                                        Considerando i dati...
+                                                    </motion.div>
+                                                );
+                                            }
+
+                                            const resultStr = toolInvocation.result;
+                                            if (!resultStr) return null;
+
+                                            try {
+                                                const result = typeof resultStr === 'string' ? JSON.parse(resultStr) : resultStr;
+                                                if (toolInvocation.toolName === 'create_study_sessions' && result.rendered_ui === 'action_plan_card') {
+                                                    return (
+                                                        <div key={toolCallId} className="mt-4 p-4 rounded-[20px] border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#111111]">
+                                                            <h4 className="font-semibold text-sm mb-3 text-black dark:text-white uppercase tracking-wider">{result.goal}</h4>
+                                                            <div className="space-y-2">
+                                                                {result.sessions.map((session: any, idx: number) => (
+                                                                    <div key={idx} className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#1E1E1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors">
+                                                                        <div>
+                                                                            <div className="font-medium text-black dark:text-white text-sm">{session.title}</div>
+                                                                            <div className="text-xs text-gray-500 dark:text-[#8E8E93] mt-0.5">{session.duration_min} min • {session.mode === 'sim' ? 'Simulazione' : 'Pratica'}</div>
+                                                                        </div>
+                                                                        <Button onClick={() => alert('Feature coming soon')} size="sm" variant="primary" className="rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-slate-200">
+                                                                            {session.cta_text || 'Avvia'}
+                                                                        </Button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+                                            } catch (e) {
+                                                console.error("Format error in tool result", e);
+                                                return null;
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </AnimatePresence>
+
+                    {(isWaitingForResponse || isTypingWelcome) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex gap-3 justify-start"
+                        >
+                            <div className="bg-[#F2F2F7] dark:bg-[#1C1C1E] rounded-[20px] rounded-bl-[12px] px-4 py-3 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce"></span>
+                            </div>
                         </motion.div>
                     )}
-                </div>
-            </div>
 
-            {/* ── MESSAGES (absolute middle, the ONLY scrollable area) ── */}
-            <div
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-                className="absolute left-0 right-0 px-4 pt-4 pb-4 space-y-6"
-                style={{
-                    top: HEADER_H,
-                    bottom: INPUT_H,
-                    overflowY: 'auto',
-                    WebkitOverflowScrolling: 'touch',
-                }}
-            >
-                {(messages || []).map((m: any) => {
-                    if (m.id === 'welcome-msg' && isTypingWelcome) return null;
-
-                    const textContent = getMessageText(m);
-                    const toolCalls = getToolInvocations(m);
-
-                    if (m.role === 'assistant' && !textContent && toolCalls.length === 0) {
-                        return null;
-                    }
-
-                    return (
-                        <div
-                            key={m.id}
-                            className={`flex gap-3 animate-[chatFadeIn_0.3s_ease-out] ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div className={`max-w-[85%] ${m.role === 'user'
-                                ? 'bg-[#0095FF] text-white rounded-[20px] rounded-br-[12px] px-4 py-3'
-                                : 'bg-[#F2F2F7] dark:bg-[#1C1C1E] text-black dark:text-white rounded-[20px] rounded-bl-[12px] px-4 py-3 pb-2.5'
-                                }`}>
-                                {textContent && (
-                                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
-                                        <ReactMarkdown>{textContent}</ReactMarkdown>
-                                    </div>
-                                )}
-
-                                {m.role === 'assistant' && m.id !== 'welcome-msg' && !isStreaming && textContent && (
-                                    <MessageActions text={textContent} />
-                                )}
-
-                                {toolCalls.map((toolPart: any) => {
-                                    const toolInvocation = toolPart.toolInvocation || toolPart;
-                                    const toolCallId = toolInvocation.toolCallId || toolPart.toolCallId;
-
-                                    if (toolInvocation.state === 'call' || !('result' in toolInvocation)) {
-                                        return (
-                                            <div key={toolCallId}
-                                                className="mt-3 p-3 rounded-[16px] bg-gray-100 dark:bg-[#111111] text-gray-500 dark:text-[#8E8E93] text-xs font-medium flex items-center gap-3 border border-gray-200 dark:border-[#2A2A2A] max-w-fit"
-                                            >
-                                                <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-[#666] border-t-black dark:border-t-white animate-spin"></div>
-                                                Considerando i dati...
-                                            </div>
-                                        );
-                                    }
-
-                                    const resultStr = toolInvocation.result;
-                                    if (!resultStr) return null;
-
-                                    try {
-                                        const result = typeof resultStr === 'string' ? JSON.parse(resultStr) : resultStr;
-                                        if (toolInvocation.toolName === 'create_study_sessions' && result.rendered_ui === 'action_plan_card') {
-                                            return (
-                                                <div key={toolCallId} className="mt-4 p-4 rounded-[20px] border border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#111111]">
-                                                    <h4 className="font-semibold text-sm mb-3 text-black dark:text-white uppercase tracking-wider">{result.goal}</h4>
-                                                    <div className="space-y-2">
-                                                        {result.sessions.map((session: any, idx: number) => (
-                                                            <div key={idx} className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#1E1E1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors">
-                                                                <div>
-                                                                    <div className="font-medium text-black dark:text-white text-sm">{session.title}</div>
-                                                                    <div className="text-xs text-gray-500 dark:text-[#8E8E93] mt-0.5">{session.duration_min} min • {session.mode === 'sim' ? 'Simulazione' : 'Pratica'}</div>
-                                                                </div>
-                                                                <Button onClick={() => alert('Feature coming soon')} size="sm" variant="primary" className="rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-slate-200">
-                                                                    {session.cta_text || 'Avvia'}
-                                                                </Button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        }
-                                    } catch (e) {
-                                        console.error("Format error in tool result", e);
-                                        return null;
-                                    }
-                                    return null;
-                                })}
+                    {error && (
+                        <div className="flex gap-3 justify-start">
+                            <div className="max-w-[85%] rounded-[20px] px-5 py-3 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 text-sm">
+                                ⚠️ Errore: {error.message || 'Si è verificato un errore. Riprova.'}
                             </div>
                         </div>
-                    );
-                })}
+                    )}
 
-                {(isWaitingForResponse || isTypingWelcome) && (
-                    <div className="flex gap-3 justify-start animate-[chatFadeIn_0.3s_ease-out]">
-                        <div className="bg-[#F2F2F7] dark:bg-[#1C1C1E] rounded-[20px] rounded-bl-[12px] px-4 py-3 flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                            <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                            <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-[#666] rounded-full animate-bounce"></span>
+                    <div ref={messagesEndRef} className="h-4" />
+                </div>
+
+                {/* ── INPUT ── */}
+                <div className="flex-shrink-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(env(safe-area-inset-bottom,8px)+8px)]">
+
+                    {messages.length <= 1 && (
+                        <div className="flex overflow-x-auto gap-2 pb-3 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">
+                            {SUGGESTIONS.map((suggestion, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => {
+                                        setInputValue('');
+                                        sendMessage({ text: suggestion });
+                                    }}
+                                    className="flex-none whitespace-nowrap px-4 py-2.5 rounded-[12px] bg-gray-100 dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] text-sm text-black dark:text-white active:bg-gray-200 dark:active:bg-[#1E1E1E] transition-colors"
+                                >
+                                    {suggestion}
+                                </button>
+                            ))}
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {error && (
-                    <div className="flex gap-3 justify-start">
-                        <div className="max-w-[85%] rounded-[20px] px-5 py-3 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 text-sm">
-                            ⚠️ Errore: {error.message || 'Si è verificato un errore. Riprova.'}
-                        </div>
-                    </div>
-                )}
-
-                <div ref={messagesEndRef} className="h-4" />
-            </div>
-
-            {/* ── INPUT (absolute bottom) ── */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(env(safe-area-inset-bottom,8px)+8px)]"
-                style={{ minHeight: INPUT_H }}>
-
-                {messages.length <= 1 && (
-                    <div className="flex overflow-x-auto gap-2 pb-3 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">
-                        {SUGGESTIONS.map((suggestion, idx) => (
+                    <form onSubmit={handleSend} className="relative flex items-center max-w-3xl mx-auto group">
+                        <input
+                            className="w-full bg-gray-100 dark:bg-[#1E1E1E] text-black dark:text-white rounded-[26px] h-[52px] pl-6 pr-24 outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 transition-all border border-gray-200 dark:border-[#2A2A2A] focus:border-gray-300 dark:focus:border-[#444] placeholder:text-gray-400 dark:placeholder:text-[#666666] text-[15px] shadow-sm"
+                            value={inputValue}
+                            placeholder="Chiedi un consiglio o come migliorare..."
+                            onChange={(e) => setInputValue(e.target.value)}
+                            disabled={isStreaming}
+                        />
+                        <div className="absolute right-2 flex items-center gap-1">
                             <button
-                                key={idx}
-                                onClick={() => {
-                                    setInputValue('');
-                                    sendMessage({ text: suggestion });
-                                }}
-                                className="flex-none whitespace-nowrap px-4 py-2.5 rounded-[12px] bg-gray-100 dark:bg-[#111111] border border-gray-200 dark:border-[#2A2A2A] text-sm text-black dark:text-white active:bg-gray-200 dark:active:bg-[#1E1E1E] transition-colors"
+                                type="submit"
+                                disabled={isStreaming || !inputValue.trim()}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 active:scale-90 ${inputValue.trim()
+                                    ? 'bg-[#00B1FF] text-white'
+                                    : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
+                                    }`}
                             >
-                                {suggestion}
+                                <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
                             </button>
-                        ))}
-                    </div>
-                )}
-
-                <form onSubmit={handleSend} className="relative flex items-center max-w-3xl mx-auto group">
-                    <input
-                        className="w-full bg-gray-100 dark:bg-[#1E1E1E] text-black dark:text-white rounded-[26px] h-[52px] pl-6 pr-24 outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 transition-all border border-gray-200 dark:border-[#2A2A2A] focus:border-gray-300 dark:focus:border-[#444] placeholder:text-gray-400 dark:placeholder:text-[#666666] text-[15px] shadow-sm"
-                        value={inputValue}
-                        placeholder="Chiedi un consiglio o come migliorare..."
-                        onChange={(e) => setInputValue(e.target.value)}
-                        disabled={isStreaming}
-                    />
-                    <div className="absolute right-2 flex items-center gap-1">
-                        <button
-                            type="submit"
-                            disabled={isStreaming || !inputValue.trim()}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 active:scale-90 ${inputValue.trim()
-                                ? 'bg-[#00B1FF] text-white'
-                                : 'bg-gray-300 dark:bg-[#3A3A3C] text-white dark:text-[#8E8E93] cursor-not-allowed'
-                                }`}
-                        >
-                            <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
-                        </button>
-                    </div>
-                </form>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

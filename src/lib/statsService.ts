@@ -284,78 +284,63 @@ export function calculateReadinessLevel(
     avgAccuracy: number,
     attemptCount: number,
     leaderboardData?: any,
-    history: AttemptWithDetails[] = [] // Added history parameter
+    history: AttemptWithDetails[] = []
 ): ReadinessDetail {
     // Calculate recency for all paths
     const lastDate = history.length > 0 ? new Date(history[0].created_at) : new Date();
     const daysSince = Math.floor((new Date().getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
     const recency = Math.max(0, 100 - (daysSince * 10));
 
-    // If we have official leaderboard data, use it!
+    // ===================================================
+    // NEW ALGORITHM: Score = (V×0.3333 + C×0.3333 + R×0.3333) × Accuracy
+    // V = Volume (0-100), C = Coverage (0-100), R = Reliability/Recency (0-100)
+    // Accuracy = multiplier from 0.00 to 1.00
+    // ===================================================
+
+    let volume = 0;
+    let coverage = 0;
+    let reliability = 0;
+    let accuracy = 0; // 0.00 to 1.00
+
     if (leaderboardData && leaderboardData.score !== undefined) {
-        const score = leaderboardData.score;
-        let level: 'low' | 'medium' | 'high' = 'low';
-        let label = 'Da migliorare';
-        let color = 'semantic-error';
+        // Leaderboard path — use real data from DB
+        volume = (leaderboardData.volume_factor || 0) * 100;
+        coverage = (leaderboardData.coverage_score || 0) * 100;
 
-        if (score >= 85) {
-            level = 'high';
-            label = 'Pronto';
-            color = 'semantic-success';
-        } else if (score >= 50) {
-            level = 'medium';
-            label = 'A buon punto';
-            color = 'brand-orange';
-        }
+        // Apply recency decay to reliability
+        const lastCalc = leaderboardData.last_calculated_at ? new Date(leaderboardData.last_calculated_at) : new Date();
+        const daysSinceAttempt = Math.floor((new Date().getTime() - lastCalc.getTime()) / (1000 * 60 * 60 * 24));
+        const recencyFactor = Math.max(0, Math.min(1, 1 - (daysSinceAttempt / 30))); // decays to 0 over 30 days
+        reliability = (leaderboardData.reliability || 0) * 100 * recencyFactor;
 
-        // 6. Recency (Time since last test)
-        // Calculated at top of function
-
-        return {
-            level,
-            label,
-            color,
-            score,
-            breakdown: {
-                accuracy: leaderboardData.accuracy_weighted || 0,
-                volume: (leaderboardData.volume_factor || 0) * 100,
-                coverage: (leaderboardData.coverage_score || 0) * 100,
-                reliability: (leaderboardData.reliability || 0) * 100,
-                recency: Math.round(recency) // Use the calculated recency
-            }
-        };
-    }
-
-    // Heuristic fallback if leaderboard not yet calculated
-    let calculatedVolume = 0;
-    if (history && history.length > 0) {
-        const totalCorrect = history.reduce((sum, h) => sum + (h.correct || 0), 0);
-        // Let's assume 300 correct answers is a solid "100%" volume target for baseline preparation
-        calculatedVolume = Math.min((totalCorrect / 300) * 100, 100);
+        accuracy = (leaderboardData.accuracy_weighted || 0) / 100; // Convert from 0-100 to 0-1
     } else {
-        calculatedVolume = Math.min((attemptCount / 10) * 100, 100);
+        // Heuristic fallback
+        if (history && history.length > 0) {
+            const totalCorrect = history.reduce((sum, h) => sum + (h.correct || 0), 0);
+            volume = Math.min((totalCorrect / 300) * 100, 100);
+        } else {
+            volume = Math.min((attemptCount / 10) * 100, 100);
+        }
+        coverage = 0; // Not available in fallback
+        reliability = recency; // Use recency as proxy
+        accuracy = (avgAccuracy || 0) / 100; // Convert from 0-100 to 0-1
     }
 
-    // MULTIPLICATIVE ALGORITHM (User's Proposal)
-    // 1. Calculate the "Effort/Work" Score (0 to 100)
-    // In the heuristic, we use Volume (80% weight) and Recency (20% weight) to represent work done.
-    const effortScore = (calculatedVolume * 0.8) + (recency * 0.2);
+    // Apply formula: (V×0.3333 + C×0.3333 + R×0.3333) × Accuracy
+    const effortScore = (volume * 0.3333) + (coverage * 0.3333) + (reliability * 0.3333);
+    const finalScore = Math.min(effortScore * accuracy, 100);
 
-    // 2. Multiply by Accuracy (Quality filter from 0.0 to 1.0)
-    const accuracyMultiplier = (avgAccuracy || 0) / 100;
-
-    // 3. Final Score is the product of Effort and Quality
-    const scoreEstimate = Math.min(effortScore * accuracyMultiplier, 100);
-
+    // Determine level
     let level: 'low' | 'medium' | 'high' = 'low';
     let label = 'Da migliorare';
     let color = 'semantic-error';
 
-    if (scoreEstimate >= 85) {
+    if (finalScore >= 85) {
         level = 'high';
         label = 'Pronto';
         color = 'semantic-success';
-    } else if (scoreEstimate >= 50) {
+    } else if (finalScore >= 50) {
         level = 'medium';
         label = 'A buon punto';
         color = 'brand-orange';
@@ -365,12 +350,12 @@ export function calculateReadinessLevel(
         level,
         label,
         color,
-        score: scoreEstimate,
+        score: finalScore,
         breakdown: {
-            accuracy: avgAccuracy,
-            volume: calculatedVolume,
-            coverage: 0,
-            reliability: 0,
+            accuracy: accuracy * 100, // Display as 0-100
+            volume,
+            coverage,
+            reliability,
             recency: Math.round(recency)
         }
     };

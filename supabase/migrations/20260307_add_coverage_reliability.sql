@@ -1,0 +1,297 @@
+-- Migration: Add Coverage & Reliability to the scoring trigger
+-- Coverage = unique questions seen / total questions in quiz
+-- Reliability = consistency of accuracy across recent attempts (+ attempt count factor)
+
+-- 0. Ensure question_stats table exists (trigger uses it)
+CREATE TABLE IF NOT EXISTS public.question_stats (
+    question_id UUID PRIMARY KEY REFERENCES public.questions(id) ON DELETE CASCADE,
+    times_answered INTEGER DEFAULT 0 NOT NULL,
+    times_correct INTEGER DEFAULT 0 NOT NULL,
+    difficulty_index NUMERIC(5, 4) GENERATED ALWAYS AS (
+        CASE 
+            WHEN times_answered > 0 THEN 1.0 - (times_correct::numeric / times_answered::numeric)
+            ELSE 0.5
+        END
+    ) STORED,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_question_stats_difficulty ON public.question_stats (difficulty_index DESC);
+ALTER TABLE public.question_stats ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'question_stats' AND policyname = 'Anyone can read question_stats') THEN
+        CREATE POLICY "Anyone can read question_stats" ON public.question_stats FOR SELECT USING (true);
+    END IF;
+END $$;
+GRANT SELECT ON public.question_stats TO authenticated;
+GRANT SELECT ON public.question_stats TO anon;
+
+-- 1. Add new columns for tracking
+ALTER TABLE public.concorso_leaderboard 
+ADD COLUMN IF NOT EXISTS seen_question_ids JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS recent_accuracies JSONB DEFAULT '[]'::jsonb;
+
+-- 2. Add coverage_score and reliability columns if they don't exist (from earlier migrations)
+ALTER TABLE public.concorso_leaderboard
+ADD COLUMN IF NOT EXISTS coverage_score NUMERIC(5, 4) DEFAULT 0,
+ADD COLUMN IF NOT EXISTS reliability NUMERIC(5, 4) DEFAULT 0,
+ADD COLUMN IF NOT EXISTS recency_score NUMERIC(5, 4) DEFAULT 0;
+
+-- 3. Redefine the trigger function with coverage & reliability
+CREATE OR REPLACE FUNCTION public.handle_new_attempt()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    _quiz_id UUID;
+    _user_id UUID;
+    _answer JSONB;
+    _question_id TEXT;
+    _is_correct BOOLEAN;
+    
+    -- Correct answers tracking
+    _current_correct_ids JSONB := '[]'::jsonb;
+    _new_correct_ids JSONB := '[]'::jsonb;
+    _final_correct_ids JSONB;
+    _correct_count INTEGER;
+    
+    -- Seen questions tracking (for coverage)
+    _current_seen_ids JSONB := '[]'::jsonb;
+    _new_seen_ids JSONB := '[]'::jsonb;
+    _final_seen_ids JSONB;
+    _seen_count INTEGER;
+    
+    -- Recent accuracies tracking (for reliability)
+    _current_recent_accs JSONB := '[]'::jsonb;
+    _attempt_accuracy NUMERIC;
+    _updated_recent_accs JSONB;
+    
+    -- Score calculations
+    _total_quiz_questions INTEGER;
+    _new_score NUMERIC;
+    _new_volume NUMERIC;
+    _new_coverage NUMERIC;
+    _new_reliability NUMERIC;
+    _attempt_correct_count INTEGER;
+    _attempt_total_count INTEGER;
+    _current_total_answered INTEGER := 0;
+    
+    -- Reliability calculation helpers
+    _acc_mean NUMERIC;
+    _acc_stddev NUMERIC;
+    _acc_count INTEGER;
+    _weighted_accuracy NUMERIC := 0;
+BEGIN
+    _quiz_id := NEW.quiz_id;
+    _user_id := NEW.user_id;
+
+    -- =====================================================
+    -- FETCH CURRENT STATE
+    -- =====================================================
+    SELECT 
+        COALESCE(correct_question_ids, '[]'::jsonb),
+        COALESCE(seen_question_ids, '[]'::jsonb),
+        COALESCE(recent_accuracies, '[]'::jsonb),
+        COALESCE(total_questions_answered, 0)
+    INTO _current_correct_ids, _current_seen_ids, _current_recent_accs, _current_total_answered
+    FROM public.concorso_leaderboard
+    WHERE user_id = _user_id AND quiz_id = _quiz_id;
+
+    IF _current_correct_ids IS NULL THEN _current_correct_ids := '[]'::jsonb; END IF;
+    IF _current_seen_ids IS NULL THEN _current_seen_ids := '[]'::jsonb; END IF;
+    IF _current_recent_accs IS NULL THEN _current_recent_accs := '[]'::jsonb; END IF;
+
+    -- =====================================================
+    -- EXTRACT DATA FROM THIS ATTEMPT
+    -- =====================================================
+    
+    -- Correct answer IDs (for volume)
+    SELECT jsonb_agg(DISTINCT elem->>'questionId')
+    INTO _new_correct_ids
+    FROM jsonb_array_elements(NEW.answers) AS elem
+    WHERE (elem->>'isCorrect')::boolean = true;
+    IF _new_correct_ids IS NULL THEN _new_correct_ids := '[]'::jsonb; END IF;
+
+    -- ALL question IDs answered (for coverage)
+    SELECT jsonb_agg(DISTINCT elem->>'questionId')
+    INTO _new_seen_ids
+    FROM jsonb_array_elements(NEW.answers) AS elem
+    WHERE elem->>'questionId' IS NOT NULL;
+    IF _new_seen_ids IS NULL THEN _new_seen_ids := '[]'::jsonb; END IF;
+
+    -- Count correct in this attempt (for accuracy)
+    SELECT COUNT(*) INTO _attempt_correct_count
+    FROM jsonb_array_elements(NEW.answers) AS elem
+    WHERE (elem->>'isCorrect')::boolean = true;
+
+    _attempt_total_count := COALESCE(jsonb_array_length(NEW.answers), 0);
+
+    -- This attempt's accuracy (0-100)
+    IF _attempt_total_count > 0 THEN
+        _attempt_accuracy := ROUND((_attempt_correct_count::numeric / _attempt_total_count::numeric) * 100, 2);
+    ELSE
+        _attempt_accuracy := 0;
+    END IF;
+
+    -- =====================================================
+    -- MERGE SETS
+    -- =====================================================
+    
+    -- Merge correct IDs (set union)
+    SELECT jsonb_agg(DISTINCT x)
+    INTO _final_correct_ids
+    FROM (
+        SELECT jsonb_array_elements_text(_current_correct_ids) as x
+        UNION
+        SELECT jsonb_array_elements_text(_new_correct_ids) as x
+    ) t;
+    IF _final_correct_ids IS NULL THEN _final_correct_ids := '[]'::jsonb; END IF;
+    _correct_count := jsonb_array_length(_final_correct_ids);
+
+    -- Merge seen IDs (set union)
+    SELECT jsonb_agg(DISTINCT x)
+    INTO _final_seen_ids
+    FROM (
+        SELECT jsonb_array_elements_text(_current_seen_ids) as x
+        UNION
+        SELECT jsonb_array_elements_text(_new_seen_ids) as x
+    ) t;
+    IF _final_seen_ids IS NULL THEN _final_seen_ids := '[]'::jsonb; END IF;
+    _seen_count := jsonb_array_length(_final_seen_ids);
+
+    -- Update recent accuracies (keep last 10, chronological order)
+    _updated_recent_accs := _current_recent_accs || jsonb_build_array(_attempt_accuracy);
+    -- Trim to last 10
+    IF jsonb_array_length(_updated_recent_accs) > 10 THEN
+        SELECT jsonb_agg(sub.val ORDER BY sub.ord)
+        INTO _updated_recent_accs
+        FROM (
+            SELECT val, ord
+            FROM jsonb_array_elements(_updated_recent_accs) WITH ORDINALITY AS t(val, ord)
+            ORDER BY ord DESC
+            LIMIT 10
+        ) sub;
+    END IF;
+
+    -- =====================================================
+    -- CALCULATE WEIGHTED ACCURACY
+    -- Newer attempts weigh more: weight = position (1=oldest, N=newest)
+    -- Example: [30, 50, 80] → (30×1 + 50×2 + 80×3) / (1+2+3) = 61.7
+    -- vs simple average: 53.3 — rewards improvement!
+    -- =====================================================
+    SELECT COALESCE(ROUND(SUM(v::numeric * rn) / NULLIF(SUM(rn), 0), 2), 0)
+    INTO _weighted_accuracy
+    FROM (
+        SELECT t.val::text::numeric AS v, ROW_NUMBER() OVER () AS rn
+        FROM jsonb_array_elements(_updated_recent_accs) AS t(val)
+    ) sub;
+
+    -- =====================================================
+    -- CALCULATE SCORES
+    -- =====================================================
+    
+    -- Total questions in quiz bank
+    SELECT count(*) INTO _total_quiz_questions
+    FROM public.questions WHERE quiz_id = _quiz_id;
+    IF _total_quiz_questions IS NULL OR _total_quiz_questions = 0 THEN
+        _total_quiz_questions := 1;
+    END IF;
+
+    -- Score (coverage of correct answers)
+    _new_score := ROUND((_correct_count::numeric / _total_quiz_questions::numeric) * 100, 1);
+    IF _new_score > 100 THEN _new_score := 100; END IF;
+
+    -- Volume = total questions answered / total bank (0-1) — measures practice quantity
+    _new_volume := LEAST((_current_total_answered + _attempt_total_count)::numeric / _total_quiz_questions::numeric, 1.0);
+
+    -- Coverage = unique seen / total bank (0-1)
+    _new_coverage := LEAST(_seen_count::numeric / _total_quiz_questions::numeric, 1.0);
+
+    -- Reliability = consistency of recent accuracies (0-1)
+    _acc_count := jsonb_array_length(_updated_recent_accs);
+    IF _acc_count >= 2 THEN
+        -- Calculate mean and stddev from recent accuracies
+        SELECT AVG(val::numeric), COALESCE(STDDEV(val::numeric), 0)
+        INTO _acc_mean, _acc_stddev
+        FROM jsonb_array_elements_text(_updated_recent_accs) AS val;
+
+        -- reliability = 1 - (stddev / 40), clamped to [0, 1]
+        -- stddev=0 → perfect consistency → 1.0
+        -- stddev=40 → very inconsistent → 0.0
+        _new_reliability := GREATEST(0, LEAST(1.0, 1.0 - (_acc_stddev / 40.0)));
+
+        -- Scale down if few attempts (need at least 3 for full reliability)
+        IF _acc_count < 3 THEN
+            _new_reliability := _new_reliability * (_acc_count::numeric / 3.0);
+        END IF;
+    ELSE
+        -- Not enough data for reliability
+        _new_reliability := 0;
+    END IF;
+
+    -- =====================================================
+    -- UPSERT INTO LEADERBOARD
+    -- =====================================================
+    INSERT INTO public.concorso_leaderboard (
+        user_id, quiz_id, score,
+        correct_question_ids, seen_question_ids,
+        total_questions_answered, total_correct_answers,
+        accuracy_weighted, volume_factor, coverage_score, reliability,
+        recent_accuracies,
+        last_calculated_at
+    )
+    VALUES (
+        _user_id, _quiz_id, _new_score,
+        _final_correct_ids, _final_seen_ids,
+        _attempt_total_count, _attempt_correct_count,
+        -- Weighted accuracy for new row (just this attempt's accuracy)
+        _attempt_accuracy,
+        _new_volume, _new_coverage, _new_reliability,
+        _updated_recent_accs,
+        NOW()
+    )
+    ON CONFLICT (user_id, quiz_id)
+    DO UPDATE SET
+        score = EXCLUDED.score,
+        correct_question_ids = EXCLUDED.correct_question_ids,
+        seen_question_ids = EXCLUDED.seen_question_ids,
+        total_questions_answered = concorso_leaderboard.total_questions_answered + EXCLUDED.total_questions_answered,
+        total_correct_answers = concorso_leaderboard.total_correct_answers + EXCLUDED.total_correct_answers,
+        -- Weighted accuracy from recent attempts (newer = higher weight)
+        accuracy_weighted = _weighted_accuracy,
+        volume_factor = EXCLUDED.volume_factor,
+        coverage_score = EXCLUDED.coverage_score,
+        reliability = EXCLUDED.reliability,
+        recent_accuracies = EXCLUDED.recent_accuracies,
+        last_calculated_at = NOW();
+
+    -- =====================================================
+    -- PART B: UPDATE QUESTION STATS
+    -- =====================================================
+    FOR _answer IN SELECT * FROM jsonb_array_elements(NEW.answers)
+    LOOP
+        _question_id := _answer->>'questionId';
+        _is_correct := COALESCE((_answer->>'isCorrect')::boolean, false);
+        
+        IF _question_id IS NOT NULL THEN
+            INSERT INTO public.question_stats (question_id, times_answered, times_correct, updated_at)
+            VALUES (_question_id::uuid, 1, CASE WHEN _is_correct THEN 1 ELSE 0 END, NOW())
+            ON CONFLICT (question_id)
+            DO UPDATE SET
+                times_answered = question_stats.times_answered + 1,
+                times_correct = question_stats.times_correct + (CASE WHEN _is_correct THEN 1 ELSE 0 END),
+                updated_at = NOW();
+        END IF;
+    END LOOP;
+
+    RETURN NEW;
+END;
+$$;
+
+-- 4. Re-attach the trigger (drop + create to ensure clean state)
+DROP TRIGGER IF EXISTS on_new_attempt_score ON public.quiz_attempts;
+
+CREATE TRIGGER on_new_attempt_score
+AFTER INSERT OR UPDATE ON public.quiz_attempts
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_new_attempt();

@@ -55,7 +55,7 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                                 layoutId={`bando-title-${bando.id}`}
                                 className="font-semibold text-slate-900 dark:text-white text-sm mt-1 line-clamp-2"
                             >
-                                {bando.title}
+                                {bando.short_title || bando.title}
                             </motion.h4>
                             <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
                                 {bando.seats_total && (
@@ -109,7 +109,7 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                             layoutId={`bando-title-${bando.id}`}
                             className="font-black text-lg text-[var(--foreground)] leading-tight mb-auto line-clamp-3 group-hover:text-[#00B1FF] transition-colors duration-300"
                         >
-                            {bando.title}
+                            {bando.short_title || bando.title}
                         </motion.h3>
 
                         {/* Footer Info */}
@@ -166,7 +166,7 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                             layoutId={`bando-title-${bando.id}`}
                             className="font-semibold text-slate-900 dark:text-white line-clamp-2 leading-tight"
                         >
-                            {bando.title}
+                            {bando.short_title || bando.title}
                         </motion.h3>
 
                         {/* Meta info */}

@@ -5,7 +5,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import AdminSidebar from '../admin/AdminSidebar';
 import InstallPrompt from '../pwa/InstallPrompt';
 import BottomNavigation from './BottomNavigation';
-import { Capacitor } from '@capacitor/core';
+import { isStandaloneApp } from '@/lib/standalone';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -31,8 +31,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         }
     }
 
-    // Check if running as native app
-    const isNativeApp = Capacitor.isNativePlatform();
+    const isNativeApp = isStandaloneApp();
 
     // Check if on pages where bottom nav should be hidden (blog, concorsi, quiz, bandi detail)
     const hideBottomNav = location.pathname.startsWith('/blog') ||
@@ -87,8 +86,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 {/* Skitla-Style Bottom Navigation */}
                 {!isAdmin && !hideBottomNav && <BottomNavigation />}
 
-                {/* PWA Install Prompt */}
-                {!isAdmin && <InstallPrompt />}
+                {/* PWA Install Prompt — disabled */}
             </div>
         </div>
     );

@@ -44,15 +44,17 @@ export default function AddFriendModal({ isOpen, onClose, currentUserId, onReque
         if (error) {
             if (typeof error === 'string' && error.includes('limite')) {
                 setRateLimitError(error);
+            } else if (typeof error === 'string' && error.includes('already exists')) {
+                setRateLimitError('Richiesta già inviata a questo utente.');
             } else {
-                // Generic error handling if needed, presently silent or logged
                 console.error(error);
             }
             return;
         }
 
-        setSentIds(prev => new Set(prev).add(friendId));
+        // Success → close modal, parent shows toast
         onRequestSent();
+        onClose();
     };
 
     return (

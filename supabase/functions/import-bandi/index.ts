@@ -57,6 +57,7 @@ async function parseWithAI(description: string, openaiKey: string) {
     const systemPrompt = `Sei un esperto di concorsi pubblici. Analizza la descrizione di un bando e estrai dati strutturati PRECISI.
     
     Output richiesto (JSON):
+    - short_title: Titolo breve e chiaro (max 60 caratteri) che comunichi IMMEDIATAMENTE il ruolo e l'ente. Esempi: "Allievi Agente Polizia di Stato 2025", "80 Funzionari Amministrativi - Comune di Ravenna", "Aggiornamento GPS Docenti 2025". REGOLE: rimuovi "AVVISO", "DELIBERA", maiuscole inutili. Se ci sono posti, metti il numero. Includi l'ente se breve.
     - ente_name: Nome pulito dell'ente (es. "Comune di Milano" non "COMUNE DI MILANO - UFFICIO CONCORSI").
     - category_slug: Scegli una tra: ['pubblica-amministrazione', 'enti-locali', 'sanita', 'istruzione', 'forze-armate', 'forze-ordine', 'giustizia', 'agenzia-entrate', 'universita', 'infrastrutture-trasporti', 'altro'].
     - seats_total: numero posti (intero).
@@ -234,6 +235,7 @@ serve(async (req) => {
                 // Upsert logic
                 const bandodata = {
                     title: item.titolo,
+                    short_title: aiData.short_title || null,
                     source_id: item.id,
                     source_type: 'inpa',
                     status: 'published', // Always live

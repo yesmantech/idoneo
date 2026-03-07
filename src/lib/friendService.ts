@@ -99,7 +99,25 @@ export const friendService = {
      * Send a friend request
      */
     async sendRequest(currentUserId: string, friendId: string) {
-        // Check if already exists
+        // 0. Check Max Friends Limit (50)
+        const { count: friendCount1 } = await supabase
+            .from('friendships')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', currentUserId)
+            .in('status', ['accepted', 'referral']);
+
+        const { count: friendCount2 } = await supabase
+            .from('friendships')
+            .select('*', { count: 'exact', head: true })
+            .eq('friend_id', currentUserId)
+            .in('status', ['accepted', 'referral']);
+
+        const totalFriends = (friendCount1 || 0) + (friendCount2 || 0);
+        if (totalFriends >= 50) {
+            return { error: 'Hai raggiunto il limite massimo di 50 amici.' };
+        }
+
+        // 1. Check if already exists
         const { data: existing } = await supabase
             .from('friendships')
             .select('*')

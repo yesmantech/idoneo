@@ -88,64 +88,52 @@ function PrepContent() {
                 </div>
                 <h2 className="text-2xl font-black text-[var(--foreground)]">Punteggio di Preparazione</h2>
                 <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed">
-                    Misuriamo la tua preparazione da 0 a 100 basandoci su 5 fattori chiave che analizzano la tua banca dati.
+                    Misuriamo la tua preparazione da 0 a 100 con la formula: (Volume + Copertura + Costanza) × Accuratezza.
+                </p>
+            </div>
+
+            {/* Formula */}
+            <div className="bg-slate-50 dark:bg-[#111]/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
+                <p className="text-sm font-mono text-center text-[var(--foreground)] opacity-70">
+                    Score = (V×33% + C×33% + R×33%) × Accuratezza
                 </p>
             </div>
 
             {/* Factors */}
             <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider pl-1">I 5 Fattori</h3>
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider pl-1">I 3 Fattori + Moltiplicatore</h3>
 
                 <InfoCard
                     icon={<Layers className="w-5 h-5" />}
                     title="Volume"
-                    subtitle="Quantità (20%)"
-                    text="Più domande diverse affronti, più il sistema ha dati per valutarti. I punteggi alti richiedono un volume consistente."
+                    subtitle="Domande Totali (33.33%)"
+                    text="Misura quante domande hai affrontato rispetto alla banca dati. Più ti alleni, più sale."
                     color="cyan"
-                />
-
-                <InfoCard
-                    icon={<CheckCircle2 className="w-5 h-5" />}
-                    title="Precisione"
-                    subtitle="Accuracy (25%)"
-                    text="È la tua percentuale di risposte corrette. Il sistema pesa maggiormente le risposte date recentemente."
-                    color="emerald"
-                />
-
-                <InfoCard
-                    icon={<Clock className="w-5 h-5" />}
-                    title="Recency"
-                    subtitle="Freschezza (20%)"
-                    text="Se non ti alleni da tempo, il punteggio scende. Per mantenerlo alto, devi esercitarti con regolarità."
-                    color="rose"
                 />
 
                 <InfoCard
                     icon={<FileText className="w-5 h-5" />}
                     title="Copertura"
-                    subtitle="Profondità (20%)"
-                    text="Premia chi esplora tutta la banca dati invece di ripetere sempre le stesse domande."
+                    subtitle="Banca Dati (33.33%)"
+                    text="Quante domande diverse hai visto. Premia chi esplora tutta la banca dati invece di ripetere sempre le stesse."
                     color="purple"
                 />
 
                 <InfoCard
                     icon={<Zap className="w-5 h-5" />}
-                    title="Affidabilità"
-                    subtitle="Costanza (15%)"
-                    text="Valuta quanto sono stabili i tuoi risultati nel tempo. Poca varianza significa una preparazione solida."
+                    title="Costanza"
+                    subtitle="Affidabilità (33.33%)"
+                    text="Quanto sono stabili i tuoi risultati nelle ultime 10 simulazioni. Meno varianza = più affidabilità. Decade se non ti alleni per 30 giorni."
                     color="amber"
                 />
-            </div>
 
-            {/* Reliability Note */}
-            <div className="bg-slate-50 dark:bg-[#111]/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 space-y-3">
-                <div className="flex items-center gap-2 text-[var(--foreground)] font-bold">
-                    <AlertTriangle className="w-5 h-5 text-amber-500" />
-                    <span>Affidabilità del punteggio</span>
-                </div>
-                <p className="text-sm text-[var(--foreground)] opacity-60 leading-relaxed">
-                    Se hai svolto pochi quiz (meno di 50-100), il tuo punteggio sarà limitato perché i dati non sono sufficienti per una stima affidabile. Continua ad allenarti per sbloccare il tuo vero potenziale!
-                </p>
+                <InfoCard
+                    icon={<CheckCircle2 className="w-5 h-5" />}
+                    title="Accuratezza"
+                    subtitle="Moltiplicatore (×0.00 – ×1.00)"
+                    text="Media pesata delle ultime 10 simulazioni — le più recenti contano di più. Se migliori, il punteggio sale più velocemente."
+                    color="emerald"
+                />
             </div>
 
             {/* Examples */}
@@ -154,7 +142,7 @@ function PrepContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="bg-[var(--card)] p-4 rounded-2xl border border-[var(--card-border)] shadow-sm">
                         <div className="font-bold text-[var(--foreground)] mb-1">Utente Principiante</div>
-                        <div className="text-[13px] text-[var(--foreground)] opacity-50">Pochi quiz ma 100% corretti → <span className="text-amber-500 font-bold">Punteggio Medio-Basso</span> (Manca volume)</div>
+                        <div className="text-[13px] text-[var(--foreground)] opacity-50">Pochi quiz ma 100% corretti → <span className="text-amber-500 font-bold">Punteggio Medio-Basso</span> (Manca volume e copertura)</div>
                     </div>
                     <div className="bg-[var(--card)] p-4 rounded-2xl border border-[var(--card-border)] shadow-sm">
                         <div className="font-bold text-[var(--foreground)] mb-1">Utente Esperto</div>

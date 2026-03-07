@@ -66,7 +66,7 @@ export default function QuizStatsPage() {
                     .maybeSingle(),
                 supabase
                     .from('concorso_leaderboard')
-                    .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+                    .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability, last_calculated_at')
                     .eq('user_id', user.id)
                     .eq('quiz_id', quizId)
                     .maybeSingle(),

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Sparkles, Trophy, User } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
+import { isStandaloneApp } from '@/lib/standalone';
 
 /**
  * Praktika-style bottom navigation with dark mode support.
@@ -19,7 +19,7 @@ const ACTIVE_COLOR = '#0095FF';
 
 export default function BottomNavigation() {
     const location = useLocation();
-    const isNativeApp = Capacitor.isNativePlatform();
+    const isStandalone = isStandaloneApp();
 
     // Dark mode detection
     const [isDark, setIsDark] = useState(() =>
@@ -47,7 +47,7 @@ export default function BottomNavigation() {
         <div
             className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
             style={{
-                paddingBottom: isNativeApp
+                paddingBottom: isStandalone
                     ? 'env(safe-area-inset-bottom, 0px)'
                     : '0px',
             }}
@@ -57,7 +57,7 @@ export default function BottomNavigation() {
                 style={{
                     background: bgColor,
                     paddingTop: '18px',
-                    paddingBottom: isNativeApp
+                    paddingBottom: isStandalone
                         ? 'max(12px, env(safe-area-inset-bottom, 12px))'
                         : '12px',
                     transition: 'background-color 0.3s ease',

@@ -80,12 +80,6 @@ export default function BandiWatchlistPage() {
                         </button>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">I Miei Bandi</h1>
                     </div>
-                    <Link
-                        to="/bandi/notifications"
-                        className="p-2 rounded-xl bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300"
-                    >
-                        <Settings className="w-5 h-5" />
-                    </Link>
                 </div>
 
                 {/* Tabs */}
@@ -124,8 +118,8 @@ export default function BandiWatchlistPage() {
                         {/* Closing this week section */}
                         {activeTab === 'attivi' && closingThisWeek.length > 0 && (
                             <section>
-                                <h2 className="text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-                                    🔥 In scadenza questa settimana
+                                <h2 className="text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                                    <img src="/icons/flame-red.png" alt="" className="w-4 h-4 object-contain" /> In scadenza questa settimana
                                 </h2>
                                 <div className="space-y-3">
                                     <AnimatePresence mode="popLayout">

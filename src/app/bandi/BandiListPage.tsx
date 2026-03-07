@@ -197,8 +197,8 @@ export default function BandiListPage() {
                         {showClosingSoon && closingSoon.length > 0 && (
                             <section>
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-[17px] font-black text-[var(--foreground)] tracking-tight flex items-center gap-2">
-                                        🔥 In scadenza
+                                    <h2 className="text-[17px] font-black text-[var(--foreground)] tracking-tight flex items-center gap-1.5">
+                                        <img src="/icons/flame-red.png" alt="" className="w-5 h-5 object-contain" /> In scadenza
                                     </h2>
                                 </div>
                                 <div className="flex gap-4 overflow-x-auto p-8 -mx-8 px-8 scrollbar-hide snap-x">

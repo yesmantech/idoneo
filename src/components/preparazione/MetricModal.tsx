@@ -23,45 +23,45 @@ const METRIC_DETAILS: Record<MetricType, {
         title: 'Volume',
         icon: BarChart2,
         color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/30',
-        weight: '20%',
-        description: 'Misura la quantità totale di risposte corrette salvate nella tua banca dati personale.',
-        insight: 'Più domande diverse affronti, più il sistema ha dati statistici per valutare il tuo livello reale. Un volume elevato riduce il margine di errore del punteggio.',
-        pro_tip: 'Non fermarti ai primi 100 quiz. La stima diventa realmente solida dopo aver superato le 500-1000 domande risposte.'
+        weight: '33.33%',
+        description: 'Domande totali risposte / dimensione della banca dati. Ogni risposta (giusta o sbagliata) contribuisce al volume.',
+        insight: 'Con una banca di 4000+ domande, servono molte simulazioni per arrivare al 100%. Il volume premia la quantità di pratica, indipendentemente dal risultato.',
+        pro_tip: 'Fai simulazioni regolarmente. Anche quelle "andate male" contribuiscono al volume e aiutano l\'algoritmo a valutarti meglio.'
     },
     accuracy: {
         title: 'Precisione',
         icon: Target,
         color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30',
-        weight: '25%',
-        description: 'Rappresenta il rapporto tra risposte corrette e tentativi totali.',
-        insight: 'È il cuore qualitativo del tuo score. Il sistema non guarda solo al numero, ma a quanto sei efficace nel rispondere correttamente al primo colpo.',
+        weight: 'Moltiplicatore ×',
+        description: 'Media pesata delle ultime 10 simulazioni: le più recenti contano di più. Moltiplica il punteggio complessivo (da ×0.00 a ×1.00).',
+        insight: 'Se migliori nel tempo, la tua accuratezza sale più velocemente rispetto a una media semplice. Una simulazione recente al 90% "pesa" più di una vecchia al 60%.',
         pro_tip: 'Punta alla qualità. Leggi bene le domande invece di correre; una precisione costante sopra l\'85% è l\'obiettivo per i concorsi più difficili.'
     },
     recency: {
         title: 'Recency',
         icon: Clock,
         color: 'text-rose-500 bg-rose-50 dark:bg-rose-900/30',
-        weight: '20%',
-        description: 'Analizza quanto sono recenti i tuoi progressi e la tua attività sulla piattaforma.',
-        insight: 'La memoria a breve termine è fondamentale. Se smetti di allenarti, lo score scende gradualmente per riflettere il "decadimento" naturale della preparazione.',
-        pro_tip: 'Meglio 15 minuti ogni giorno che 4 ore una volta a settimana. La regolarità mantiene questo indicatore al 100%.'
+        weight: 'Incluso in Costanza',
+        description: 'Misura quanto recentemente ti sei allenato. Il valore di Costanza decade gradualmente se non fai simulazioni per più di 30 giorni.',
+        insight: 'Il fattore recency è integrato nella Costanza (Reliability). Dopo 30 giorni senza simulazioni, la costanza si dimezza ogni 15 giorni aggiuntivi.',
+        pro_tip: 'Meglio 15 minuti ogni giorno che 4 ore una volta a settimana. La regolarità mantiene alta la costanza.'
     },
     coverage: {
         title: 'Copertura',
         icon: FileText,
         color: 'text-purple-500 bg-purple-50 dark:bg-purple-900/30',
-        weight: '20%',
-        description: 'Valuta quanta parte dell\'intera banca dati ufficiale hai esplorato.',
-        insight: 'Premia chi varia le materie e i capitoli. Ripetere sempre le stesse domande (che già conosci) "gonfia" l\'accuratezza ma abbassa la copertura.',
-        pro_tip: 'Usa la funzione "Domande mai viste" nelle simulazioni personalizzate per massimizzare questo fattore velocemente.'
+        weight: '33.33%',
+        description: 'Domande uniche viste almeno una volta / domande totali nella banca dati. Ripetere le stesse domande non aumenta la copertura.',
+        insight: 'Diversamente dal Volume, la Copertura premia l\'ampiezza: se rispondi 100 volte alle stesse 20 domande, il Volume sale ma la Copertura resta ferma.',
+        pro_tip: 'Usa la funzione "Domande mai viste" nelle simulazioni personalizzate per massimizzare la copertura velocemente.'
     },
     reliability: {
-        title: 'Affidabilità',
+        title: 'Costanza',
         icon: Shield,
         color: 'text-amber-500 bg-amber-50 dark:bg-amber-900/30',
-        weight: '15%',
-        description: 'Riflette la stabilità dei tuoi risultati nel tempo e la varianza statistica.',
-        insight: 'Indica quanto il sistema è sicuro che il tuo score sia reale. Se passi dal 10% al 90% improvvisamente, l\'affidabilità sarà bassa finché il trend non si stabilizza.',
+        weight: '33.33%',
+        description: 'Calcola la stabilità dei tuoi risultati: 1 - (deviazione standard delle ultime 10 accuratezze / 40), scalata per numero di tentativi.',
+        insight: 'Se le tue accuratezze sono 85%, 87%, 83%, 86% = costanza alta. Ma se sono 30%, 90%, 50%, 80% = costanza bassa. Decade del 50% ogni 15 giorni dopo 30 giorni di inattività.',
         pro_tip: 'Cerca di mantenere una performance costante. Una preparazione matura non mostra sbalzi eccessivi tra un tentativo e l\'altro.'
     }
 };

@@ -46,8 +46,8 @@ export default function PunteggiPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center"
                 >
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-[24px] bg-gradient-to-br from-[#00B1FF] to-emerald-500 flex items-center justify-center shadow-lg">
-                        <Calculator className="w-10 h-10 text-white" />
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-[24px] bg-[#00B1FF]/10 dark:bg-[#00B1FF]/15 flex items-center justify-center">
+                        <Calculator className="w-10 h-10 text-[#00B1FF]" />
                     </div>
                     <h1 className="text-3xl font-black mb-3">Come Calcoliamo i Punteggi</h1>
                     <p className="text-slate-500 dark:text-slate-400 text-lg max-w-md mx-auto">
@@ -126,10 +126,16 @@ export default function PunteggiPage() {
                         </div>
                     </div>
 
-                    <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                        Il livello di preparazione viene calcolato analizzando le tue ultime simulazioni.
-                        Si attiva dopo almeno <strong>3 quiz completati</strong>.
+                    <p className="text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
+                        Il livello usa la formula: <strong>(Volume + Copertura + Costanza) × Accuratezza</strong>.
+                        Si attiva dopo almeno <strong>2 simulazioni</strong>.
                     </p>
+
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111]/50 border border-slate-100 dark:border-slate-700 mb-6">
+                        <p className="text-sm font-mono text-center text-slate-600 dark:text-slate-300">
+                            Score = (V×33% + C×33% + R×33%) × Accuratezza
+                        </p>
+                    </div>
 
                     <div className="space-y-4">
                         <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
@@ -187,25 +193,25 @@ export default function PunteggiPage() {
 
                     <div className="space-y-4">
                         <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                                <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                            <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
+                                <BarChart3 className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Accuratezza</h4>
+                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Volume (33.33%)</h4>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Media delle risposte corrette su tutte le simulazioni. Più alta è, meglio sei posizionato.
+                                    Domande totali risposte rispetto alla banca dati. Più ti alleni, più sale.
                                 </p>
                             </div>
                         </div>
 
                         <div className="flex items-start gap-4">
                             <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                                <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Volume</h4>
+                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Copertura (33.33%)</h4>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Numero totale di risposte corrette. Più ti alleni, più punti accumuli.
+                                    Quante domande diverse hai visto. Premia chi esplora tutta la banca dati.
                                 </p>
                             </div>
                         </div>
@@ -215,9 +221,21 @@ export default function PunteggiPage() {
                                 <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Consistenza</h4>
+                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Costanza (33.33%)</h4>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Frequenza di allenamento. Chi si allena regolarmente ha un vantaggio.
+                                    Stabilità dei risultati nelle ultime 10 simulazioni. Decade dopo 30 giorni di inattività.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                                <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Accuratezza (Moltiplicatore)</h4>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    Media pesata delle ultime 10 simulazioni — le più recenti contano di più. Moltiplica il punteggio dei 3 fattori.
                                 </p>
                             </div>
                         </div>
@@ -225,7 +243,7 @@ export default function PunteggiPage() {
 
                     <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-[#00B1FF]/10 to-emerald-500/10 border border-[#00B1FF]/20">
                         <p className="text-sm text-slate-600 dark:text-slate-300">
-                            🏆 <strong>Score Finale:</strong> Una combinazione ponderata di accuratezza, volume e consistenza determina la tua posizione in classifica.
+                            🏆 <strong>Score = (V×33% + C×33% + R×33%) × Accuratezza</strong> L'accuratezza agisce come moltiplicatore: se rispondi tutto sbagliato, il punteggio è 0.
                         </p>
                     </div>
                 </motion.section>

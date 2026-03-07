@@ -33,6 +33,7 @@ async function parseWithAI(description: string, openaiKey: string) {
     const systemPrompt = `Sei un esperto di concorsi pubblici. Analizza la descrizione di un bando e estrai dati strutturati PRECISI.
     
     Output richiesto (JSON):
+    - short_title: Titolo breve e chiaro (max 60 caratteri) che comunichi IMMEDIATAMENTE il ruolo e l'ente. Esempi: "Allievi Agente Polizia di Stato 2025", "80 Funzionari Amministrativi - Comune di Ravenna". REGOLE: rimuovi "AVVISO", "DELIBERA", maiuscole inutili. Se ci sono posti, metti il numero. Includi l'ente se breve.
     - ente_name: Nome pulito dell'ente (es. "Comune di Milano" non "COMUNE DI MILANO - UFFICIO CONCORSI").
     - category_slug: Scegli una tra: ['pubblica-amministrazione', 'enti-locali', 'sanita', 'istruzione', 'forze-armate', 'forze-ordine', 'giustizia', 'agenzia-entrate', 'universita', 'infrastrutture-trasporti', 'altro'].
     - seats_total: numero posti (intero).
@@ -118,6 +119,7 @@ serve(async (req) => {
                     const { error: updateError } = await supabaseClient
                         .from('bandi')
                         .update({
+                            short_title: aiData.short_title || null,
                             ente_id: enteId,
                             category_id: categoryId,
                             seats_total: aiData.seats_total || null,
@@ -127,7 +129,7 @@ serve(async (req) => {
                             province: aiData.province || null,
                             city: aiData.city || null,
                             salary_range: aiData.salary_range || null,
-                            description: aiData.optimized_description || bando.description // Update description if optimized
+                            description: aiData.optimized_description || bando.description
                         })
                         .eq('id', bando.id);
 

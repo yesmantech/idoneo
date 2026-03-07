@@ -40,6 +40,22 @@ export default function ContestPage() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Leaderboard data — for readiness card
+  const { data: leaderboardData } = useQuery({
+    queryKey: ['contest-leaderboard', contest?.id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('concorso_leaderboard')
+        .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability, last_calculated_at')
+        .eq('quiz_id', contest!.id)
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!contest?.id && !!user?.id,
+    staleTime: 1000 * 60 * 5,
+  });
+
   if (loading) return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-black pb-20 font-sans text-slate-900 dark:text-white">
       <div className="sticky top-0 z-30 bg-[#F8FAFC]/90 dark:bg-black/90 backdrop-blur-md px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex items-center gap-1">
@@ -109,18 +125,14 @@ export default function ContestPage() {
           </h1>
         </div>
 
-        {/* 3. DESCRIPTION CARD */}
-        <div className="bg-white dark:bg-[#1C1C1E] rounded-[20px] p-5 shadow-[0_2px_15px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100/50 dark:border-white/[0.06]">
-          <p className={`${contest.description ? 'text-slate-600 dark:text-white/50' : 'text-slate-400 dark:text-white/25 italic'} text-[15px] leading-relaxed`}>
-            {contest.description || "Nessuna descrizione inserita."}
-          </p>
-        </div>
+
 
         {/* 3.5 READINESS CARD */}
         {user && (
           <ReadinessCard
             history={attempts}
             theme={{ gradient: "from-[#00B1FF] to-[#00B1FF]" }}
+            leaderboardData={leaderboardData}
           />
         )}
 

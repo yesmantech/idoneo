@@ -106,7 +106,8 @@ export const leaderboardService = {
                 accuracy_weighted,
                 recency_score,
                 coverage_score,
-                reliability
+                reliability,
+                last_calculated_at
             `)
             .eq('quiz_id', quizId)
             .order('score', { ascending: false })
@@ -254,7 +255,7 @@ export const leaderboardService = {
         // Fetch user's score first
         const { data: userRow, error: scoreError } = await supabase
             .from('concorso_leaderboard')
-            .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability')
+            .select('score, volume_factor, accuracy_weighted, recency_score, coverage_score, reliability, last_calculated_at')
             .eq('user_id', userId)
             .eq('quiz_id', quizId)
             .maybeSingle();

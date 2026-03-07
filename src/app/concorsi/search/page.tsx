@@ -8,7 +8,6 @@ import {
     Trophy,
     Calendar,
     ArrowRight,
-    Shield,
     Sparkles,
     CheckCircle2
 } from 'lucide-react';
@@ -21,6 +20,7 @@ import {
 } from '@/lib/concorsoService';
 import TierSLoader from '@/components/ui/TierSLoader';
 import SEOHead from '@/components/seo/SEOHead';
+import { getCategoryStyle } from '@/lib/categoryIcons';
 
 // ============================================
 // CONCORSI SEARCH PAGE - Tier S
@@ -298,18 +298,7 @@ export default function ConcorsiSearchPage() {
 // ============================================
 
 function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
-    // Dynamic styling based on category
-    const getColorClass = (title?: string) => {
-        if (!title) return 'bg-brand-blue';
-        const lower = title.toLowerCase();
-        if (lower.includes('forze-armate') || lower.includes('militari') || lower.includes('polizia')) return 'bg-brand-blue';
-        if (lower.includes('sanita')) return 'bg-semantic-error';
-        if (lower.includes('amministrativi')) return 'bg-brand-purple';
-        if (lower.includes('enti-locali')) return 'bg-brand-orange';
-        return 'bg-brand-blue';
-    };
-
-    const cardBgColor = getColorClass(quiz.category?.slug);
+    const { Icon, color, bgLight } = getCategoryStyle(quiz.category?.title);
 
     return (
         <Link
@@ -318,8 +307,11 @@ function QuizSearchCard({ quiz }: { quiz: ConcorsoQuiz }) {
         >
             <div className="p-5 flex gap-4">
                 {/* Visual Icon */}
-                <div className={`w-14 h-14 rounded-2xl ${cardBgColor} flex items-center justify-center shrink-0`}>
-                    <Shield className="w-6 h-6 text-white" strokeWidth={1.5} />
+                <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: bgLight }}
+                >
+                    <Icon className="w-6 h-6" style={{ color }} strokeWidth={1.5} />
                 </div>
 
                 {/* Content */}
