@@ -51,13 +51,33 @@ export default function BandiListPage() {
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
-    // Deduplicate across pages — pagination overlap can produce same-ID dupes
+    // Deduplicate across pages — by ID (pagination overlap) AND by normalized title (data dupes)
     const bandi = (() => {
         const all = infiniteData?.pages.flatMap(page => page.data) || [];
         const seenIds = new Set<string>();
+        const seenTitles = new Map<string, typeof all[0]>();
+
+        // Normalize title for fuzzy dedup: strip leading numbers, dashes, years
+        const normalize = (t: string) => t.toLowerCase()
+            .replace(/^\d+\s*/g, '').replace(/\s*-\s*/g, ' ')
+            .replace(/\b20\d{2}\b/g, '').replace(/\s+/g, ' ').trim();
+
         return all.filter(b => {
+            // 1. Skip exact ID dupes
             if (seenIds.has(b.id)) return false;
             seenIds.add(b.id);
+
+            // 2. Skip title dupes — keep the one with earliest deadline
+            const key = normalize(b.title);
+            const existing = seenTitles.get(key);
+            if (existing) {
+                // If this one has an earlier deadline, replace the existing
+                if (new Date(b.deadline) < new Date(existing.deadline)) {
+                    seenTitles.set(key, b);
+                }
+                return false; // filter out this duplicate
+            }
+            seenTitles.set(key, b);
             return true;
         });
     })();
