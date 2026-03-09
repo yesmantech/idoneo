@@ -243,7 +243,21 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
         days_remaining: Math.max(0, Math.ceil((new Date(bando.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     }));
 
-    return { data: bandiWithComputed, count: count || 0 };
+    // Deduplicate by title — keep the entry with the earliest deadline
+    const seen = new Map<string, typeof bandiWithComputed[0]>();
+    for (const bando of bandiWithComputed) {
+        const key = (bando.short_title || bando.title).toLowerCase().trim();
+        const existing = seen.get(key);
+        if (!existing || new Date(bando.deadline) < new Date(existing.deadline)) {
+            seen.set(key, bando);
+        }
+    }
+    const deduped = bandiWithComputed.filter(b => {
+        const key = (b.short_title || b.title).toLowerCase().trim();
+        return seen.get(key) === b;
+    });
+
+    return { data: deduped, count: count || 0 };
 }
 
 export async function fetchBandoBySlug(slug: string): Promise<Bando | null> {
@@ -308,10 +322,20 @@ export async function fetchClosingSoonBandi(days = 7, limit = 10): Promise<Bando
         return [];
     }
 
-    return (data || []).map(bando => ({
+    const withComputed = (data || []).map(bando => ({
         ...bando,
         days_remaining: Math.max(0, Math.ceil((new Date(bando.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     }));
+
+    // Deduplicate by title
+    const seen = new Map<string, typeof withComputed[0]>();
+    for (const b of withComputed) {
+        const key = (b.short_title || b.title).toLowerCase().trim();
+        if (!seen.has(key) || new Date(b.deadline) < new Date(seen.get(key)!.deadline)) {
+            seen.set(key, b);
+        }
+    }
+    return withComputed.filter(b => seen.get((b.short_title || b.title).toLowerCase().trim()) === b);
 }
 
 // ============================================
