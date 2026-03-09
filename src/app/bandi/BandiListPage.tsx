@@ -51,7 +51,16 @@ export default function BandiListPage() {
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
-    const bandi = infiniteData?.pages.flatMap(page => page.data) || [];
+    // Deduplicate across pages — pagination overlap can produce same-ID dupes
+    const bandi = (() => {
+        const all = infiniteData?.pages.flatMap(page => page.data) || [];
+        const seenIds = new Set<string>();
+        return all.filter(b => {
+            if (seenIds.has(b.id)) return false;
+            seenIds.add(b.id);
+            return true;
+        });
+    })();
     const totalCount = infiniteData?.pages[0]?.count || 0;
 
     // 2. Closing Soon (Only on first page, no search)

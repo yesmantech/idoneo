@@ -118,6 +118,25 @@ export interface BandiFilters {
 }
 
 // ============================================
+// DEDUPLICATION HELPERS
+// ============================================
+
+/**
+ * Aggressively normalizes a bando title for deduplication.
+ * Strips leading seat counts, dashes, year suffixes, extra whitespace.
+ * e.g. "100 Docenti Infanzia e Primaria - Comune di L'Aquila 2025" → "docenti infanzia e primaria comune di l'aquila"
+ */
+function normalizeBandoTitle(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/^\d+\s*/g, '')           // strip leading numbers ("100 Docenti..." → "Docenti...")
+        .replace(/\s*-\s*/g, ' ')           // replace dashes with spaces
+        .replace(/\b20\d{2}\b/g, '')        // strip year references (2024, 2025, 2026...)
+        .replace(/\s+/g, ' ')              // collapse whitespace
+        .trim();
+}
+
+// ============================================
 // QUERY FUNCTIONS
 // ============================================
 
@@ -243,19 +262,16 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
         days_remaining: Math.max(0, Math.ceil((new Date(bando.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     }));
 
-    // Deduplicate by title — keep the entry with the earliest deadline
+    // Deduplicate by normalized title — keep the entry with the earliest deadline
     const seen = new Map<string, typeof bandiWithComputed[0]>();
     for (const bando of bandiWithComputed) {
-        const key = (bando.short_title || bando.title).toLowerCase().trim();
+        const key = normalizeBandoTitle(bando.title);
         const existing = seen.get(key);
         if (!existing || new Date(bando.deadline) < new Date(existing.deadline)) {
             seen.set(key, bando);
         }
     }
-    const deduped = bandiWithComputed.filter(b => {
-        const key = (b.short_title || b.title).toLowerCase().trim();
-        return seen.get(key) === b;
-    });
+    const deduped = bandiWithComputed.filter(b => seen.get(normalizeBandoTitle(b.title)) === b);
 
     return { data: deduped, count: count || 0 };
 }
@@ -330,12 +346,12 @@ export async function fetchClosingSoonBandi(days = 7, limit = 10): Promise<Bando
     // Deduplicate by title
     const seen = new Map<string, typeof withComputed[0]>();
     for (const b of withComputed) {
-        const key = (b.short_title || b.title).toLowerCase().trim();
+        const key = normalizeBandoTitle(b.title);
         if (!seen.has(key) || new Date(b.deadline) < new Date(seen.get(key)!.deadline)) {
             seen.set(key, b);
         }
     }
-    return withComputed.filter(b => seen.get((b.short_title || b.title).toLowerCase().trim()) === b);
+    return withComputed.filter(b => seen.get(normalizeBandoTitle(b.title)) === b);
 }
 
 // ============================================
