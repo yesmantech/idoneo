@@ -197,6 +197,27 @@ serve(async (req) => {
                     return;
                 }
 
+                // Also check for title-based duplicates (different source_id but same content)
+                if (!existing) {
+                    const normalizedTitle = item.titolo.toLowerCase()
+                        .replace(/^\d+\s*/g, '').replace(/\s*[-–—]\s*/g, ' ')
+                        .replace(/\b20\d{2}\b/g, '').replace(/\s+/g, ' ').trim();
+
+                    const { data: titleDup } = await supabaseClient
+                        .from('bandi')
+                        .select('id')
+                        .eq('status', 'published')
+                        .eq('normalized_title', normalizedTitle)
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (titleDup) {
+                        results.skipped++;
+                        results.details.push({ title: item.titolo, skipped: 'duplicate_title' });
+                        return;
+                    }
+                }
+
                 // AI Parsing & Enrichment
                 let aiData: any = {};
                 let enteId: string | null = null;
