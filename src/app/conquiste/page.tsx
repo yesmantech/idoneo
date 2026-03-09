@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, X, Share2, Lock, Zap, Flame, Calendar, Trophy } from 'lucide-react';
+import { ArrowLeft, X, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { badgeService } from '@/lib/badgeService';
 import { BADGE_DEFINITIONS, BadgeDefinition } from '@/lib/badgeDefinitions';
 import { hapticLight } from '@/lib/haptics';
 import { generateBadgeGraphicFile, generateRecordGraphicFile } from '@/lib/shareGraphic';
 import { useNavigate } from 'react-router-dom';
-import { BadgeGlow } from '@/components/gamification/BadgeGlow';
 
 interface Badge extends BadgeDefinition {
     unlocked: boolean;
@@ -86,6 +85,11 @@ function RecordDetailModal({ record, onClose }: { record: PersonalRecord; onClos
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [showShareSheet, setShowShareSheet] = useState(false);
+
+    // Cleanup blob URL on unmount to prevent memory leak
+    useEffect(() => {
+        return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+    }, [previewUrl]);
 
     // Map record gradient to share config
     const recordShareConfig: Record<string, { bgKey: string; accentColor: string }> = {
@@ -505,6 +509,11 @@ function BadgeDetailModal({ badge, onClose }: { badge: Badge; onClose: () => voi
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [showShareSheet, setShowShareSheet] = useState(false);
+
+    // Cleanup blob URL on unmount to prevent memory leak
+    useEffect(() => {
+        return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+    }, [previewUrl]);
 
     const handleGeneratePreview = async () => {
         if (isGenerating) return;
