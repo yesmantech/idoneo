@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 
 // ============================================================================
@@ -127,6 +127,15 @@ function fireDailyCheckin() {
     });
 }
 
+// Scroll to top on every route change
+function ScrollToTop() {
+    const { pathname } = useLocation();
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+    return null;
+}
+
 // Loading fallback for lazy-loaded components
 const AdminLoading = () => (
     <div className="flex items-center justify-center min-h-screen bg-[var(--background)]">
@@ -178,6 +187,7 @@ export default function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
+                <ScrollToTop />
                 <ErrorBoundary>
                     <ThemeProvider>
                         <AuthProvider>
