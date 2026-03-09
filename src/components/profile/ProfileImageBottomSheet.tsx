@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Image as ImageIcon, Smile, Star, Trash2, X } from 'lucide-react';
+import { Camera, Image as ImageIcon, Smile, Star, RotateCcw, X } from 'lucide-react';
 import { hapticLight } from '@/lib/haptics';
 import { createPortal } from 'react-dom';
 
@@ -12,7 +12,6 @@ interface ProfileImageBottomSheetProps {
     onUseEmoji: () => void;
     onUseIcon: () => void;
     onRestoreDefault: () => void;
-    activeCategory?: 'emoji' | 'icon' | 'image' | 'camera';
 }
 
 export default function ProfileImageBottomSheet({
@@ -23,10 +22,8 @@ export default function ProfileImageBottomSheet({
     onUseEmoji,
     onUseIcon,
     onRestoreDefault,
-    activeCategory = 'emoji' // Example default from video
 }: ProfileImageBottomSheetProps) {
 
-    // Mount state for portal
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
 
@@ -46,82 +43,96 @@ export default function ProfileImageBottomSheet({
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Backdrop */}
+                    {/* Backdrop — heavy blur, dark overlay */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-[25px]"
-                        onClick={() => {
-                            hapticLight();
-                            onClose();
-                        }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        className="fixed inset-0 z-[100]"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(25px)', WebkitBackdropFilter: 'blur(25px)' }}
+                        onClick={() => { hapticLight(); onClose(); }}
                     />
 
-                    {/* Bottom Sheet */}
+                    {/* Floating Bottom Sheet — NOT full-width, rounded all corners */}
                     <motion.div
-                        initial={{ y: '100%' }}
-                        animate={{ y: 0 }}
-                        exit={{ y: '100%' }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed bottom-0 left-0 right-0 z-[101] bg-[#1c1c1e] text-white rounded-t-[32px] overflow-hidden"
-                        style={{ paddingBottom: 'env(safe-area-inset-bottom, 20px)' }}
+                        initial={{ y: '100%', opacity: 0.5 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '100%', opacity: 0 }}
+                        transition={{ type: 'spring', damping: 28, stiffness: 300, mass: 0.8 }}
+                        className="fixed z-[101] left-4 right-4"
+                        style={{ bottom: 'max(16px, env(safe-area-inset-bottom, 16px))' }}
                     >
-                        {/* Drag Handle & Header */}
-                        <div className="relative pt-4 pb-4 px-6 flex items-center justify-between border-b border-white/5">
-                            {/* Drag Indicator */}
-                            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1.5 rounded-full bg-white/20" />
+                        <div
+                            className="overflow-hidden"
+                            style={{
+                                backgroundColor: '#1C1C1E',
+                                borderRadius: 24,
+                            }}
+                        >
+                            {/* Header: "Select Icon" + Close button */}
+                            <div className="flex items-center justify-between px-5 pt-5 pb-4">
+                                <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>
+                                    Select Icon
+                                </h2>
+                                <button
+                                    onClick={() => { hapticLight(); onClose(); }}
+                                    className="active:scale-90 transition-transform"
+                                    style={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: '50%',
+                                        backgroundColor: '#3A3A3C',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        border: 'none',
+                                    }}
+                                >
+                                    <X style={{ width: 16, height: 16, color: '#8E8E93' }} />
+                                </button>
+                            </div>
 
-                            <h2 className="text-[18px] font-bold text-white mt-2">Select Icon</h2>
-                            <button
-                                onClick={() => {
-                                    hapticLight();
-                                    onClose();
-                                }}
-                                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mt-2 active:scale-90 transition-transform"
-                            >
-                                <X className="w-5 h-5 text-white/70" />
-                            </button>
-                        </div>
+                            {/* Action Rows — each is a separate pill */}
+                            <div className="flex flex-col gap-[6px] px-3 pb-4">
 
-                        {/* Menu Options */}
-                        <div className="px-4 py-2 flex flex-col gap-1 mb-4">
+                                <ActionRow
+                                    icon={<Camera style={{ width: 20, height: 20, color: '#fff' }} />}
+                                    iconBg="#3A3A3C"
+                                    label="Take Photo"
+                                    onClick={() => { hapticLight(); onTakePhoto(); }}
+                                />
 
-                            <MenuOption
-                                icon={<Camera className="w-5 h-5 text-white" />}
-                                label="Take Photo"
-                                onClick={() => { hapticLight(); onTakePhoto(); }}
-                            />
+                                <ActionRow
+                                    icon={<ImageIcon style={{ width: 20, height: 20, color: '#fff' }} />}
+                                    iconBg="#3A3A3C"
+                                    label="Choose Image"
+                                    onClick={() => { hapticLight(); onChooseImage(); }}
+                                />
 
-                            <MenuOption
-                                icon={<ImageIcon className="w-5 h-5 text-white" />}
-                                label="Choose Image"
-                                onClick={() => { hapticLight(); onChooseImage(); }}
-                            />
+                                <ActionRow
+                                    icon={<span style={{ fontSize: 22, lineHeight: 1 }}>😀</span>}
+                                    iconBg="#FFB800"
+                                    label="Use Emoji"
+                                    isHighlighted
+                                    onClick={() => { hapticLight(); onUseEmoji(); }}
+                                />
 
-                            <MenuOption
-                                icon={<Smile className="w-5 h-5 text-white" />}
-                                label="Use Emoji"
-                                isActive={activeCategory === 'emoji'}
-                                onClick={() => { hapticLight(); onUseEmoji(); }}
-                            />
+                                <ActionRow
+                                    icon={<Star style={{ width: 20, height: 20, color: '#fff' }} />}
+                                    iconBg="#3A3A3C"
+                                    label="Use Icon"
+                                    onClick={() => { hapticLight(); onUseIcon(); }}
+                                />
 
-                            <MenuOption
-                                icon={<Star className="w-5 h-5 text-white" />}
-                                label="Use Icon"
-                                isActive={activeCategory === 'icon'}
-                                onClick={() => { hapticLight(); onUseIcon(); }}
-                            />
+                                <ActionRow
+                                    icon={<RotateCcw style={{ width: 20, height: 20, color: '#fff' }} />}
+                                    iconBg="#3A3A3C"
+                                    label="Restore Default"
+                                    onClick={() => { hapticLight(); onRestoreDefault(); }}
+                                />
 
-                            <MenuOption
-                                icon={<Trash2 className="w-5 h-5 text-rose-500" />}
-                                iconBg="bg-rose-500/10"
-                                label="Restore Default"
-                                titleColor="text-rose-500"
-                                onClick={() => { hapticLight(); onRestoreDefault(); }}
-                            />
-
+                            </div>
                         </div>
                     </motion.div>
                 </>
@@ -132,42 +143,53 @@ export default function ProfileImageBottomSheet({
     return createPortal(modalContent, document.body);
 }
 
-function MenuOption({
+/** Individual action row — pill-shaped with rounded bg */
+function ActionRow({
     icon,
+    iconBg,
     label,
     onClick,
-    isActive = false,
-    iconBg = "bg-white/10",
-    titleColor = "text-white"
+    isHighlighted = false,
 }: {
     icon: React.ReactNode;
+    iconBg: string;
     label: string;
     onClick: () => void;
-    isActive?: boolean;
-    iconBg?: string;
-    titleColor?: string;
+    isHighlighted?: boolean;
 }) {
-    // If active (like the Emoji option in the video), highlight the background
-    const wrapperClasses = isActive
-        ? "w-10 h-10 rounded-full bg-[#FFD700] flex items-center justify-center" // Assuming brand yellow
-        : `w-10 h-10 rounded-full ${iconBg} flex items-center justify-center`;
-
     return (
         <button
             onClick={onClick}
-            className="w-full flex items-center gap-4 px-4 py-3 active:bg-white/5 rounded-2xl transition-colors"
+            className="active:scale-[0.97] transition-transform"
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                width: '100%',
+                padding: '12px 14px',
+                borderRadius: 14,
+                backgroundColor: '#2C2C2E',
+                border: 'none',
+                cursor: 'pointer',
+            }}
         >
-            <div className={wrapperClasses}>
-                {isActive ? (
-                    // When active (brand yellow bg), icon should probably be dark/black for contrast
-                    <div className="text-black [&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-black">
-                        {icon}
-                    </div>
-                ) : (
-                    <div>{icon}</div>
-                )}
+            <div
+                style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: '50%',
+                    backgroundColor: iconBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                }}
+            >
+                {icon}
             </div>
-            <span className={`text-[16px] font-semibold ${titleColor}`}>{label}</span>
+            <span style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>
+                {label}
+            </span>
         </button>
     );
 }
