@@ -35,8 +35,31 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
         '2xl': 'w-10 h-10',
     };
 
+    const emojiSizes = {
+        sm: 'text-[14px]',
+        md: 'text-[18px]',
+        lg: 'text-[22px]',
+        xl: 'text-[30px]',
+        '2xl': 'text-[38px]',
+    };
+
     // Consistent premium gradient
     const gradient = 'bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600';
+
+    // Handle emoji avatar format: "emoji:😀:#007AFF"
+    if (src && src.startsWith('emoji:')) {
+        const parts = src.split(':');
+        const emoji = parts[1] || '😀';
+        const bgColor = parts.slice(2).join(':') || '#007AFF';
+        return (
+            <div
+                className={`relative rounded-full overflow-hidden flex items-center justify-center ${sizeClasses[size]} ${className}`}
+                style={{ backgroundColor: bgColor }}
+            >
+                <span className={emojiSizes[size]} style={{ lineHeight: 1 }}>{emoji}</span>
+            </div>
+        );
+    }
 
     if (src && !imgError) {
         return (

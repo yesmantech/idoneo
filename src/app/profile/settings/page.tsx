@@ -14,6 +14,7 @@ import {
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
 import ProfileImageBottomSheet from '@/components/profile/ProfileImageBottomSheet';
+import EmojiPickerSheet from '@/components/profile/EmojiPickerSheet';
 import { hapticLight } from '@/lib/haptics';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
@@ -44,6 +45,7 @@ export default function ProfileSettingsPage() {
     const [showThemeSelector, setShowThemeSelector] = useState(false);
     const [themeLabel, setThemeLabel] = useState<string>('Auto'); // Added themeLabel state
     const [showImageSheet, setShowImageSheet] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -353,15 +355,51 @@ export default function ProfileSettingsPage() {
                     }}
                     onUseEmoji={() => {
                         setShowImageSheet(false);
-                        showToast('success', 'Presto disponibile: Avatar Emoji!');
+                        setTimeout(() => setShowEmojiPicker(true), 300);
                     }}
                     onUseIcon={() => {
                         setShowImageSheet(false);
                         showToast('success', 'Presto disponibile: Icone Profilo!');
                     }}
-                    onRestoreDefault={() => {
+                    onRestoreDefault={async () => {
                         setShowImageSheet(false);
-                        showToast('success', 'Avatar predefinito ripristinato!');
+                        try {
+                            await supabase.from('profiles').upsert({
+                                id: user?.id,
+                                avatar_url: null,
+                                updated_at: new Date().toISOString()
+                            });
+                            setAvatarUrl(null);
+                            await refreshProfile();
+                            showToast('success', 'Avatar predefinito ripristinato!');
+                        } catch {
+                            showToast('error', 'Errore durante il ripristino.');
+                        }
+                    }}
+                />
+
+                <EmojiPickerSheet
+                    isOpen={showEmojiPicker}
+                    onClose={() => setShowEmojiPicker(false)}
+                    initialEmoji={avatarUrl?.startsWith('emoji:') ? avatarUrl.split(':')[1] : '😀'}
+                    initialColor={avatarUrl?.startsWith('emoji:') ? avatarUrl.split(':').slice(2).join(':') : '#007AFF'}
+                    onSave={async (emoji, bgColor) => {
+                        const emojiAvatarUrl = `emoji:${emoji}:${bgColor}`;
+                        try {
+                            setSaving(true);
+                            await supabase.from('profiles').upsert({
+                                id: user?.id,
+                                avatar_url: emojiAvatarUrl,
+                                updated_at: new Date().toISOString()
+                            });
+                            setAvatarUrl(emojiAvatarUrl);
+                            await refreshProfile();
+                            showToast('success', 'Avatar emoji salvato!');
+                        } catch {
+                            showToast('error', 'Errore salvataggio emoji.');
+                        } finally {
+                            setSaving(false);
+                        }
                     }}
                 />
 
