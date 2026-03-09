@@ -150,31 +150,28 @@ export function StreakCelebration() {
         const updateStatusBar = async () => {
             const meta = document.querySelector('meta[name="theme-color"]');
 
-            // Define colors based on theme
-            // Light: Slate-50 (#F8FAFC), Dark: Slate-900 (#0F172A)
-            const activeColor = resolvedTheme === 'dark' ? '#0F172A' : '#F8FAFC';
-            const activeStyle = resolvedTheme === 'dark' ? Style.Dark : Style.Light;
+            // Streak modal is ALWAYS dark regardless of theme
+            const darkColor = '#0a0e1a';
 
             if (show) {
-                // ACTIVE: Match the modal background
-                meta?.setAttribute('content', activeColor);
-                document.body.style.backgroundColor = activeColor;
+                meta?.setAttribute('content', darkColor);
+                document.body.style.backgroundColor = darkColor;
 
                 try {
-                    await StatusBar.setBackgroundColor({ color: activeColor });
-                    await StatusBar.setStyle({ style: activeStyle });
+                    await StatusBar.setBackgroundColor({ color: darkColor });
+                    await StatusBar.setStyle({ style: Style.Dark });
                 } catch (e) { /* ignore web errors */ }
             } else {
                 // INACTIVE: Restore to default app theme
-                // Dark: #0F172A, Light: #F3F5F7 (App Canvas)
                 const fallbackColor = resolvedTheme === 'dark' ? '#0F172A' : '#F3F5F7';
+                const fallbackStyle = resolvedTheme === 'dark' ? Style.Dark : Style.Light;
 
                 meta?.setAttribute('content', fallbackColor);
-                document.body.style.backgroundColor = ''; // Clear inline to revert to CSS
+                document.body.style.backgroundColor = '';
 
                 try {
                     await StatusBar.setBackgroundColor({ color: fallbackColor });
-                    await StatusBar.setStyle({ style: activeStyle });
+                    await StatusBar.setStyle({ style: fallbackStyle });
                 } catch (e) { /* ignore */ }
             }
         };
@@ -200,7 +197,8 @@ export function StreakCelebration() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     // THEME-AWARE BACKGROUND:
                     // Uses explicit slate colors for reliability with opacity
-                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-50/95 dark:bg-black/95 backdrop-blur-xl"
+                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center backdrop-blur-xl"
+                    style={{ backgroundColor: 'rgba(10, 14, 26, 0.96)' }}
                 >
                     <Confetti
                         width={windowSize.width}
@@ -590,15 +588,15 @@ export function StreakCelebration() {
                                 {isTierUnlock ? "Nuovo Grado Sbloccato!" : (isMilestone ? "Traguardo Raggiunto!" : "Streak Aggiornata!")}
                             </h2>
                             <div className="flex items-center justify-center gap-3 mb-6">
-                                <span className="text-8xl font-black tracking-tighter drop-shadow-lg font-sans text-slate-900 dark:text-white">
+                                <span className="text-8xl font-black tracking-tighter drop-shadow-lg font-sans text-white">
                                     {streak}
                                 </span>
                                 <div className="flex flex-col items-start space-y-1">
-                                    <span className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">GIORNI</span>
-                                    <span className="text-lg font-medium tracking-wide text-slate-500 dark:text-slate-400">CONSECUTIVI</span>
+                                    <span className="text-2xl font-bold tracking-tight text-white">GIORNI</span>
+                                    <span className="text-lg font-medium tracking-wide text-slate-400">CONSECUTIVI</span>
                                 </div>
                             </div>
-                            <p className="text-base max-w-xs mx-auto leading-relaxed text-slate-500 dark:text-slate-400">
+                            <p className="text-base max-w-xs mx-auto leading-relaxed text-slate-400">
                                 {isMilestone
                                     ? "Stai costruendo un'abitudine di ferro! Continua su questa strada."
                                     : "Continua a studiare ogni giorno per mantenere la tua streak."}
