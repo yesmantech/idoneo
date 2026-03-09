@@ -151,7 +151,7 @@ export function StreakCelebration() {
             const meta = document.querySelector('meta[name="theme-color"]');
 
             // Streak modal is ALWAYS dark regardless of theme
-            const darkColor = '#0a0e1a';
+            const darkColor = '#000000';
 
             if (show) {
                 meta?.setAttribute('content', darkColor);
@@ -198,7 +198,7 @@ export function StreakCelebration() {
                     // THEME-AWARE BACKGROUND:
                     // Uses explicit slate colors for reliability with opacity
                     className="fixed inset-0 z-[100] flex flex-col items-center justify-center backdrop-blur-xl"
-                    style={{ backgroundColor: 'rgba(10, 14, 26, 0.96)' }}
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.96)' }}
                 >
                     <Confetti
                         width={windowSize.width}
