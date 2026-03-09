@@ -104,8 +104,8 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                                             <Star className="w-4 h-4 text-[#00B1FF]" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-[14px] mb-0.5">1 XP per risposta corretta</h4>
-                                            <p className="text-[12px] text-slate-500 dark:text-white/35">Ogni risposta giusta ti fa guadagnare 1 punto esperienza.</p>
+                                            <h4 className="font-bold text-slate-900 dark:text-white text-[14px] mb-0.5">1 XP per risposta corretta unica</h4>
+                                            <p className="text-[12px] text-slate-500 dark:text-white/35">Guadagni XP solo per domande nuove. Ripetere le stesse non dà XP extra.</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.04]">
@@ -122,8 +122,8 @@ export default function ProfileIdentityCard({ user, profile, xp = 0 }: ProfileId
                                             <Zap className="w-4 h-4 text-amber-500" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-[14px] mb-0.5">Impegno, non preparazione</h4>
-                                            <p className="text-[12px] text-slate-500 dark:text-white/35">Gli XP misurano quanto ti alleni, non il tuo livello di preparazione.</p>
+                                            <h4 className="font-bold text-slate-900 dark:text-white text-[14px] mb-0.5">Qualità, non quantità</h4>
+                                            <p className="text-[12px] text-slate-500 dark:text-white/35">Gli XP premiano l'esplorazione della banca dati. Più domande diverse impari, più cresci.</p>
                                         </div>
                                     </div>
                                 </div>

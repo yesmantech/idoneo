@@ -71,7 +71,7 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
 
     return (
         <div className="space-y-4">
-            {/* TIER S SEARCH BAR */}
+            {/* TIER S SEARCH BAR — matches homepage premium feel */}
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -85,65 +85,65 @@ export default function BandiFiltersBar({ filters, onFiltersChange, totalResults
                         offset: 0
                     });
                 }}
-                className="bg-[var(--card)] rounded-[28px] shadow-soft border border-[var(--card-border)] p-2 flex flex-col md:flex-row gap-2 relative z-20"
+                className="bg-[var(--card)] rounded-[26px] lg:rounded-[30px] shadow-soft border border-[var(--card-border)] hover:shadow-lg hover:shadow-[#00B1FF]/5 hover:border-[#00B1FF]/20 transition-all duration-300 overflow-hidden"
             >
                 {/* Keyword Input */}
-                <div className="flex-1 relative group">
-                    <button
-                        type="submit"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400 group-focus-within:text-brand-blue group-focus-within:bg-brand-blue/10 dark:group-focus-within:bg-brand-blue/20 transition-all hover:bg-brand-blue hover:text-white"
-                    >
-                        <Search className="w-4 h-4" />
-                    </button>
+                <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[14px] bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400 group-focus-within:text-[#00B1FF] group-focus-within:bg-[#00B1FF]/10 dark:group-focus-within:bg-[#00B1FF]/20 transition-all duration-200">
+                        <Search className="w-[18px] h-[18px]" />
+                    </div>
                     <input
                         type="text"
                         value={keyword}
                         onChange={(e) => setKeyword(e.target.value)}
                         placeholder="Cosa cerchi? (es. Amministrativo)"
-                        className="w-full pl-14 pr-4 py-3.5 bg-transparent border-0 focus:ring-0 text-[var(--foreground)] placeholder:text-slate-400/70 font-medium text-[15px]"
+                        className="w-full pl-16 pr-5 h-[52px] lg:h-[56px] bg-transparent border-0 focus:ring-0 text-[var(--foreground)] placeholder:text-slate-400/60 font-medium text-[15px] outline-none"
                     />
                 </div>
 
-                {/* Divider (Desktop) */}
-                <div className="hidden md:block w-px bg-[var(--card-border)] my-2" />
+                {/* Separator */}
+                <div className="mx-4 h-px bg-slate-100 dark:bg-slate-800" />
 
                 {/* Location Input */}
-                <div className="flex-1 relative group md:max-w-[30%]">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400 group-focus-within:text-brand-blue group-focus-within:bg-brand-blue/10 dark:group-focus-within:bg-brand-blue/20 transition-all">
-                        <MapPin className="w-4 h-4" />
+                <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[14px] bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400 group-focus-within:text-[#00B1FF] group-focus-within:bg-[#00B1FF]/10 dark:group-focus-within:bg-[#00B1FF]/20 transition-all duration-200">
+                        <MapPin className="w-[18px] h-[18px]" />
                     </div>
                     <input
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         placeholder="Dove? (Città o Provincia)"
-                        className="w-full pl-14 pr-4 py-3.5 bg-transparent border-0 focus:ring-0 text-[var(--foreground)] placeholder:text-slate-400/70 font-medium text-[15px]"
+                        className="w-full pl-16 pr-5 h-[52px] lg:h-[56px] bg-transparent border-0 focus:ring-0 text-[var(--foreground)] placeholder:text-slate-400/60 font-medium text-[15px] outline-none"
                     />
                 </div>
 
-                {/* Filter Button */}
-                <motion.button
-                    type="button"
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                        hapticLight();
-                        setShowAdvanced(true);
-                    }}
-                    className={`
-                        md:w-auto w-full px-6 py-3.5 rounded-[22px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px]
-                        ${activeFiltersCount > 0
-                            ? 'bg-brand-blue text-white shadow-sm hover:opacity-90'
-                            : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}
-                    `}
-                >
-                    <SlidersHorizontal className="w-4 h-4" />
-                    <span className="hidden md:inline">Filtri</span>
-                    {activeFiltersCount > 0 && (
-                        <span className="bg-white/25 px-2 py-0.5 rounded-full text-[11px] font-black">
-                            {activeFiltersCount}
-                        </span>
-                    )}
-                </motion.button>
+                {/* Filter Button — inside the card */}
+                <div className="px-3 pb-3">
+                    <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => {
+                            hapticLight();
+                            setShowAdvanced(true);
+                        }}
+                        className={`
+                            w-full py-3.5 rounded-[18px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px]
+                            ${activeFiltersCount > 0
+                                ? 'bg-[#00B1FF] text-white shadow-md shadow-[#00B1FF]/25 hover:shadow-lg hover:shadow-[#00B1FF]/30'
+                                : 'bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }
+                        `}
+                    >
+                        <SlidersHorizontal className="w-4 h-4" />
+                        Filtri Avanzati
+                        {activeFiltersCount > 0 && (
+                            <span className="bg-white/25 px-2.5 py-0.5 rounded-full text-[11px] font-black min-w-[22px] text-center">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </motion.button>
+                </div>
             </form>
 
             {/* Result Stats & Sort */}

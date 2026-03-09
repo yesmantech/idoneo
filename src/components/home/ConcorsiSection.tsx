@@ -124,7 +124,7 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                         <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-[10px] border border-emerald-100 shadow-sm shadow-emerald-900/5">
                             <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                             <span className="text-emerald-700 font-black text-[10px] lg:text-[11px]">
-                                {postiDisponibili} posti
+                                {postiDisponibili} {postiDisponibili === 1 ? 'posto' : 'posti'}
                             </span>
                         </div>
                     )}

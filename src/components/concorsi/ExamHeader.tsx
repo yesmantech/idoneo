@@ -50,7 +50,7 @@ export default function ExamHeader({ title, subtitle, breadcrumbs, status = 'ope
                             )}
                             {positions && (
                                 <span className="text-sm text-slate-600 font-medium flex items-center gap-1">
-                                    👥 {positions} Posti
+                                    👥 {positions} {Number(positions) === 1 ? 'Posto' : 'Posti'}
                                 </span>
                             )}
                         </div>

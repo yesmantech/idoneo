@@ -173,6 +173,105 @@ export async function fetchSmartQuestions(
     return finalSelection;
 }
 
+/**
+ * Optimized version: fetches ALL question data in ONE query, selects in-memory.
+ * Returns full question objects ready for richAnswers — no batch re-fetching needed.
+ * Total DB queries: 1 (questions) + 1 (history, only for non-random modes) = max 2.
+ */
+export async function fetchSmartQuestionsWithData(
+    userId: string | null,
+    quizId: string,
+    subjectConfigs: SubjectConfig[],
+    mode: QuestionSelectionMode
+): Promise<any[]> {
+
+    const subjectIds = subjectConfigs.filter(c => c.count > 0).map(c => c.subjectId);
+    if (subjectIds.length === 0) return [];
+
+    // 1. SINGLE QUERY: all questions with full data + subject name
+    const { data: allQuestions } = await supabase
+        .from("questions_safe")
+        .select("id, subject_id, text, option_a, option_b, option_c, option_d, explanation, subject:subjects(name)")
+        .in("subject_id", subjectIds)
+        .eq("is_archived", false);
+
+    if (!allQuestions || allQuestions.length === 0) return [];
+
+    // Group full question objects by subject
+    const questionsBySubject = new Map<string, any[]>();
+    for (const q of allQuestions) {
+        if (!questionsBySubject.has(q.subject_id)) {
+            questionsBySubject.set(q.subject_id, []);
+        }
+        questionsBySubject.get(q.subject_id)!.push(q);
+    }
+
+    // 2. User history (1 query, only if needed)
+    let userHistory: UserAnswerHistory | null = null;
+    if (userId && mode !== "random" && mode !== "hardest") {
+        userHistory = await fetchUserHistoryBatch(userId, quizId);
+    }
+
+    // 3. In-memory selection on full objects
+    const finalSelection: any[] = [];
+
+    for (const config of subjectConfigs) {
+        if (config.count <= 0) continue;
+        const pool = questionsBySubject.get(config.subjectId) || [];
+        if (pool.length === 0) continue;
+
+        const allIds = pool.map(q => q.id);
+        let selectedIds: string[] = [];
+
+        if (mode === "random") {
+            selectedIds = shuffleArray(allIds).slice(0, config.count);
+        }
+        else if (mode === "unseen" && userHistory) {
+            const unseen = allIds.filter(id => !userHistory.seen.has(id));
+            selectedIds = fillPool(unseen, allIds, config.count);
+        }
+        else if (mode === "weak" && userHistory) {
+            const wrongIds = getTopByCount(userHistory.wrong, allIds);
+            selectedIds = fillPool(wrongIds, allIds, config.count);
+        }
+        else if (mode === "unanswered" && userHistory) {
+            const skippedIds = getTopByCount(userHistory.skipped, allIds);
+            selectedIds = fillPool(skippedIds, allIds, config.count);
+        }
+        else if (mode === "hardest") {
+            const { data: hardestData } = await supabase
+                .from("question_stats")
+                .select("question_id")
+                .in("question_id", allIds)
+                .order("difficulty_index", { ascending: false })
+                .limit(config.count);
+
+            if (hardestData && hardestData.length > 0) {
+                selectedIds = fillPool(hardestData.map(d => d.question_id), allIds, config.count);
+            } else {
+                selectedIds = shuffleArray(allIds).slice(0, config.count);
+            }
+        }
+        else if (mode === "smart_mix" && userHistory) {
+            selectedIds = selectSmartMix(allIds, userHistory, config.count);
+        }
+
+        if (selectedIds.length === 0 && mode !== "random") {
+            selectedIds = shuffleArray(allIds).slice(0, config.count);
+        }
+
+        // Map selected IDs back to full question objects
+        const idSet = new Set([...new Set(selectedIds)]);
+        const idToQuestion = new Map(pool.map(q => [q.id, q]));
+        for (const id of idSet) {
+            const q = idToQuestion.get(id);
+            if (q) finalSelection.push(q);
+        }
+    }
+
+    return finalSelection;
+}
+
 // --- Batch fetch user history (1 query instead of N) ---
 
 async function fetchUserHistoryBatch(userId: string, quizId: string): Promise<UserAnswerHistory> {

@@ -60,6 +60,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { hapticLight, hapticSelection } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import { analytics } from '@/lib/analytics';
+import { getCategoryStyle } from '@/lib/categoryIcons';
 
 // ============================================================================
 // TYPES & CONFIG
@@ -321,13 +322,22 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
         }
     };
 
-    const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'category': return '📁';
-            case 'role': return '👤';
-            case 'contest': return '📝';
-            default: return '📄';
-        }
+    const renderItemIcon = (item: SearchItem, isSelected: boolean) => {
+        const style = getCategoryStyle(item.title);
+        const Icon = style.Icon;
+        return (
+            <div
+                className={cn(
+                    "w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all",
+                    isSelected
+                        ? "shadow-md"
+                        : ""
+                )}
+                style={{ backgroundColor: isSelected ? style.bgLight : style.bgLight + '80' }}
+            >
+                <Icon className="w-5 h-5" style={{ color: style.color }} strokeWidth={1.8} />
+            </div>
+        );
     };
 
     const getTypeLabel = (type: string) => {
@@ -441,14 +451,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                                         : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
                                                 )}
                                             >
-                                                <div className={cn(
-                                                    "w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 text-xl transition-all",
-                                                    selectedIndex === itemIndex
-                                                        ? "bg-white dark:bg-[#111] shadow-md"
-                                                        : "bg-slate-100 dark:bg-[#111]"
-                                                )}>
-                                                    {getTypeIcon(item.type)}
-                                                </div>
+                                                {renderItemIcon(item, selectedIndex === itemIndex)}
                                                 <div className="flex-1 min-w-0">
                                                     <div className={cn(
                                                         "text-[15px] font-bold truncate transition-colors",

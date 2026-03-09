@@ -125,30 +125,29 @@ export default function LeaderboardSelector({
                     }}
                 >
                     <div
-                        className="rounded-[28px] overflow-hidden backdrop-blur-3xl border border-white/10 shadow-2xl"
-                        style={{ backgroundColor: '#1C1C1E' }}
+                        className="rounded-[28px] overflow-hidden backdrop-blur-3xl border border-[var(--card-border)] shadow-2xl bg-[var(--card)]"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 pt-5 pb-1">
-                            <h2 className="text-[15px] font-bold text-white/60 tracking-wide">Seleziona classifica</h2>
+                            <h2 className="text-[15px] font-bold text-[var(--muted-foreground)] tracking-wide">Seleziona classifica</h2>
                             <button
                                 onClick={handleClose}
-                                className="w-7 h-7 rounded-full flex items-center justify-center bg-[#2C2C2E] active:scale-95 transition-transform"
+                                className="w-7 h-7 rounded-full flex items-center justify-center bg-[var(--background)] active:scale-95 transition-transform"
                             >
-                                <X className="w-3.5 h-3.5 text-white/50" strokeWidth={2.5} />
+                                <X className="w-3.5 h-3.5 text-[var(--muted-foreground)]" strokeWidth={2.5} />
                             </button>
                         </div>
 
-                        <div className="w-[calc(100%-40px)] h-[1px] bg-white/[0.05] mx-5 my-2" />
+                        <div className="w-[calc(100%-40px)] h-[1px] bg-[var(--card-border)] mx-5 my-2" />
 
                         {/* Search Bar */}
                         <div className="px-4 pb-2">
                             <input
                                 type="text"
                                 placeholder="Cerca concorso..."
-                                className="w-full px-4 py-2.5 bg-[#2C2C2E] rounded-xl text-sm outline-none 
+                                className="w-full px-4 py-2.5 bg-[var(--background)] rounded-xl text-sm outline-none 
                                          focus:ring-2 focus:ring-[#00B1FF]/20 transition-all font-medium 
-                                         text-white placeholder:text-white/30"
+                                         text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 autoFocus
@@ -164,25 +163,25 @@ export default function LeaderboardSelector({
                                     onClick={() => handleSelect('xp')}
                                     className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all active:scale-[0.98] ${currentSelection === 'xp'
                                         ? 'bg-amber-500/10'
-                                        : 'active:bg-white/[0.04]'
+                                        : 'active:bg-[var(--background)]'
                                         }`}
                                 >
-                                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${currentSelection === 'xp' ? 'bg-amber-500/15' : 'bg-[#2C2C2E]'}`}>
+                                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${currentSelection === 'xp' ? 'bg-amber-500/15' : 'bg-[var(--background)]'}`}>
                                         <Trophy className={`w-5 h-5 ${currentSelection === 'xp' ? 'text-amber-400' : 'text-white/40'}`} />
                                     </div>
                                     <div className="flex-1">
-                                        <div className={`font-bold text-[15px] ${currentSelection === 'xp' ? 'text-amber-400' : 'text-white'}`}>Gold League</div>
-                                        <div className="text-[11px] uppercase font-bold tracking-wider text-white/30">Classifica Globale</div>
+                                        <div className={`font-bold text-[15px] ${currentSelection === 'xp' ? 'text-amber-400' : 'text-[var(--foreground)]'}`}>Gold League</div>
+                                        <div className="text-[11px] uppercase font-bold tracking-wider text-[var(--muted-foreground)]">Classifica Globale</div>
                                     </div>
                                     {currentSelection === 'xp' && <CheckIcon color="text-amber-500" />}
                                 </button>
                             )}
-                            {search === '' && <div className="h-px bg-white/[0.06] mx-2" />}
+                            {search === '' && <div className="h-px bg-[var(--card-border)] mx-2" />}
 
                             {/* 2. My Concorsi */}
                             {filteredActive.length > 0 && (
                                 <div>
-                                    <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-white/25 tracking-widest leading-none mt-1">
+                                    <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-[var(--muted-foreground)] tracking-widest leading-none mt-1">
                                         I Tuoi Concorsi ({filteredActive.length})
                                     </div>
                                     {filteredActive.map(q => (
@@ -199,7 +198,7 @@ export default function LeaderboardSelector({
                             {/* 3. Other Concorsi */}
                             <div>
                                 {filteredOther.length > 0 && (
-                                    <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-white/25 tracking-widest mt-1">
+                                    <div className="px-4 py-2 text-[11px] uppercase font-extrabold text-[var(--muted-foreground)] tracking-widest mt-1">
                                         Tutti i Concorsi ({filteredOther.length})
                                     </div>
                                 )}
@@ -212,7 +211,7 @@ export default function LeaderboardSelector({
                                     />
                                 ))}
                                 {filteredActive.length === 0 && filteredOther.length === 0 && (
-                                    <div className="p-4 text-center text-white/30 text-sm">
+                                    <div className="p-4 text-center text-[var(--muted-foreground)] text-sm">
                                         Nessun concorso trovato.
                                     </div>
                                 )}
@@ -233,22 +232,22 @@ function OptionRow({ quiz, isSelected, onClick }: { key?: React.Key; quiz: QuizO
             onClick={onClick}
             className={`w-full text-left px-4 py-3 rounded-2xl flex items-center gap-3 transition-all mb-0.5 active:scale-[0.98] ${isSelected
                 ? 'bg-[#00B1FF]/10'
-                : 'active:bg-white/[0.04]'
+                : 'active:bg-[var(--background)]'
                 }`}
         >
             {(() => {
                 const { Icon: CatIcon, color: catColor, bg: catBg, bgLight: catBgLight } = getCategoryStyle(quiz.category || quiz.title); return (
-                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center cat-icon-bg`} style={{ '--cat-bg-light': catBgLight, '--cat-bg-dark': isSelected ? catBg : '#2C2C2E', backgroundColor: isSelected ? catBgLight : '#f1f5f9' } as React.CSSProperties}>
+                    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center cat-icon-bg`} style={{ '--cat-bg-light': catBgLight, '--cat-bg-dark': isSelected ? catBg : 'var(--background)', backgroundColor: isSelected ? catBgLight : 'var(--background)' } as React.CSSProperties}>
                         <CatIcon className="w-5 h-5" style={{ color: isSelected ? catColor : 'rgba(0,0,0,0.3)' }} />
                     </div>
                 );
             })()}
             <div className="flex-1 min-w-0">
-                <div className={`font-bold text-[14px] truncate ${isSelected ? 'text-[#00B1FF]' : 'text-white'}`}>
+                <div className={`font-bold text-[14px] truncate ${isSelected ? 'text-[#00B1FF]' : 'text-[var(--foreground)]'}`}>
                     {roleTitle || quiz.title}
                 </div>
                 {roleTitle && roleTitle !== quiz.title && (
-                    <div className="text-[11px] text-white/25 truncate">
+                    <div className="text-[11px] text-[var(--muted-foreground)] truncate">
                         {quiz.title}
                     </div>
                 )}

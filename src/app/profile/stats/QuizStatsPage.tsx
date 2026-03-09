@@ -188,7 +188,12 @@ export default function QuizStatsPage() {
         // 1. KPIs
         const totalTests = data.length;
         const totalScore = data.reduce((acc, curr) => acc + (curr.score || 0), 0);
-        const maxScore = data.reduce((max, curr) => Math.max(max, curr.score || 0), 0);
+
+        // Best score: prioritize official simulations, fallback to custom
+        const officialAttempts = data.filter((d: any) => d.mode === 'official');
+        const maxScore = officialAttempts.length > 0
+            ? officialAttempts.reduce((max, curr) => Math.max(max, curr.score || 0), 0)
+            : data.reduce((max, curr) => Math.max(max, curr.score || 0), 0);
 
         let validAccuracyCount = 0;
         const totalAccuracy = data.reduce((acc, curr) => {

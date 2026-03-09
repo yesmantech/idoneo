@@ -181,11 +181,13 @@ export default function QuizResultsPage() {
         fetchAttempt();
     }, [attemptId]);
 
-    // XP Display — server trigger awards XP; we just show the correct count.
+    // XP Display — server trigger awards XP only for NEW unique correct answers.
+    // We can't know the exact number client-side, so we show a confirmation.
     useEffect(() => {
         if (attempt && !xpAwardedRef.current) {
             xpAwardedRef.current = true;
-            setXpEarned(attempt.correct || 0);
+            // XP is now based on unique correct only (server-side), we don't show a number
+            setXpEarned(null);
         }
     }, [attempt]);
 
@@ -456,15 +458,18 @@ export default function QuizResultsPage() {
                         <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl lg:rounded-3xl p-4 lg:p-6 text-center shadow-sm">
                             <div className="flex items-center justify-center gap-2 mb-2">
                                 <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-purple-500" />
-                                <span className="text-[10px] lg:text-xs font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">XP Guadagnati</span>
+                                <span className="text-[10px] lg:text-xs font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wider">XP</span>
                             </div>
                             <div className="text-2xl lg:text-4xl font-bold text-purple-500">
                                 {attemptId?.startsWith('local-') ? (
                                     <span className="text-sm text-slate-400">Sync...</span>
                                 ) : (
-                                    `+${xpEarned ?? 0}`
+                                    <span className="flex items-center justify-center gap-1.5">
+                                        <Check className="w-5 h-5 lg:w-7 lg:h-7" />
+                                    </span>
                                 )}
                             </div>
+                            <p className="text-[10px] text-slate-400 mt-1">Solo domande nuove</p>
                         </div>
 
                         {/* Accuracy Card - Desktop Only */}

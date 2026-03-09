@@ -260,21 +260,7 @@ export default function QuizRunnerPage() {
                     }
                 }
 
-                const qIds = loadedAnswers.map((a: any) => a.questionId);
-                if (qIds.length > 0) {
-                    const { data: freshQuestions } = await supabase
-                        .from('questions_safe')
-                        .select('id, explanation')
-                        .in('id', qIds);
-
-                    if (freshQuestions) {
-                        loadedAnswers = loadedAnswers.map((a: any) => {
-                            const fresh = freshQuestions.find(q => q.id === a.questionId);
-                            return { ...a, explanation: fresh?.explanation || null };
-                        });
-                    }
-                }
-
+                // Show quiz immediately — don't block on explanation fetch
                 setAnswering(loadedAnswers);
                 answeringRef.current = loadedAnswers;
 
@@ -290,6 +276,35 @@ export default function QuizRunnerPage() {
                         useCustomPassThreshold: quizData.use_custom_pass_threshold,
                         minCorrectForPass: quizData.min_correct_for_pass
                     });
+                }
+
+                // Fetch missing explanations in background (non-blocking)
+                const missingIds = loadedAnswers
+                    .filter((a: any) => !a.explanation)
+                    .map((a: any) => a.questionId);
+
+                if (missingIds.length > 0) {
+                    const BATCH = 100;
+                    Promise.all(
+                        Array.from({ length: Math.ceil(missingIds.length / BATCH) }, (_, i) =>
+                            supabase
+                                .from('questions_safe')
+                                .select('id, explanation')
+                                .in('id', missingIds.slice(i * BATCH, (i + 1) * BATCH))
+                                .then(r => r.data || [])
+                        )
+                    ).then(batches => {
+                        const fresh = batches.flat().filter(q => q.explanation);
+                        if (fresh.length > 0) {
+                            const expMap = new Map(fresh.map(q => [q.id, q.explanation]));
+                            const updated = answeringRef.current.map(a => ({
+                                ...a,
+                                explanation: a.explanation ?? expMap.get(a.questionId) ?? null
+                            }));
+                            answeringRef.current = updated;
+                            setAnswering(updated);
+                        }
+                    }).catch(e => console.warn('Background explanation fetch failed:', e));
                 }
             }
             setLoading(false);

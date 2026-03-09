@@ -51,9 +51,9 @@ const METRIC_DETAILS: Record<MetricType, {
         icon: FileText,
         color: 'text-purple-500 bg-purple-50 dark:bg-purple-900/30',
         weight: '33.33%',
-        description: 'Domande uniche viste almeno una volta / domande totali nella banca dati. Ripetere le stesse domande non aumenta la copertura.',
-        insight: 'Diversamente dal Volume, la Copertura premia l\'ampiezza: se rispondi 100 volte alle stesse 20 domande, il Volume sale ma la Copertura resta ferma.',
-        pro_tip: 'Usa la funzione "Domande mai viste" nelle simulazioni personalizzate per massimizzare la copertura velocemente.'
+        description: 'Domande uniche risposte correttamente / domande totali nella banca dati. Solo le risposte corrette contano per la copertura.',
+        insight: 'Diversamente dal Volume, la Copertura premia la qualità e l\'ampiezza: rispondere 100 volte alle stesse 20 domande non aumenta la Copertura, e rispondere sbagliato neanche.',
+        pro_tip: 'Usa la funzione "Domande mai viste" nelle simulazioni personalizzate per scoprire nuove domande e aumentare la copertura.'
     },
     reliability: {
         title: 'Costanza',

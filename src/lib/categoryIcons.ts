@@ -15,8 +15,12 @@ export function getCategoryStyle(catTitle?: string): CategoryStyle {
     if (lower.includes('armate') || lower.includes('esercito') || lower.includes('marina') || lower.includes('aeronautica'))
         return { Icon: Swords, color: '#FBBF24', bg: '#422006', bgLight: '#FEF3C7' };
 
+    // 💰 Guardia di Finanza — gold/amber (distinct from generic Forze dell'Ordine)
+    if (lower.includes('finanza') || lower.includes('guardia'))
+        return { Icon: Swords, color: '#FBBF24', bg: '#422006', bgLight: '#FEF3C7' };
+
     // 👮 Forze dell'Ordine — vivid blue
-    if (lower.includes('ordine') || lower.includes('polizia') || lower.includes('carabinieri') || lower.includes('finanza') || lower.includes('agente') || lower.includes('guardia'))
+    if (lower.includes('ordine') || lower.includes('polizia') || lower.includes('carabinieri') || lower.includes('agente'))
         return { Icon: Shield, color: '#60A5FA', bg: '#172554', bgLight: '#DBEAFE' };
 
     // 🏛️ Pubblica Amministrazione — vibrant purple

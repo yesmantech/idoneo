@@ -313,7 +313,7 @@ export default function PreparazionePage() {
                                 <div className="space-y-3">
                                     {[
                                         { label: 'Volume', desc: 'Domande totali risposte rispetto alla banca dati. Più ti alleni, più sale.', color: 'blue', weight: '33.33%' },
-                                        { label: 'Copertura', desc: 'Domande uniche viste almeno una volta. Ripetere le stesse non aumenta la copertura.', color: 'purple', weight: '33.33%' },
+                                        { label: 'Copertura', desc: 'Domande uniche risposte correttamente. Ripetere le stesse o sbagliare non aumenta la copertura.', color: 'purple', weight: '33.33%' },
                                         { label: 'Costanza', desc: 'Stabilità dei risultati nelle ultime 10 simulazioni. Decade dopo 30 giorni di inattività.', color: 'amber', weight: '33.33%' },
                                     ].map((factor) => (
                                         <div key={factor.label} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#111]/50 border border-slate-100 dark:border-slate-700/50">

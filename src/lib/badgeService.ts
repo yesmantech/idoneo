@@ -98,6 +98,27 @@ export const badgeService = {
     },
 
     /**
+     * Fetch all badges with their unlock dates
+     */
+    async getUserBadgesWithDates(userId: string): Promise<Record<string, string>> {
+        const { data, error } = await supabase
+            .from('user_badges')
+            .select('badge_id, awarded_at')
+            .eq('user_id', userId);
+
+        if (error) {
+            console.error('Error fetching user badges with dates:', error);
+            return {};
+        }
+
+        const map: Record<string, string> = {};
+        for (const b of data) {
+            map[b.badge_id] = b.awarded_at;
+        }
+        return map;
+    },
+
+    /**
      * Award a badge to a user (Idempotent)
      * Silently handles RLS errors to prevent console spam
      */

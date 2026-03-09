@@ -363,13 +363,14 @@ export const leaderboardService = {
         };
     },
 
-    // 3. Get User's Active Quizzes (from Leaderboard)
+    // 3. Get User's Active Quizzes (from Leaderboard + quiz_attempts)
     async getUserActiveQuizzes(userId: string) {
-        // Fetch from concorso_leaderboard which stores the "Official" preparation score
-        const { data: leaderboardRows, error } = await supabase
+        // 1. Fetch from concorso_leaderboard (official preparation scores)
+        const { data: leaderboardRows } = await supabase
             .from("concorso_leaderboard")
             .select(`
                 score,
+                quiz_id,
                 last_calculated_at,
                 quiz:quizzes (
                     id, 
@@ -383,27 +384,66 @@ export const leaderboardService = {
             .eq("user_id", userId)
             .order("last_calculated_at", { ascending: false });
 
-        if (error) {
-            console.error("Error fetching active quizzes from leaderboard:", error);
-            return [];
+        // 2. Fetch distinct quiz_ids from quiz_attempts (all quizzes user has played)
+        const { data: attemptRows } = await supabase
+            .from("quiz_attempts")
+            .select(`
+                quiz_id,
+                score,
+                created_at,
+                quiz:quizzes (
+                    id, 
+                    title, 
+                    year, 
+                    category_id,
+                    slug,
+                    category:categories ( title )
+                )
+            `)
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false });
+
+        // Build a map of quiz_id -> best data, preferring leaderboard
+        const quizMap = new Map<string, any>();
+
+        // Add leaderboard entries first (these have official scores)
+        if (leaderboardRows) {
+            for (const row of leaderboardRows) {
+                const quizData = row.quiz as any;
+                const quiz = Array.isArray(quizData) ? quizData[0] : quizData;
+                if (!quiz?.id || quizMap.has(quiz.id)) continue;
+
+                const categoryData = quiz?.category as any;
+                const categoryTitle = Array.isArray(categoryData) ? categoryData[0]?.title : categoryData?.title;
+
+                quizMap.set(quiz.id, {
+                    ...quiz,
+                    category: categoryTitle || undefined,
+                    accuracy: Math.round(row.score || 0),
+                    lastPlayed: row.last_calculated_at
+                });
+            }
         }
 
-        if (!leaderboardRows) return [];
+        // Add quiz_attempts entries that aren't already in the map
+        if (attemptRows) {
+            for (const row of attemptRows) {
+                const quizData = row.quiz as any;
+                const quiz = Array.isArray(quizData) ? quizData[0] : quizData;
+                if (!quiz?.id || quizMap.has(quiz.id)) continue;
 
-        return leaderboardRows.map(row => {
-            // Flatten the structure
-            const quizData = row.quiz as any;
-            const quiz = Array.isArray(quizData) ? quizData[0] : quizData;
-            // Extract category title from nested join
-            const categoryData = quiz?.category as any;
-            const categoryTitle = Array.isArray(categoryData) ? categoryData[0]?.title : categoryData?.title;
+                const categoryData = quiz?.category as any;
+                const categoryTitle = Array.isArray(categoryData) ? categoryData[0]?.title : categoryData?.title;
 
-            return {
-                ...quiz,
-                category: categoryTitle || undefined,
-                accuracy: Math.round(row.score || 0),
-                lastPlayed: row.last_calculated_at
-            };
-        });
+                quizMap.set(quiz.id, {
+                    ...quiz,
+                    category: categoryTitle || undefined,
+                    accuracy: Math.round(row.score || 0),
+                    lastPlayed: row.created_at
+                });
+            }
+        }
+
+        return Array.from(quizMap.values());
     }
 };

@@ -75,7 +75,7 @@ export default function InfoModal({ isOpen, onClose, type, onMoreInfo }: InfoMod
                                     </>
                                 ) : (
                                     <>
-                                        <BulletRow icon={<Star className="w-4 h-4" />} title="XP per risposta" text="Ogni risposta corretta ti dà 1 XP." color="amber" />
+                                        <BulletRow icon={<Star className="w-4 h-4" />} title="XP per risposta" text="1 XP per ogni nuova risposta corretta unica." color="amber" />
                                         <BulletRow icon={<Trophy className="w-4 h-4" />} title="Classifica Settimanale" text="La classifica si azzera ogni settimana." color="amber" />
                                         <BulletRow icon={<Shield className="w-4 h-4" />} title="XP Totali" text="I tuoi XP totali restano sempre nel profilo." color="amber" />
                                         <BulletRow icon={<Target className="w-4 h-4" />} title="Allenamento" text="Gli XP misurano l'impegno, non la preparazione." color="amber" />

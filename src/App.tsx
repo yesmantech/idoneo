@@ -20,6 +20,7 @@ import ContestPage from './app/concorsi/[category]/[contestSlug]/page';
 import SimulationTypePage from './app/concorsi/[category]/[contestSlug]/simulazione/page';
 import QuizRulesPage from './app/concorsi/[category]/[contestSlug]/simulazione/[type]/regole/page';
 import CustomQuizWizardPage from './app/concorsi/[category]/[contestSlug]/custom/page';
+import TemplateDetailPage from './app/concorsi/[category]/[contestSlug]/template/[templateId]/page';
 import QuizRunnerPage from './app/quiz/run/[attemptId]/page';
 import QuizResultsPage from './app/quiz/results/[attemptId]/page';
 import ExplanationPage from './app/quiz/explanations/[attemptId]/[questionId]/page';
@@ -231,6 +232,7 @@ export default function App() {
                                                     <Route path="/concorsi/:category/:contestSlug/simulazione" element={<MainLayout><SimulationTypePage /></MainLayout>} />
                                                     <Route path="/concorsi/:category/:contestSlug/simulazione/:type/regole" element={<MainLayout><QuizRulesPage /></MainLayout>} />
                                                     <Route path="/concorsi/:category/:contestSlug/custom" element={<CustomQuizWizardPage />} />
+                                                    <Route path="/concorsi/:category/:contestSlug/template/:templateId" element={<TemplateDetailPage />} />
 
                                                     {/* Quiz Engine (Wrapped) */}
                                                     <Route path="/quiz/:id/official" element={<OfficialQuizStarterPage />} />

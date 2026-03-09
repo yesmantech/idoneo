@@ -84,7 +84,7 @@ export default function BadgesBlock() {
                                 transition={{ delay: 0.06 * i, duration: 0.3, type: 'spring', stiffness: 300 }}
                                 className="flex items-center justify-center"
                             >
-                                <BadgeGlow color={badge.color} unlocked={badge.unlocked} size={76}>
+                                <div className="w-[76px] h-[76px] flex items-center justify-center">
                                     <img
                                         src={badge.imageSrc}
                                         alt={badge.name}
@@ -94,7 +94,7 @@ export default function BadgesBlock() {
                                                 : 'grayscale opacity-[0.15]'}`}
                                         loading="lazy"
                                     />
-                                </BadgeGlow>
+                                </div>
                             </motion.div>
                         ))}
                     </div>

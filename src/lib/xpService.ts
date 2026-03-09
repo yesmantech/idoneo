@@ -3,16 +3,16 @@
  * @description Experience points (XP) system for gamification.
  *
  * The XP system provides progression and motivation through:
- * - **Per-attempt XP**: 1 XP per correct answer
+ * - **Per-attempt XP**: 1 XP per NEW unique correct answer (handled server-side)
  * - **Seasonal tracking**: Weekly/monthly seasons for fresh competition
  * - **Leveling system**: Simple linear progression (Level = XP / 100 + 1)
  *
  * ## XP Sources
- * | Source              | XP Amount | Notes                          |
- * |---------------------|-----------|--------------------------------|
- * | Correct answer      | 1 XP      | Awarded via `awardXpForAttempt`|
- * | (Future) Streaks    | Bonus XP  | Multipliers for consistency    |
- * | (Future) Challenges | Bonus XP  | Special event rewards          |
+ * | Source                    | XP Amount | Notes                                     |
+ * |---------------------------|-----------|-------------------------------------------|
+ * | New unique correct answer | 1 XP      | Only if not already answered correctly    |
+ * | (Future) Streaks          | Bonus XP  | Multipliers for consistency               |
+ * | (Future) Challenges       | Bonus XP  | Special event rewards                     |
  *
  * ## Data Storage
  * - `profiles.total_xp` - All-time XP balance

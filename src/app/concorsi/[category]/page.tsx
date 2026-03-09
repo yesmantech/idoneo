@@ -203,7 +203,7 @@ export default function ConcorsoHubPage() {
                             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50/80 dark:bg-emerald-500/[0.08] border border-emerald-100/50 dark:border-emerald-500/10">
                               <Trophy className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
                               <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                                {quiz.available_seats} posti
+                                {quiz.available_seats} {Number(quiz.available_seats) === 1 ? 'posto' : 'posti'}
                               </span>
                             </div>
                           )}

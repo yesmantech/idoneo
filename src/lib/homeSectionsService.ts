@@ -42,10 +42,11 @@ export async function fetchRecentlyUsed(userId: string, limit = 5): Promise<Rece
     if (!userId) return [];
 
     try {
-        // Get recent quiz attempts grouped by quiz
-        const { data, error } = await supabase
+        // Two parallel queries: recent attempts (for ordering) + real counts per quiz
+        const recentsRes = await supabase
             .from('quiz_attempts')
             .select(`
+                quiz_id,
                 quiz:quizzes (
                     id, slug, title, is_archived,
                     category:categories (slug, title, is_archived)
@@ -54,38 +55,53 @@ export async function fetchRecentlyUsed(userId: string, limit = 5): Promise<Rece
             `)
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
-            .limit(50); // Fetch more to dedupe
+            .limit(50);
 
-        if (error) {
-            console.error('Error fetching recently used:', error);
+        if (recentsRes.error) {
+            console.error('Error fetching recently used:', recentsRes.error);
             return [];
         }
 
         // Deduplicate by quiz and keep most recent
-        const quizMap = new Map<string, RecentlyUsedItem>();
+        const quizMap = new Map<string, RecentlyUsedItem & { quizDbId: string }>();
 
-        (data || []).forEach((attempt: any) => {
+        (recentsRes.data || []).forEach((attempt: any) => {
             const quiz = attempt.quiz;
             const category = quiz?.category;
-            // Skip archived quizzes or categories
             if (!quiz?.id || quiz.is_archived || category?.is_archived) return;
 
             if (!quizMap.has(quiz.id)) {
                 quizMap.set(quiz.id, {
                     quizId: quiz.id,
+                    quizDbId: attempt.quiz_id,
                     quizSlug: quiz.slug,
                     quizTitle: quiz.title,
                     categorySlug: quiz.category?.slug || '',
                     categoryTitle: quiz.category?.title || '',
                     lastAttemptAt: attempt.created_at,
-                    attemptCount: 1
+                    attemptCount: 0
                 });
-            } else {
-                quizMap.get(quiz.id)!.attemptCount++;
             }
         });
 
-        return Array.from(quizMap.values()).slice(0, limit);
+        // Fetch exact counts per quiz (parallel, no row limit)
+        const quizIds = Array.from(quizMap.values()).map(q => q.quizDbId);
+        const countResults = await Promise.all(
+            quizIds.map(qId =>
+                supabase
+                    .from('quiz_attempts')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', userId)
+                    .eq('quiz_id', qId)
+            )
+        );
+
+        const entries = Array.from(quizMap.values());
+        countResults.forEach((res, i) => {
+            entries[i].attemptCount = res.count || 0;
+        });
+
+        return entries.map(({ quizDbId, ...item }) => item).slice(0, limit);
     } catch (err) {
         console.error('fetchRecentlyUsed error:', err);
         return [];

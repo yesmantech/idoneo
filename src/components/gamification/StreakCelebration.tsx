@@ -590,15 +590,15 @@ export function StreakCelebration() {
                                 {isTierUnlock ? "Nuovo Grado Sbloccato!" : (isMilestone ? "Traguardo Raggiunto!" : "Streak Aggiornata!")}
                             </h2>
                             <div className="flex items-center justify-center gap-3 mb-6">
-                                <span className="text-8xl font-black tracking-tighter drop-shadow-lg font-sans text-white">
+                                <span className="text-8xl font-black tracking-tighter drop-shadow-lg font-sans text-slate-900 dark:text-white">
                                     {streak}
                                 </span>
                                 <div className="flex flex-col items-start space-y-1">
-                                    <span className="text-2xl font-bold tracking-tight text-white">GIORNI</span>
-                                    <span className="text-lg font-medium tracking-wide text-slate-400">CONSECUTIVI</span>
+                                    <span className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">GIORNI</span>
+                                    <span className="text-lg font-medium tracking-wide text-slate-500 dark:text-slate-400">CONSECUTIVI</span>
                                 </div>
                             </div>
-                            <p className="text-base max-w-xs mx-auto leading-relaxed text-slate-400">
+                            <p className="text-base max-w-xs mx-auto leading-relaxed text-slate-500 dark:text-slate-400">
                                 {isMilestone
                                     ? "Stai costruendo un'abitudine di ferro! Continua su questa strada."
                                     : "Continua a studiare ogni giorno per mantenere la tua streak."}

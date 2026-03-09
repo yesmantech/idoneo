@@ -211,7 +211,7 @@ export default function PunteggiPage() {
                             <div>
                                 <h4 className="font-bold text-slate-900 dark:text-slate-100">Copertura (33.33%)</h4>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Quante domande diverse hai visto. Premia chi esplora tutta la banca dati.
+                                    Domande uniche risposte correttamente. Solo le risposte giuste contano.
                                 </p>
                             </div>
                         </div>
@@ -275,8 +275,8 @@ export default function PunteggiPage() {
                                 <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">+1</span>
                             </div>
                             <div>
-                                <h4 className="font-bold text-emerald-700 dark:text-emerald-300">XP per risposta corretta</h4>
-                                <p className="text-sm text-emerald-600 dark:text-emerald-400">Ogni risposta giusta ti dà 1 XP</p>
+                                <h4 className="font-bold text-emerald-700 dark:text-emerald-300">XP per risposta corretta unica</h4>
+                                <p className="text-sm text-emerald-600 dark:text-emerald-400">1 XP per ogni nuova domanda risposta correttamente. Ripetere le stesse non dà XP.</p>
                             </div>
                         </div>
 

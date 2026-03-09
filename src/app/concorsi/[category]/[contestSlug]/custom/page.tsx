@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { fetchSmartQuestions, QuestionSelectionMode, SubjectConfig } from "@/lib/quiz-smart-selection";
-import { ChevronLeft, ChevronDown, Minus, Plus, Check, Play, Clock, Filter, Layers, Target, RotateCcw, Bookmark } from "lucide-react";
+import { fetchSmartQuestionsWithData, QuestionSelectionMode, SubjectConfig } from "@/lib/quiz-smart-selection";
+import { ChevronLeft, ChevronDown, Minus, Plus, Check, Play, Clock, Filter, Layers, Target, RotateCcw, Bookmark, ChevronRight, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TierSLoader from "@/components/ui/TierSLoader";
 import ScrollPicker from "@/components/ui/ScrollPicker";
@@ -14,6 +14,18 @@ import { hapticLight, hapticSuccess, hapticError } from "@/lib/haptics";
 // Types
 type Subject = { id: string; name: string; question_count: number };
 type ScoringConfig = { correct: number; wrong: number; blank: number };
+type SavedTemplate = {
+    id: string;
+    name: string;
+    subject_selections: Record<string, number>;
+    selection_mode: string;
+    time_hours: number;
+    time_minutes: number;
+    time_seconds: number;
+    no_time_limit: boolean;
+    scoring: ScoringConfig;
+    updated_at: string;
+};
 
 // Helper to normalize DB answers
 function normalizeDBAnswer(val: string | null | undefined): string | null {
@@ -41,6 +53,7 @@ export default function CustomQuizWizardPage() {
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const [hasTemplate, setHasTemplate] = useState(false);
+    const [savedTemplates, setSavedTemplates] = useState<SavedTemplate[]>([]);
 
     // Data
     const [quizId, setQuizId] = useState<string | null>(null);
@@ -60,19 +73,26 @@ export default function CustomQuizWizardPage() {
     // Scoring Config
     const [scoring, setScoring] = useState<ScoringConfig>({ correct: 1, wrong: 0, blank: 0 });
 
-    // --- Load Data & Restore Template (Optimized: 2 queries instead of N+2) ---
+    // --- Load Data & Fetch Templates ---
     useEffect(() => {
         const load = async () => {
-            // Single parallel fetch: quiz + subjects
             const { data: qData } = await supabase.from("quizzes").select("id").eq("slug", contestSlug).single();
             if (!qData) { setLoading(false); return; }
             setQuizId(qData.id);
 
-            // Fetch subjects first (1 query)
-            const { data: sData } = await supabase.from("subjects").select("id, name").eq("quiz_id", qData.id).eq("is_archived", false);
+            const userRes = await supabase.auth.getUser();
+            const userId = userRes.data.user?.id;
+
+            const [subjectsRes, templatesRes] = await Promise.all([
+                supabase.from("subjects").select("id, name").eq("quiz_id", qData.id).eq("is_archived", false),
+                userId
+                    ? supabase.from("quiz_templates").select("*").eq("user_id", userId).eq("quiz_id", qData.id).order("updated_at", { ascending: false })
+                    : Promise.resolve({ data: [] })
+            ]);
+
+            const sData = subjectsRes.data;
             if (!sData || sData.length === 0) { setLoading(false); return; }
 
-            // Single batch query for ALL question counts instead of N separate queries (1 query)
             const subjectIds = sData.map(s => s.id);
             const { data: qRows } = await supabase
                 .from("questions_safe")
@@ -80,7 +100,6 @@ export default function CustomQuizWizardPage() {
                 .in("subject_id", subjectIds)
                 .eq("is_archived", false);
 
-            // Count questions per subject from the batch result
             const countMap: Record<string, number> = {};
             (qRows || []).forEach(q => {
                 countMap[q.subject_id] = (countMap[q.subject_id] || 0) + 1;
@@ -92,33 +111,11 @@ export default function CustomQuizWizardPage() {
 
             setSubjects(enriched);
 
-            // Restore saved template (sync, from localStorage)
-            try {
-                const saved = localStorage.getItem(`quiz-template-${qData.id}`);
-                if (saved) {
-                    const t = JSON.parse(saved);
-                    const validIds = new Set(enriched.map(s => s.id));
-                    const validSelections: Record<string, number> = {};
-                    for (const [id, count] of Object.entries(t.subjectSelections || {})) {
-                        if (validIds.has(id)) {
-                            const subj = enriched.find(s => s.id === id);
-                            validSelections[id] = Math.min(count as number, subj?.question_count || 20);
-                        }
-                    }
-                    if (Object.keys(validSelections).length > 0) {
-                        setSubjectSelections(validSelections);
-                        setSelectionMode(t.selectionMode || 'random');
-                        setTimeHours(t.timeHours ?? 0);
-                        setTimeMinutes(t.timeMinutes ?? 30);
-                        setTimeSeconds(t.timeSeconds ?? 0);
-                        setNoTimeLimit(t.noTimeLimit ?? false);
-                        setScoring(t.scoring || { correct: 1, wrong: 0, blank: 0 });
-                        setHasTemplate(true);
-                    }
-                }
-            } catch (e) {
-                console.warn('[Template] Failed to restore:', e);
+            // Store all templates for the list section
+            if (templatesRes.data && templatesRes.data.length > 0) {
+                setSavedTemplates(templatesRes.data as SavedTemplate[]);
             }
+
             setLoading(false);
         };
         load();
@@ -161,17 +158,13 @@ export default function CustomQuizWizardPage() {
         return Object.values(subjectSelections).reduce((acc: number, c: number) => acc + c, 0);
     }, [subjectSelections]);
 
-    const resetTemplate = () => {
+    const deleteTemplate = async (templateId: string) => {
         hapticLight();
-        setSubjectSelections({});
-        setSelectionMode('random');
-        setTimeHours(0);
-        setTimeMinutes(30);
-        setTimeSeconds(0);
-        setNoTimeLimit(false);
-        setScoring({ correct: 1, wrong: 0, blank: 0 });
-        setHasTemplate(false);
-        if (quizId) localStorage.removeItem(`quiz-template-${quizId}`);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            await supabase.from('quiz_templates').delete().eq('id', templateId).eq('user_id', user.id);
+            setSavedTemplates(prev => prev.filter(t => t.id !== templateId));
+        }
     };
 
     // --- Action ---
@@ -191,44 +184,23 @@ export default function CustomQuizWizardPage() {
                 count
             }));
 
-            const selection = await fetchSmartQuestions(
-                (await supabase.auth.getUser()).data.user?.id || null,
+            const { data: { user } } = await supabase.auth.getUser();
+            const userId = user?.id || null;
+
+            // Single-query optimized fetch: gets full question data + applies selection in-memory
+            const selectedQuestions = await fetchSmartQuestionsWithData(
+                userId,
                 quizId,
                 configs,
                 selectionMode
             );
 
-
-            if (!selection || selection.length === 0) {
+            if (!selectedQuestions || selectedQuestions.length === 0) {
                 throw new Error(`Nessuna domanda trovata. Configs: ${JSON.stringify(configs)}, Mode: ${selectionMode}`);
             }
 
-            // Batch fetch for large selections (Supabase .in() has limits)
-            const BATCH_SIZE = 500;
-            const questionIds = selection.map((s: any) => s.questionId);
-            let fullQuestions: any[] = [];
-
-            for (let i = 0; i < questionIds.length; i += BATCH_SIZE) {
-                const batchIds = questionIds.slice(i, i + BATCH_SIZE);
-                const { data: batchData, error: batchError } = await supabase
-                    .from("questions_safe")
-                    .select("*, subject:subjects(name)")
-                    .in("id", batchIds);
-
-                if (batchError) {
-                    console.error("[CustomQuiz] Batch fetch error:", batchError);
-                    throw new Error(`Errore nel recupero domande: ${batchError.message}`);
-                }
-
-                if (batchData) {
-                    fullQuestions = [...fullQuestions, ...batchData];
-                }
-            }
-
-
-            if (fullQuestions.length === 0) throw new Error("Nessuna domanda trovata con questi criteri.");
-
-            const shuffledQ = fullQuestions.sort((a: any, b: any) => Math.random() - 0.5);
+            // Shuffle final order
+            const shuffledQ = selectedQuestions.sort(() => Math.random() - 0.5);
 
             const richAnswers = shuffledQ.map((q: any) => ({
                 questionId: q.id,
@@ -236,7 +208,7 @@ export default function CustomQuizWizardPage() {
                 subjectId: q.subject_id,
                 subjectName: (q as any).subject?.name || "Materia",
                 selectedOption: null,
-                correctOption: null, // SECURITY: Never expose correct option to client
+                correctOption: null,
                 isCorrect: false,
                 isSkipped: false,
                 explanation: q.explanation || null,
@@ -247,7 +219,7 @@ export default function CustomQuizWizardPage() {
 
             const { data: attempt, error } = await supabase.from("quiz_attempts").insert({
                 quiz_id: quizId,
-                user_id: (await supabase.auth.getUser()).data.user?.id!,
+                user_id: userId!,
                 score: 0,
                 answers: richAnswers,
                 total_questions: richAnswers.length,
@@ -258,12 +230,25 @@ export default function CustomQuizWizardPage() {
 
             if (error) throw error;
 
-            // Save template for one-click repeat
-            localStorage.setItem(`quiz-template-${quizId}`, JSON.stringify({
-                subjectSelections, selectionMode,
-                timeHours, timeMinutes, timeSeconds, noTimeLimit,
-                scoring, savedAt: Date.now()
-            }));
+            // Save template (fire-and-forget)
+            if (userId) {
+                const totalQ = Object.values(subjectSelections).reduce((a, b) => a + b, 0);
+                supabase.from('quiz_templates').insert({
+                    user_id: userId,
+                    quiz_id: quizId,
+                    name: `Prova ${totalQ} domande`,
+                    subject_selections: subjectSelections,
+                    selection_mode: selectionMode,
+                    time_hours: timeHours,
+                    time_minutes: timeMinutes,
+                    time_seconds: timeSeconds,
+                    no_time_limit: noTimeLimit,
+                    scoring: scoring,
+                    updated_at: new Date().toISOString()
+                }).then(({ error: tErr }) => {
+                    if (tErr) console.warn('[Template] DB save failed:', tErr);
+                });
+            }
 
             const scoringParams = `correct=${scoring.correct}&wrong=${scoring.wrong}&blank=${scoring.blank}`;
             const timeParam = noTimeLimit ? "time=0" : `time=${Math.ceil(durationSeconds / 60)}`;
@@ -329,38 +314,64 @@ export default function CustomQuizWizardPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col gap-1"
                 >
-                    <h1 className="text-2xl font-black text-[var(--foreground)] tracking-tight">{hasTemplate ? 'Ripeti Prova' : 'Crea la tua Prova'}</h1>
+                    <h1 className="text-2xl font-black text-[var(--foreground)] tracking-tight">Crea la tua Prova</h1>
                     <p className="text-sm font-medium text-[var(--foreground)] opacity-60">
-                        {hasTemplate ? 'I tuoi settings sono stati ripristinati.' : 'Configura ogni dettaglio per un allenamento mirato.'}
+                        Configura ogni dettaglio per un allenamento mirato.
                     </p>
                 </motion.div>
 
-                {/* Template Loaded Banner */}
-                <AnimatePresence>
-                    {hasTemplate && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10, height: 0 }}
-                            animate={{ opacity: 1, y: 0, height: 'auto' }}
-                            exit={{ opacity: 0, y: -10, height: 0 }}
-                            className="flex items-center gap-3 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/60 dark:border-purple-500/20 rounded-2xl px-4 py-3"
-                        >
-                            <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                                <Bookmark className="w-4 h-4 text-purple-500" fill="currentColor" />
+                {/* Saved Templates Section */}
+                {savedTemplates.length > 0 && (
+                    <motion.section
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2 text-[var(--foreground)] opacity-50">
+                                <Bookmark className="w-4 h-4" />
+                                <h2 className="text-[11px] font-bold uppercase tracking-widest">I tuoi template</h2>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-bold text-purple-700 dark:text-purple-300">Template caricato</p>
-                                <p className="text-[11px] text-purple-500/80 dark:text-purple-400/60">Configurazione dell'ultima prova ripristinata</p>
-                            </div>
-                            <button
-                                onClick={resetTemplate}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-purple-600 dark:text-purple-300 bg-purple-100 dark:bg-purple-500/20 hover:bg-purple-200 dark:hover:bg-purple-500/30 transition-colors uppercase tracking-wider"
-                            >
-                                <RotateCcw className="w-3 h-3" />
-                                Resetta
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            {savedTemplates.length > 3 && (
+                                <button
+                                    onClick={() => navigate(`/concorsi/${category}/${contestSlug}/templates`)}
+                                    className="text-[11px] font-bold text-brand-blue uppercase tracking-wider flex items-center gap-1"
+                                >
+                                    Vedi tutti <ChevronRight className="w-3 h-3" />
+                                </button>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            {savedTemplates.slice(0, 3).map((template) => {
+                                const totalQ = Object.values(template.subject_selections || {}).reduce((a: number, b: number) => a + b, 0);
+                                const timeStr = template.no_time_limit
+                                    ? 'Senza limiti'
+                                    : `${template.time_hours > 0 ? template.time_hours + 'h ' : ''}${template.time_minutes}m${template.time_seconds > 0 ? ' ' + template.time_seconds + 's' : ''}`;
+                                const updatedDate = new Date(template.updated_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+
+                                return (
+                                    <motion.div
+                                        key={template.id}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => navigate(`/concorsi/${category}/${contestSlug}/template/${template.id}`)}
+                                        className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-slate-100 dark:border-white/[0.06] cursor-pointer hover:border-brand-blue/30 transition-all group"
+                                    >
+                                        <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                            <Bookmark className="w-4 h-4 text-violet-500" fill="currentColor" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[14px] font-bold text-[var(--foreground)] truncate">{template.name}</p>
+                                            <p className="text-[11px] text-[var(--foreground)] opacity-40">
+                                                {totalQ} domande · {timeStr} · {updatedDate}
+                                            </p>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-[var(--foreground)] opacity-20 group-hover:opacity-50 transition-opacity flex-shrink-0" />
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </motion.section>
+                )}
 
                 {/* SELEZIONA MATERIE */}
                 <section>
@@ -651,7 +662,7 @@ export default function CustomQuizWizardPage() {
                                 <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    {hasTemplate ? 'Ripeti Prova' : 'Avvia Prova'} <Play className="w-5 h-5 fill-current" />
+                                    Avvia Prova <Play className="w-5 h-5 fill-current" />
                                 </>
                             )}
                         </span>

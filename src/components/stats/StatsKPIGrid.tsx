@@ -109,6 +109,115 @@ export default function StatsKPIGrid({
     return (
         <div className="space-y-6 mb-8">
 
+            {/* Preparation Level — New Speedometer Design */}
+            {readiness && (() => {
+                const colorMap: Record<string, { stroke: string; bg: string; text: string; label: string }> = {
+                    'high': { stroke: '#10B981', bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400', label: 'Pronto' },
+                    'medium': { stroke: '#F59E0B', bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-400', label: 'A buon punto' },
+                    'low': { stroke: '#EF4444', bg: 'bg-red-50 dark:bg-red-900/20', text: 'text-red-600 dark:text-red-400', label: 'Da migliorare' },
+                };
+                const currentTheme = colorMap[readiness.level] || colorMap['low'];
+                const scoreVal = readiness.score !== undefined ? readiness.score : 0;
+
+                return (
+                    <div
+                        data-onboarding="stats-readiness"
+                        onClick={handleReadinessClick}
+                        className="group relative bg-[var(--card)] p-6 pt-8 pb-6 rounded-[32px] shadow-soft border border-[var(--card-border)] cursor-pointer hover:border-[#00B1FF]/30 transition-all overflow-hidden"
+                    >
+                        {/* Ambient glow */}
+                        <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-[80px] pointer-events-none opacity-20"
+                            style={{ background: currentTheme.stroke }}
+                        />
+
+                        <div className="relative z-10 flex flex-col items-center">
+                            {/* Label */}
+                            <div className="flex items-center gap-1.5 mb-6">
+                                <span className="text-[11px] font-black text-[var(--foreground)] opacity-40 uppercase tracking-[0.2em]">
+                                    Preparazione
+                                </span>
+                                <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center">
+                                    <Info className="w-3 h-3 text-slate-400" />
+                                </div>
+                            </div>
+
+                            {/* Speedometer Gauge */}
+                            <div className="relative w-[220px] h-[130px] mb-2">
+                                <svg viewBox="0 0 220 130" className="w-full h-full overflow-visible">
+                                    <defs>
+                                        <linearGradient id="statsGaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#EF4444" />
+                                            <stop offset="35%" stopColor="#F59E0B" />
+                                            <stop offset="65%" stopColor="#F59E0B" />
+                                            <stop offset="100%" stopColor="#10B981" />
+                                        </linearGradient>
+                                    </defs>
+
+                                    {/* Background track */}
+                                    <path
+                                        d="M 20 120 A 90 90 0 0 1 200 120"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="14"
+                                        strokeLinecap="round"
+                                        className="text-slate-100 dark:text-[#111]"
+                                    />
+
+                                    {/* Gradient arc */}
+                                    <motion.path
+                                        d="M 20 120 A 90 90 0 0 1 200 120"
+                                        fill="none"
+                                        stroke="url(#statsGaugeGradient)"
+                                        strokeWidth="14"
+                                        strokeLinecap="round"
+                                        initial={{ pathLength: 0 }}
+                                        animate={{ pathLength: Math.max(scoreVal / 100, 0.02) }}
+                                        transition={{ duration: 1.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                                        style={{ filter: `drop-shadow(0 0 6px ${currentTheme.stroke}40)` }}
+                                    />
+
+                                    {/* Needle indicator */}
+                                    <motion.g
+                                        initial={{ rotate: -180 }}
+                                        animate={{ rotate: -180 + (scoreVal / 100) * 180 }}
+                                        transition={{ duration: 1.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                                        style={{ transformOrigin: '110px 120px' }}
+                                    >
+                                        <circle cx="110" cy="30" r="6" fill={currentTheme.stroke} />
+                                        <circle cx="110" cy="30" r="3" fill="var(--card)" />
+                                    </motion.g>
+                                </svg>
+
+                                {/* Score in center */}
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                                    <motion.span
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+                                        className="text-[52px] font-black text-[var(--foreground)] leading-none tracking-tight"
+                                    >
+                                        {Math.round(scoreVal)}%
+                                    </motion.span>
+                                </div>
+                            </div>
+
+                            {/* Level badge + subtitle */}
+                            <div className="flex flex-col items-center gap-2 mt-2">
+                                <div className={`inline-flex px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider ${currentTheme.bg} ${currentTheme.text}`}>
+                                    {currentTheme.label}
+                                </div>
+                                <p className="text-[13px] text-slate-500 dark:text-slate-400 text-center max-w-[240px] leading-snug">
+                                    {readiness.level === 'high' ? 'Sei pronto per la prova ufficiale.' :
+                                        readiness.level === 'medium' ? 'Manca poco per l\'eccellenza.' :
+                                            'Serve più allenamento. Non mollare!'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
+
             {/* 2x2 Grid */}
             <div data-onboarding="stats-kpi" className="grid grid-cols-2 gap-4">
 
@@ -157,88 +266,6 @@ export default function StatsKPIGrid({
                 />
 
             </div>
-
-            {/* Preparation Level Banner - Now navigates to page */}
-            {readiness && (
-                <div
-                    data-onboarding="stats-readiness"
-                    onClick={handleReadinessClick}
-                    className="group relative bg-[var(--card)] p-6 rounded-[32px] shadow-soft flex items-center justify-between overflow-hidden border border-[var(--card-border)] cursor-pointer hover:border-[#00B1FF]/30 transition-all"
-                >
-                    {/* Background Decorator */}
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#00B1FF] to-emerald-500 opacity-[0.05] rounded-bl-[100px] pointer-events-none" />
-
-                    {/* Text Content */}
-                    <div className="flex-1 pr-4 z-10">
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${readiness.level === 'high' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
-                                readiness.level === 'medium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
-                                    'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                                }`}>
-                                {readiness.label}
-                            </div>
-                            <div className="w-4 h-4 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center text-slate-400">
-                                <Info className="w-2.5 h-2.5" />
-                            </div>
-                        </div>
-                        <h3 className="text-xl font-black text-[var(--foreground)] mb-1 leading-tight">
-                            {readiness.level === 'high' ? 'Sei pronto!' :
-                                readiness.level === 'medium' ? 'A buon punto' :
-                                    'Sei all\'inizio'}
-                        </h3>
-                        <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-snug">
-                            {readiness.level === 'high' ? 'Ottima costanza. Sei pronto per la prova ufficiale.' :
-                                readiness.level === 'medium' ? 'Continua così, manca poco per l\'eccellenza.' :
-                                    'Serve più allenamento. Non mollare!'}
-                        </p>
-                    </div>
-
-                    {/* Radial Gauge */}
-                    <div className="relative w-20 h-20 flex-shrink-0 flex items-center justify-center z-10">
-                        <svg className="w-full h-full transform -rotate-90">
-                            <circle
-                                cx="40"
-                                cy="40"
-                                r="32"
-                                stroke="currentColor"
-                                strokeWidth="6"
-                                fill="transparent"
-                                className="text-slate-100 dark:text-slate-800"
-                            />
-                            <motion.circle
-                                initial={{ strokeDasharray: 200, strokeDashoffset: 200 }}
-                                animate={{ strokeDashoffset: 200 - ((readiness.score !== undefined ? readiness.score : (readiness.level === 'high' ? 92 : readiness.level === 'medium' ? 65 : 35)) / 100) * 200 }}
-                                transition={{ duration: 1.5, ease: "easeOut" }}
-                                cx="40"
-                                cy="40"
-                                r="32"
-                                stroke={readiness.level === 'high' ? '#10B981' : readiness.level === 'medium' ? '#F59E0B' : '#EF4444'}
-                                strokeWidth="6"
-                                strokeLinecap="round"
-                                fill="transparent"
-                            />
-                        </svg>
-                        {/* Icon in Center */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            {readiness.score !== undefined ? (
-                                <span className={`text-lg font-black ${readiness.level === 'high' ? 'text-emerald-600' : readiness.level === 'medium' ? 'text-amber-600' : 'text-red-600'}`}>
-                                    {Math.round(readiness.score)}
-                                </span>
-                            ) : (
-                                <>
-                                    {readiness.level === 'high' ? (
-                                        <Trophy className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                                    ) : readiness.level === 'medium' ? (
-                                        <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                                    ) : (
-                                        <Target className="w-6 h-6 text-red-600 dark:text-red-400" />
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Explanation Modal */}
             <AnimatePresence>
