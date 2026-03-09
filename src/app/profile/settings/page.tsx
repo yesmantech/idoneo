@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
+import ProfileImageBottomSheet from '@/components/profile/ProfileImageBottomSheet';
 import { hapticLight } from '@/lib/haptics';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
@@ -42,8 +43,10 @@ export default function ProfileSettingsPage() {
     const [editingNickname, setEditingNickname] = useState(false);
     const [showThemeSelector, setShowThemeSelector] = useState(false);
     const [themeLabel, setThemeLabel] = useState<string>('Auto'); // Added themeLabel state
+    const [showImageSheet, setShowImageSheet] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
     const nicknameInputRef = useRef<HTMLInputElement>(null);
 
     // Initialize state from context
@@ -238,7 +241,7 @@ export default function ProfileSettingsPage() {
                 <div className="bg-[var(--card)] rounded-2xl overflow-hidden mb-6">
                     {/* Avatar Row */}
                     <button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setShowImageSheet(true)}
                         className="w-full flex items-center gap-4 px-5 py-5 active:bg-white/5 transition-colors"
                     >
                         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
@@ -327,6 +330,39 @@ export default function ProfileSettingsPage() {
                     className="hidden"
                     accept="image/*"
                     onChange={handleFileChange}
+                />
+                <input
+                    type="file"
+                    ref={cameraInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    capture="user"
+                    onChange={handleFileChange}
+                />
+
+                <ProfileImageBottomSheet
+                    isOpen={showImageSheet}
+                    onClose={() => setShowImageSheet(false)}
+                    onTakePhoto={() => {
+                        setShowImageSheet(false);
+                        setTimeout(() => cameraInputRef.current?.click(), 300);
+                    }}
+                    onChooseImage={() => {
+                        setShowImageSheet(false);
+                        setTimeout(() => fileInputRef.current?.click(), 300);
+                    }}
+                    onUseEmoji={() => {
+                        setShowImageSheet(false);
+                        showToast('success', 'Presto disponibile: Avatar Emoji!');
+                    }}
+                    onUseIcon={() => {
+                        setShowImageSheet(false);
+                        showToast('success', 'Presto disponibile: Icone Profilo!');
+                    }}
+                    onRestoreDefault={() => {
+                        setShowImageSheet(false);
+                        showToast('success', 'Avatar predefinito ripristinato!');
+                    }}
                 />
 
                 {/* ─── GENERALE ─── */}
