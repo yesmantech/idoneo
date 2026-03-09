@@ -65,9 +65,10 @@ export default function BandiListPage() {
             .trim();
 
         // Pass 1: pick the best entry (earliest deadline) for each normalized title
+        // Use short_title || title — matching what BandoCard displays
         const winners = new Map<string, typeof all[0]>();
         for (const b of all) {
-            const key = normalize(b.title);
+            const key = normalize(b.short_title || b.title);
             const existing = winners.get(key);
             if (!existing || new Date(b.deadline) < new Date(existing.deadline)) {
                 winners.set(key, b);
@@ -79,7 +80,7 @@ export default function BandiListPage() {
         return all.filter(b => {
             if (seenIds.has(b.id)) return false;
             seenIds.add(b.id);
-            return winners.get(normalize(b.title)) === b;
+            return winners.get(normalize(b.short_title || b.title)) === b;
         });
     })();
     const totalCount = infiniteData?.pages[0]?.count || 0;
