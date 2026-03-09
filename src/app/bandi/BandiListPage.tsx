@@ -54,31 +54,32 @@ export default function BandiListPage() {
     // Deduplicate across pages — by ID (pagination overlap) AND by normalized title (data dupes)
     const bandi = (() => {
         const all = infiniteData?.pages.flatMap(page => page.data) || [];
-        const seenIds = new Set<string>();
-        const seenTitles = new Map<string, typeof all[0]>();
 
-        // Normalize title for fuzzy dedup: strip leading numbers, dashes, years
+        // Normalize title for fuzzy dedup: strip leading numbers, dashes, years, accents
         const normalize = (t: string) => t.toLowerCase()
-            .replace(/^\d+\s*/g, '').replace(/\s*-\s*/g, ' ')
-            .replace(/\b20\d{2}\b/g, '').replace(/\s+/g, ' ').trim();
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+            .replace(/^\d+\s*/g, '')                          // strip leading numbers
+            .replace(/\s*[-–—]\s*/g, ' ')                     // all dash types → space
+            .replace(/\b20\d{2}\b/g, '')                      // strip year references
+            .replace(/\s+/g, ' ')                             // collapse whitespace
+            .trim();
 
+        // Pass 1: pick the best entry (earliest deadline) for each normalized title
+        const winners = new Map<string, typeof all[0]>();
+        for (const b of all) {
+            const key = normalize(b.title);
+            const existing = winners.get(key);
+            if (!existing || new Date(b.deadline) < new Date(existing.deadline)) {
+                winners.set(key, b);
+            }
+        }
+
+        // Pass 2: keep only the winners, also skip exact ID dupes
+        const seenIds = new Set<string>();
         return all.filter(b => {
-            // 1. Skip exact ID dupes
             if (seenIds.has(b.id)) return false;
             seenIds.add(b.id);
-
-            // 2. Skip title dupes — keep the one with earliest deadline
-            const key = normalize(b.title);
-            const existing = seenTitles.get(key);
-            if (existing) {
-                // If this one has an earlier deadline, replace the existing
-                if (new Date(b.deadline) < new Date(existing.deadline)) {
-                    seenTitles.set(key, b);
-                }
-                return false; // filter out this duplicate
-            }
-            seenTitles.set(key, b);
-            return true;
+            return winners.get(normalize(b.title)) === b;
         });
     })();
     const totalCount = infiniteData?.pages[0]?.count || 0;
