@@ -7,6 +7,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { getCategoryStyle } from '@/lib/categoryIcons';
 
+/** Returns formatted seats string or null if data looks like a placeholder */
+function displaySeats(seats?: number | null): string | null {
+    if (!seats || seats >= 5000) return null; // hide placeholder values like 9999, 6571
+    return `${seats.toLocaleString('it-IT')} posti`;
+}
+
 interface BandoCardProps {
     bando: Bando;
     variant?: 'default' | 'compact' | 'featured';
@@ -58,10 +64,10 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                                 {bando.short_title || bando.title}
                             </motion.h4>
                             <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                                {bando.seats_total && (
+                                {displaySeats(bando.seats_total) && (
                                     <span className="flex items-center gap-1">
                                         <Users className="w-3 h-3" />
-                                        {bando.seats_total}
+                                        {displaySeats(bando.seats_total)}
                                     </span>
                                 )}
                                 <span className={`flex items-center gap-1 ${isClosingSoon ? 'text-amber-500 font-medium' : ''}`}>
@@ -119,10 +125,10 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                                     <MapPin className="w-3.5 h-3.5" />
                                     <span className="truncate max-w-[120px]">{bando.region || 'Nazionale'}</span>
                                 </div>
-                                {bando.seats_total && (
+                                {displaySeats(bando.seats_total) && (
                                     <div className="flex items-center gap-1.5">
                                         <Users className="w-3.5 h-3.5" />
-                                        <span>{bando.seats_total} posti</span>
+                                        <span>{displaySeats(bando.seats_total)}</span>
                                     </div>
                                 )}
                             </div>
@@ -177,10 +183,10 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                                     {bando.region}
                                 </span>
                             )}
-                            {bando.seats_total && (
+                            {displaySeats(bando.seats_total) && (
                                 <span className="flex items-center gap-1">
                                     <Users className="w-4 h-4" />
-                                    {bando.seats_total} posti
+                                    {displaySeats(bando.seats_total)}
                                     {bando.seats_reserved ? ` (${bando.seats_reserved} ris.)` : ''}
                                 </span>
                             )}
@@ -247,6 +253,15 @@ function BandoStatusBadge({ daysRemaining, size = 'md' }: BandoStatusBadgeProps)
     let textColor: string;
     let label = `${daysRemaining}gg`;
     let pulse = false;
+
+    // Format large day counts for readability
+    if (daysRemaining > 365) {
+        label = 'Aperto';
+    } else if (daysRemaining > 60) {
+        label = `~${Math.round(daysRemaining / 30)} mesi`;
+    } else if (daysRemaining > 30) {
+        label = `~1 mese`;
+    }
 
     if (daysRemaining <= 0) {
         // Closed

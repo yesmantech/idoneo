@@ -119,9 +119,9 @@ function BandoScadenzaCard({ bando }: { key?: string; bando: Bando }) {
                     </h3>
 
                     {/* Seats */}
-                    {bando.seats_total && (
+                    {bando.seats_total && bando.seats_total < 5000 && (
                         <div className="flex items-center gap-1.5 text-emerald-600">
-                            <span className="text-[11px] font-bold">{bando.seats_total} posti</span>
+                            <span className="text-[11px] font-bold">{bando.seats_total.toLocaleString('it-IT')} posti</span>
                         </div>
                     )}
                 </div>
