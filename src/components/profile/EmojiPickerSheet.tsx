@@ -437,7 +437,7 @@ export default function EmojiPickerSheet({
                                                     letterSpacing: -0.3,
                                                 }}
                                             >
-                                                Save
+                                                Salva
                                             </button>
                                         </div>
                                     </motion.div>
