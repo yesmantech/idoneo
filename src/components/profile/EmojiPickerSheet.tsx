@@ -3,132 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Pencil } from 'lucide-react';
 import { hapticLight } from '@/lib/haptics';
 import { createPortal } from 'react-dom';
+import { EMOJI_CATEGORIES, EMOJI_KEYWORDS } from './emojiData';
 
-// ─── Color palette (from the reference video — 20 colors, 6 columns) ───
+// ─── Color palette (from the reference video — 24 colors, 6 columns) ───
 const COLOR_PALETTE = [
     '#FF3B30', '#FF6482', '#FF2D92', '#AF52DE', '#5856D6', '#3634A3',
     '#007AFF', '#32ADE6', '#00C7BE', '#FF2D55', '#30D158', '#34C759',
     '#0066FF', '#5AC8FA', '#FFCC00', '#FF9500', '#FF6900', '#FF3B00',
     '#FF2D40', '#C4975A', '#8E6C4A', '#1C3A6B', '#3478F6', '#8E8E93',
 ];
-
-// ─── Common emoji sets (curated, native unicode) ───
-const EMOJI_CATEGORIES: { name: string; emojis: string[] }[] = [
-    {
-        name: 'Faccine', emojis: [
-            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂',
-            '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩',
-            '😘', '😗', '😚', '😙', '🥲', '😋', '😛', '😜',
-            '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🫢',
-            '🤐', '🤨', '😐', '😑', '😶', '🫥', '😏', '😒',
-            '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴',
-            '😷', '🤒', '🤕', '🤢', '🤮', '🥵', '🥶', '🥴',
-            '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐',
-        ]
-    },
-    {
-        name: 'Gesti', emojis: [
-            '👋', '🤚', '🖐️', '✋', '🖖', '🫱', '🫲', '🫳',
-            '🫴', '👌', '🤌', '🤏', '✌️', '🤞', '🫰', '🤟',
-            '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️',
-            '🫵', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏',
-            '🙌', '🫶', '👐', '🤲', '🤝', '🙏', '💪', '🦾',
-        ]
-    },
-    {
-        name: 'Cuori', emojis: [
-            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍',
-            '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓',
-            '💗', '💖', '💘', '💝', '💟', '♥️', '🫀', '💌',
-        ]
-    },
-    {
-        name: 'Animali', emojis: [
-            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
-            '🐻‍❄️', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵',
-            '🙈', '🙉', '🙊', '🐒', '🦆', '🐔', '🐧', '🐦',
-            '🦅', '🦉', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛',
-            '🦋', '🐌', '🐞', '🐜', '🪰', '🪲', '🪳', '🦟',
-        ]
-    },
-    {
-        name: 'Cibo', emojis: [
-            '🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇',
-            '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥',
-            '🥝', '🍅', '🥑', '🍆', '🌶️', '🫑', '🥒', '🥬',
-            '🥦', '🧄', '🧅', '🍄', '🌽', '🥕', '🥔', '🍠',
-            '🍕', '🍔', '🍟', '🌭', '🍿', '🧂', '🥚', '🍳',
-        ]
-    },
-    {
-        name: 'Viaggi', emojis: [
-            '🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑',
-            '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🏍️', '🛵',
-            '🚲', '🛴', '🛺', '✈️', '🛩️', '🚀', '🛸', '🚁',
-            '⛵', '🚤', '🛥️', '🛳️', '⛴️', '🚂', '🚆', '🚇',
-        ]
-    },
-    {
-        name: 'Oggetti', emojis: [
-            '⌚', '📱', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️',
-            '🎮', '🕹️', '📷', '📸', '📹', '🎥', '📽️', '🎞️',
-            '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️',
-            '🎛️', '⏱️', '⏲️', '⏰', '🕰️', '🔋', '🔌', '💡',
-            '🔦', '🕯️', '🧯', '🛢️', '💸', '💵', '💴', '💶',
-        ]
-    },
-    {
-        name: 'Sport', emojis: [
-            '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉',
-            '🥏', '🎱', '🪀', '🪁', '🏓', '🏸', '🏒', '🏑',
-            '🥍', '🏏', '🪃', '🥅', '⛳', '🪂', '🏋️', '🤸',
-            '🎯', '🎳', '🎮', '🎲', '🧩', '♟️', '🎭', '🎨',
-        ]
-    },
-];
-
-// ─── Italian keyword search index ───
-const EMOJI_KEYWORDS: Record<string, string> = {
-    '😀': 'felice sorriso gioia contento', '😃': 'sorriso felice allegro', '😄': 'risata sorriso felice', '😁': 'ghigno sorriso', '😆': 'ridere risata', '😅': 'sudore nervoso', '🤣': 'risata rotolare', '😂': 'piangere ridere lacrime',
-    '🙂': 'sorriso leggero', '🙃': 'sottosopra', '😉': 'occhiolino', '😊': 'arrossire sorriso', '😇': 'angelo aureola', '🥰': 'amore cuori', '😍': 'innamorato cuori occhi', '🤩': 'stelle eccitato',
-    '😘': 'bacio cuore', '😗': 'bacio', '😚': 'bacio occhi chiusi', '😙': 'bacio sorriso', '🥲': 'sorriso triste lacrima', '😋': 'goloso lingua', '😛': 'lingua fuori', '😜': 'lingua occhiolino',
-    '🤪': 'pazzo folle', '😝': 'lingua strizzare', '🤑': 'soldi ricco', '🤗': 'abbraccio', '🤭': 'ops risatina', '🤫': 'silenzio shhh', '🤔': 'pensare hmm', '🫢': 'sorpresa bocca',
-    '🤐': 'chiuso zip bocca', '🤨': 'sopracciglio dubbio', '😐': 'neutro', '😑': 'neutro espressione', '😶': 'silenzio muto', '🫥': 'invisibile', '😏': 'ghigno furbo', '😒': 'annoiato noia',
-    '🙄': 'occhi alzare annoiato', '😬': 'grimace smorfia', '🤥': 'bugiardo naso', '😌': 'sollievo pace', '😔': 'triste pensieroso', '😪': 'sonno stanco', '🤤': 'bava golosità', '😴': 'dormire sonno zzz',
-    '😷': 'maschera malato', '🤒': 'febbre termometro', '🤕': 'ferito benda', '🤢': 'nausea verde', '🤮': 'vomitare', '🥵': 'caldo sudare', '🥶': 'freddo gelo', '🥴': 'ubriaco confuso',
-    '😵': 'stordito', '🤯': 'mente esplodere shock', '🤠': 'cowboy cappello', '🥳': 'festa party compleanno', '🥸': 'travestimento', '😎': 'occhiali sole figo', '🤓': 'nerd occhiali', '🧐': 'monocolo esaminare',
-    '👋': 'ciao saluto mano', '🤚': 'mano alzata stop', '🖐️': 'mano aperta cinque', '✋': 'mano stop alto', '🖖': 'vulcano saluto', '🫱': 'mano destra', '🫲': 'mano sinistra', '🫳': 'mano giù palmo',
-    '🫴': 'mano su palmo', '👌': 'ok perfetto', '🤌': 'italiano mano gesto', '🤏': 'piccolo pizzico', '✌️': 'vittoria pace', '🤞': 'dita incrociate fortuna', '🫰': 'cuore mano', '🤟': 'amore gesto',
-    '🤘': 'rock corna', '🤙': 'chiamami telefono', '👈': 'sinistra punto', '👉': 'destra punto', '👆': 'su punto', '🖕': 'medio dito', '👇': 'giù punto', '☝️': 'su indice',
-    '🫵': 'punto tu', '👍': 'ok bene pollice su', '👎': 'male pollice giù', '✊': 'pugno forza', '👊': 'pugno', '🤛': 'pugno sinistra', '🤜': 'pugno destra', '👏': 'applauso bravo',
-    '🙌': 'mani alzate celebrare', '🫶': 'cuore mani', '👐': 'mani aperte', '🤲': 'mani palmo', '🤝': 'stretta mano accordo', '🙏': 'pregare grazie', '💪': 'muscolo forza', '🦾': 'braccio robot',
-    '❤️': 'cuore rosso amore', '🧡': 'cuore arancione', '💛': 'cuore giallo', '💚': 'cuore verde', '💙': 'cuore blu', '💜': 'cuore viola', '🖤': 'cuore nero', '🤍': 'cuore bianco',
-    '🤎': 'cuore marrone', '💔': 'cuore spezzato', '❤️‍🔥': 'cuore fuoco', '❤️‍🩹': 'cuore fascia', '❣️': 'cuore esclamativo', '💕': 'due cuori', '💞': 'cuori rotanti', '💓': 'cuore battente',
-    '💗': 'cuore crescente', '💖': 'cuore scintillante', '💘': 'cuore freccia', '💝': 'cuore regalo', '💟': 'cuore decorativo', '♥️': 'cuore', '🫀': 'cuore anatomico organo', '💌': 'lettera amore',
-    '🐶': 'cane cucciolo', '🐱': 'gatto micio', '🐭': 'topo topolino', '🐹': 'criceto', '🐰': 'coniglio', '🦊': 'volpe', '🐻': 'orso', '🐼': 'panda',
-    '🐻‍❄️': 'orso polare', '🐨': 'koala', '🐯': 'tigre', '🦁': 'leone', '🐮': 'mucca', '🐷': 'maiale', '🐸': 'rana', '🐵': 'scimmia',
-    '🙈': 'scimmia occhi', '🙉': 'scimmia orecchie', '🙊': 'scimmia bocca', '🐒': 'scimmia', '🦆': 'anatra papera', '🐔': 'gallina pollo', '🐧': 'pinguino', '🐦': 'uccello',
-    '🦅': 'aquila', '🦉': 'gufo civetta', '🐺': 'lupo', '🐗': 'cinghiale', '🐴': 'cavallo', '🦄': 'unicorno', '🐝': 'ape', '🐛': 'bruco',
-    '🦋': 'farfalla', '🐌': 'lumaca', '🐞': 'coccinella', '🐜': 'formica', '🪰': 'mosca', '🪲': 'scarabeo', '🪳': 'scarafaggio', '🦟': 'zanzara',
-    '🍏': 'mela verde', '🍎': 'mela rossa', '🍐': 'pera', '🍊': 'arancia mandarino', '🍋': 'limone', '🍌': 'banana', '🍉': 'anguria cocomero', '🍇': 'uva',
-    '🍓': 'fragola', '🫐': 'mirtillo', '🍈': 'melone', '🍒': 'ciliegia', '🍑': 'pesca', '🥭': 'mango', '🍍': 'ananas', '🥥': 'cocco',
-    '🥝': 'kiwi', '🍅': 'pomodoro', '🥑': 'avocado', '🍆': 'melanzana', '🌶️': 'peperoncino piccante', '🫑': 'peperone', '🥒': 'cetriolo', '🥬': 'insalata lattuga',
-    '🥦': 'broccoli', '🧄': 'aglio', '🧅': 'cipolla', '🍄': 'fungo', '🌽': 'mais pannocchia', '🥕': 'carota', '🥔': 'patata', '🍠': 'patata dolce',
-    '🍕': 'pizza', '🍔': 'hamburger panino', '🍟': 'patatine fritte', '🌭': 'hot dog', '🍿': 'popcorn cinema', '🧂': 'sale', '🥚': 'uovo', '🍳': 'uovo fritto padella',
-    '🚗': 'macchina auto', '🚕': 'taxi', '🚙': 'suv auto', '🚌': 'autobus bus', '🚎': 'filobus', '🏎️': 'formula corsa', '🚓': 'polizia auto', '🚑': 'ambulanza',
-    '🚒': 'pompieri', '🚐': 'furgone', '🛻': 'camion pickup', '🚚': 'camion', '🚛': 'tir camion', '🚜': 'trattore', '🏍️': 'moto motocicletta', '🛵': 'scooter vespa',
-    '🚲': 'bicicletta bici', '🛴': 'monopattino', '🛺': 'risciò', '✈️': 'aereo volo', '🛩️': 'aereo piccolo', '🚀': 'razzo spazio', '🛸': 'ufo alieno', '🚁': 'elicottero',
-    '⛵': 'barca vela', '🚤': 'motoscafo', '🛥️': 'yacht barca', '🛳️': 'nave crociera', '⛴️': 'traghetto', '🚂': 'treno locomotiva', '🚆': 'treno', '🚇': 'metro metropolitana',
-    '⌚': 'orologio polso', '📱': 'telefono cellulare', '💻': 'computer portatile', '⌨️': 'tastiera', '🖥️': 'computer desktop', '🖨️': 'stampante', '🖱️': 'mouse', '🖲️': 'trackball',
-    '🎮': 'controller gioco videogioco', '🕹️': 'joystick gioco', '📷': 'fotocamera', '📸': 'fotocamera flash', '📹': 'videocamera', '🎥': 'cinema film', '📽️': 'proiettore', '🎞️': 'pellicola',
-    '📞': 'telefono fisso', '☎️': 'telefono retro', '📟': 'cercapersone', '📠': 'fax', '📺': 'televisione tv', '📻': 'radio', '🎙️': 'microfono studio', '🎚️': 'mixer audio',
-    '🎛️': 'manopole', '⏱️': 'cronometro', '⏲️': 'timer', '⏰': 'sveglia', '🕰️': 'orologio pendolo', '🔋': 'batteria', '🔌': 'spina presa', '💡': 'lampadina idea',
-    '🔦': 'torcia', '🕯️': 'candela', '🧯': 'estintore', '🛢️': 'barile petrolio', '💸': 'soldi volano', '💵': 'dollaro', '💴': 'yen', '💶': 'euro soldi',
-    '⚽': 'calcio pallone', '🏀': 'basket pallacanestro', '🏈': 'football americano', '⚾': 'baseball', '🥎': 'softball', '🎾': 'tennis', '🏐': 'pallavolo', '🏉': 'rugby',
-    '🥏': 'frisbee', '🎱': 'biliardo', '🪀': 'yoyo', '🪁': 'aquilone', '🏓': 'ping pong', '🏸': 'badminton', '🏒': 'hockey', '🏑': 'hockey prato',
-    '🥍': 'lacrosse', '🏏': 'cricket', '🪃': 'boomerang', '🥅': 'porta rete', '⛳': 'golf', '🪂': 'paracadute', '🏋️': 'pesi palestra', '🤸': 'ginnastica',
-    '🎯': 'bersaglio freccette', '🎳': 'bowling', '🎲': 'dado gioco', '🧩': 'puzzle', '♟️': 'scacchi', '🎭': 'teatro maschere', '🎨': 'arte tavolozza pittura',
-};
 
 interface EmojiPickerSheetProps {
     isOpen: boolean;
@@ -204,8 +87,6 @@ export default function EmojiPickerSheet({
 
     const handleEmojiSelect = useCallback((emoji: string) => {
         hapticLight();
-        // Set emoji first, then switch view in next frame to avoid
-        // AnimatePresence showing stale state during transition
         setSelectedEmoji(emoji);
         requestAnimationFrame(() => {
             setView('editor');
