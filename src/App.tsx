@@ -33,6 +33,7 @@ import BlogPostPage from './app/blog/[slug]/page';
 import LeaderboardPage from './app/leaderboard/page';
 import AiAssistantPage from './app/ai-assistant/page';
 import PunteggiPage from './app/come-funziona/punteggi/page';
+import BrandGuidelinesPage from './app/brand/page';
 import PreparazionePage from './app/preparazione/page';
 import BandiListPage from './app/bandi/BandiListPage';
 import BandoDetailPage from './app/bandi/BandoDetailPage';
@@ -267,6 +268,7 @@ export default function App() {
 
                                                     {/* Informational Pages */}
                                                     <Route path="/come-funziona/punteggi" element={<MainLayout><PunteggiPage /></MainLayout>} />
+                                                    <Route path="/brand" element={<BrandGuidelinesPage />} />
                                                     <Route path="/preparazione" element={<PreparazionePage />} />
 
                                                     {/* Demo Pages */}
