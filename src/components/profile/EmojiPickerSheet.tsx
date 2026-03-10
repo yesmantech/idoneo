@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Pencil } from 'lucide-react';
 import { hapticLight } from '@/lib/haptics';
@@ -135,11 +135,15 @@ export default function EmojiPickerSheet({
         return matched.length > 0 ? matched : allEmojis;
     }, [searchQuery, allEmojis]);
 
-    const handleEmojiSelect = (emoji: string) => {
+    const handleEmojiSelect = useCallback((emoji: string) => {
         hapticLight();
+        // Set emoji first, then switch view in next frame to avoid
+        // AnimatePresence showing stale state during transition
         setSelectedEmoji(emoji);
-        setView('editor');
-    };
+        requestAnimationFrame(() => {
+            setView('editor');
+        });
+    }, []);
 
     const handleSave = () => {
         hapticLight();
@@ -188,7 +192,7 @@ export default function EmojiPickerSheet({
                                 maxHeight: 'calc(100vh - 140px)',
                             }}
                         >
-                            <AnimatePresence mode="wait">
+                            <AnimatePresence initial={false} mode="popLayout">
                                 {view === 'grid' ? (
                                     <motion.div
                                         key="grid"
@@ -261,26 +265,31 @@ export default function EmojiPickerSheet({
                                                 style={{
                                                     display: 'grid',
                                                     gridTemplateColumns: 'repeat(8, 1fr)',
-                                                    gap: 2,
+                                                    gap: 4,
                                                 }}
                                             >
                                                 {filteredEmojis.map((emoji, i) => (
                                                     <button
                                                         key={`${emoji}-${i}`}
-                                                        onClick={() => handleEmojiSelect(emoji)}
-                                                        className="active:scale-75 transition-transform"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEmojiSelect(emoji);
+                                                        }}
+                                                        className="active:scale-90 transition-transform"
                                                         style={{
                                                             width: '100%',
                                                             aspectRatio: '1',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
-                                                            fontSize: 28,
-                                                            borderRadius: 8,
+                                                            fontSize: 26,
+                                                            borderRadius: 10,
                                                             border: 'none',
                                                             background: 'transparent',
                                                             cursor: 'pointer',
-                                                            padding: 0,
+                                                            padding: 2,
+                                                            touchAction: 'manipulation',
+                                                            WebkitTapHighlightColor: 'transparent',
                                                         }}
                                                     >
                                                         {emoji}
