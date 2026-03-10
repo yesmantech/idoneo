@@ -63,6 +63,10 @@
             "destination": "/api/$1"
         },
         {
+            "source": "/Idoneo_Brand_Guidelines.md",
+            "destination": "/Idoneo_Brand_Guidelines.md"
+        },
+        {
             "source": "/((?!api/).*)",
             "destination": "/index.html"
         }
