@@ -17,6 +17,7 @@ import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
 import ProfileImageBottomSheet from '@/components/profile/ProfileImageBottomSheet';
 import EmojiPickerSheet from '@/components/profile/EmojiPickerSheet';
+import IconPickerSheet from '@/components/profile/IconPickerSheet';
 import { hapticLight } from '@/lib/haptics';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
@@ -48,6 +49,7 @@ export default function ProfileSettingsPage() {
     const [themeLabel, setThemeLabel] = useState<string>('Auto'); // Added themeLabel state
     const [showImageSheet, setShowImageSheet] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showIconPicker, setShowIconPicker] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -376,7 +378,7 @@ export default function ProfileSettingsPage() {
                     }}
                     onUseIcon={() => {
                         setShowImageSheet(false);
-                        showToast('success', 'Presto disponibile: Icone Profilo!');
+                        setTimeout(() => setShowIconPicker(true), 300);
                     }}
                     onRestoreDefault={async () => {
                         setShowImageSheet(false);
@@ -414,6 +416,31 @@ export default function ProfileSettingsPage() {
                             showToast('success', 'Avatar emoji salvato!');
                         } catch {
                             showToast('error', 'Errore salvataggio emoji.');
+                        } finally {
+                            setSaving(false);
+                        }
+                    }}
+                />
+
+                <IconPickerSheet
+                    isOpen={showIconPicker}
+                    onClose={() => setShowIconPicker(false)}
+                    initialIcon={avatarUrl?.startsWith('icon:') ? avatarUrl.split(':')[1] : 'Star'}
+                    initialColor={avatarUrl?.startsWith('icon:') ? avatarUrl.split(':').slice(2).join(':') : '#FF9500'}
+                    onSave={async (iconName, bgColor) => {
+                        const iconAvatarUrl = `icon:${iconName}:${bgColor}`;
+                        try {
+                            setSaving(true);
+                            await supabase.from('profiles').upsert({
+                                id: user?.id,
+                                avatar_url: iconAvatarUrl,
+                                updated_at: new Date().toISOString()
+                            });
+                            setAvatarUrl(iconAvatarUrl);
+                            await refreshProfile();
+                            showToast('success', 'Avatar icona salvato!');
+                        } catch {
+                            showToast('error', 'Errore salvataggio icona.');
                         } finally {
                             setSaving(false);
                         }

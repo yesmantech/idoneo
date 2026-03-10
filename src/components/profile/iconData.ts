@@ -1,0 +1,220 @@
+// Curated Lucide icon dataset with Italian keyword search index
+// Uses Lucide icon component names for rendering
+
+export interface IconEntry {
+    name: string;       // Lucide component name (e.g. 'Star', 'Heart')
+    keywords: string;   // Italian search keywords
+}
+
+export const ICON_CATEGORIES: { name: string; icons: IconEntry[] }[] = [
+    {
+        name: 'Popolari', icons: [
+            { name: 'Star', keywords: 'stella preferito' },
+            { name: 'Heart', keywords: 'cuore amore' },
+            { name: 'Flame', keywords: 'fuoco fiamma' },
+            { name: 'Zap', keywords: 'fulmine lampo energia' },
+            { name: 'Crown', keywords: 'corona re regina' },
+            { name: 'Trophy', keywords: 'trofeo coppa vittoria' },
+            { name: 'Target', keywords: 'bersaglio obiettivo' },
+            { name: 'Rocket', keywords: 'razzo spazio lancio' },
+            { name: 'Shield', keywords: 'scudo protezione difesa' },
+            { name: 'Gem', keywords: 'gemma diamante gioiello' },
+            { name: 'Award', keywords: 'premio medaglia' },
+            { name: 'Medal', keywords: 'medaglia premio' },
+            { name: 'Sparkles', keywords: 'scintille brillare magia' },
+            { name: 'Swords', keywords: 'spade combattimento battaglia' },
+            { name: 'CircleUser', keywords: 'utente profilo persona' },
+            { name: 'UserRound', keywords: 'utente persona profilo' },
+        ]
+    },
+    {
+        name: 'Animali', icons: [
+            { name: 'Cat', keywords: 'gatto micio felino' },
+            { name: 'Dog', keywords: 'cane cucciolo' },
+            { name: 'Bird', keywords: 'uccello volatile' },
+            { name: 'Fish', keywords: 'pesce mare acqua' },
+            { name: 'Bug', keywords: 'insetto farfalla coccinella' },
+            { name: 'Snail', keywords: 'lumaca lenta' },
+            { name: 'Turtle', keywords: 'tartaruga lenta' },
+            { name: 'Rabbit', keywords: 'coniglio lepre' },
+            { name: 'Squirrel', keywords: 'scoiattolo' },
+            { name: 'Rat', keywords: 'topo ratto' },
+            { name: 'Egg', keywords: 'uovo pulcino' },
+            { name: 'PawPrint', keywords: 'zampa impronta animale' },
+        ]
+    },
+    {
+        name: 'Sport', icons: [
+            { name: 'Dribbble', keywords: 'basket pallacanestro' },
+            { name: 'Dumbbell', keywords: 'manubrio palestra pesi' },
+            { name: 'Bike', keywords: 'bicicletta ciclismo' },
+            { name: 'Volleyball', keywords: 'pallavolo' },
+            { name: 'Siren', keywords: 'sirena' },
+            { name: 'Sword', keywords: 'spada combattimento' },
+            { name: 'Crosshair', keywords: 'mirino puntamento' },
+            { name: 'Mountain', keywords: 'montagna escursione' },
+            { name: 'Waves', keywords: 'onde mare surf nuoto' },
+            { name: 'Timer', keywords: 'cronometro tempo' },
+            { name: 'Flag', keywords: 'bandiera traguardo' },
+            { name: 'Footprints', keywords: 'impronte passi camminare' },
+        ]
+    },
+    {
+        name: 'Musica', icons: [
+            { name: 'Music', keywords: 'musica nota' },
+            { name: 'Headphones', keywords: 'cuffie musica audio' },
+            { name: 'Mic', keywords: 'microfono cantare voce' },
+            { name: 'Guitar', keywords: 'chitarra strumento musica' },
+            { name: 'Piano', keywords: 'pianoforte tastiera musica' },
+            { name: 'Drum', keywords: 'tamburo batteria' },
+            { name: 'Radio', keywords: 'radio trasmissione' },
+            { name: 'Speaker', keywords: 'altoparlante cassa audio' },
+            { name: 'Volume2', keywords: 'volume suono audio' },
+            { name: 'Disc3', keywords: 'disco vinile musica' },
+        ]
+    },
+    {
+        name: 'Tecnologia', icons: [
+            { name: 'Laptop', keywords: 'computer portatile' },
+            { name: 'Smartphone', keywords: 'telefono cellulare' },
+            { name: 'Monitor', keywords: 'schermo monitor desktop' },
+            { name: 'Gamepad2', keywords: 'controller gioco videogioco' },
+            { name: 'Joystick', keywords: 'joystick gioco arcade' },
+            { name: 'Camera', keywords: 'fotocamera foto' },
+            { name: 'Video', keywords: 'video registrare' },
+            { name: 'Wifi', keywords: 'wifi internet connessione' },
+            { name: 'Bluetooth', keywords: 'bluetooth connessione' },
+            { name: 'Cpu', keywords: 'processore chip computer' },
+            { name: 'HardDrive', keywords: 'disco rigido memoria' },
+            { name: 'Bot', keywords: 'robot intelligenza artificiale ai' },
+            { name: 'Braces', keywords: 'codice programmazione sviluppo' },
+            { name: 'Terminal', keywords: 'terminale console programmazione' },
+            { name: 'Globe', keywords: 'globo mondo internet terra' },
+            { name: 'QrCode', keywords: 'codice qr scansione' },
+        ]
+    },
+    {
+        name: 'Cibo', icons: [
+            { name: 'Coffee', keywords: 'caffè tazza bevanda' },
+            { name: 'Pizza', keywords: 'pizza cibo italiano' },
+            { name: 'Apple', keywords: 'mela frutta' },
+            { name: 'Cherry', keywords: 'ciliegia frutta' },
+            { name: 'Grape', keywords: 'uva frutta vino' },
+            { name: 'Banana', keywords: 'banana frutta' },
+            { name: 'Citrus', keywords: 'agrumi limone arancia' },
+            { name: 'IceCreamCone', keywords: 'gelato cono dolce' },
+            { name: 'CakeSlice', keywords: 'torta dolce fetta' },
+            { name: 'Cookie', keywords: 'biscotto dolce' },
+            { name: 'Beef', keywords: 'carne manzo bistecca' },
+            { name: 'Wine', keywords: 'vino bicchiere rosso' },
+            { name: 'Beer', keywords: 'birra boccale' },
+            { name: 'Milk', keywords: 'latte bicchiere' },
+            { name: 'Croissant', keywords: 'cornetto croissant colazione' },
+            { name: 'Salad', keywords: 'insalata verdura sana' },
+        ]
+    },
+    {
+        name: 'Natura', icons: [
+            { name: 'Sun', keywords: 'sole caldo estate' },
+            { name: 'Moon', keywords: 'luna notte' },
+            { name: 'CloudSun', keywords: 'nuvola sole tempo' },
+            { name: 'Snowflake', keywords: 'neve fiocco inverno freddo' },
+            { name: 'Droplets', keywords: 'gocce pioggia acqua' },
+            { name: 'Wind', keywords: 'vento aria' },
+            { name: 'Rainbow', keywords: 'arcobaleno colori' },
+            { name: 'TreePine', keywords: 'albero pino abete foresta' },
+            { name: 'TreeDeciduous', keywords: 'albero foglie bosco' },
+            { name: 'Flower2', keywords: 'fiore petali giardino' },
+            { name: 'Leaf', keywords: 'foglia verde natura' },
+            { name: 'Clover', keywords: 'trifoglio fortuna' },
+            { name: 'MountainSnow', keywords: 'montagna neve inverno' },
+            { name: 'Palmtree', keywords: 'palma tropicale estate' },
+            { name: 'Sunrise', keywords: 'alba mattina sole' },
+            { name: 'Sunset', keywords: 'tramonto sera' },
+        ]
+    },
+    {
+        name: 'Viaggi', icons: [
+            { name: 'Plane', keywords: 'aereo volo viaggio' },
+            { name: 'Car', keywords: 'macchina auto automobile' },
+            { name: 'Train', keywords: 'treno ferrovia' },
+            { name: 'Ship', keywords: 'nave barca mare' },
+            { name: 'Bus', keywords: 'autobus pullman' },
+            { name: 'Compass', keywords: 'bussola navigazione direzione' },
+            { name: 'Map', keywords: 'mappa cartina navigazione' },
+            { name: 'MapPin', keywords: 'segnaposto posizione luogo' },
+            { name: 'Navigation', keywords: 'navigazione freccia direzione' },
+            { name: 'Anchor', keywords: 'ancora nave porto' },
+            { name: 'Tent', keywords: 'tenda campeggio' },
+            { name: 'Luggage', keywords: 'valigia bagaglio viaggio' },
+            { name: 'Hotel', keywords: 'hotel albergo' },
+            { name: 'Landmark', keywords: 'monumento punto interesse' },
+            { name: 'Church', keywords: 'chiesa cattedrale' },
+            { name: 'Castle', keywords: 'castello fortezza' },
+        ]
+    },
+    {
+        name: 'Scienza', icons: [
+            { name: 'Atom', keywords: 'atomo scienza fisica' },
+            { name: 'FlaskConical', keywords: 'provetta laboratorio chimica' },
+            { name: 'Microscope', keywords: 'microscopio ricerca laboratorio' },
+            { name: 'Telescope', keywords: 'telescopio astronomia stelle' },
+            { name: 'Dna', keywords: 'dna genetica biologia' },
+            { name: 'Brain', keywords: 'cervello mente intelligenza' },
+            { name: 'Pill', keywords: 'pillola medicina farmaco' },
+            { name: 'Stethoscope', keywords: 'stetoscopio medico dottore' },
+            { name: 'Syringe', keywords: 'siringa vaccino iniezione' },
+            { name: 'Thermometer', keywords: 'termometro temperatura' },
+            { name: 'TestTubes', keywords: 'provette laboratorio esperimento' },
+            { name: 'Radiation', keywords: 'radiazione nucleare' },
+        ]
+    },
+    {
+        name: 'Oggetti', icons: [
+            { name: 'Key', keywords: 'chiave aprire serratura' },
+            { name: 'Lock', keywords: 'lucchetto sicurezza chiuso' },
+            { name: 'Lightbulb', keywords: 'lampadina idea luce' },
+            { name: 'Wrench', keywords: 'chiave inglese attrezzi' },
+            { name: 'Hammer', keywords: 'martello costruire attrezzi' },
+            { name: 'Scissors', keywords: 'forbici tagliare' },
+            { name: 'Paintbrush', keywords: 'pennello pittura arte' },
+            { name: 'Palette', keywords: 'tavolozza colori arte' },
+            { name: 'Pen', keywords: 'penna scrivere' },
+            { name: 'BookOpen', keywords: 'libro aperto leggere studio' },
+            { name: 'GraduationCap', keywords: 'laurea cappello diploma studio' },
+            { name: 'Briefcase', keywords: 'valigetta lavoro ufficio' },
+            { name: 'Wallet', keywords: 'portafoglio soldi' },
+            { name: 'Gift', keywords: 'regalo pacco sorpresa' },
+            { name: 'Bookmark', keywords: 'segnalibro salvare' },
+            { name: 'Glasses', keywords: 'occhiali vista' },
+            { name: 'Watch', keywords: 'orologio polso tempo' },
+            { name: 'Umbrella', keywords: 'ombrello pioggia' },
+            { name: 'Flashlight', keywords: 'torcia luce' },
+            { name: 'Bell', keywords: 'campana notifica avviso' },
+            { name: 'Megaphone', keywords: 'megafono annuncio' },
+            { name: 'Puzzle', keywords: 'puzzle pezzo gioco' },
+            { name: 'Dice5', keywords: 'dado gioco fortuna' },
+            { name: 'Crown', keywords: 'corona re regina' },
+        ]
+    },
+    {
+        name: 'Simboli', icons: [
+            { name: 'Infinity', keywords: 'infinito eterno' },
+            { name: 'Hash', keywords: 'hashtag cancelletto numero' },
+            { name: 'AtSign', keywords: 'chiocciola email' },
+            { name: 'Percent', keywords: 'percentuale sconto' },
+            { name: 'CircleDot', keywords: 'cerchio punto centro' },
+            { name: 'Triangle', keywords: 'triangolo forma' },
+            { name: 'Pentagon', keywords: 'pentagono forma' },
+            { name: 'Hexagon', keywords: 'esagono forma' },
+            { name: 'Octagon', keywords: 'ottagono stop forma' },
+            { name: 'Asterisk', keywords: 'asterisco stella nota' },
+            { name: 'BadgeCheck', keywords: 'badge verificato spunta' },
+            { name: 'ShieldCheck', keywords: 'scudo verificato sicuro' },
+            { name: 'ThumbsUp', keywords: 'pollice su ok bene' },
+            { name: 'ThumbsDown', keywords: 'pollice giù male' },
+            { name: 'Eye', keywords: 'occhio vedere guardare' },
+            { name: 'Power', keywords: 'accensione power on off' },
+        ]
+    },
+];

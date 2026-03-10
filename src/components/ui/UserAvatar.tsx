@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 interface UserAvatarProps {
     src?: string | null;
@@ -57,6 +58,26 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
                 style={{ backgroundColor: bgColor }}
             >
                 <span className={emojiSizes[size]} style={{ lineHeight: 1 }}>{emoji}</span>
+            </div>
+        );
+    }
+
+    // Handle icon avatar format: "icon:Star:#FF9500"
+    if (src && src.startsWith('icon:')) {
+        const parts = src.split(':');
+        const iconName = parts[1] || 'Star';
+        const bgColor = parts.slice(2).join(':') || '#FF9500';
+        const IconComp = (LucideIcons as Record<string, unknown>)[iconName] as React.ComponentType<{ style?: React.CSSProperties }> | undefined;
+        return (
+            <div
+                className={`relative rounded-full overflow-hidden flex items-center justify-center ${sizeClasses[size]} ${className}`}
+                style={{ backgroundColor: bgColor }}
+            >
+                {IconComp ? (
+                    <IconComp style={{ width: '55%', height: '55%', color: '#fff', fill: '#fff', strokeWidth: 0 }} />
+                ) : (
+                    <User style={{ width: '55%', height: '55%', color: '#fff' }} />
+                )}
             </div>
         );
     }
