@@ -46,7 +46,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
     return (
         <div className="space-y-4 mb-8">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {quizzes.map((q) => (
                     <DashboardCard
                         key={q.id}
