@@ -32,6 +32,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { useLocation } from 'react-router-dom';
 import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { xpService } from '@/lib/xpService';
 import { useAuth } from '@/context/AuthContext';
@@ -97,6 +98,7 @@ function LeagueCountdown() {
 export default function UnifiedLeaderboardPage() {
 
     const { user, profile, isModalDismissed, dismissModal } = useAuth();
+    const location = useLocation();
     // Use role-based check instead of hardcoded emails
     const isAdmin = profile?.role === 'admin';
 
@@ -225,7 +227,7 @@ export default function UnifiedLeaderboardPage() {
             }
         }
         loadLeaderboard();
-    }, [selection, user]);
+    }, [selection, user, location.key]);
 
     // Computed Props
     const isXP = selection === 'xp';
