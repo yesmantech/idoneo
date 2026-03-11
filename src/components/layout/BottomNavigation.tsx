@@ -46,15 +46,13 @@ export default function BottomNavigation() {
     return (
         <div
             className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
+            style={{ background: bgColor }}
         >
             <nav
                 className="flex items-end justify-around"
                 style={{
-                    background: bgColor,
-                    paddingTop: '18px',
-                    paddingBottom: isStandalone
-                        ? 'calc(12px + env(safe-area-inset-bottom, 0px))'
-                        : '12px',
+                    paddingTop: '12px',
+                    paddingBottom: '8px',
                     transition: 'background-color 0.3s ease',
                 }}
             >
@@ -67,24 +65,24 @@ export default function BottomNavigation() {
                             to={item.path}
                             className="flex flex-col items-center justify-end flex-1"
                             style={{
-                                gap: '6px',
+                                gap: '4px',
                                 WebkitTapHighlightColor: 'transparent',
                                 textDecoration: 'none',
                             }}
                         >
                             <item.Icon
-                                size={26}
+                                size={24}
                                 color={isActive ? ACTIVE_COLOR : inactiveColor}
                                 strokeWidth={2}
                                 style={{ transition: 'color 0.15s ease' }}
                             />
                             <span
                                 style={{
-                                    fontSize: '12px',
+                                    fontSize: '11px',
                                     fontWeight: isActive ? 700 : 500,
                                     color: isActive ? ACTIVE_COLOR : inactiveColor,
                                     transition: 'color 0.15s ease',
-                                    lineHeight: 1.3,
+                                    lineHeight: 1.2,
                                     letterSpacing: '-0.01em',
                                 }}
                             >
@@ -94,6 +92,8 @@ export default function BottomNavigation() {
                     );
                 })}
             </nav>
+            {/* Safe area fill — extends the background into the home indicator area */}
+            <div style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
         </div>
     );
 }
