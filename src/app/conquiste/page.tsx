@@ -795,11 +795,11 @@ export default function ConquistePage() {
                 {/* Record personali — horizontal cards */}
                 <div className="mb-7">
                     <h2 className="text-lg font-black text-[var(--foreground)] mb-3 tracking-tight">Record personali</h2>
-                    <div className="flex gap-2.5 overflow-x-auto scrollbar-hide snap-x pb-1 -mx-1 px-1">
+                    <div className="flex gap-2.5 overflow-x-auto scrollbar-hide snap-x pb-1 -mx-4 px-4">
                         {records.map((record, i) => (
                             <motion.div
                                 key={record.label}
-                                className="shrink-0 snap-start flex-1 min-w-0 cursor-pointer"
+                                className="shrink-0 snap-start flex-1 min-w-[140px] cursor-pointer"
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.06 * i, duration: 0.35, type: 'spring' }}
