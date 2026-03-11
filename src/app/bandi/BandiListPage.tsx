@@ -55,12 +55,13 @@ export default function BandiListPage() {
     const bandi = (() => {
         const all = infiniteData?.pages.flatMap(page => page.data) || [];
 
-        // Normalize title for fuzzy dedup: strip leading numbers, dashes, years, accents
+        // Normalize title for fuzzy dedup: strip leading numbers, dashes, years, accents, filler words
         const normalize = (t: string) => t.toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
             .replace(/^\d+\s*/g, '')                          // strip leading numbers
             .replace(/\s*[-–—]\s*/g, ' ')                     // all dash types → space
             .replace(/\b20\d{2}\b/g, '')                      // strip year references
+            .replace(/\b(scuola|concorso|concorsi|pubblica|pubblico|selezione|bando|avviso|procedura|assunzione|reclutamento|di|e|per|del|della|dei|delle|il|la|le|lo|gli|un|una|al|alla|in)\b/g, '')
             .replace(/\s+/g, ' ')                             // collapse whitespace
             .trim();
 
@@ -71,7 +72,15 @@ export default function BandiListPage() {
             const key = normalize(b.short_title || b.title);
             const existing = winners.get(key);
             if (!existing || new Date(b.deadline) < new Date(existing.deadline)) {
+                // Merge seats — keep highest
+                if (existing?.seats_total && b.seats_total) {
+                    b.seats_total = Math.max(b.seats_total, existing.seats_total);
+                } else if (existing?.seats_total && !b.seats_total) {
+                    b.seats_total = existing.seats_total;
+                }
                 winners.set(key, b);
+            } else if (existing && b.seats_total && (!existing.seats_total || b.seats_total > existing.seats_total)) {
+                existing.seats_total = b.seats_total;
             }
         }
 

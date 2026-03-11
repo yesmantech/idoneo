@@ -123,17 +123,25 @@ export interface BandiFilters {
 
 /**
  * Aggressively normalizes a bando title for deduplication.
- * Strips leading seat counts, dashes, year suffixes, extra whitespace.
- * e.g. "100 Docenti Infanzia e Primaria - Comune di L'Aquila 2025" → "docenti infanzia e primaria comune di l'aquila"
+ * Strips leading seat counts, dashes, year suffixes, filler words, accents.
+ * e.g. "100 Docenti Scuola Infanzia e Primaria - Comune di L'Aquila 2025"
+ *    → "docenti infanzia primaria comune l'aquila"
  */
 function normalizeBandoTitle(title: string): string {
     return title
         .toLowerCase()
-        .replace(/^\d+\s*/g, '')           // strip leading numbers ("100 Docenti..." → "Docenti...")
-        .replace(/\s*-\s*/g, ' ')           // replace dashes with spaces
-        .replace(/\b20\d{2}\b/g, '')        // strip year references (2024, 2025, 2026...)
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+        .replace(/^\d+\s*/g, '')           // strip leading numbers
+        .replace(/\s*[-–—]\s*/g, ' ')      // all dash types → space
+        .replace(/\b20\d{2}\b/g, '')        // strip year references
+        .replace(/\b(scuola|concorso|concorsi|pubblica|pubblico|selezione|bando|avviso|procedura|assunzione|reclutamento|di|e|per|del|della|dei|delle|il|la|le|lo|gli|un|una|al|alla|in)\b/g, '') // strip filler words
         .replace(/\s+/g, ' ')              // collapse whitespace
         .trim();
+}
+
+/** Get the display title for a bando (same logic as BandoCard) */
+function bandoDisplayTitle(b: { short_title?: string; title: string }): string {
+    return b.short_title || b.title;
 }
 
 // ============================================
@@ -262,16 +270,25 @@ export async function fetchBandi(filters: BandiFilters = {}): Promise<{ data: Ba
         days_remaining: Math.max(0, Math.ceil((new Date(bando.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     }));
 
-    // Deduplicate by normalized title — keep the entry with the earliest deadline
+    // Deduplicate by normalized display title — keep earliest deadline, merge seats
     const seen = new Map<string, typeof bandiWithComputed[0]>();
     for (const bando of bandiWithComputed) {
-        const key = normalizeBandoTitle(bando.title);
+        const key = normalizeBandoTitle(bandoDisplayTitle(bando));
         const existing = seen.get(key);
         if (!existing || new Date(bando.deadline) < new Date(existing.deadline)) {
+            // If merging, keep the higher seats_total
+            if (existing && existing.seats_total && bando.seats_total) {
+                bando.seats_total = Math.max(bando.seats_total, existing.seats_total);
+            } else if (existing?.seats_total && !bando.seats_total) {
+                bando.seats_total = existing.seats_total;
+            }
             seen.set(key, bando);
+        } else if (existing && bando.seats_total && (!existing.seats_total || bando.seats_total > existing.seats_total)) {
+            // Keep existing but take the higher seat count
+            existing.seats_total = bando.seats_total;
         }
     }
-    const deduped = bandiWithComputed.filter(b => seen.get(normalizeBandoTitle(b.title)) === b);
+    const deduped = bandiWithComputed.filter(b => seen.get(normalizeBandoTitle(bandoDisplayTitle(b))) === b);
 
     return { data: deduped, count: count || 0 };
 }
@@ -343,15 +360,23 @@ export async function fetchClosingSoonBandi(days = 7, limit = 10): Promise<Bando
         days_remaining: Math.max(0, Math.ceil((new Date(bando.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     }));
 
-    // Deduplicate by title
+    // Deduplicate by display title
     const seen = new Map<string, typeof withComputed[0]>();
     for (const b of withComputed) {
-        const key = normalizeBandoTitle(b.title);
-        if (!seen.has(key) || new Date(b.deadline) < new Date(seen.get(key)!.deadline)) {
+        const key = normalizeBandoTitle(bandoDisplayTitle(b));
+        const existing = seen.get(key);
+        if (!existing || new Date(b.deadline) < new Date(existing.deadline)) {
+            if (existing?.seats_total && b.seats_total) {
+                b.seats_total = Math.max(b.seats_total, existing.seats_total);
+            } else if (existing?.seats_total && !b.seats_total) {
+                b.seats_total = existing.seats_total;
+            }
             seen.set(key, b);
+        } else if (existing && b.seats_total && (!existing.seats_total || b.seats_total > existing.seats_total)) {
+            existing.seats_total = b.seats_total;
         }
     }
-    return withComputed.filter(b => seen.get(normalizeBandoTitle(b.title)) === b);
+    return withComputed.filter(b => seen.get(normalizeBandoTitle(bandoDisplayTitle(b))) === b);
 }
 
 // ============================================
