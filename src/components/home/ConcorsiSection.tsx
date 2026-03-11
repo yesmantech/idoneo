@@ -51,15 +51,15 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
     return (
         <Link
             to={`/concorsi/${contest.slug}`}
-            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[220px] lg:w-full"
+            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[180px] lg:min-h-[220px] lg:w-full"
             style={{
-                width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
+                width: 'clamp(160px, calc((100vw - 32px) * 0.44), 300px)',
             } as React.CSSProperties}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
             <div
                 className="relative overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-slate-700 shrink-0"
-                style={{ aspectRatio: '2 / 1', width: '100%' }}
+                style={{ aspectRatio: '2.2 / 1', width: '100%' }}
             >
                 {contest.home_banner_url ? (
                     <img
@@ -99,7 +99,7 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
             </div>
 
             {/* 2. TEXT AREA */}
-            <div className="flex flex-col justify-between bg-[var(--card)] relative z-10 p-4 lg:p-5 flex-1">
+            <div className="flex flex-col justify-between bg-[var(--card)] relative z-10 p-3 lg:p-5 flex-1">
                 <div className="space-y-1.5">
                     <h3 className="font-extrabold text-[var(--foreground)] leading-[1.3] line-clamp-2 group-hover:text-[#00B1FF] transition-colors text-[14px] lg:text-[16px] tracking-tight">
                         {contest.title}
@@ -111,7 +111,7 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
                     )}
                 </div>
 
-                <div className="flex items-center justify-between mt-4 md:mt-auto pt-2">
+                <div className="flex items-center justify-between mt-2 md:mt-auto pt-1.5">
                     {contest.year ? (
                         <div className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-md">
                             <span className="text-[var(--foreground)] opacity-50 font-bold text-[10px] lg:text-[11px] uppercase tracking-wider">
