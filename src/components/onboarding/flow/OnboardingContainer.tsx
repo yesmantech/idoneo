@@ -97,11 +97,11 @@ export default function OnboardingContainer() {
         <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] flex flex-col relative overflow-hidden">
             {/* Header: Back + Skip + Progress */}
             {step > 0 && step < TOTAL_STEPS - 1 && (
-                <div className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800/50 px-4 pt-[env(safe-area-inset-top)] pb-3">
+                <div className="sticky top-0 z-50 bg-white/80 dark:bg-[var(--background)]/80 backdrop-blur-xl border-b border-slate-100 dark:border-white/[0.08] px-4 pt-[env(safe-area-inset-top)] pb-3">
                     <div className="flex items-center justify-between mb-3 pt-3">
                         <button
                             onClick={goBack}
-                            className="flex items-center gap-1 text-[var(--foreground)] opacity-60 hover:opacity-100 transition-opacity"
+                            className="flex items-center gap-1 text-[var(--foreground)] opacity-60 hover:opacity-100 transition-opacity active:scale-[0.97]"
                         >
                             <ChevronLeft className="w-5 h-5" />
                             <span className="text-sm font-medium">Indietro</span>
@@ -113,10 +113,10 @@ export default function OnboardingContainer() {
                             Salta
                         </button>
                     </div>
-                    {/* Progress Bar */}
-                    <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    {/* Progress Bar — brand gradient */}
+                    <div className="h-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-gradient-to-r from-[#00B1FF] to-[#00D4FF] rounded-full transition-all duration-500 ease-out"
+                            className="h-full bg-gradient-to-r from-[#00B1FF] to-[#0066FF] rounded-full transition-all duration-500 ease-out"
                             style={{ width: `${progress}%` }}
                         />
                     </div>

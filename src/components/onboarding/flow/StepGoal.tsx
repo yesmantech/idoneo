@@ -1,10 +1,11 @@
 /**
  * @file StepGoal.tsx
- * @description Phase 2 — Goal Discovery. Single-select card question.
+ * @description Phase 2 — Goal Discovery with Tier S card design.
+ * Uses glassmorphic card borders, brand gradient accent, and tactile press feedback.
  */
 
 import React from 'react';
-import CardSelector from '../ui/CardSelector';
+import { hapticLight } from '@/lib/haptics';
 
 const GOAL_OPTIONS = [
     {
@@ -43,41 +44,64 @@ interface StepGoalProps {
 export default function StepGoal({ value, onChange, onNext, canAdvance }: StepGoalProps) {
     return (
         <div className="flex-1 flex flex-col px-6 py-6">
-            {/* Headline */}
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold tracking-tight">
+            {/* Headline — same typography as login page */}
+            <div className="space-y-2 mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
                     Cosa vuoi ottenere?
-                </h2>
-                <p className="text-[15px] text-[var(--foreground)] opacity-50 mt-2">
+                </h1>
+                <p className="text-[15px] md:text-[16px] font-medium text-[var(--foreground)] opacity-50">
                     Scegli ciò che ti rappresenta di più
                 </p>
             </div>
 
-            {/* Cards */}
-            <CardSelector
-                options={GOAL_OPTIONS}
-                selected={value}
-                onChange={(v) => {
-                    onChange(v);
-                    // Auto-advance after selection with small delay
-                    setTimeout(onNext, 400);
-                }}
-            />
+            {/* Cards — Tier S glassmorphic style */}
+            <div className="flex flex-col gap-3">
+                {GOAL_OPTIONS.map((opt, i) => {
+                    const isSelected = value === opt.value;
+                    return (
+                        <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                                hapticLight();
+                                onChange(opt.value);
+                                setTimeout(onNext, 400);
+                            }}
+                            className={`
+                                relative flex items-center gap-4 p-4 rounded-2xl text-left
+                                transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                                border active:scale-[0.97]
+                                animate-in slide-in-from-bottom-4 fade-in
+                                ${isSelected
+                                    ? 'bg-[#00B1FF]/8 dark:bg-[#00B1FF]/10 border-[#00B1FF] shadow-sm shadow-[#00B1FF]/10'
+                                    : 'bg-white dark:bg-white/[0.04] border-slate-100 dark:border-white/[0.08] shadow-soft hover:shadow-md hover:scale-[1.01]'
+                                }
+                            `}
+                            style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
+                        >
+                            <span className="text-3xl shrink-0">{opt.emoji}</span>
+                            <div className="flex-1 min-w-0">
+                                <p className={`font-bold text-[15px] ${isSelected ? 'text-[#00B1FF]' : 'text-[var(--foreground)]'}`}>
+                                    {opt.title}
+                                </p>
+                                <p className="text-[13px] text-[var(--foreground)] opacity-50 leading-snug mt-0.5">
+                                    {opt.description}
+                                </p>
+                            </div>
+                            {isSelected && (
+                                <div className="shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#00B1FF] to-[#0066FF] flex items-center justify-center animate-in zoom-in duration-200">
+                                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
 
             {/* Spacer */}
             <div className="flex-1" />
-
-            {/* CTA (hidden when auto-advance works, but fallback) */}
-            {canAdvance && (
-                <div className="pt-6 pb-[env(safe-area-inset-bottom)]">
-                    <button
-                        onClick={onNext}
-                        className="w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20"
-                    >
-                        Continua
-                    </button>
-                </div>
-            )}
         </div>
     );
 }

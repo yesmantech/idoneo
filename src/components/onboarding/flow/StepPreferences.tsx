@@ -1,12 +1,12 @@
 /**
  * @file StepPreferences.tsx
- * @description Phase 4 — Preference Mapping.
- * Multi-select chips for learning style + pill selector for daily time.
+ * @description Phase 4 — Preference Mapping with Tier S chip design.
+ * Multi-select chips + time pill selector with glassmorphic styling.
  */
 
 import React from 'react';
-import ChipMultiSelect from '../ui/ChipMultiSelect';
-import PillSelector from '../ui/PillSelector';
+import { hapticLight, hapticWarning } from '@/lib/haptics';
+import { Button } from '@/components/ui/Button';
 import type { OnboardingData } from '@/lib/onboardingService';
 
 const PREFERENCE_OPTIONS = [
@@ -33,39 +33,90 @@ interface StepPreferencesProps {
 }
 
 export default function StepPreferences({ data, onChange, onNext, canAdvance }: StepPreferencesProps) {
+    const togglePref = (value: string) => {
+        hapticLight();
+        const selected = data.preferences;
+        if (selected.includes(value)) {
+            onChange({ preferences: selected.filter(v => v !== value) });
+        } else {
+            if (selected.length >= 3) { hapticWarning(); return; }
+            onChange({ preferences: [...selected, value] });
+        }
+    };
+
     return (
         <div className="flex-1 flex flex-col px-6 py-6 overflow-y-auto">
             {/* Headline */}
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
+            <div className="space-y-2 mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
                     Come preferisci prepararti?
-                </h2>
-                <p className="text-[15px] text-[var(--foreground)] opacity-50 mt-2">
+                </h1>
+                <p className="text-[15px] md:text-[16px] font-medium text-[var(--foreground)] opacity-50">
                     Scegli fino a 3 modalità
                 </p>
             </div>
 
-            {/* Chips */}
-            <div className="mb-10">
-                <ChipMultiSelect
-                    options={PREFERENCE_OPTIONS}
-                    selected={data.preferences}
-                    onChange={(v) => onChange({ preferences: v })}
-                    maxSelections={3}
-                />
+            {/* Chips — Tier S glassmorphic */}
+            <div className="flex flex-wrap gap-2.5 mb-3">
+                {PREFERENCE_OPTIONS.map(opt => {
+                    const isSelected = data.preferences.includes(opt.value);
+                    const isDisabled = !isSelected && data.preferences.length >= 3;
+                    return (
+                        <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => togglePref(opt.value)}
+                            disabled={isDisabled}
+                            className={`
+                                inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-[14px] font-semibold
+                                transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                                border active:scale-[0.97]
+                                ${isSelected
+                                    ? 'bg-[#00B1FF]/10 dark:bg-[#00B1FF]/15 border-[#00B1FF] text-[#00B1FF]'
+                                    : isDisabled
+                                        ? 'bg-slate-50 dark:bg-white/[0.02] border-slate-100 dark:border-white/[0.05] text-[var(--foreground)] opacity-30 cursor-not-allowed'
+                                        : 'bg-white dark:bg-white/[0.04] border-slate-100 dark:border-white/[0.08] text-[var(--foreground)] opacity-80 hover:opacity-100 shadow-soft'
+                                }
+                            `}
+                        >
+                            <span className="text-lg">{opt.icon}</span>
+                            {opt.label}
+                        </button>
+                    );
+                })}
             </div>
+            <p className="text-[12px] text-[var(--foreground)] opacity-35 mb-8">
+                {data.preferences.length}/3 selezionati
+            </p>
 
             {/* Daily Time */}
             <div className="mb-8">
-                <label className="text-sm font-bold text-[var(--foreground)] opacity-70 mb-3 block">
+                <label className="text-[13px] font-bold text-[var(--foreground)] opacity-60 uppercase tracking-wide mb-3 block">
                     Quanto tempo al giorno puoi dedicare?
                 </label>
-                <PillSelector
-                    options={TIME_OPTIONS}
-                    selected={data.dailyTime}
-                    onChange={(v) => onChange({ dailyTime: v })}
-                    columns={2}
-                />
+                <div className="grid grid-cols-2 gap-2.5">
+                    {TIME_OPTIONS.map(opt => {
+                        const isSelected = data.dailyTime === opt.value;
+                        return (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => { hapticLight(); onChange({ dailyTime: opt.value }); }}
+                                className={`
+                                    px-3 py-3 rounded-2xl text-[14px] font-semibold text-center
+                                    transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                                    border active:scale-[0.97]
+                                    ${isSelected
+                                        ? 'bg-[#00B1FF]/10 dark:bg-[#00B1FF]/15 border-[#00B1FF] text-[#00B1FF] shadow-sm shadow-[#00B1FF]/10'
+                                        : 'bg-white dark:bg-white/[0.04] border-slate-100 dark:border-white/[0.08] text-[var(--foreground)] opacity-80 hover:opacity-100 shadow-soft hover:shadow-md'
+                                    }
+                                `}
+                            >
+                                {opt.label}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Spacer */}
@@ -73,13 +124,9 @@ export default function StepPreferences({ data, onChange, onNext, canAdvance }: 
 
             {/* CTA */}
             <div className="pt-4 pb-[env(safe-area-inset-bottom)] sticky bottom-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent pt-8">
-                <button
-                    onClick={onNext}
-                    disabled={!canAdvance}
-                    className="w-full h-14 bg-[#00B1FF] hover:bg-[#0099e6] active:scale-[0.98] transition-all text-white font-bold text-[17px] rounded-full shadow-lg shadow-[#00B1FF]/20 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
+                <Button variant="primary" size="lg" fullWidth onClick={onNext} disabled={!canAdvance}>
                     Continua
-                </button>
+                </Button>
             </div>
         </div>
     );
