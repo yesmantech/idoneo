@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingProvider';
@@ -15,9 +13,6 @@ import {
 } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
-import ProfileImageBottomSheet from '@/components/profile/ProfileImageBottomSheet';
-import EmojiPickerSheet from '@/components/profile/EmojiPickerSheet';
-import IconPickerSheet from '@/components/profile/IconPickerSheet';
 import { hapticLight } from '@/lib/haptics';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
@@ -47,12 +42,8 @@ export default function ProfileSettingsPage() {
     const [editingNickname, setEditingNickname] = useState(false);
     const [showThemeSelector, setShowThemeSelector] = useState(false);
     const [themeLabel, setThemeLabel] = useState<string>('Auto'); // Added themeLabel state
-    const [showImageSheet, setShowImageSheet] = useState(false);
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [showIconPicker, setShowIconPicker] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const cameraInputRef = useRef<HTMLInputElement>(null);
     const nicknameInputRef = useRef<HTMLInputElement>(null);
 
     // Initialize state from context
@@ -197,7 +188,7 @@ export default function ProfileSettingsPage() {
         <div className="min-h-screen bg-[var(--background)] pb-28 transition-colors duration-300">
 
             {/* ─── Header ─── */}
-            <header className="glass-thin sticky top-0 z-20 pt-safe">
+            <header className="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md pt-safe">
                 <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
                     <button
                         onClick={() => navigate('/profile')}
@@ -212,30 +203,15 @@ export default function ProfileSettingsPage() {
 
             <div className="max-w-md mx-auto px-4 pt-4">
 
-                {/* ─── Floating Toast (AI Coach style via portal) ─── */}
-                {createPortal(
-                    <AnimatePresence>
-                        {msg && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -40, x: '-50%' }}
-                                animate={{ opacity: 1, y: 0, x: '-50%' }}
-                                exit={{ opacity: 0, y: -20, x: '-50%', transition: { duration: 0.2, ease: 'easeIn' } }}
-                                transition={{ duration: 0.3, ease: [0.18, 0.89, 0.32, 1.28] }}
-                                className="fixed left-1/2 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full whitespace-nowrap"
-                                style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
-                            >
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${msg.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                                    }`}>
-                                    {msg.type === 'success'
-                                        ? <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                                        : <AlertTriangle className="w-3 h-3 text-white" strokeWidth={3} />
-                                    }
-                                </div>
-                                <span className="text-[14px] font-medium text-black dark:text-white">{msg.text}</span>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>,
-                    document.body
+                {/* ─── Toast ─── */}
+                {msg && (
+                    <div className={`mb-4 p-3 rounded-2xl text-[13px] text-center font-semibold flex items-center justify-center gap-2 animate-in fade-in duration-200 ${msg.type === 'success'
+                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
+                        }`}>
+                        {msg.type === 'success' ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+                        {msg.text}
+                    </div>
                 )}
 
                 {/* ─── Instagram Banner ─── */}
@@ -262,7 +238,7 @@ export default function ProfileSettingsPage() {
                 <div className="bg-[var(--card)] rounded-2xl overflow-hidden mb-6">
                     {/* Avatar Row */}
                     <button
-                        onClick={() => setShowImageSheet(true)}
+                        onClick={() => fileInputRef.current?.click()}
                         className="w-full flex items-center gap-4 px-5 py-5 active:bg-white/5 transition-colors"
                     >
                         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
@@ -351,100 +327,6 @@ export default function ProfileSettingsPage() {
                     className="hidden"
                     accept="image/*"
                     onChange={handleFileChange}
-                />
-                <input
-                    type="file"
-                    ref={cameraInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    capture="user"
-                    onChange={handleFileChange}
-                />
-
-                <ProfileImageBottomSheet
-                    isOpen={showImageSheet}
-                    onClose={() => setShowImageSheet(false)}
-                    onTakePhoto={() => {
-                        setShowImageSheet(false);
-                        setTimeout(() => cameraInputRef.current?.click(), 300);
-                    }}
-                    onChooseImage={() => {
-                        setShowImageSheet(false);
-                        setTimeout(() => fileInputRef.current?.click(), 300);
-                    }}
-                    onUseEmoji={() => {
-                        setShowImageSheet(false);
-                        setTimeout(() => setShowEmojiPicker(true), 300);
-                    }}
-                    onUseIcon={() => {
-                        setShowImageSheet(false);
-                        setTimeout(() => setShowIconPicker(true), 300);
-                    }}
-                    onRestoreDefault={async () => {
-                        setShowImageSheet(false);
-                        try {
-                            await supabase.from('profiles').upsert({
-                                id: user?.id,
-                                avatar_url: null,
-                                updated_at: new Date().toISOString()
-                            });
-                            setAvatarUrl(null);
-                            await refreshProfile();
-                            showToast('success', 'Avatar predefinito ripristinato!');
-                        } catch {
-                            showToast('error', 'Errore durante il ripristino.');
-                        }
-                    }}
-                />
-
-                <EmojiPickerSheet
-                    isOpen={showEmojiPicker}
-                    onClose={() => setShowEmojiPicker(false)}
-                    initialEmoji={avatarUrl?.startsWith('emoji:') ? avatarUrl.split(':')[1] : '😀'}
-                    initialColor={avatarUrl?.startsWith('emoji:') ? avatarUrl.split(':').slice(2).join(':') : '#007AFF'}
-                    onSave={async (emoji, bgColor) => {
-                        const emojiAvatarUrl = `emoji:${emoji}:${bgColor}`;
-                        try {
-                            setSaving(true);
-                            await supabase.from('profiles').upsert({
-                                id: user?.id,
-                                avatar_url: emojiAvatarUrl,
-                                updated_at: new Date().toISOString()
-                            });
-                            setAvatarUrl(emojiAvatarUrl);
-                            await refreshProfile();
-                            showToast('success', 'Avatar emoji salvato!');
-                        } catch {
-                            showToast('error', 'Errore salvataggio emoji.');
-                        } finally {
-                            setSaving(false);
-                        }
-                    }}
-                />
-
-                <IconPickerSheet
-                    isOpen={showIconPicker}
-                    onClose={() => setShowIconPicker(false)}
-                    initialIcon={avatarUrl?.startsWith('icon:') ? avatarUrl.split(':')[1] : 'Star'}
-                    initialColor={avatarUrl?.startsWith('icon:') ? avatarUrl.split(':').slice(2).join(':') : '#FF9500'}
-                    onSave={async (iconName, bgColor) => {
-                        const iconAvatarUrl = `icon:${iconName}:${bgColor}`;
-                        try {
-                            setSaving(true);
-                            await supabase.from('profiles').upsert({
-                                id: user?.id,
-                                avatar_url: iconAvatarUrl,
-                                updated_at: new Date().toISOString()
-                            });
-                            setAvatarUrl(iconAvatarUrl);
-                            await refreshProfile();
-                            showToast('success', 'Avatar icona salvato!');
-                        } catch {
-                            showToast('error', 'Errore salvataggio icona.');
-                        } finally {
-                            setSaving(false);
-                        }
-                    }}
                 />
 
                 {/* ─── GENERALE ─── */}

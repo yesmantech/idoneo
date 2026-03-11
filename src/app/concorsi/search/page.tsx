@@ -137,7 +137,7 @@ export default function ConcorsiSearchPage() {
 
 
             {/* Desktop / Mobile Header */}
-            <header className="glass-thin sticky top-0 z-40 pt-safe">
+            <header className="sticky top-0 z-40 bg-[var(--background)] backdrop-blur-xl border-b border-[var(--card-border)] pt-safe">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
