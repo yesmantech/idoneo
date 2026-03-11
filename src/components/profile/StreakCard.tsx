@@ -75,7 +75,7 @@ export default function StreakCard() {
             </button>
 
             {/* ── Week Row ── */}
-            <div className="flex justify-between items-start" style={{ paddingInline: 2 }}>
+            <div className="flex justify-between items-start gap-1.5 sm:gap-2">
                 {days.map((day, i) => {
                     const isActive = day.isActive;
                     const isToday = day.isToday;
@@ -103,12 +103,10 @@ export default function StreakCard() {
                         : 'none';
 
                     return (
-                        <div key={i} className="flex flex-col items-center" style={{ gap: 10 }}>
+                        <div key={i} className="flex flex-col items-center flex-1 max-w-[48px]" style={{ gap: 10 }}>
                             <div
-                                className="flex items-center justify-center bg-slate-100 dark:bg-[#2C2C2E]"
+                                className="w-full aspect-square flex items-center justify-center bg-slate-100 dark:bg-[#2C2C2E]"
                                 style={{
-                                    width: 48,
-                                    height: 48,
                                     borderRadius: 16,
                                     ...(bg ? { backgroundColor: bg } : {}),
                                     border,
@@ -116,7 +114,7 @@ export default function StreakCard() {
                                     transition: 'all 0.3s ease',
                                 }}
                             />
-                            <span className={`font-bold text-[14px] tracking-wide ${labelClass}`}>
+                            <span className={`font-bold text-[13px] sm:text-[14px] tracking-wide ${labelClass}`}>
                                 {day.label}
                             </span>
                         </div>
