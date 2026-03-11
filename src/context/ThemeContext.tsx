@@ -60,12 +60,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         const root = window.document.documentElement;
 
         const applyTheme = (isDark: boolean) => {
+            const meta = document.querySelector('meta[name="theme-color"]');
             if (isDark) {
                 root.classList.add('dark');
                 setResolvedTheme('dark');
+                if (meta) meta.setAttribute('content', '#000000');
             } else {
                 root.classList.remove('dark');
                 setResolvedTheme('light');
+                if (meta) meta.setAttribute('content', '#F5F5F7');
             }
         };
 
