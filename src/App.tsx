@@ -99,17 +99,26 @@ import { BadgeUnlockCelebration } from './components/gamification/BadgeUnlockCel
 // REMOVED: streakService import — streak is now 100% server-side (handle_new_attempt_xp trigger)
 import { CinematicGrain } from './components/ui/CinematicGrain';
 import { removeBootLoader } from './lib/domUtils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/react-query-persist-client';
 import { LazyMotion, domAnimation } from 'framer-motion';
 
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
+            staleTime: 1000 * 60 * 5, // 5 min — show cached, refetch in bg
+            gcTime: 1000 * 60 * 60 * 24, // 24h — keep in localStorage
             retry: 1,
         },
     },
+});
+
+// Persist cache to localStorage — survives app restart
+const persister = createSyncStoragePersister({
+    storage: window.localStorage,
+    key: 'IDONEO_QUERY_CACHE',
 });
 
 // V7-RET-1: Daily check-in — streak updates on app engagement, not just quiz completion.
@@ -203,7 +212,7 @@ export default function App() {
     }, []);
 
     return (
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}>
             <BrowserRouter>
                 <ScrollToTop />
                 <ErrorBoundary>
@@ -350,6 +359,6 @@ export default function App() {
                 </ErrorBoundary>
             </BrowserRouter>
             <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
     );
 }
