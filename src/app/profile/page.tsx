@@ -101,26 +101,28 @@ export default function ProfilePage() {
                     />
                 </div>
 
-                {/* ── Badges strip — mobile: after cards, desktop: after header ── */}
+                {/* ── Badges strip — desktop only, after header ── */}
                 <div className="hidden lg:block">
                     <BadgesBlock />
                 </div>
 
                 {/* ── Active Quizzes — full width ── */}
-                <DashboardList userId={user?.id || ''} />
+                <div className="mt-6 lg:mt-0">
+                    <DashboardList userId={user?.id || ''} />
+                </div>
 
                 {/* ── Widget Grid — 1 col mobile, 2 cols desktop ── */}
                 <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
                     {/* Streak Card */}
                     <StreakCard />
 
-                    {/* Badges — mobile only (appears inline) */}
+                    {/* Friends Block */}
+                    <FriendsBlock userId={user?.id || ''} />
+
+                    {/* Badges — mobile only (after Friends, same as original) */}
                     <div className="lg:hidden">
                         <BadgesBlock />
                     </div>
-
-                    {/* Friends Block */}
-                    <FriendsBlock userId={user?.id || ''} />
                 </div>
             </div>
         </div>

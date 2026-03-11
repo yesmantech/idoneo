@@ -75,7 +75,7 @@ export default function StreakCard() {
             </button>
 
             {/* ── Week Row ── */}
-            <div className="max-w-sm">
+            <div className="lg:max-w-sm">
                 <div className="flex justify-between items-start gap-1.5 sm:gap-2">
                     {days.map((day, i) => {
                         const isActive = day.isActive;

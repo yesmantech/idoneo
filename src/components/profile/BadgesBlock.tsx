@@ -75,7 +75,7 @@ export default function BadgesBlock() {
             {/* Badge strip — exactly 4 badges, evenly spaced */}
             {earned.length > 0 ? (
                 <Link to="/conquiste" className="block">
-                    <div className="flex justify-start gap-6 px-2">
+                    <div className="flex justify-between lg:justify-start lg:gap-6 px-2">
                         {displayBadges.map((badge, i) => (
                             <motion.div
                                 key={badge.id}
