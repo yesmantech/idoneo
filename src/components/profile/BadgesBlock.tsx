@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Medal, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -7,6 +7,7 @@ import { BADGE_DEFINITIONS, BadgeDefinition } from '@/lib/badgeDefinitions';
 import { hapticLight } from '@/lib/haptics';
 import { Link } from 'react-router-dom';
 import { BadgeGlow } from '@/components/gamification/BadgeGlow';
+import { useQuery } from '@tanstack/react-query';
 
 interface Badge extends BadgeDefinition {
     unlocked: boolean;
@@ -19,28 +20,17 @@ interface Badge extends BadgeDefinition {
  */
 export default function BadgesBlock() {
     const { user } = useAuth();
-    const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (user?.id) {
-            fetchBadges();
-        }
-    }, [user?.id]);
-
-    const fetchBadges = async () => {
-        if (!user?.id) return;
-        setLoading(true);
-        try {
+    const { data: unlockedBadges = [], isLoading: loading } = useQuery({
+        queryKey: ['user-badges', user?.id],
+        queryFn: async () => {
+            if (!user?.id) return [];
             await badgeService.checkAndAwardBadges(user.id);
-            const earned = await badgeService.getUserBadges(user.id);
-            setUnlockedBadges(earned);
-        } catch (err) {
-            console.error('BadgesBlock: Error fetching badges:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+            return badgeService.getUserBadges(user.id);
+        },
+        enabled: !!user?.id,
+        staleTime: 5 * 60 * 1000, // 5 min
+    });
 
     const allBadges: Badge[] = BADGE_DEFINITIONS.map(def => ({
         ...def,

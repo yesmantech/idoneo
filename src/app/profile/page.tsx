@@ -19,12 +19,13 @@
  * 3. Triggers Profile Onboarding Tour if not completed
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Share2, Trophy, Zap, Target } from 'lucide-react';
 import { useOnboarding } from '@/context/OnboardingProvider';
 import TierSLoader from '@/components/ui/TierSLoader';
+import { useQuery } from '@tanstack/react-query';
 
 // Components
 import ProfileIdentityCard from '@/components/profile/ProfileIdentityCard';
@@ -42,8 +43,17 @@ export default function ProfilePage() {
     const { user, profile, loading } = useAuth();
     const navigate = useNavigate();
 
-    // XP & Score State
-    const [xp, setXP] = useState(0);
+    // XP — cached via React Query
+    const { data: xp = 0 } = useQuery({
+        queryKey: ['user-xp', user?.id],
+        queryFn: async () => {
+            if (!user) return 0;
+            const stats = await xpService.getUserXp(user.id);
+            return stats.totalXp;
+        },
+        enabled: !!user,
+        staleTime: 5 * 60 * 1000, // 5 min
+    });
 
     // Onboarding
     const { startOnboarding, hasCompletedContext } = useOnboarding();
@@ -51,16 +61,7 @@ export default function ProfilePage() {
     useEffect(() => {
         if (!loading && !user) {
             navigate('/login');
-            return;
         }
-
-        async function fetchData() {
-            if (!user) return;
-            // Fetch XP
-            const stats = await xpService.getUserXp(user.id);
-            setXP(stats.totalXp);
-        }
-        fetchData();
     }, [user, loading, navigate]);
 
     // Auto-start profile onboarding

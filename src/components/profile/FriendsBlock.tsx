@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Users, Gift, UserPlus, Search, Check, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReferralModal from '@/components/referral/ReferralModal';
@@ -7,15 +7,14 @@ import { friendService, FriendProfile } from '@/lib/friendService';
 import { useReferral } from '@/hooks/useReferral';
 import { Link } from 'react-router-dom';
 import { UserAvatar } from '@/components/ui/UserAvatar';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface FriendsBlockProps {
     userId: string;
 }
 
 export default function FriendsBlock({ userId }: FriendsBlockProps) {
-    const [friends, setFriends] = useState<FriendProfile[]>([]);
-    const [pendingReceived, setPendingReceived] = useState<FriendProfile[]>([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [showToast, setShowToast] = useState(false);
 
     // Referral Logic (Pre-loading for modal)
@@ -25,41 +24,38 @@ export default function FriendsBlock({ userId }: FriendsBlockProps) {
     const [showReferralModal, setShowReferralModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
 
+    const { data, isLoading: loading } = useQuery({
+        queryKey: ['user-friends', userId],
+        queryFn: () => friendService.getFriendsAndRequests(userId),
+        enabled: !!userId,
+        staleTime: 5 * 60 * 1000, // 5 min
+    });
+
+    const friends = data?.friends ?? [];
+    const pendingReceived = data?.pendingReceived ?? [];
+
     const handleInvite = () => {
         setShowReferralModal(true);
     };
 
-    const refreshData = async () => {
-        if (!userId) return;
-        try {
-            const { friends: f, pendingReceived: p } = await friendService.getFriendsAndRequests(userId);
-            setFriends(f);
-            setPendingReceived(p);
-        } catch (err) {
-            console.error('Error fetching friends:', err);
-        } finally {
-            setLoading(false);
-        }
+    const invalidateFriends = () => {
+        queryClient.invalidateQueries({ queryKey: ['user-friends', userId] });
     };
-
-    useEffect(() => {
-        refreshData();
-    }, [userId]);
 
     const handleAccept = async (friendshipId?: string) => {
         if (!friendshipId) return;
         await friendService.acceptRequest(friendshipId);
-        refreshData();
+        invalidateFriends();
     };
 
     const handleReject = async (friendshipId?: string) => {
         if (!friendshipId) return;
         await friendService.removeFriendship(friendshipId);
-        refreshData();
+        invalidateFriends();
     };
 
     const handleRequestSent = () => {
-        refreshData();
+        invalidateFriends();
         setShowToast(true);
         setTimeout(() => setShowToast(false), 2500);
     };

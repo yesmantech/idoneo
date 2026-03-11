@@ -365,10 +365,11 @@ export const leaderboardService = {
 
     // 3. Get User's Active Quizzes (from Leaderboard + quiz_attempts)
     async getUserActiveQuizzes(userId: string) {
-        // 1. Fetch from concorso_leaderboard (official preparation scores)
-        const { data: leaderboardRows } = await supabase
-            .from("concorso_leaderboard")
-            .select(`
+        // 1+2. Fetch both in parallel (was sequential)
+        const [{ data: leaderboardRows }, { data: attemptRows }] = await Promise.all([
+            supabase
+                .from("concorso_leaderboard")
+                .select(`
                 score,
                 quiz_id,
                 last_calculated_at,
@@ -381,13 +382,11 @@ export const leaderboardService = {
                     category:categories ( title )
                 )
             `)
-            .eq("user_id", userId)
-            .order("last_calculated_at", { ascending: false });
-
-        // 2. Fetch distinct quiz_ids from quiz_attempts (all quizzes user has played)
-        const { data: attemptRows } = await supabase
-            .from("quiz_attempts")
-            .select(`
+                .eq("user_id", userId)
+                .order("last_calculated_at", { ascending: false }),
+            supabase
+                .from("quiz_attempts")
+                .select(`
                 quiz_id,
                 score,
                 created_at,
@@ -400,8 +399,9 @@ export const leaderboardService = {
                     category:categories ( title )
                 )
             `)
-            .eq("user_id", userId)
-            .order("created_at", { ascending: false });
+                .eq("user_id", userId)
+                .order("created_at", { ascending: false })
+        ]);
 
         // Build a map of quiz_id -> best data, preferring leaderboard
         const quizMap = new Map<string, any>();

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { leaderboardService } from '@/lib/leaderboardService';
 import DashboardCard from './DashboardCard';
 
@@ -9,22 +10,13 @@ interface DashboardListProps {
 
 export default function DashboardList({ userId }: DashboardListProps) {
     const navigate = useNavigate();
-    const [quizzes, setQuizzes] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function load() {
-            try {
-                const data = await leaderboardService.getUserActiveQuizzes(userId);
-                setQuizzes(data);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        }
-        if (userId) load();
-    }, [userId]);
+    const { data: quizzes = [], isLoading: loading } = useQuery({
+        queryKey: ['user-active-quizzes', userId],
+        queryFn: () => leaderboardService.getUserActiveQuizzes(userId),
+        enabled: !!userId,
+        staleTime: 5 * 60 * 1000, // 5 min — instant on back/forward
+    });
 
     if (loading) return <div className="py-8 text-center text-slate-400 animate-pulse">Caricamento corsi...</div>;
 
@@ -47,7 +39,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
         <div className="space-y-4 mb-8">
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {quizzes.map((q) => (
+                {quizzes.map((q: any) => (
                     <DashboardCard
                         key={q.id}
                         quizId={q.id}
