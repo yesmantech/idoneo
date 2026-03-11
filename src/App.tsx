@@ -102,7 +102,7 @@ import { removeBootLoader } from './lib/domUtils';
 import { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { LazyMotion, domAnimation } from 'framer-motion';
 
 const queryClient = new QueryClient({
