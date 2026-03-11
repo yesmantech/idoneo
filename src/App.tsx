@@ -13,6 +13,7 @@ import HomePage from './app/page';
 import ProfilePage from './app/profile/page';
 import ProfileSettingsPage from './app/profile/settings/page';
 import ProfileSetupPage from './app/profile/setup/page';
+import OnboardingContainer from './components/onboarding/flow/OnboardingContainer';
 import QuizStatsPage from './app/profile/stats/QuizStatsPage';
 import ConcorsiSearchPage from './app/concorsi/search/page';
 import ConcorsoHubPage from './app/concorsi/[category]/page';
@@ -222,6 +223,7 @@ export default function App() {
                                                         </MainLayout>
                                                     } />
                                                     <Route path="/profile/setup" element={<ProfileSetupPage />} />
+                                                    <Route path="/onboarding" element={<OnboardingContainer />} />
                                                     <Route path="/profile/settings" element={
                                                         <MainLayout>
                                                             <ProfileSettingsPage />

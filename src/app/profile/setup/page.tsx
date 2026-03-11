@@ -132,7 +132,7 @@ export default function ProfileSetupPage() {
                 } else if (result.code === 'ALREADY_SETUP') {
                     // Profile already set up, just navigate home
                     await refreshProfile();
-                    navigate('/');
+                    navigate('/onboarding');
                     return;
                 } else {
                     setError(result.error);
@@ -150,7 +150,7 @@ export default function ProfileSetupPage() {
             await refreshProfile();
 
             // Success -> Home Page
-            navigate('/');
+            navigate('/onboarding');
         } catch (err: any) {
             // V4 FUNC-2: Show error to user, do NOT navigate away
             setError(err?.message || 'Errore durante il salvataggio del profilo.');

@@ -52,6 +52,12 @@ export interface Profile {
     streak_max?: number;
     dismissed_modals?: string[];
     total_xp?: number;
+    onboarding_completed_at?: string | null;
+    onboarding_categories?: string[];
+    onboarding_goal?: string | null;
+    onboarding_preferences?: string[];
+    onboarding_daily_time?: string | null;
+    onboarding_experience?: string | null;
 }
 
 interface AuthContextType {
@@ -90,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!user?.id) return null;
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, nickname, avatar_url, role, streak_current, streak_max, dismissed_modals, total_xp')
+                .select('id, nickname, avatar_url, role, streak_current, streak_max, dismissed_modals, total_xp, onboarding_completed_at, onboarding_categories, onboarding_goal, onboarding_preferences, onboarding_daily_time, onboarding_experience')
                 .eq('id', user.id)
                 .single();
 

@@ -87,7 +87,23 @@ export default function HomePage() {
     }
   }, [user?.id]);
 
-  const consigliati = categories.slice(0, 8);
+  // Personalization: if user completed onboarding with selected categories,
+  // show those first. Otherwise fall back to generic top 8.
+  const hasOnboarding = !!profile?.onboarding_completed_at;
+  const onboardingCatIds = profile?.onboarding_categories || [];
+
+  const consigliati = hasOnboarding && onboardingCatIds.length > 0
+    ? categories.filter(c => onboardingCatIds.includes(c.id))
+    : categories.slice(0, 8);
+
+  const consigliatiTitle = hasOnboarding && onboardingCatIds.length > 0
+    ? 'I tuoi Concorsi'
+    : 'Consigliati per te';
+
+  // Show remaining categories if user has personalized ones
+  const altreCategorie = hasOnboarding && onboardingCatIds.length > 0
+    ? categories.filter(c => !onboardingCatIds.includes(c.id)).slice(0, 6)
+    : [];
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 transition-colors duration-300">
@@ -118,15 +134,27 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* 5. CONCORSI SECTIONS - Recommended */}
+        {/* 5. CONCORSI SECTIONS - Personalized or Recommended */}
         <section className="mb-8 lg:mb-10">
           <Reveal width="100%" delay={0.6}>
             <ConcorsiSection
-              title="Consigliati per te"
+              title={consigliatiTitle}
               contests={consigliati}
             />
           </Reveal>
         </section>
+
+        {/* 5a. SCOPRI ANCHE — Other categories (only after onboarding) */}
+        {altreCategorie.length > 0 && (
+          <section className="mb-8 lg:mb-10">
+            <Reveal width="100%" delay={0.65}>
+              <ConcorsiSection
+                title="Scopri anche"
+                contests={altreCategorie}
+              />
+            </Reveal>
+          </section>
+        )}
 
         {/* 5b. RECENTLY ADDED - Fresh content */}
         {recentCategories.length > 0 && (
