@@ -46,11 +46,6 @@ export default function BottomNavigation() {
     return (
         <div
             className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
-            style={{
-                paddingBottom: isStandalone
-                    ? 'env(safe-area-inset-bottom, 0px)'
-                    : '0px',
-            }}
         >
             <nav
                 className="flex items-end justify-around"
@@ -58,7 +53,7 @@ export default function BottomNavigation() {
                     background: bgColor,
                     paddingTop: '18px',
                     paddingBottom: isStandalone
-                        ? 'max(12px, env(safe-area-inset-bottom, 12px))'
+                        ? 'calc(12px + env(safe-area-inset-bottom, 0px))'
                         : '12px',
                     transition: 'background-color 0.3s ease',
                 }}
