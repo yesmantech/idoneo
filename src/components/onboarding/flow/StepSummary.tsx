@@ -62,7 +62,7 @@ export default function StepSummary({ data, onComplete, saving }: StepSummaryPro
     ].filter(Boolean) as { icon: string; label: string; value: string }[];
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
+        <div className="flex-1 flex flex-col items-center px-6 pt-12 pb-32 text-center">
             {/* Celebration Icon — brand gradient */}
             <div className="relative mb-8 animate-in zoom-in-75 duration-700">
                 <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/25">
@@ -108,17 +108,14 @@ export default function StepSummary({ data, onComplete, saving }: StepSummaryPro
                 </div>
             )}
 
-            {/* Spacer */}
-            <div className="flex-1 min-h-8" />
-
-            {/* CTA — shared Button component */}
-            <div className="w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: '800ms', animationFillMode: 'both' }}>
-                <Button variant="primary" size="lg" fullWidth onClick={onComplete} disabled={saving} isLoading={saving}>
-                    Entra nel tuo Idoneo →
-                </Button>
+            {/* Fixed bottom CTA */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 px-6 pb-[max(16px,env(safe-area-inset-bottom,16px))] pt-4 bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: '800ms', animationFillMode: 'both' }}>
+                <div className="max-w-sm mx-auto">
+                    <Button variant="primary" size="lg" fullWidth onClick={onComplete} disabled={saving} isLoading={saving}>
+                        Entra nel tuo Idoneo →
+                    </Button>
+                </div>
             </div>
-
-            <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
     );
 }
