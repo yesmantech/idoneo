@@ -133,16 +133,23 @@ function fireDailyCheckin() {
 function ScrollToTop() {
     const { pathname } = useLocation();
     useEffect(() => {
-        // Reset all possible scroll containers
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-        // #root is the actual scroll container in this app
-        const root = document.getElementById('root');
-        if (root) root.scrollTop = 0;
-        // Also scroll the main content area
-        const main = document.querySelector('main');
-        if (main) main.scrollTop = 0;
+        const resetScroll = () => {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            const root = document.getElementById('root');
+            if (root) root.scrollTop = 0;
+            const main = document.querySelector('main');
+            if (main) main.scrollTop = 0;
+        };
+        // Immediate reset
+        resetScroll();
+        // Delayed reset after React renders the new component
+        requestAnimationFrame(() => {
+            resetScroll();
+            // Double rAF for after browser paint
+            requestAnimationFrame(resetScroll);
+        });
     }, [pathname]);
     return null;
 }
