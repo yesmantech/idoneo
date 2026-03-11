@@ -111,18 +111,20 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Right Column: Dashboard + More */}
-                    <div className="space-y-6 mt-6 lg:mt-0">
-                        {/* Dashboard List */}
-                        <DashboardList userId={user?.id || ''} />
+                    <div className="space-y-6 mt-6 lg:mt-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+                        {/* Dashboard List — full width on desktop */}
+                        <div className="lg:col-span-2">
+                            <DashboardList userId={user?.id || ''} />
+                        </div>
 
-                        {/* Streak Card */}
+                        {/* Streak Card — left half on desktop */}
                         <StreakCard />
 
-                        {/* Friends Block */}
+                        {/* Friends Block — right half on desktop */}
                         <FriendsBlock userId={user?.id || ''} />
 
                         {/* Badges - Mobile Only */}
-                        <div className="lg:hidden">
+                        <div className="lg:hidden lg:col-span-2">
                             <BadgesBlock />
                         </div>
                     </div>

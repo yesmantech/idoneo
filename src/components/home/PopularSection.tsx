@@ -35,7 +35,7 @@ export default function PopularSection({ quizzes }: PopularSectionProps) {
                     </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 lg:hidden">
                     <button
                         onClick={() => scroll('left')}
                         className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-sm"
@@ -51,17 +51,19 @@ export default function PopularSection({ quizzes }: PopularSectionProps) {
                 </div>
             </div>
 
-            {/* Carousel */}
+            {/* Carousel (mobile) / Grid (desktop) */}
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-6 -my-6 pl-4 lg:pl-8 gap-3 lg:gap-4"
+                className="flex overflow-x-auto snap-x scroll-pl-4 scrollbar-hide py-6 -my-6 pl-4 gap-3 items-stretch lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:gap-4 lg:overflow-visible lg:px-8 lg:py-0 lg:my-0"
             >
                 {quizzes.map((quiz, idx) => (
-                    <PopularCard key={quiz.quizId} quiz={quiz} rank={idx + 1} />
+                    <div key={quiz.quizId} className="snap-start flex-shrink-0 lg:flex-shrink lg:w-full [&>a]:lg:!w-full">
+                        <PopularCard quiz={quiz} rank={idx + 1} />
+                    </div>
                 ))}
 
-                {/* Right spacer for scroll end padding */}
-                <div className="min-w-[4px] lg:min-w-[16px] flex-shrink-0" aria-hidden="true" />
+                {/* Right spacer — mobile only */}
+                <div className="min-w-[4px] flex-shrink-0 lg:hidden" aria-hidden="true" />
             </div>
         </div>
     );
@@ -106,10 +108,10 @@ function PopularCard({ quiz, rank }: { key?: string; quiz: PopularQuiz; rank: nu
     return (
         <Link
             to={`/concorsi/${quiz.categorySlug}/${quiz.quizSlug}`}
-            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[220px]"
+            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[220px] lg:w-full"
             style={{
                 width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
-            }}
+            } as React.CSSProperties}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
             <div

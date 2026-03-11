@@ -51,10 +51,10 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
     return (
         <Link
             to={`/concorsi/${contest.slug}`}
-            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[220px]"
+            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[220px] lg:w-full"
             style={{
                 width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
-            }}
+            } as React.CSSProperties}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
             <div
@@ -163,8 +163,8 @@ export default function ConcorsiSection({ title, contests, icon: IconOverride, i
                     </h2>
                 </div>
 
-                {/* Navigation Buttons */}
-                <div className="flex gap-2">
+                {/* Navigation Buttons — mobile/tablet only */}
+                <div className="flex gap-2 lg:hidden">
                     <button
                         onClick={() => scroll('left')}
                         className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-sm"
@@ -180,19 +180,19 @@ export default function ConcorsiSection({ title, contests, icon: IconOverride, i
                 </div>
             </div>
 
-            {/* Carousel Container - uses padding for alignment instead of spacer divs */}
+            {/* Carousel (mobile) / Grid (desktop) */}
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-6 -my-6 pl-4 lg:pl-8 gap-3 lg:gap-4 items-stretch"
+                className="flex overflow-x-auto snap-x scroll-pl-4 scrollbar-hide py-6 -my-6 pl-4 gap-3 items-stretch lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-8 lg:pl-8 lg:py-0 lg:my-0"
             >
                 {contests.map((contest, idx) => (
-                    <div key={idx} className="snap-start flex-shrink-0">
+                    <div key={idx} className="snap-start flex-shrink-0 lg:flex-shrink lg:w-full [&>a]:lg:!w-full">
                         <ConcorsoCard contest={contest} index={idx} />
                     </div>
                 ))}
 
-                {/* Right spacer for scroll end padding */}
-                <div className="min-w-[4px] lg:min-w-[16px] flex-shrink-0" aria-hidden="true" />
+                {/* Right spacer for scroll end padding — mobile only */}
+                <div className="min-w-[4px] flex-shrink-0 lg:hidden" aria-hidden="true" />
             </div>
         </div>
     );

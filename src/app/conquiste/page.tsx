@@ -791,7 +791,7 @@ export default function ConquistePage() {
                 </div>
             </div>
 
-            <div className="max-w-lg mx-auto px-4 pt-5 pb-32">
+            <div className="max-w-lg lg:max-w-4xl mx-auto px-4 lg:px-6 pt-5 pb-32">
                 {/* Record personali — horizontal cards */}
                 <div className="mb-7">
                     <h2 className="text-lg font-black text-[var(--foreground)] mb-3 tracking-tight">Record personali</h2>
@@ -817,7 +817,7 @@ export default function ConquistePage() {
                     <h2 className="text-lg font-black text-[var(--foreground)] mb-4 tracking-tight">Premi</h2>
 
                     {loading ? (
-                        <div className="grid grid-cols-3 gap-x-4 gap-y-5">
+                        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-5">
                             {[...Array(6)].map((_, i) => (
                                 <div key={i} className="flex flex-col items-center gap-2">
                                     <div className="w-[90px] h-[90px] rounded-full bg-[var(--card)] animate-pulse" />
@@ -826,7 +826,7 @@ export default function ConquistePage() {
                             ))}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-3 gap-x-4 gap-y-6">
+                        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
                             {sorted.map((badge, i) => (
                                 <motion.button
                                     key={badge.id}

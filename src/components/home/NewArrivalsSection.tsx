@@ -37,7 +37,7 @@ export default function NewArrivalsSection({ quizzes }: NewArrivalsSectionProps)
                     </h2>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 lg:hidden">
                     <button
                         onClick={() => scroll('left')}
                         className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-sm"
@@ -53,17 +53,17 @@ export default function NewArrivalsSection({ quizzes }: NewArrivalsSectionProps)
                 </div>
             </div>
 
-            {/* Carousel */}
+            {/* Carousel (mobile) / Grid (desktop) */}
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto snap-x scroll-pl-4 lg:scroll-pl-8 scrollbar-hide py-6 -my-6 pl-4 lg:pl-8 gap-3 lg:gap-4"
+                className="flex overflow-x-auto snap-x scroll-pl-4 scrollbar-hide py-6 -my-6 pl-4 gap-3 lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:gap-4 lg:overflow-visible lg:px-8 lg:py-0 lg:my-0"
             >
                 {quizzes.map((quiz, idx) => (
                     <NewArrivalCard key={quiz.id} quiz={quiz} index={idx} />
                 ))}
 
-                {/* Right spacer for scroll end padding */}
-                <div className="min-w-[4px] lg:min-w-[16px] flex-shrink-0" aria-hidden="true" />
+                {/* Right spacer — mobile only */}
+                <div className="min-w-[4px] flex-shrink-0 lg:hidden" aria-hidden="true" />
             </div>
         </div>
     );
@@ -89,8 +89,7 @@ function NewArrivalCard({ quiz, index }: { key?: string; quiz: NewArrivalQuiz; i
             className="snap-start flex-shrink-0 group"
         >
             <div
-                className="bg-[var(--card)] rounded-[24px] border border-[var(--card-border)] shadow-soft overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg relative"
-                style={{ width: '180px' }}
+                className="bg-[var(--card)] rounded-[24px] border border-[var(--card-border)] shadow-soft overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg relative w-[180px] lg:w-full"
             >
                 {/* NEW Badge */}
                 {isNew && (
