@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Sparkles, Trophy, User } from 'lucide-react';
-import { isStandaloneApp } from '@/lib/standalone';
 
 /**
- * Praktika-style bottom navigation with dark mode support.
+ * Floating pill bottom navigation with SwiftUI glass material.
+ * Uses CSS `.glass-ultra-thin` from index.css for Apple-style translucency.
+ * Keeps original Idoneo style: icons + labels, brand blue active.
  */
 
 const NAV_ITEMS = [
@@ -19,7 +20,6 @@ const ACTIVE_COLOR = '#0095FF';
 
 export default function BottomNavigation() {
     const location = useLocation();
-    const isStandalone = isStandaloneApp();
 
     // Dark mode detection
     const [isDark, setIsDark] = useState(() =>
@@ -34,8 +34,7 @@ export default function BottomNavigation() {
         return () => observer.disconnect();
     }, []);
 
-    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF'; // gray-500 in dark, gray-400 in light
-    const bgColor = isDark ? '#000000' : '#FFFFFF';       // true black in dark, white in light
+    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF';
 
     const activeIndex = NAV_ITEMS.findIndex(item =>
         item.path === '/'
@@ -43,24 +42,23 @@ export default function BottomNavigation() {
             : location.pathname.startsWith(item.path)
     );
 
+    // Active pill background — subtle brand tint
+    const activePillBg = isDark
+        ? 'rgba(0, 149, 255, 0.12)'
+        : 'rgba(0, 149, 255, 0.08)';
+
     return (
         <div
-            className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
-            style={{
-                paddingBottom: isStandalone
-                    ? 'env(safe-area-inset-bottom, 0px)'
-                    : '0px',
-            }}
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none"
+            style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))' }}
         >
             <nav
-                className="flex items-end justify-around"
+                className="pointer-events-auto glass-ultra-thin flex items-center justify-around"
                 style={{
-                    background: bgColor,
-                    paddingTop: '18px',
-                    paddingBottom: isStandalone
-                        ? 'max(12px, env(safe-area-inset-bottom, 12px))'
-                        : '12px',
-                    transition: 'background-color 0.3s ease',
+                    borderRadius: '26px',
+                    padding: '4px',
+                    width: 'min(94%, 420px)',
+                    transition: 'background 0.3s ease',
                 }}
             >
                 {NAV_ITEMS.map((item, index) => {
@@ -70,26 +68,30 @@ export default function BottomNavigation() {
                         <Link
                             key={item.path}
                             to={item.path}
-                            className="flex flex-col items-center justify-end flex-1"
+                            className="flex flex-col items-center justify-center flex-1"
                             style={{
-                                gap: '6px',
+                                gap: '2px',
+                                padding: '8px 0 6px',
+                                borderRadius: '22px',
+                                background: isActive ? activePillBg : 'transparent',
+                                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                                 WebkitTapHighlightColor: 'transparent',
                                 textDecoration: 'none',
                             }}
                         >
                             <item.Icon
-                                size={26}
+                                size={22}
                                 color={isActive ? ACTIVE_COLOR : inactiveColor}
-                                strokeWidth={2}
+                                strokeWidth={isActive ? 2.2 : 1.8}
                                 style={{ transition: 'color 0.15s ease' }}
                             />
                             <span
                                 style={{
-                                    fontSize: '12px',
+                                    fontSize: '10px',
                                     fontWeight: isActive ? 700 : 500,
                                     color: isActive ? ACTIVE_COLOR : inactiveColor,
                                     transition: 'color 0.15s ease',
-                                    lineHeight: 1.3,
+                                    lineHeight: 1,
                                     letterSpacing: '-0.01em',
                                 }}
                             >
@@ -102,4 +104,3 @@ export default function BottomNavigation() {
         </div>
     );
 }
-
