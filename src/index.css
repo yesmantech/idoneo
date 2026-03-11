@@ -19,31 +19,33 @@
 /* ===== SwiftUI-style Glass Materials ===== */
 /* Usage: add these classes alongside backdrop-blur for Apple's glass effect */
 
-/* .ultraThinMaterial — Apple Liquid Glass for floating overlays */
+/* .ultraThinMaterial — Apple Liquid Glass (nav2 reference) */
 .glass-ultra-thin {
   background: linear-gradient(180deg,
-      rgba(255, 255, 255, 0.82) 0%,
-      rgba(255, 255, 255, 0.65) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -0.5px 0 rgba(0, 0, 0, 0.05);
-  -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
-  backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.08) 100%);
+  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -0.5px 0 rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(50px) saturate(180%) brightness(1.1);
+  backdrop-filter: blur(50px) saturate(180%) brightness(1.1);
 }
 
 .dark .glass-ultra-thin {
   background: linear-gradient(180deg,
-      rgba(60, 60, 68, 0.55) 0%,
-      rgba(40, 40, 48, 0.45) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45),
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -0.5px 0 rgba(0, 0, 0, 0.2);
-  -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(0.9);
-  backdrop-filter: blur(50px) saturate(200%) brightness(0.9);
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.04) 100%);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -0.5px 0 rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(50px) saturate(180%) brightness(0.95);
+  backdrop-filter: blur(50px) saturate(180%) brightness(0.95);
 }
 
 /* .thinMaterial — for sticky headers/toolbars */
