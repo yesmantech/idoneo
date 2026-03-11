@@ -70,7 +70,7 @@ export default function PreparazionePage() {
                 </div>
             </div>
 
-            <main className="px-4 py-6 max-w-lg mx-auto space-y-6">
+            <main className="px-4 py-6 max-w-lg lg:max-w-3xl mx-auto space-y-6">
                 {/* Hero Section — Speedometer Gauge */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

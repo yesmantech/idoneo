@@ -75,51 +75,53 @@ export default function StreakCard() {
             </button>
 
             {/* ── Week Row ── */}
-            <div className="flex justify-between items-start gap-1.5 sm:gap-2">
-                {days.map((day, i) => {
-                    const isActive = day.isActive;
-                    const isToday = day.isToday;
+            <div className="max-w-sm">
+                <div className="flex justify-between items-start gap-1.5 sm:gap-2">
+                    {days.map((day, i) => {
+                        const isActive = day.isActive;
+                        const isToday = day.isToday;
 
-                    let bg = '';
-                    let border = '2.5px solid transparent';
-                    let labelClass = 'text-slate-300 dark:text-white/35';
+                        let bg = '';
+                        let border = '2.5px solid transparent';
+                        let labelClass = 'text-slate-300 dark:text-white/35';
 
-                    if (isActive && isToday) {
-                        bg = 'rgba(56, 189, 248, 0.45)';
-                        border = '3px solid #38BDF8';
-                        labelClass = 'text-sky-400';
-                    } else if (isActive) {
-                        bg = 'rgba(0, 177, 255, 0.2)';
-                        border = '2.5px solid #00B1FF';
-                        labelClass = 'text-[#00B1FF]';
-                    } else if (isToday) {
-                        bg = 'rgba(56, 189, 248, 0.35)';
-                        border = '3px solid #38BDF8';
-                        labelClass = 'text-sky-400';
-                    }
+                        if (isActive && isToday) {
+                            bg = 'rgba(56, 189, 248, 0.45)';
+                            border = '3px solid #38BDF8';
+                            labelClass = 'text-sky-400';
+                        } else if (isActive) {
+                            bg = 'rgba(0, 177, 255, 0.2)';
+                            border = '2.5px solid #00B1FF';
+                            labelClass = 'text-[#00B1FF]';
+                        } else if (isToday) {
+                            bg = 'rgba(56, 189, 248, 0.35)';
+                            border = '3px solid #38BDF8';
+                            labelClass = 'text-sky-400';
+                        }
 
-                    const shadow = isToday
-                        ? '0 0 12px rgba(56, 189, 248, 0.5)'
-                        : 'none';
+                        const shadow = isToday
+                            ? '0 0 12px rgba(56, 189, 248, 0.5)'
+                            : 'none';
 
-                    return (
-                        <div key={i} className="flex flex-col items-center flex-1 max-w-[48px]" style={{ gap: 10 }}>
-                            <div
-                                className="w-full aspect-square flex items-center justify-center bg-slate-100 dark:bg-[#2C2C2E]"
-                                style={{
-                                    borderRadius: 16,
-                                    ...(bg ? { backgroundColor: bg } : {}),
-                                    border,
-                                    boxShadow: shadow,
-                                    transition: 'all 0.3s ease',
-                                }}
-                            />
-                            <span className={`font-bold text-[13px] sm:text-[14px] tracking-wide ${labelClass}`}>
-                                {day.label}
-                            </span>
-                        </div>
-                    );
-                })}
+                        return (
+                            <div key={i} className="flex flex-col items-center flex-1 max-w-[48px]" style={{ gap: 10 }}>
+                                <div
+                                    className="w-full aspect-square flex items-center justify-center bg-slate-100 dark:bg-[#2C2C2E]"
+                                    style={{
+                                        borderRadius: 16,
+                                        ...(bg ? { backgroundColor: bg } : {}),
+                                        border,
+                                        boxShadow: shadow,
+                                        transition: 'all 0.3s ease',
+                                    }}
+                                />
+                                <span className={`font-bold text-[13px] sm:text-[14px] tracking-wide ${labelClass}`}>
+                                    {day.label}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* ── Stats Row ── */}

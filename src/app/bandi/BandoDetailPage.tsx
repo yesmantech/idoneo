@@ -76,7 +76,7 @@ export default function BandoDetailPage() {
 
             {/* Navbar (Glass) */}
             <div className="sticky top-0 z-40 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 data-[scrolled=true]:shadow-soft transition-all">
-                <div className="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
+                <div className="flex items-center justify-between px-4 h-14 max-w-lg lg:max-w-3xl mx-auto">
                     <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 dark:hover:text-white transition-all">
                         <ArrowLeft className="w-6 h-6" />
                     </button>
@@ -89,7 +89,7 @@ export default function BandoDetailPage() {
                 </div>
             </div>
 
-            <div className="px-4 py-6 space-y-6 max-w-lg mx-auto relative z-10">
+            <div className="px-4 py-6 space-y-6 max-w-lg lg:max-w-3xl mx-auto relative z-10">
 
                 {/* 1. HERO CARD (Tier S: Gradient Mesh + Squircle) */}
                 <motion.div
