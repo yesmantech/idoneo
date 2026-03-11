@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Sparkles, Trophy, User } from 'lucide-react';
-import { isStandaloneApp } from '@/lib/standalone';
 
 /**
- * Praktika-style bottom navigation with dark mode support.
+ * Floating pill-style bottom navigation (Skitla reference).
+ * - Semi-transparent dark glass pill floating above the safe area
+ * - Icon-only navigation (no labels)
+ * - Active item gets a glowing pill highlight
  */
 
 const NAV_ITEMS = [
@@ -15,27 +17,11 @@ const NAV_ITEMS = [
     { label: 'Profilo', path: '/profile', Icon: User },
 ];
 
-const ACTIVE_COLOR = '#0095FF';
+const ACTIVE_COLOR = '#FFFFFF';
+const INACTIVE_COLOR = 'rgba(255, 255, 255, 0.45)';
 
 export default function BottomNavigation() {
     const location = useLocation();
-    const isStandalone = isStandaloneApp();
-
-    // Dark mode detection
-    const [isDark, setIsDark] = useState(() =>
-        document.documentElement.classList.contains('dark')
-    );
-
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsDark(document.documentElement.classList.contains('dark'));
-        });
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        return () => observer.disconnect();
-    }, []);
-
-    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF'; // gray-500 in dark, gray-400 in light
-    const bgColor = isDark ? '#000000' : '#FFFFFF';       // true black in dark, white in light
 
     const activeIndex = NAV_ITEMS.findIndex(item =>
         item.path === '/'
@@ -44,16 +30,20 @@ export default function BottomNavigation() {
     );
 
     return (
-        <div
-            className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
-            style={{ background: bgColor }}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none"
+            style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))' }}
         >
             <nav
-                className="flex items-end justify-around"
+                className="pointer-events-auto flex items-center justify-around"
                 style={{
-                    paddingTop: '12px',
-                    paddingBottom: '8px',
-                    transition: 'background-color 0.3s ease',
+                    background: 'rgba(15, 15, 20, 0.85)',
+                    backdropFilter: 'blur(24px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                    borderRadius: '28px',
+                    padding: '10px 8px',
+                    width: 'min(92%, 420px)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(255, 255, 255, 0.05) inset',
                 }}
             >
                 {NAV_ITEMS.map((item, index) => {
@@ -63,38 +53,33 @@ export default function BottomNavigation() {
                         <Link
                             key={item.path}
                             to={item.path}
-                            className="flex flex-col items-center justify-end flex-1"
+                            className="flex items-center justify-center relative"
                             style={{
-                                gap: '4px',
+                                width: isActive ? '56px' : '48px',
+                                height: '44px',
+                                borderRadius: '20px',
+                                background: isActive
+                                    ? 'rgba(255, 255, 255, 0.12)'
+                                    : 'transparent',
+                                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                                 WebkitTapHighlightColor: 'transparent',
                                 textDecoration: 'none',
                             }}
+                            aria-label={item.label}
                         >
                             <item.Icon
-                                size={24}
-                                color={isActive ? ACTIVE_COLOR : inactiveColor}
-                                strokeWidth={2}
-                                style={{ transition: 'color 0.15s ease' }}
-                            />
-                            <span
+                                size={isActive ? 24 : 22}
+                                color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
+                                strokeWidth={isActive ? 2.2 : 1.8}
                                 style={{
-                                    fontSize: '11px',
-                                    fontWeight: isActive ? 700 : 500,
-                                    color: isActive ? ACTIVE_COLOR : inactiveColor,
-                                    transition: 'color 0.15s ease',
-                                    lineHeight: 1.2,
-                                    letterSpacing: '-0.01em',
+                                    transition: 'all 0.2s ease',
+                                    filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))' : 'none',
                                 }}
-                            >
-                                {item.label}
-                            </span>
+                            />
                         </Link>
                     );
                 })}
             </nav>
-            {/* Safe area fill — extends the background into the home indicator area */}
-            <div style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
         </div>
     );
 }
-
