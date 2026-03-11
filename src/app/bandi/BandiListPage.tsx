@@ -51,7 +51,47 @@ export default function BandiListPage() {
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
-    const bandi = infiniteData?.pages.flatMap(page => page.data) || [];
+    // Deduplicate across pages — by ID (pagination overlap) AND by normalized title (data dupes)
+    const bandi = (() => {
+        const all = infiniteData?.pages.flatMap(page => page.data) || [];
+
+        // Normalize title for fuzzy dedup: strip leading numbers, dashes, years, accents, filler words
+        const normalize = (t: string) => t.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+            .replace(/^\d+\s*/g, '')                          // strip leading numbers
+            .replace(/\s*[-–—]\s*/g, ' ')                     // all dash types → space
+            .replace(/\b20\d{2}\b/g, '')                      // strip year references
+            .replace(/\b(scuola|concorso|concorsi|pubblica|pubblico|selezione|bando|avviso|procedura|assunzione|reclutamento|di|e|per|del|della|dei|delle|il|la|le|lo|gli|un|una|al|alla|in)\b/g, '')
+            .replace(/\s+/g, ' ')                             // collapse whitespace
+            .trim();
+
+        // Pass 1: pick the best entry (earliest deadline) for each normalized title
+        // Use short_title || title — matching what BandoCard displays
+        const winners = new Map<string, typeof all[0]>();
+        for (const b of all) {
+            const key = normalize(b.short_title || b.title);
+            const existing = winners.get(key);
+            if (!existing || new Date(b.deadline) < new Date(existing.deadline)) {
+                // Merge seats — keep highest
+                if (existing?.seats_total && b.seats_total) {
+                    b.seats_total = Math.max(b.seats_total, existing.seats_total);
+                } else if (existing?.seats_total && !b.seats_total) {
+                    b.seats_total = existing.seats_total;
+                }
+                winners.set(key, b);
+            } else if (existing && b.seats_total && (!existing.seats_total || b.seats_total > existing.seats_total)) {
+                existing.seats_total = b.seats_total;
+            }
+        }
+
+        // Pass 2: keep only the winners, also skip exact ID dupes
+        const seenIds = new Set<string>();
+        return all.filter(b => {
+            if (seenIds.has(b.id)) return false;
+            seenIds.add(b.id);
+            return winners.get(normalize(b.short_title || b.title)) === b;
+        });
+    })();
     const totalCount = infiniteData?.pages[0]?.count || 0;
 
     // 2. Closing Soon (Only on first page, no search)
