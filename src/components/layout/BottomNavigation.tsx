@@ -3,9 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Sparkles, Trophy, User } from 'lucide-react';
 
 /**
- * Floating pill bottom navigation.
- * Combines original Idoneo style (icons + labels, brand blue)
- * with Skitla-style floating pill container.
+ * Floating pill bottom navigation with SwiftUI glass material.
+ * Uses CSS `.glass-ultra-thin` from index.css for Apple-style translucency.
+ * Keeps original Idoneo style: icons + labels, brand blue active.
  */
 
 const NAV_ITEMS = [
@@ -42,18 +42,9 @@ export default function BottomNavigation() {
             : location.pathname.startsWith(item.path)
     );
 
-    // Theme-aware floating pill
-    const pillBg = isDark
-        ? 'rgba(10, 10, 14, 0.92)'
-        : 'rgba(255, 255, 255, 0.95)';
-    const pillBorder = isDark
-        ? '1px solid rgba(255, 255, 255, 0.08)'
-        : '1px solid rgba(0, 0, 0, 0.06)';
-    const pillShadow = isDark
-        ? '0 8px 40px rgba(0, 0, 0, 0.55), inset 0 0.5px 0 rgba(255, 255, 255, 0.05)'
-        : '0 4px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04)';
+    // Active pill background — subtle brand tint
     const activePillBg = isDark
-        ? 'rgba(0, 149, 255, 0.15)'
+        ? 'rgba(0, 149, 255, 0.12)'
         : 'rgba(0, 149, 255, 0.08)';
 
     return (
@@ -62,17 +53,12 @@ export default function BottomNavigation() {
             style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))' }}
         >
             <nav
-                className="pointer-events-auto flex items-center justify-around"
+                className="pointer-events-auto glass-ultra-thin flex items-center justify-around"
                 style={{
-                    background: pillBg,
-                    backdropFilter: 'blur(28px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(28px) saturate(180%)',
-                    borderRadius: '28px',
-                    padding: '6px 4px',
+                    borderRadius: '26px',
+                    padding: '4px',
                     width: 'min(94%, 420px)',
-                    border: pillBorder,
-                    boxShadow: pillShadow,
-                    transition: 'background 0.3s ease, box-shadow 0.3s ease',
+                    transition: 'background 0.3s ease',
                 }}
             >
                 {NAV_ITEMS.map((item, index) => {
@@ -84,7 +70,7 @@ export default function BottomNavigation() {
                             to={item.path}
                             className="flex flex-col items-center justify-center flex-1"
                             style={{
-                                gap: '3px',
+                                gap: '2px',
                                 padding: '8px 0 6px',
                                 borderRadius: '22px',
                                 background: isActive ? activePillBg : 'transparent',
@@ -96,7 +82,7 @@ export default function BottomNavigation() {
                             <item.Icon
                                 size={22}
                                 color={isActive ? ACTIVE_COLOR : inactiveColor}
-                                strokeWidth={2}
+                                strokeWidth={isActive ? 2.2 : 1.8}
                                 style={{ transition: 'color 0.15s ease' }}
                             />
                             <span

@@ -781,7 +781,7 @@ export default function ConquistePage() {
     return (
         <div className="min-h-screen bg-[var(--background)]">
             {/* Header */}
-            <div className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
+            <div className="glass-thin sticky top-0 z-50">
                 <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
                     <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full hover:bg-[var(--card)] active:scale-95 flex items-center justify-center transition-all">
                         <ArrowLeft className="w-5 h-5 text-[var(--foreground)]" />

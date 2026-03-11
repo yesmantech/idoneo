@@ -197,7 +197,7 @@ export default function ProfileSettingsPage() {
         <div className="min-h-screen bg-[var(--background)] pb-28 transition-colors duration-300">
 
             {/* ─── Header ─── */}
-            <header className="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md pt-safe">
+            <header className="glass-thin sticky top-0 z-20 pt-safe">
                 <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
                     <button
                         onClick={() => navigate('/profile')}

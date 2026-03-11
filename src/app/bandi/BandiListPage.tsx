@@ -182,8 +182,8 @@ export default function BandiListPage() {
                 description="Scopri tutti i bandi e concorsi pubblici attivi. Cerca per categoria, ente e scadenza. Preparati con Idoneo."
                 url="/bandi"
             />
-            {/* Tier S Header */}
-            <div className="bg-[var(--background)] sticky top-0 z-30 border-b border-[var(--card-border)] pt-safe">
+            {/* Tier S Glass Header */}
+            <div className="glass-thin sticky top-0 z-30 pt-safe">
                 <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
                     <div>
                         <h1 className="text-[22px] font-black text-[var(--foreground)] tracking-tight">Bandi</h1>

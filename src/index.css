@@ -16,6 +16,57 @@
   --card-border: rgba(255, 255, 255, 0.08);
 }
 
+/* ===== SwiftUI-style Glass Materials ===== */
+/* Usage: add these classes alongside backdrop-blur for Apple's glass effect */
+
+/* .ultraThinMaterial — most transparent, for floating overlays */
+.glass-ultra-thin {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(40px) saturate(190%);
+  backdrop-filter: blur(40px) saturate(190%);
+}
+
+.dark .glass-ultra-thin {
+  background: rgba(30, 30, 35, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* .thinMaterial — for sticky headers/toolbars */
+.glass-thin {
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(180%);
+}
+
+.dark .glass-thin {
+  background: rgba(18, 18, 22, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* .thickMaterial — for cards/modals */
+.glass-thick {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+}
+
+.dark .glass-thick {
+  background: rgba(25, 25, 30, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+
 html,
 body {
   height: 100dvh;
