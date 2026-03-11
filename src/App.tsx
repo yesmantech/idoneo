@@ -133,7 +133,13 @@ function fireDailyCheckin() {
 function ScrollToTop() {
     const { pathname } = useLocation();
     useEffect(() => {
+        // Reset all possible scroll containers
         window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        // Also scroll the main content area if it has its own scroll
+        const main = document.querySelector('main');
+        if (main) main.scrollTop = 0;
     }, [pathname]);
     return null;
 }
