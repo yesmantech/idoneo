@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { LeaderboardEntry } from '@/lib/leaderboardService';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Crown, Medal } from 'lucide-react';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface LeaderboardViewProps {
     data: LeaderboardEntry[];
@@ -88,15 +89,7 @@ export default function LeaderboardViewLegacy({ data, loading, theme, metricLabe
     );
 }
 
-// --- Helpers ---
 
-/** Replace ugly avataaars style with clean initials */
-const getAvatarUrl = (avatarUrl: string | undefined, nickname: string) => {
-    if (avatarUrl && avatarUrl.includes('avataaars')) {
-        return avatarUrl.replace('avataaars', 'initials');
-    }
-    return avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${nickname}`;
-};
 
 // --- Sub Components ---
 
@@ -114,8 +107,8 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                 {second && (
                     <>
                         <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft overflow-hidden bg-white`}>
-                                <img src={getAvatarUrl(second.user.avatarUrl, second.user.nickname)} alt={second.user.nickname} className="w-full h-full object-cover" />
+                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft flex items-center justify-center bg-white`}>
+                                <UserAvatar src={second.user.avatarUrl} name={second.user.nickname} size="xl" />
                             </div>
                             <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-white dark:border-slate-800">2</div>
                         </div>
@@ -135,8 +128,8 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                             <div className="absolute -top-9 left-1/2 -translate-x-1/2 animate-[float_3s_ease-in-out_infinite]">
                                 <Crown className="w-8 h-8 text-amber-500 fill-amber-400/40 drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]" strokeWidth={2} />
                             </div>
-                            <div className={`w-24 h-24 rounded-squircle border-4 ${isGold ? 'border-brand-orange' : 'border-brand-cyan'} overflow-hidden bg-white shadow-card`}>
-                                <img src={getAvatarUrl(first.user.avatarUrl, first.user.nickname)} alt={first.user.nickname} className="w-full h-full object-cover" />
+                            <div className={`w-24 h-24 rounded-squircle border-4 ${isGold ? 'border-brand-orange' : 'border-brand-cyan'} flex items-center justify-center bg-white shadow-card`}>
+                                <UserAvatar src={first.user.avatarUrl} name={first.user.nickname} size="2xl" />
                             </div>
                             <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 ${rankBg} text-white text-[13px] font-black w-7 h-7 flex items-center justify-center rounded-full shadow-lg border-2 border-white`}>1</div>
                         </div>
@@ -153,8 +146,8 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                 {third && (
                     <>
                         <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft overflow-hidden bg-white`}>
-                                <img src={getAvatarUrl(third.user.avatarUrl, third.user.nickname)} alt={third.user.nickname} className="w-full h-full object-cover" />
+                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft flex items-center justify-center bg-white`}>
+                                <UserAvatar src={third.user.avatarUrl} name={third.user.nickname} size="xl" />
                             </div>
                             <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-white dark:border-slate-800">3</div>
                         </div>
@@ -184,9 +177,7 @@ const RankingRow = ({ entry, theme, metricLabel }: { key?: React.Key; entry: Lea
                 {entry.rank}
             </span>
 
-            <div className="w-10 h-10 rounded-squircle bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0 shadow-sm border border-transparent">
-                <img src={getAvatarUrl(entry.user.avatarUrl, entry.user.nickname)} alt="Avatar" className="w-full h-full object-cover" />
-            </div>
+            <UserAvatar src={entry.user.avatarUrl} name={entry.user.nickname} size="md" className="rounded-squircle flex-shrink-0 shadow-sm" />
 
             <div className="flex-1 min-w-0">
                 <div className={`font-bold text-sm truncate text-text-primary flex items-center gap-2`}>
