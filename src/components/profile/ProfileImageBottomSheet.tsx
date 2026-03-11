@@ -70,10 +70,10 @@ export default function ProfileImageBottomSheet({
                                 borderRadius: 24,
                             }}
                         >
-                            {/* Header: "Select Icon" + Close button */}
+                            {/* Header */}
                             <div className="flex items-center justify-between px-5 pt-5 pb-4">
                                 <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>
-                                    Select Icon
+                                    Scegli Immagine
                                 </h2>
                                 <button
                                     onClick={() => { hapticLight(); onClose(); }}
@@ -99,21 +99,21 @@ export default function ProfileImageBottomSheet({
                                 <ActionRow
                                     icon={<Camera style={{ width: 20, height: 20, color: '#fff' }} />}
                                     iconBg="#3A3A3C"
-                                    label="Take Photo"
+                                    label="Scatta Foto"
                                     onClick={() => { hapticLight(); onTakePhoto(); }}
                                 />
 
                                 <ActionRow
                                     icon={<ImageIcon style={{ width: 20, height: 20, color: '#fff' }} />}
                                     iconBg="#3A3A3C"
-                                    label="Choose Image"
+                                    label="Scegli dalla Galleria"
                                     onClick={() => { hapticLight(); onChooseImage(); }}
                                 />
 
                                 <ActionRow
                                     icon={<span style={{ fontSize: 22, lineHeight: 1 }}>😀</span>}
                                     iconBg="#FFB800"
-                                    label="Use Emoji"
+                                    label="Usa Emoji"
                                     isHighlighted
                                     onClick={() => { hapticLight(); onUseEmoji(); }}
                                 />
@@ -121,14 +121,14 @@ export default function ProfileImageBottomSheet({
                                 <ActionRow
                                     icon={<Star style={{ width: 20, height: 20, color: '#fff' }} />}
                                     iconBg="#3A3A3C"
-                                    label="Use Icon"
+                                    label="Usa Icona"
                                     onClick={() => { hapticLight(); onUseIcon(); }}
                                 />
 
                                 <ActionRow
                                     icon={<RotateCcw style={{ width: 20, height: 20, color: '#fff' }} />}
                                     iconBg="#3A3A3C"
-                                    label="Restore Default"
+                                    label="Ripristina Default"
                                     onClick={() => { hapticLight(); onRestoreDefault(); }}
                                 />
 
