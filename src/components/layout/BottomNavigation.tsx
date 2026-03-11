@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Sparkles, Trophy, User } from 'lucide-react';
 
 /**
- * Floating pill bottom navigation with SwiftUI glass material.
- * Uses CSS `.glass-ultra-thin` from index.css for Apple-style translucency.
- * Keeps original Idoneo style: icons + labels, brand blue active.
+ * Floating pill bottom navigation — nav2 Skitla reference.
+ * Dark glassmorphism pill, icon-only, sliding highlight pill,
+ * contextual blue glow on active icon.
  */
 
 const NAV_ITEMS = [
@@ -16,25 +16,12 @@ const NAV_ITEMS = [
     { label: 'Profilo', path: '/profile', Icon: User },
 ];
 
-const ACTIVE_COLOR = '#0095FF';
+const BRAND_GLOW = '#00B1FF';
 
 export default function BottomNavigation() {
     const location = useLocation();
-
-    // Dark mode detection
-    const [isDark, setIsDark] = useState(() =>
-        document.documentElement.classList.contains('dark')
-    );
-
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setIsDark(document.documentElement.classList.contains('dark'));
-        });
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        return () => observer.disconnect();
-    }, []);
-
-    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF';
+    const navRef = useRef<HTMLElement>(null);
+    const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
     const activeIndex = NAV_ITEMS.findIndex(item =>
         item.path === '/'
@@ -42,10 +29,21 @@ export default function BottomNavigation() {
             : location.pathname.startsWith(item.path)
     );
 
-    // Active pill background — subtle brand tint
-    const activePillBg = isDark
-        ? 'rgba(0, 149, 255, 0.12)'
-        : 'rgba(0, 149, 255, 0.08)';
+    // Track the sliding pill position
+    const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
+
+    useEffect(() => {
+        const activeEl = itemRefs.current[activeIndex];
+        const navEl = navRef.current;
+        if (activeEl && navEl) {
+            const navRect = navEl.getBoundingClientRect();
+            const itemRect = activeEl.getBoundingClientRect();
+            setPillStyle({
+                left: itemRect.left - navRect.left,
+                width: itemRect.width,
+            });
+        }
+    }, [activeIndex]);
 
     return (
         <div
@@ -53,14 +51,52 @@ export default function BottomNavigation() {
             style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))' }}
         >
             <nav
-                className="pointer-events-auto glass-ultra-thin flex items-center justify-around"
+                ref={navRef}
+                className="pointer-events-auto relative flex items-center"
                 style={{
-                    borderRadius: '26px',
-                    padding: '4px',
-                    width: 'min(94%, 420px)',
-                    transition: 'background 0.3s ease',
+                    background: 'rgba(10, 10, 14, 0.88)',
+                    backdropFilter: 'blur(40px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                    borderRadius: '28px',
+                    padding: '6px',
+                    width: 'min(88%, 380px)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    boxShadow: '0 8px 40px rgba(0, 0, 0, 0.5), inset 0 0.5px 0 rgba(255, 255, 255, 0.04)',
                 }}
             >
+                {/* Sliding highlight pill */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '6px',
+                        left: `${pillStyle.left}px`,
+                        width: `${pillStyle.width}px`,
+                        height: 'calc(100% - 12px)',
+                        borderRadius: '22px',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        transition: 'left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                        pointerEvents: 'none',
+                    }}
+                />
+
+                {/* Active glow — behind the sliding pill */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: `${pillStyle.left + pillStyle.width / 2}px`,
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: BRAND_GLOW,
+                        opacity: 0.12,
+                        filter: 'blur(20px)',
+                        transform: 'translate(-50%, -50%)',
+                        transition: 'left 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                        pointerEvents: 'none',
+                    }}
+                />
+
                 {NAV_ITEMS.map((item, index) => {
                     const isActive = index === activeIndex;
 
@@ -68,35 +104,27 @@ export default function BottomNavigation() {
                         <Link
                             key={item.path}
                             to={item.path}
-                            className="flex flex-col items-center justify-center flex-1"
+                            ref={(el) => { itemRefs.current[index] = el; }}
+                            className="relative flex items-center justify-center flex-1 z-10"
                             style={{
-                                gap: '2px',
-                                padding: '8px 0 6px',
+                                height: '44px',
                                 borderRadius: '22px',
-                                background: isActive ? activePillBg : 'transparent',
-                                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                                 WebkitTapHighlightColor: 'transparent',
                                 textDecoration: 'none',
                             }}
+                            aria-label={item.label}
                         >
                             <item.Icon
                                 size={22}
-                                color={isActive ? ACTIVE_COLOR : inactiveColor}
-                                strokeWidth={isActive ? 2.2 : 1.8}
-                                style={{ transition: 'color 0.15s ease' }}
-                            />
-                            <span
+                                color={isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.35)'}
+                                strokeWidth={isActive ? 2.2 : 1.6}
                                 style={{
-                                    fontSize: '10px',
-                                    fontWeight: isActive ? 700 : 500,
-                                    color: isActive ? ACTIVE_COLOR : inactiveColor,
-                                    transition: 'color 0.15s ease',
-                                    lineHeight: 1,
-                                    letterSpacing: '-0.01em',
+                                    transition: 'color 0.2s ease, stroke-width 0.2s ease',
+                                    filter: isActive
+                                        ? `drop-shadow(0 0 8px ${BRAND_GLOW}50)`
+                                        : 'none',
                                 }}
-                            >
-                                {item.label}
-                            </span>
+                            />
                         </Link>
                     );
                 })}
