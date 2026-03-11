@@ -14,7 +14,6 @@ import { supabase } from '@/lib/supabaseClient';
 import { Pencil, Loader2, Star, Cloud, Zap, Heart, Shield, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { UserAvatar } from '@/components/ui/UserAvatar';
 import { hapticLight, hapticSuccess } from '@/lib/haptics';
 import ProfileImageBottomSheet from '@/components/profile/ProfileImageBottomSheet';
 import EmojiPickerSheet from '@/components/profile/EmojiPickerSheet';
@@ -215,10 +214,30 @@ export default function ProfileSetupPage() {
                     {/* Outer glow ring */}
                     <div className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-[#00B1FF]/20 to-[#0066FF]/20 blur-md group-hover:from-[#00B1FF]/30 group-hover:to-[#0066FF]/30 transition-all duration-300" />
 
-                    {/* Avatar circle — using UserAvatar for emoji/icon/image support */}
+                    {/* Avatar circle — renders emoji/icon/image/mascot at full size */}
                     <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-white/[0.04] border-[3px] border-white/80 dark:border-white/[0.1] shadow-xl shadow-black/5 transition-all duration-300 group-hover:scale-[1.03] group-active:scale-[0.97]">
-                        {avatarUrl ? (
-                            <UserAvatar avatarUrl={avatarUrl} nickname={nickname || '?'} size={112} />
+                        {avatarUrl?.startsWith('emoji:') ? (() => {
+                            const parts = avatarUrl.split(':');
+                            const emoji = parts[1] || '😀';
+                            const bgColor = parts.slice(2).join(':') || '#007AFF';
+                            return (
+                                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: bgColor }}>
+                                    <span className="text-5xl" style={{ lineHeight: 1 }}>{emoji}</span>
+                                </div>
+                            );
+                        })() : avatarUrl?.startsWith('icon:') ? (() => {
+                            const parts = avatarUrl.split(':');
+                            const iconName = parts[1] || 'Star';
+                            const bgColor = parts.slice(2).join(':') || '#FF9500';
+                            const LucideIcons = require('lucide-react');
+                            const IconComp = LucideIcons[iconName];
+                            return (
+                                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: bgColor }}>
+                                    {IconComp ? <IconComp className="w-14 h-14 text-white" style={{ fill: 'white', strokeWidth: 0 }} /> : <span className="text-5xl">⭐</span>}
+                                </div>
+                            );
+                        })() : avatarUrl ? (
+                            <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full bg-gradient-to-br from-[#00B1FF]/10 to-[#0066FF]/10 flex items-center justify-center">
                                 <span className="text-4xl">🎯</span>
