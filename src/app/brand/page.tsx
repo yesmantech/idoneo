@@ -303,57 +303,19 @@ export default function BrandGuidelinesPage() {
                     </div>
                 </div>
 
-                {/* ──── LOGO ──── */}
-                <SectionTitle icon={Sparkles} title="Logo" />
+                {/* ──── LOGO RULES ──── */}
+                <SectionTitle icon={Sparkles} title="Logo Rules" />
                 <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] overflow-hidden">
                     <div className="grid grid-cols-2 gap-0">
                         {/* Logo on light */}
-                        <div className="flex items-center justify-center py-10" style={{ backgroundColor: '#F5F5F7' }}>
-                            <img src="/icon-512x512.png" alt="Idoneo Logo" className="w-24 h-24 rounded-[22%]" />
+                        <div className="flex items-center justify-center py-8" style={{ backgroundColor: '#F5F5F7' }}>
+                            <span style={{ fontSize: 24, fontWeight: 900, color: '#00B1FF', letterSpacing: -0.5 }}>Idoneo</span>
                         </div>
                         {/* Logo on dark */}
-                        <div className="flex items-center justify-center py-10" style={{ backgroundColor: '#000' }}>
-                            <img src="/icon-512x512.png" alt="Idoneo Logo" className="w-24 h-24 rounded-[22%]" />
+                        <div className="flex items-center justify-center py-8" style={{ backgroundColor: '#000' }}>
+                            <span style={{ fontSize: 24, fontWeight: 900, color: '#00B1FF', letterSpacing: -0.5 }}>Idoneo</span>
                         </div>
                     </div>
-
-                    {/* Download Buttons */}
-                    <div className="p-4 border-t border-[var(--card-border)] flex flex-col sm:flex-row gap-2">
-                        <button
-                            onClick={() => {
-                                hapticLight();
-                                const a = document.createElement('a');
-                                a.href = '/icon.svg';
-                                a.download = 'Idoneo_Logo.svg';
-                                a.click();
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-[var(--card-border)] hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.97] transition-all"
-                        >
-                            <Download style={{ width: 16, height: 16, color: '#00B1FF' }} />
-                            <span style={{ fontSize: 13, fontWeight: 700 }} className="text-[var(--foreground)]">Download SVG</span>
-                        </button>
-                        <button
-                            onClick={() => {
-                                hapticLight();
-                                fetch('/icon-512x512.png')
-                                    .then(r => r.blob())
-                                    .then(blob => {
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = 'Idoneo_Logo_512.png';
-                                        a.click();
-                                        URL.revokeObjectURL(url);
-                                    });
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-[var(--card-border)] hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.97] transition-all"
-                        >
-                            <Download style={{ width: 16, height: 16, color: '#00B1FF' }} />
-                            <span style={{ fontSize: 13, fontWeight: 700 }} className="text-[var(--foreground)]">Download PNG (512px)</span>
-                        </button>
-                    </div>
-
-                    {/* Rules */}
                     <div className="p-4 border-t border-[var(--card-border)]">
                         <div className="space-y-2">
                             {[
