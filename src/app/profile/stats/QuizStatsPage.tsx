@@ -35,17 +35,23 @@ import GoalsBlock from "@/components/stats/GoalsBlock";
 import SubjectDetailSheet from "@/components/stats/SubjectDetailSheet";
 import GoalCreationModal from "@/components/stats/GoalCreationModal";
 
+const PAGE_SIZE = 10;
+
 export default function QuizStatsPage() {
     const { quizId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [allAttempts, setAllAttempts] = useState<AttemptWithDetails[]>([]);
+    const [totalCount, setTotalCount] = useState(0);
 
     // React Query for Data Fetching
     const { data: fetchedData, isLoading: loading } = useQuery({
         queryKey: ['quiz-stats', quizId, user?.id],
         queryFn: async () => {
             if (!user || !quizId) return null;
-            const [quizRes, attemptsRes, goalRes, leaderboardRes, rulesRes] = await Promise.all([
+            const [quizRes, attemptsRes, countRes, goalRes, leaderboardRes, rulesRes] = await Promise.all([
                 supabase
                     .from('quizzes')
                     .select('title, total_questions, points_correct, rule_id, simulation_rule:simulation_rules(total_questions, points_correct)')
@@ -56,7 +62,13 @@ export default function QuizStatsPage() {
                     .select('id, score, correct, wrong, blank, total_questions, created_at, answers, mode, quiz:quizzes(title)')
                     .eq("user_id", user.id)
                     .eq("quiz_id", quizId)
-                    .order("created_at", { ascending: false }),
+                    .order("created_at", { ascending: false })
+                    .limit(PAGE_SIZE),
+                supabase
+                    .from("quiz_attempts")
+                    .select('id', { count: 'exact', head: true })
+                    .eq("user_id", user.id)
+                    .eq("quiz_id", quizId),
                 supabase
                     .from("test_goals")
                     .select("*")
@@ -79,6 +91,7 @@ export default function QuizStatsPage() {
             return {
                 quiz: quizRes.data,
                 attempts: attemptsRes.data,
+                totalCount: countRes.count ?? 0,
                 goal: goalRes.data,
                 leaderboard: leaderboardRes.data,
                 rules: rulesRes.data,
@@ -132,7 +145,9 @@ export default function QuizStatsPage() {
     useEffect(() => {
         if (!fetchedData || !quizId) return;
 
-        const { quiz: quizData, attempts: data, goal: goalData, leaderboard: leaderboardData, rules, error } = fetchedData;
+        const { quiz: quizData, attempts: data, totalCount: tc, goal: goalData, leaderboard: leaderboardData, rules, error } = fetchedData;
+        if (tc) setTotalCount(tc);
+        if (data) setAllAttempts(data as AttemptWithDetails[]);
 
         let maxCalc = 0;
 
@@ -293,6 +308,28 @@ export default function QuizStatsPage() {
         }
     };
 
+    // Load more attempts (next page)
+    const loadMore = async () => {
+        if (!user || !quizId || loadingMore) return;
+        setLoadingMore(true);
+        const nextCount = visibleCount + PAGE_SIZE;
+        const { data } = await supabase
+            .from("quiz_attempts")
+            .select('id, score, correct, wrong, blank, total_questions, created_at, answers, mode, quiz:quizzes(title)')
+            .eq("user_id", user.id)
+            .eq("quiz_id", quizId)
+            .order("created_at", { ascending: false })
+            .limit(nextCount);
+        if (data) {
+            setAllAttempts(data as AttemptWithDetails[]);
+            setVisibleCount(nextCount);
+            // Reprocess stats with more data
+            const maxPossible = stats.maxPossibleScore || 100;
+            processData(data as AttemptWithDetails[], maxPossible, fetchedData?.leaderboard);
+        }
+        setLoadingMore(false);
+    };
+
     if (loading) return (
         <TierSLoader message="Analisi performance in corso..." />
     );
@@ -424,9 +461,22 @@ export default function QuizStatsPage() {
                         <div className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-slate-100 dark:border-transparent">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cronologia Tentativi</h3>
-                                <span className="text-[10px] font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-400 dark:text-white/30 px-3 py-1.5 rounded-full uppercase tracking-widest">Ultimi 50</span>
+                                <span className="text-[10px] font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-400 dark:text-white/30 px-3 py-1.5 rounded-full uppercase tracking-widest">
+                                    {allAttempts.length} di {totalCount}
+                                </span>
                             </div>
-                            <AttemptsHistoryTable attempts={attempts as any} quizId={quizId} />
+                            <AttemptsHistoryTable attempts={allAttempts as any} quizId={quizId} />
+
+                            {/* Load More Button */}
+                            {allAttempts.length < totalCount && (
+                                <button
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                    className="w-full mt-4 py-3 rounded-xl border-2 border-dashed border-slate-200 dark:border-white/10 text-sm font-bold text-slate-400 dark:text-white/40 hover:bg-slate-50 dark:hover:bg-white/[0.03] hover:text-slate-600 dark:hover:text-white/60 transition-all active:scale-[0.98] disabled:opacity-50"
+                                >
+                                    {loadingMore ? 'Caricamento...' : `Carica altri ${PAGE_SIZE}`}
+                                </button>
+                            )}
                         </div>
 
                     </div>
