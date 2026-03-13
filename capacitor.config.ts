@@ -61,8 +61,8 @@ const config: CapacitorConfig = {
       splashImmersive: true,
     },
     StatusBar: {
-      style: 'LIGHT',
-      backgroundColor: '#0F172A',
+      style: 'DARK',
+      backgroundColor: '#FFFFFF',
       overlaysWebView: true,
     },
     Keyboard: {
@@ -82,7 +82,7 @@ const config: CapacitorConfig = {
     // Custom URL scheme for deep linking
     scheme: 'idoneo',
     // DEFINITIVE FIX: Match background color to dark mode
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
   },
 };
 
