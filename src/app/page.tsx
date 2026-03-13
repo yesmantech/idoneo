@@ -106,7 +106,7 @@ export default function HomePage() {
     : [];
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 pt-safe transition-colors duration-300">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 transition-colors duration-300">
       <SEOHead
         title="Il miglior simulatore per i tuoi Concorsi Pubblici"
         description="Preparati al meglio per i concorsi di Polizia, Carabinieri, Forze Armate e molto altro con quiz ufficiali e statistiche avanzate."
