@@ -138,7 +138,7 @@ export default function EmojiPickerSheet({
                                 backgroundColor: '#1C1C1E',
                                 borderRadius: 24,
                                 maxHeight: 'calc(100vh - 140px)',
-                                overflow: 'clip',
+                                overflow: 'hidden',
                             }}
                         >
                             <AnimatePresence initial={false} mode="popLayout">
@@ -207,7 +207,6 @@ export default function EmojiPickerSheet({
                                             className="overflow-y-auto px-3 pb-4"
                                             style={{
                                                 maxHeight: '50vh',
-                                                paddingTop: 6,
                                                 WebkitOverflowScrolling: 'touch',
                                             }}
                                         >
@@ -216,6 +215,7 @@ export default function EmojiPickerSheet({
                                                     display: 'grid',
                                                     gridTemplateColumns: 'repeat(8, 1fr)',
                                                     gap: 4,
+                                                    paddingTop: 10,
                                                 }}
                                             >
                                                 {filteredEmojis.map((emoji, i) => (
@@ -238,6 +238,7 @@ export default function EmojiPickerSheet({
                                                             background: 'transparent',
                                                             cursor: 'pointer',
                                                             padding: 2,
+                                                            overflow: 'visible',
                                                             touchAction: 'manipulation',
                                                             WebkitTapHighlightColor: 'transparent',
                                                         }}
