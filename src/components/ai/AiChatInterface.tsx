@@ -15,7 +15,7 @@ import { supabase } from '@/lib/supabaseClient';
 // On native Capacitor (iOS/Android), relative URLs resolve to localhost which has no server.
 // Use the absolute Vercel deployment URL instead.
 const AI_CHAT_API = Capacitor.isNativePlatform() ? 'https://idoneo.ai/api/chat' : '/api/chat';
-console.log('[AI Coach] Platform:', Capacitor.getPlatform(), 'isNative:', Capacitor.isNativePlatform(), 'API:', AI_CHAT_API);
+console.log('[AI Coach] Platform:', Capacitor.getPlatform(), 'isNative:', Capacitor.isNativePlatform(), 'origin:', window.location.origin, 'API:', AI_CHAT_API);
 
 // iOS-style Share icon (square open at top + upward arrow)
 const IosShareIcon = ({ className }: { className?: string }) => (
