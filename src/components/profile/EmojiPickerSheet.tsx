@@ -246,8 +246,8 @@ export default function EmojiPickerSheet({
                                                                 fontSize: 28,
                                                                 lineHeight: '44px',
                                                                 display: 'block',
-                                                                width: 44,
-                                                                height: 44,
+                                                                width: '100%',
+                                                                height: '100%',
                                                                 textAlign: 'center',
                                                             }}
                                                         >
