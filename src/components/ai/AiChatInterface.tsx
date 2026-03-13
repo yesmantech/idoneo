@@ -4,12 +4,17 @@ import { useChat } from '@ai-sdk/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DefaultChatTransport } from 'ai';
 import ReactMarkdown from 'react-markdown';
+import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUp, Bot, User, Sparkles, RotateCcw, ArrowLeft, Mic, Copy, Check, ThumbsUp, ThumbsDown, MoreVertical, Trash2, X, Plus, MessageSquare, Mail, Link2, BookOpen, AlertCircle, ChevronDown } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/Button';
 import { supabase } from '@/lib/supabaseClient';
+
+// On native Capacitor (iOS/Android), relative URLs resolve to localhost which has no server.
+// Use the absolute Vercel deployment URL instead.
+const AI_CHAT_API = Capacitor.isNativePlatform() ? 'https://idoneo.ai/api/chat' : '/api/chat';
 
 // iOS-style Share icon (square open at top + upward arrow)
 const IosShareIcon = ({ className }: { className?: string }) => (
@@ -575,7 +580,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
 
     const { messages, sendMessage, status, error, setMessages } = useChat({
         transport: new DefaultChatTransport({
-            api: '/api/chat',
+            api: AI_CHAT_API,
             body: { userId: user?.id },
         }),
         messages: initialMessages,
