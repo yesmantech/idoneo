@@ -20,23 +20,6 @@ const openai = createOpenAI({
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // CORS — allow Capacitor iOS origins (may be https://localhost, idoneo://localhost, or no origin)
-    const origin = req.headers.origin || '';
-    const allowedOrigins = ['https://localhost', 'capacitor://localhost', 'idoneo://localhost', 'https://idoneo.ai'];
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    } else if (!origin) {
-        // Native apps sometimes send no Origin header — allow with wildcard
-        res.setHeader('Access-Control-Allow-Origin', '*');
-    }
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    // Preflight
-    if (req.method === 'OPTIONS') {
-        return res.status(204).end();
-    }
-
     try {
         const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
         const { messages, userId } = body || {};
