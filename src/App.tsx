@@ -108,9 +108,10 @@ import { LazyMotion, domAnimation } from 'framer-motion';
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 1000 * 60 * 5, // 5 min — show cached, refetch in bg
-            gcTime: 1000 * 60 * 60 * 24, // 24h — keep in localStorage
+            staleTime: 1000 * 60 * 30, // 30 min — show cache instantly, no bg refetch
+            gcTime: 1000 * 60 * 60 * 24, // 24h — persist in localStorage
             retry: 1,
+            refetchOnWindowFocus: false, // Don't refetch when switching apps
         },
     },
 });

@@ -1,39 +1,42 @@
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import { useSidebar } from '@/context/SidebarContext';
 import AdminSidebar from '../admin/AdminSidebar';
-import InstallPrompt from '../pwa/InstallPrompt';
 import BottomNavigation from './BottomNavigation';
 import { isStandaloneApp } from '@/lib/standalone';
+import { useAuth } from '@/context/AuthContext';
 
 interface MainLayoutProps {
     children: React.ReactNode;
 }
 
-import { useAuth } from '@/context/AuthContext';
-import { Navigate } from 'react-router-dom';
+// Tier S page transition — instant content + subtle lift
+const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
+
+const pageVariants = {
+    initial: { opacity: 0, y: 6 },
+    enter: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.18, ease: EASE }
+    },
+    exit: {
+        opacity: 0,
+        y: -4,
+        transition: { duration: 0.12, ease: EASE }
+    }
+};
 
 export default function MainLayout({ children }: MainLayoutProps) {
     const { isCollapsed, setMobileOpen } = useSidebar();
     const location = useLocation();
     const isAdmin = location.pathname.startsWith('/admin');
-
-    // REDUNDANT WAITLIST LOCK:
-    // Ensure only Admins can see the MainLayout (App).
     const { user, profile, loading } = useAuth();
-
-    // IMMEDIATE UNLOCK FOR ALL USERS (Except Guests)
-    if (!loading) {
-        if (!user && !isAdmin) {
-            // Guest -> Force Waitlist Landing
-            // return <Navigate to="/waitlist" replace />;
-        }
-    }
-
     const isNativeApp = isStandaloneApp();
 
-    // Check if on pages where bottom nav should be hidden (blog, concorsi, quiz, bandi detail)
+    // Check if on pages where bottom nav should be hidden
     const hideBottomNav = location.pathname.startsWith('/blog') ||
         location.pathname.startsWith('/concorsi') ||
         location.pathname.startsWith('/quiz') ||
@@ -51,7 +54,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         location.pathname.startsWith('/profile') ||
         location.pathname.startsWith('/leaderboard');
 
-    // Check if we're on the leaderboard for full-height background
     const isLeaderboard = location.pathname.startsWith('/leaderboard');
 
     return (
@@ -67,17 +69,22 @@ export default function MainLayout({ children }: MainLayoutProps) {
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-in-out">
 
-                <main
-                    className={`flex-1 ${hideBottomNav ? 'pb-8' : (isLeaderboard ? 'pb-0' : 'pb-20')} lg:pb-8 animate-in fade-in duration-500`}
-                    style={isNativeApp && !isAdmin && !hasOwnSafeArea ? { paddingTop: 'env(safe-area-inset-top, 0px)' } : undefined}
-                >
-                    {children}
-                </main>
+                <AnimatePresence mode="wait" initial={false}>
+                    <motion.main
+                        key={location.pathname}
+                        variants={pageVariants}
+                        initial="initial"
+                        animate="enter"
+                        exit="exit"
+                        className={`flex-1 ${hideBottomNav ? 'pb-8' : (isLeaderboard ? 'pb-0' : 'pb-20')} lg:pb-8`}
+                        style={isNativeApp && !isAdmin && !hasOwnSafeArea ? { paddingTop: 'env(safe-area-inset-top, 0px)' } : undefined}
+                    >
+                        {children}
+                    </motion.main>
+                </AnimatePresence>
 
-                {/* Skitla-Style Bottom Navigation */}
+                {/* Bottom Navigation */}
                 {!isAdmin && !hideBottomNav && <BottomNavigation />}
-
-                {/* PWA Install Prompt — disabled */}
             </div>
         </div>
     );

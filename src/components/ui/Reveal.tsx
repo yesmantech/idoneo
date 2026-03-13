@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, useInView, useAnimation, Variant } from 'framer-motion';
+import { motion, useInView, useAnimation } from 'framer-motion';
 
 interface RevealProps {
     children: React.ReactNode;
@@ -9,21 +9,24 @@ interface RevealProps {
     blur?: boolean;
     y?: number;
     className?: string;
-    stagger?: number; // Time between children animations
+    stagger?: number;
 }
+
+// Tier S easing — snappy entry, smooth settle
+const TIER_S_EASE = [0.22, 1, 0.36, 1] as const;
 
 export const Reveal = ({
     children,
     width = 'fit-content',
     delay = 0,
-    duration = 0.5,
+    duration = 0.25,   // Was 0.5 — halved for instant feel
     blur = false,
-    y = 20,
+    y = 8,             // Was 20 — subtle lift only
     className = "",
     stagger = 0
 }: RevealProps) => {
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: "-10% 0px -10% 0px" });
+    const isInView = useInView(ref, { once: true, margin: "0px 0px -5% 0px" });
     const mainControls = useAnimation();
 
     useEffect(() => {
@@ -35,17 +38,18 @@ export const Reveal = ({
     const variants = {
         hidden: {
             opacity: 0,
-            y: y,
-            filter: blur ? "blur(10px)" : "blur(0px)"
+            y,
+            // No blur by default — GPU expensive
+            ...(blur ? { filter: "blur(8px)" } : {})
         },
         visible: {
             opacity: 1,
             y: 0,
-            filter: "blur(0px)",
+            ...(blur ? { filter: "blur(0px)" } : {}),
             transition: {
                 duration,
                 delay,
-                ease: [0.25, 0.25, 0, 1], // Custom cubic-bezier for "premium" feel
+                ease: TIER_S_EASE,
                 staggerChildren: stagger
             }
         }
@@ -64,11 +68,11 @@ export const Reveal = ({
     );
 };
 
-// Container for staggered children (e.g. lists, grids)
+// Container for staggered children
 export const RevealGroup = ({
     children,
     className,
-    stagger = 0.1,
+    stagger = 0.06,   // Was 0.1
     delay = 0
 }: {
     children: React.ReactNode;
@@ -77,7 +81,7 @@ export const RevealGroup = ({
     delay?: number;
 }) => {
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: "-10% 0px -10% 0px" });
+    const isInView = useInView(ref, { once: true, margin: "0px 0px -5% 0px" });
     const controls = useAnimation();
 
     useEffect(() => {
@@ -86,21 +90,16 @@ export const RevealGroup = ({
         }
     }, [isInView]);
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: stagger,
-                delayChildren: delay
-            }
-        }
-    };
-
     return (
         <motion.div
             ref={ref}
-            variants={containerVariants as any}
+            variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                    opacity: 1,
+                    transition: { staggerChildren: stagger, delayChildren: delay }
+                }
+            }}
             initial="hidden"
             animate={controls}
             className={className}
@@ -111,19 +110,19 @@ export const RevealGroup = ({
 };
 
 export const RevealItem = ({ children, className }: { children: React.ReactNode, className?: string }) => {
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20, filter: "blur(5px)" },
-        visible: {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            transition: { duration: 0.5, ease: "easeOut" }
-        }
-    };
-
     return (
-        <motion.div variants={itemVariants as any} className={className}>
+        <motion.div
+            variants={{
+                hidden: { opacity: 0, y: 6 },
+                visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 0.2, ease: TIER_S_EASE }
+                }
+            }}
+            className={className}
+        >
             {children}
         </motion.div>
     );
-}
+};
