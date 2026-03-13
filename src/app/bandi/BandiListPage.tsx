@@ -193,11 +193,11 @@ export default function BandiListPage() {
                 url="/bandi"
             />
             {/* Tier S Header */}
-            <div className="bg-[var(--background)] sticky top-0 z-30 border-b border-[var(--card-border)]">
-                <div
-                    className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between"
-                    style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-                >
+            <div
+                className="bg-[var(--background)] sticky top-0 z-30 border-b border-[var(--card-border)]"
+                style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+            >
+                <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
                     <div>
                         <h1 className="text-[22px] font-black text-[var(--foreground)] tracking-tight">Bandi</h1>
                         <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">
