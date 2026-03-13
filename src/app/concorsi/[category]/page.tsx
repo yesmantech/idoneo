@@ -91,10 +91,7 @@ export default function ConcorsoHubPage() {
         description={`Scopri tutti i concorsi per ${categoryData.title}. Preparati con simulatori ufficiali e statistiche avanzate.`}
         url={`/concorsi/${category}`}
       />
-      <div
-        className="relative h-[25vh] min-h-[200px] md:h-[40vh] md:min-h-[340px] overflow-hidden"
-        style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))', paddingTop: 'env(safe-area-inset-top, 0px)' }}
-      >
+      <div className="relative h-[25vh] min-h-[200px] md:h-[40vh] md:min-h-[340px] overflow-hidden">
         {/* Category gradient background — always visible */}
         <div className="absolute inset-0">
           <div className={`w-full h-full bg-gradient-to-br ${theme.gradient}`} />
@@ -103,7 +100,7 @@ export default function ConcorsoHubPage() {
         </div>
 
         {/* Back button */}
-        <div className="absolute top-0 left-0 right-0 z-20 px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}>
+        <div className="absolute top-0 left-0 right-0 z-20 pt-safe px-4">
           <div className="h-14 flex items-center justify-between">
             <button
               onClick={() => navigate(-1)}

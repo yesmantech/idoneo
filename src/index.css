@@ -447,9 +447,9 @@ a,
 /* Auto-apply safe areas when running as installed PWA */
 @media (display-mode: standalone) {
   body {
-    padding-top: env(safe-area-inset-top, 0px);
-    /* Safe-area bottom padding via body directly can sometimes be overridden. 
-       We use a pseudo-element spacer to guarantee the home indicator is clear. */
+    /* Safe area top is handled per-page via .pt-safe class.
+       Do NOT add padding-top here — it creates a white gap
+       on pages with colored/gradient headers (categories, AI coach). */
   }
 
   body::after {
