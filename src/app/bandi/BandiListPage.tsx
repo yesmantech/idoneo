@@ -111,8 +111,18 @@ export default function BandiListPage() {
             const saved = await fetchUserSavedBandi();
             return new Set(saved.map(b => b.id));
         },
+        // Always reconstruct a real Set — plain objects from localStorage cache lack .has()
+        select: (data): Set<string> => {
+            if (data instanceof Set) return data;
+            // Deserialized from JSON as a plain object — extract values
+            if (data && typeof data === 'object') {
+                return new Set(Object.values(data as Record<string, string>));
+            }
+            return new Set<string>();
+        },
         enabled: !!user,
-        staleTime: Infinity, // Mutated directly
+        staleTime: 0, // Always fresh — mutations manage the cache directly
+        gcTime: 0,    // Don't persist Sets to localStorage (they don't survive JSON)
     });
 
     // --- Mutations ---
