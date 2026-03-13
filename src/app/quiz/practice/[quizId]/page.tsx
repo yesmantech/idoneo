@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { Clock, Target, ChevronRight, AlertCircle, Play, BookOpen } from "lucide-react";
+import { AlertCircle, Play, BookOpen, Target, Check } from "lucide-react";
 import { analytics } from "@/lib/analytics";
+import { motion, AnimatePresence } from "framer-motion";
+import BackButton from "@/components/ui/BackButton";
+import { hapticLight } from "@/lib/haptics";
 
 // V5 FIX: Fisher-Yates shuffle (replaces biased Array.sort(random))
 function shuffleArray<T>(array: T[]): T[] {
@@ -36,6 +39,8 @@ interface Subject {
     name: string;
     questionCount: number;
 }
+
+const QUESTION_COUNTS = [5, 10, 20, 30, 50];
 
 export default function PracticeStartPage() {
     const { quizId } = useParams<{ quizId: string }>();
@@ -124,6 +129,7 @@ export default function PracticeStartPage() {
     }, [quizId, navigate, preSelectedSubject]);
 
     const toggleSubject = (id: string) => {
+        hapticLight();
         setSelectedSubjects(prev =>
             prev.includes(id)
                 ? prev.filter(s => s !== id)
@@ -132,10 +138,12 @@ export default function PracticeStartPage() {
     };
 
     const selectAll = () => {
+        hapticLight();
         setSelectedSubjects(subjects.map(s => s.id));
     };
 
     const deselectAll = () => {
+        hapticLight();
         setSelectedSubjects([]);
     };
 
@@ -156,8 +164,6 @@ export default function PracticeStartPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Utente non autenticato");
 
-            // V11-SEC-2: Fetch from questions_safe VIEW (no correct_option)
-            // Answer validation is done server-side by finish_quiz_attempt RPC
             const { data: questions, error: questionsError } = await supabase
                 .from("questions_safe")
                 .select("id, text, subject_id, option_a, option_b, option_c, option_d, explanation, is_archived")
@@ -166,7 +172,6 @@ export default function PracticeStartPage() {
 
             if (questionsError || !questions?.length) throw new Error("Nessuna domanda disponibile");
 
-            // V5 FIX: Fetch subject names separately
             const subjectIds = [...new Set(questions.map((q: any) => q.subject_id))];
             const { data: subjectData } = await supabase
                 .from("subjects")
@@ -174,11 +179,9 @@ export default function PracticeStartPage() {
                 .in("id", subjectIds);
             const subjectMap = new Map(subjectData?.map((s: any) => [s.id, s.name]) || []);
 
-            // V5 FIX: Fisher-Yates shuffle and limit
             const shuffled = shuffleArray(questions);
             const limited = shuffled.slice(0, Math.min(questionCount, shuffled.length));
 
-            // V11: correctOption null — server handles scoring, RPC handles instant-check
             const richAnswers = limited.map((q: any) => ({
                 questionId: q.id,
                 text: q.text,
@@ -192,7 +195,6 @@ export default function PracticeStartPage() {
                 options: { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d }
             }));
 
-            // Create attempt with config_snapshot for "Repeat Test"
             const { data: attempt, error: attemptError } = await supabase
                 .from("quiz_attempts")
                 .insert({
@@ -220,7 +222,6 @@ export default function PracticeStartPage() {
 
             if (attemptError || !attempt) throw attemptError;
 
-            // Track practice quiz started
             analytics.track('quiz_started', {
                 quiz_id: quizId,
                 title: quizTitle,
@@ -238,152 +239,200 @@ export default function PracticeStartPage() {
         }
     };
 
+    // ─── Loading ────────────────────────────────────────────────────────────────
     if (loading) {
         return (
-            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center transition-colors">
-                <div className="w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full animate-spin" />
+            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     if (error && subjects.length === 0) {
         return (
-            <div className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-4 transition-colors">
-                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl max-w-sm text-center border border-red-100 dark:border-red-800/30">
+            <div className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-6">
+                <div className="bg-red-500/10 text-red-400 p-6 rounded-2xl max-w-sm text-center">
                     <AlertCircle className="w-8 h-8 mx-auto mb-2" />
                     <p className="font-medium">{error}</p>
-                    <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold underline">Torna indietro</button>
+                    <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold text-[var(--foreground)] underline">
+                        Torna indietro
+                    </button>
                 </div>
             </div>
         );
     }
 
+    const canStart = selectedSubjects.length > 0;
+
     return (
-        <div className="min-h-screen bg-[var(--background)] flex flex-col transition-colors duration-500">
-            {/* Top Bar */}
-            <header className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
-                <div className="px-4 h-14 flex items-center gap-3 max-w-3xl mx-auto w-full">
-                    <button onClick={() => navigate(-1)} className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <ChevronRight className="w-5 h-5 text-slate-400 rotate-180" />
-                    </button>
-                    <span className="font-semibold text-[var(--foreground)]">Allenamento</span>
+        <div className="min-h-screen bg-[var(--background)] flex flex-col">
+
+            {/* ── Header ─────────────────────────────────────────────────────── */}
+            <header
+                className="sticky top-0 z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--card-border)]"
+                style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+            >
+                <div className="h-14 px-4 flex items-center justify-between max-w-lg mx-auto">
+                    <BackButton />
+                    <span className="font-black text-[var(--foreground)] text-[15px] tracking-tight">Allenamento</span>
+                    <div className="w-9" />
                 </div>
             </header>
 
-            <main className="flex-1 px-5 py-6 max-w-lg mx-auto w-full flex flex-col">
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="w-12 h-12 rounded-2xl bg-brand-cyan/10 flex items-center justify-center">
-                        <Target className="w-6 h-6 text-brand-cyan" />
+            {/* ── Main ───────────────────────────────────────────────────────── */}
+            <main className="flex-1 px-4 pt-5 pb-36 max-w-lg mx-auto w-full space-y-4">
+
+                {/* Hero */}
+                <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className="flex items-center gap-4 px-1"
+                >
+                    <div className="w-14 h-14 rounded-2xl bg-[#00B1FF]/15 flex items-center justify-center flex-shrink-0">
+                        <Target className="w-7 h-7 text-[#00B1FF]" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-[var(--foreground)]">{quizTitle}</h1>
-                        <p className="text-sm text-[var(--foreground)] opacity-50">Pratica personalizzata</p>
+                        <h1 className="text-[18px] font-black text-[var(--foreground)] leading-tight">{quizTitle}</h1>
+                        <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">Pratica personalizzata</p>
                     </div>
-                </div>
+                </motion.div>
 
-                {/* Subject Selection */}
-                <div className="bg-[var(--card)] rounded-3xl p-5 shadow-sm border border-[var(--card-border)] mt-6 mb-4">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold text-[var(--foreground)] flex items-center gap-2">
-                            <BookOpen className="w-5 h-5 text-brand-cyan" />
-                            Seleziona Materie
-                        </h3>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={selectAll}
-                                className="text-xs font-bold text-brand-cyan hover:underline"
-                            >
+                {/* ── Subject Selection Card ──────────────────────────────── */}
+                <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+                    className="bg-[var(--card)] rounded-3xl border border-[var(--card-border)] overflow-hidden"
+                >
+                    {/* Card header */}
+                    <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-[var(--card-border)]">
+                        <div className="flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-[#00B1FF]" />
+                            <span className="font-black text-[var(--foreground)] text-[14px] tracking-tight">Materie</span>
+                            {selectedSubjects.length > 0 && (
+                                <span className="text-[11px] font-bold bg-[#00B1FF]/15 text-[#00B1FF] px-2 py-0.5 rounded-full">
+                                    {selectedSubjects.length}/{subjects.length}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button onClick={selectAll} className="text-[12px] font-bold text-[#00B1FF] active:opacity-60 transition-opacity">
                                 Tutte
                             </button>
-                            <span className="text-slate-300">|</span>
-                            <button
-                                onClick={deselectAll}
-                                className="text-xs font-bold text-[var(--foreground)] opacity-40 hover:opacity-100 hover:underline"
-                            >
+                            <div className="w-px h-3.5 bg-[var(--card-border)]" />
+                            <button onClick={deselectAll} className="text-[12px] font-bold text-[var(--muted-foreground)] active:opacity-60 transition-opacity">
                                 Nessuna
                             </button>
                         </div>
                     </div>
 
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {subjects.map(subject => {
+                    {/* Subject list */}
+                    <div className="divide-y divide-[var(--card-border)] max-h-56 overflow-y-auto">
+                        {subjects.map((subject, i) => {
                             const isSelected = selectedSubjects.includes(subject.id);
                             return (
-                                <button
+                                <motion.button
                                     key={subject.id}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.08 + i * 0.04 }}
                                     onClick={() => toggleSubject(subject.id)}
-                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${isSelected
-                                        ? 'bg-brand-cyan/10 border border-brand-cyan/30'
-                                        : 'bg-slate-50 dark:bg-[#111]/50 border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800'
-                                        }`}
+                                    className="w-full flex items-center justify-between px-5 py-3.5 transition-colors active:bg-[var(--card-border)]"
                                 >
-                                    <span className={`font-medium ${isSelected ? 'text-brand-cyan' : 'text-[var(--foreground)]'}`}>
+                                    <span className={`font-semibold text-[14px] text-left ${isSelected ? 'text-[#00B1FF]' : 'text-[var(--foreground)]'}`}>
                                         {subject.name}
                                     </span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-[var(--foreground)] opacity-40">{subject.questionCount} domande</span>
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-brand-cyan bg-brand-cyan' : 'border-slate-300 dark:border-slate-700'
-                                            }`}>
-                                            {isSelected && (
-                                                <svg className="w-3 h-3 text-white" viewBox="0 0 14 14" fill="none">
-                                                    <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            )}
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-[12px] text-[var(--muted-foreground)]">{subject.questionCount}</span>
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
+                                            ${isSelected ? 'border-[#00B1FF] bg-[#00B1FF]' : 'border-[var(--card-border)] bg-transparent'}`}>
+                                            {isSelected && <Check className="w-3 h-3 text-white" />}
                                         </div>
                                     </div>
+                                </motion.button>
+                            );
+                        })}
+                    </div>
+                </motion.div>
+
+                {/* ── Question Count Card ─────────────────────────────────── */}
+                <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="bg-[var(--card)] rounded-3xl border border-[var(--card-border)] p-5"
+                >
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="font-black text-[var(--foreground)] text-[14px] tracking-tight">Domande</span>
+                        <span className="text-[12px] text-[var(--muted-foreground)]">
+                            {totalAvailableQuestions} disponibili
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-5 gap-2">
+                        {QUESTION_COUNTS.map(count => {
+                            const isActive = questionCount === count;
+                            const isDisabled = count > totalAvailableQuestions;
+                            return (
+                                <button
+                                    key={count}
+                                    onClick={() => { if (!isDisabled) { hapticLight(); setQuestionCount(count); } }}
+                                    disabled={isDisabled}
+                                    className={`py-2.5 rounded-2xl text-[14px] font-black transition-all
+                                        ${isActive
+                                            ? 'bg-[#00B1FF] text-white shadow-[0_4px_12px_rgba(0,177,255,0.35)]'
+                                            : isDisabled
+                                                ? 'bg-[var(--card-border)] text-[var(--muted-foreground)] opacity-30 cursor-not-allowed'
+                                                : 'bg-[var(--background)] text-[var(--foreground)] active:scale-95'}`}
+                                >
+                                    {count}
                                 </button>
                             );
                         })}
                     </div>
-                </div>
-
-                {/* Question Count */}
-                <div className="bg-[var(--card)] rounded-3xl p-5 shadow-sm border border-[var(--card-border)] mb-6">
-                    <h3 className="font-bold text-[var(--foreground)] mb-4">Numero di Domande</h3>
-                    <div className="flex gap-2">
-                        {[5, 10, 20, 30, 50].map(count => (
-                            <button
-                                key={count}
-                                onClick={() => setQuestionCount(count)}
-                                disabled={count > totalAvailableQuestions}
-                                className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${questionCount === count
-                                    ? 'bg-brand-cyan text-white'
-                                    : count > totalAvailableQuestions
-                                        ? 'bg-slate-100 dark:bg-[#111] text-slate-300 dark:text-slate-700 cursor-not-allowed'
-                                        : 'bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                                    }`}
-                            >
-                                {count}
-                            </button>
-                        ))}
-                    </div>
-                    <p className="text-xs text-[var(--foreground)] opacity-40 mt-2 text-center">
-                        {totalAvailableQuestions} domande disponibili
-                    </p>
-                </div>
+                </motion.div>
 
                 {/* Error */}
-                {error && (
-                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl text-sm mb-4 text-center border border-red-100 dark:border-red-800/30">
-                        {error}
-                    </div>
-                )}
-
-                {/* Start Button */}
-                <button
-                    onClick={handleStart}
-                    disabled={starting || selectedSubjects.length === 0}
-                    className="mt-auto w-full py-4 rounded-2xl bg-brand-cyan text-white font-bold text-lg shadow-lg shadow-cyan-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {starting ? (
-                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                        <>
-                            Inizia Allenamento <Play className="w-5 h-5 fill-current" />
-                        </>
+                <AnimatePresence>
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="bg-red-500/10 text-red-400 px-4 py-3 rounded-2xl text-[13px] font-medium text-center border border-red-500/15"
+                        >
+                            {error}
+                        </motion.div>
                     )}
-                </button>
+                </AnimatePresence>
             </main>
+
+            {/* ── Sticky CTA ─────────────────────────────────────────────────── */}
+            <div
+                className="fixed bottom-0 left-0 right-0 px-4 pt-3 bg-[var(--background)]/90 backdrop-blur-xl border-t border-[var(--card-border)]"
+                style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))' }}
+            >
+                <div className="max-w-lg mx-auto">
+                    <motion.button
+                        onClick={handleStart}
+                        disabled={starting || !canStart}
+                        whileTap={{ scale: 0.97 }}
+                        className={`w-full py-4 rounded-2xl font-black text-[16px] flex items-center justify-center gap-2.5 transition-all
+                            ${canStart
+                                ? 'bg-[#00B1FF] text-white shadow-[0_4px_24px_rgba(0,177,255,0.35)]'
+                                : 'bg-[var(--card)] text-[var(--muted-foreground)] cursor-not-allowed'}`}
+                    >
+                        {starting ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                Inizia Allenamento
+                                <Play className="w-4 h-4 fill-current" />
+                            </>
+                        )}
+                    </motion.button>
+                </div>
+            </div>
         </div>
     );
 }
