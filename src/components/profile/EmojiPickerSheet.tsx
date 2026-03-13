@@ -132,15 +132,13 @@ export default function EmojiPickerSheet({
                             maxHeight: 'calc(100vh - 120px)',
                         }}
                     >
-                        {/* Card — is itself the scroll container: NO nested overflow contexts */}
                         <div
-                            ref={scrollRef}
+                            className="flex flex-col"
                             style={{
                                 backgroundColor: '#1C1C1E',
                                 borderRadius: 24,
                                 maxHeight: 'calc(100vh - 140px)',
-                                overflowY: 'auto',
-                                overflowX: 'hidden',
+                                WebkitMaskImage: '-webkit-radial-gradient(white, black)',
                             }}
                         >
                             <AnimatePresence initial={false} mode="wait">
@@ -151,17 +149,11 @@ export default function EmojiPickerSheet({
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.15 }}
+                                        className="flex flex-col"
+                                        style={{ maxHeight: 'calc(100vh - 140px)' }}
                                     >
-                                        {/* Sticky Header */}
-                                        <div
-                                            className="flex items-center justify-between px-5 pt-5 pb-3"
-                                            style={{
-                                                position: 'sticky',
-                                                top: 0,
-                                                backgroundColor: '#1C1C1E',
-                                                zIndex: 2,
-                                            }}
-                                        >
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
                                             <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>
                                                 Scegli un Emoji
                                             </h2>
@@ -179,16 +171,8 @@ export default function EmojiPickerSheet({
                                             </button>
                                         </div>
 
-                                        {/* Sticky Search Bar */}
-                                        <div
-                                            className="px-3 pb-3"
-                                            style={{
-                                                position: 'sticky',
-                                                top: 56,
-                                                backgroundColor: '#1C1C1E',
-                                                zIndex: 2,
-                                            }}
-                                        >
+                                        {/* Search Bar */}
+                                        <div className="px-3 pb-3 flex-shrink-0">
                                             <div
                                                 className="flex items-center gap-2"
                                                 style={{
@@ -217,42 +201,61 @@ export default function EmojiPickerSheet({
                                             </div>
                                         </div>
 
-                                        {/* Emoji Grid — no separate scroll container, flows naturally */}
+                                        {/* Emoji Grid — scrollable area */}
                                         <div
+                                            ref={scrollRef}
+                                            className="px-3 pb-4"
                                             style={{
-                                                display: 'grid',
-                                                gridTemplateColumns: 'repeat(8, 1fr)',
-                                                gap: 4,
-                                                padding: '8px 12px 16px',
+                                                maxHeight: '50vh',
+                                                overflowY: 'scroll',
+                                                overflowX: 'hidden',
                                             }}
                                         >
-                                            {filteredEmojis.map((emoji, i) => (
-                                                <button
-                                                    key={`${emoji}-${i}`}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEmojiSelect(emoji);
-                                                    }}
-                                                    className="active:scale-90 transition-transform"
-                                                    style={{
-                                                        width: '100%',
-                                                        aspectRatio: '1',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        fontSize: 26,
-                                                        borderRadius: 10,
-                                                        border: 'none',
-                                                        background: 'transparent',
-                                                        cursor: 'pointer',
-                                                        padding: 2,
-                                                        touchAction: 'manipulation',
-                                                        WebkitTapHighlightColor: 'transparent',
-                                                    }}
-                                                >
-                                                    {emoji}
-                                                </button>
-                                            ))}
+                                            <div
+                                                style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'repeat(8, 1fr)',
+                                                    gap: 2,
+                                                }}
+                                            >
+                                                {filteredEmojis.map((emoji, i) => (
+                                                    <button
+                                                        key={`${emoji}-${i}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEmojiSelect(emoji);
+                                                        }}
+                                                        className="active:scale-90 transition-transform"
+                                                        style={{
+                                                            width: '100%',
+                                                            height: 44,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            borderRadius: 10,
+                                                            border: 'none',
+                                                            background: 'transparent',
+                                                            cursor: 'pointer',
+                                                            padding: 0,
+                                                            touchAction: 'manipulation',
+                                                            WebkitTapHighlightColor: 'transparent',
+                                                        }}
+                                                    >
+                                                        <span
+                                                            style={{
+                                                                fontSize: 28,
+                                                                lineHeight: '44px',
+                                                                display: 'block',
+                                                                width: 44,
+                                                                height: 44,
+                                                                textAlign: 'center',
+                                                            }}
+                                                        >
+                                                            {emoji}
+                                                        </span>
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
                                     </motion.div>
                                 ) : (
