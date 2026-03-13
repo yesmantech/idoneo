@@ -133,11 +133,12 @@ export default function EmojiPickerSheet({
                         }}
                     >
                         <div
-                            className="flex flex-col overflow-hidden"
+                            className="flex flex-col"
                             style={{
                                 backgroundColor: '#1C1C1E',
                                 borderRadius: 24,
                                 maxHeight: 'calc(100vh - 140px)',
+                                overflow: 'clip',
                             }}
                         >
                             <AnimatePresence initial={false} mode="popLayout">
@@ -206,6 +207,7 @@ export default function EmojiPickerSheet({
                                             className="overflow-y-auto px-3 pb-4"
                                             style={{
                                                 maxHeight: '50vh',
+                                                paddingTop: 6,
                                                 WebkitOverflowScrolling: 'touch',
                                             }}
                                         >
