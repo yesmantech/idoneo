@@ -782,7 +782,7 @@ export default function ConquistePage() {
     return (
         <div className="min-h-screen bg-[var(--background)]">
             {/* Header */}
-            <div className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
+            <div className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--card-border)] safe-area-top">
                 <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
                     <BackButton />
                     <h1 className="text-base font-black text-[var(--foreground)] tracking-tight">Conquiste</h1>
