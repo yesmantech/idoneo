@@ -585,6 +585,21 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             body: { userId: user?.id },
             credentials: 'omit',
             headers: { 'Content-Type': 'application/json' },
+            fetch: async (url, init) => {
+                console.log('[AI Coach] Fetching:', url, 'mode:', init?.mode);
+                try {
+                    const response = await fetch(url, {
+                        ...init,
+                        mode: 'cors',
+                        credentials: 'omit',
+                    });
+                    console.log('[AI Coach] Response status:', response.status, 'ok:', response.ok);
+                    return response;
+                } catch (err) {
+                    console.error('[AI Coach] Fetch error:', err);
+                    throw err;
+                }
+            },
         }),
         messages: initialMessages,
         onFinish: async ({ messages: finishedMessages }) => {
