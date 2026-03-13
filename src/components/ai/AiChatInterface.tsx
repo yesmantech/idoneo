@@ -676,7 +676,10 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             <div className="flex flex-col w-full h-full" style={{ maxWidth: '48rem', margin: '0 auto' }}>
 
                 {/* ── HEADER ── */}
-                <div className="flex-shrink-0 p-4 flex items-center gap-3 z-20 bg-white dark:bg-black border-b border-gray-100 dark:border-[#1A1A1A]">
+                <div
+                    className="flex-shrink-0 p-4 flex items-center gap-3 z-20 bg-white dark:bg-black border-b border-gray-100 dark:border-[#1A1A1A]"
+                    style={{ paddingTop: 'max(16px, env(safe-area-inset-top, 16px))' }}
+                >
                     <button
                         onClick={() => navigate(-1)}
                         className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] flex items-center justify-center transition-colors"
