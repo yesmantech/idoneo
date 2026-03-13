@@ -254,7 +254,7 @@ export default function BandiListPage() {
                                         <img src="/icons/flame-red.png" alt="" className="w-5 h-5 object-contain" /> In scadenza
                                     </h2>
                                 </div>
-                                <div className="flex gap-4 overflow-x-auto p-8 -mx-8 px-8 scrollbar-hide snap-x">
+                                <div className="flex gap-4 overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide snap-x">
                                     {closingSoon.slice(0, 5).map((bando: Bando, i: number) => (
                                         <m.div
                                             key={bando.id}
