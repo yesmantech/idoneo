@@ -120,16 +120,7 @@ export default function ConcorsoHubPage() {
               Concorsi Pubblici 2026
             </span>
           </div>
-          {/* Uploaded logo image */}
-          {categoryData.inner_banner_url && (
-            <div className="mb-3">
-              <img
-                src={categoryData.inner_banner_url}
-                alt={categoryData.title}
-                className="w-20 h-20 md:w-28 md:h-28 object-contain mx-auto drop-shadow-lg animate-in fade-in zoom-in duration-700"
-              />
-            </div>
-          )}
+
           <h1 className="text-3xl md:text-5xl font-black text-[var(--foreground)] tracking-tight leading-[1.1] mb-2 drop-shadow-sm">
             {categoryData.title}
           </h1>
