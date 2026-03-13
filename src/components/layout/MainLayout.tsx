@@ -52,7 +52,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
         location.pathname.startsWith('/concorsi') ||
         location.pathname.startsWith('/quiz') ||
         location.pathname.startsWith('/profile') ||
-        location.pathname.startsWith('/leaderboard');
+        location.pathname.startsWith('/leaderboard') ||
+        location.pathname.startsWith('/bandi') ||
+        location.pathname.startsWith('/conquiste') ||
+        location.pathname.startsWith('/ai-assistant');
 
     const isLeaderboard = location.pathname.startsWith('/leaderboard');
 
