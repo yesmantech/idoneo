@@ -150,7 +150,7 @@ export default function EmojiPickerSheet({
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.15 }}
                                         className="flex flex-col"
-                                        style={{ maxHeight: 'calc(100vh - 140px)' }}
+                                        style={{ flex: 1, minHeight: 0 }}
                                     >
                                         {/* Header */}
                                         <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
@@ -206,8 +206,9 @@ export default function EmojiPickerSheet({
                                             ref={scrollRef}
                                             className="overflow-y-auto px-3 pb-4"
                                             style={{
-                                                maxHeight: '50vh',
-                                                WebkitOverflowScrolling: 'touch',
+                                                flex: 1,
+                                                minHeight: 0,
+                                                paddingTop: 12,
                                             }}
                                         >
                                             <div
@@ -215,7 +216,6 @@ export default function EmojiPickerSheet({
                                                     display: 'grid',
                                                     gridTemplateColumns: 'repeat(8, 1fr)',
                                                     gap: 4,
-                                                    paddingTop: 10,
                                                 }}
                                             >
                                                 {filteredEmojis.map((emoji, i) => (
