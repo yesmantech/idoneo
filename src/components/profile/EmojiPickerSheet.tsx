@@ -138,7 +138,7 @@ export default function EmojiPickerSheet({
                                 backgroundColor: '#1C1C1E',
                                 borderRadius: 24,
                                 maxHeight: 'calc(100vh - 140px)',
-                                WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+                                overflow: 'hidden',
                             }}
                         >
                             <AnimatePresence initial={false} mode="wait">
