@@ -25,6 +25,79 @@ const metricConfig = {
     responseTime: { label: 'Tempo medio', unit: 's', color: '#F59E0B' }
 };
 
+// ─── The Chart itself ─────────────────────────────────────────────────────────
+// Fixed issues:
+//   1. SVG <text> elements need fontSize/fill as SVG attributes, not Tailwind classes
+//   2. Left padding increased so Y-axis labels don't get clipped
+//   3. Y-axis domain uses nice rounded max/min so chart doesn't hug the bottom
+//   4. Dot center-fill uses a CSS variable so it works in both light + dark mode
+
+const W = 600;
+const H = 200;
+const PAD_LEFT = 42;  // room for Y-axis labels
+const PAD_RIGHT = 12;
+const PAD_TOP = 14;
+const PAD_BOT = 14;
+
+function niceMax(v: number, metric: MetricType): number {
+    if (metric === 'accuracy') return 100;
+    if (v <= 0) return 10;
+    // Round up to nearest nice number
+    const mag = Math.pow(10, Math.floor(Math.log10(v)));
+    return Math.ceil(v / mag) * mag;
+}
+
+function niceMin(v: number): number {
+    if (v <= 0) return 0;
+    const mag = Math.pow(10, Math.floor(Math.log10(v)));
+    return Math.max(0, Math.floor(v / mag) * mag);
+}
+
+// Shared filter pills used in both the "no data" state and the main chart
+function FilterBar({
+    metric, setMetric,
+    timeRange, setTimeRange
+}: {
+    metric: MetricType;
+    setMetric: (m: MetricType) => void;
+    timeRange: TimeRange;
+    setTimeRange: (t: TimeRange) => void;
+}) {
+    return (
+        <div className="flex flex-wrap gap-2 justify-between items-center">
+            <div className="flex gap-1.5">
+                {(['score', 'accuracy'] as MetricType[]).map(m => (
+                    <button
+                        key={m}
+                        onClick={() => setMetric(m)}
+                        style={{ backgroundColor: metric === m ? metricConfig[m].color : undefined }}
+                        className={`px-4 py-2 text-xs font-bold rounded-full transition-all
+                            ${metric === m
+                                ? 'text-white'
+                                : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-white/40'}`}
+                    >
+                        {metricConfig[m].label}
+                    </button>
+                ))}
+            </div>
+            <div className="flex gap-1.5">
+                {(['7d', '30d', 'all'] as TimeRange[]).map(t => (
+                    <button
+                        key={t}
+                        onClick={() => setTimeRange(t)}
+                        className={`px-3 py-2 text-xs font-bold rounded-full transition-all
+                            ${timeRange === t
+                                ? 'bg-white dark:bg-white text-black'
+                                : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-white/40'}`}
+                    >
+                        {t === 'all' ? 'Tutto' : t}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export default function ProgressLineChart({
     data,
     defaultMetric = 'score',
@@ -34,61 +107,29 @@ export default function ProgressLineChart({
     const [timeRange, setTimeRange] = useState<TimeRange>(defaultTimeRange);
     const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
 
-    // Filter data by time range
+    // Filter by time range
     const filteredData = useMemo(() => {
         if (timeRange === 'all') return data;
-
         const now = new Date();
         const days = timeRange === '7d' ? 7 : 30;
         const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-
         return data.filter(d => d.fullDate >= cutoff);
     }, [data, timeRange]);
 
-    // Get metric value
     const getValue = (d: ProgressData): number => {
         switch (metric) {
             case 'score': return d.score;
             case 'accuracy': return d.accuracy;
-            case 'responseTime': return (d.responseTime || 0) / 1000; // Convert to seconds
+            case 'responseTime': return (d.responseTime || 0) / 1000;
             default: return d.score;
         }
     };
 
+    // ── Not enough data ──────────────────────────────────────────────────────
     if (filteredData.length < 2) {
         return (
             <div className="space-y-4">
-                {/* Filters */}
-                <div className="flex flex-wrap gap-2 justify-between items-center">
-                    <div className="flex gap-1.5">
-                        {(['score', 'accuracy'] as MetricType[]).map(m => (
-                            <button
-                                key={m}
-                                onClick={() => setMetric(m)}
-                                className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${metric === m
-                                    ? 'bg-[#00B1FF] text-white'
-                                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
-                                    }`}
-                            >
-                                {metricConfig[m].label}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="flex gap-1.5">
-                        {(['7d', '30d', 'all'] as TimeRange[]).map(t => (
-                            <button
-                                key={t}
-                                onClick={() => setTimeRange(t)}
-                                className={`px-3 py-2 text-xs font-bold rounded-full transition-all ${timeRange === t
-                                    ? 'bg-white dark:bg-white text-black'
-                                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
-                                    }`}
-                            >
-                                {t === 'all' ? 'Tutto' : t}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                <FilterBar metric={metric} setMetric={setMetric} timeRange={timeRange} setTimeRange={setTimeRange} />
                 <div className="h-48 flex items-center justify-center text-slate-400 dark:text-white/30 italic text-sm">
                     Non ci sono abbastanza dati per questo periodo.
                 </div>
@@ -96,131 +137,123 @@ export default function ProgressLineChart({
         );
     }
 
-    // Dimensions
-    const width = 600;
-    const height = 200;
-    const padding = 30;
-
-    // Scales
+    // ── Domain calculation ───────────────────────────────────────────────────
     const values = filteredData.map(getValue);
-    const maxValue = Math.max(...values, 10);
-    const minValue = Math.min(...values, 0);
-    const valueRange = maxValue - minValue || 1;
+    const rawMax = Math.max(...values);
+    const rawMin = Math.min(...values);
 
-    const getX = (index: number) => {
-        return padding + (index / (filteredData.length - 1)) * (width - padding * 2);
-    };
+    const domainMax = niceMax(rawMax, metric);
+    const domainMin = niceMin(rawMin);
+    const domainRange = domainMax - domainMin || 1;
 
-    const getY = (value: number) => {
-        return height - padding - ((value - minValue) / valueRange) * (height - padding * 2);
-    };
+    // ── Coordinate helpers ───────────────────────────────────────────────────
+    const getX = (index: number) =>
+        PAD_LEFT + (index / (filteredData.length - 1)) * (W - PAD_LEFT - PAD_RIGHT);
 
-    // Smooth curve path using cardinal spline
-    const points = filteredData.map((d, i) => ({
-        x: getX(i),
-        y: getY(getValue(d))
-    }));
+    const getY = (value: number) =>
+        H - PAD_BOT - ((value - domainMin) / domainRange) * (H - PAD_TOP - PAD_BOT);
 
-    // Simple smooth path with quadratic bezier curves
-    let pathD = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 1; i < points.length; i++) {
-        const prev = points[i - 1];
-        const curr = points[i];
+    // ── Smooth path ──────────────────────────────────────────────────────────
+    const pts = filteredData.map((d, i) => ({ x: getX(i), y: getY(getValue(d)) }));
+
+    let pathD = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+        const prev = pts[i - 1];
+        const curr = pts[i];
         const cpX = (prev.x + curr.x) / 2;
         pathD += ` Q ${cpX} ${prev.y}, ${(cpX + curr.x) / 2} ${(prev.y + curr.y) / 2}`;
     }
-    // Final point
-    if (points.length > 1) {
-        const last = points[points.length - 1];
+    if (pts.length > 1) {
+        const last = pts[pts.length - 1];
         pathD += ` T ${last.x} ${last.y}`;
     }
 
-    // Area Path  
-    const areaD = `${pathD} L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`;
+    const areaD = `${pathD} L ${W - PAD_RIGHT} ${H - PAD_BOT} L ${PAD_LEFT} ${H - PAD_BOT} Z`;
 
     const config = metricConfig[metric];
 
+    // Y-axis tick values: min, mid, max
+    const yTicks = [domainMin, domainMin + domainRange / 2, domainMax];
+
     return (
         <div className="space-y-4">
-            {/* Filters */}
-            <div className="flex flex-wrap gap-2 justify-between items-center">
-                <div className="flex gap-1.5">
-                    {(['score', 'accuracy'] as MetricType[]).map(m => (
-                        <button
-                            key={m}
-                            onClick={() => setMetric(m)}
-                            className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${metric === m
-                                ? 'bg-[#00B1FF] text-white'
-                                : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
-                                }`}
-                        >
-                            {metricConfig[m].label}
-                        </button>
-                    ))}
-                </div>
-                <div className="flex gap-1.5">
-                    {(['7d', '30d', 'all'] as TimeRange[]).map(t => (
-                        <button
-                            key={t}
-                            onClick={() => setTimeRange(t)}
-                            className={`px-3 py-2 text-xs font-bold rounded-full transition-all ${timeRange === t
-                                ? 'bg-white dark:bg-white text-black'
-                                : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-white/40'
-                                }`}
-                        >
-                            {t === 'all' ? 'Tutto' : t}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <FilterBar metric={metric} setMetric={setMetric} timeRange={timeRange} setTimeRange={setTimeRange} />
 
-            {/* Chart */}
-            <div className="w-full overflow-hidden relative">
-                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
-                    {/* Gradient Definition */}
+            {/* SVG chart */}
+            <div className="w-full overflow-visible relative">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto overflow-visible">
                     <defs>
-                        <linearGradient id={`gradient-${metric}`} x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id={`grad-${metric}`} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor={config.color} stopOpacity="0.25" />
-                            <stop offset="60%" stopColor={config.color} stopOpacity="0.08" />
+                            <stop offset="60%" stopColor={config.color} stopOpacity="0.06" />
                             <stop offset="100%" stopColor={config.color} stopOpacity="0" />
                         </linearGradient>
                     </defs>
 
-                    {/* Y Axis Grid + Labels */}
-                    {[0, 0.5, 1].map(t => {
-                        const value = minValue + valueRange * t;
-                        const y = getY(value);
+                    {/* Y-axis grid lines + labels */}
+                    {yTicks.map((v, i) => {
+                        const y = getY(v);
+                        const label = metric === 'accuracy'
+                            ? `${v.toFixed(0)}%`
+                            : v.toFixed(v < 10 ? 1 : 0);
                         return (
-                            <g key={t}>
-                                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="currentColor" className="text-slate-200 dark:text-white/[0.06]" strokeWidth="1" strokeDasharray="4 4" />
-                                <text x={padding - 8} y={y + 4} textAnchor="end" className="text-[10px] fill-slate-400 dark:fill-white/25 font-medium">
-                                    {value.toFixed(0)}
+                            <g key={i}>
+                                {/* Dashed grid line */}
+                                <line
+                                    x1={PAD_LEFT} y1={y}
+                                    x2={W - PAD_RIGHT} y2={y}
+                                    stroke="currentColor"
+                                    strokeOpacity="0.08"
+                                    strokeWidth="1"
+                                    strokeDasharray="4 4"
+                                    className="text-slate-900 dark:text-white"
+                                />
+                                {/* Y label — use SVG attributes, NOT Tailwind font-size classes */}
+                                <text
+                                    x={PAD_LEFT - 6}
+                                    y={y + 4}
+                                    textAnchor="end"
+                                    fontSize="10"
+                                    fontWeight="500"
+                                    fill="currentColor"
+                                    fillOpacity="0.35"
+                                    className="text-slate-900 dark:text-white"
+                                >
+                                    {label}
                                 </text>
                             </g>
                         );
                     })}
 
-                    {/* Area */}
-                    <path d={areaD} fill={`url(#gradient-${metric})`} />
+                    {/* Area fill */}
+                    <path d={areaD} fill={`url(#grad-${metric})`} />
 
-                    {/* Line — smooth curve */}
-                    <path d={pathD} fill="none" stroke={config.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Line */}
+                    <path
+                        d={pathD}
+                        fill="none"
+                        stroke={config.color}
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
 
                     {/* Dots */}
                     {filteredData.map((d, i) => (
-                        <g key={i}>
-                            <circle
-                                cx={getX(i)}
-                                cy={getY(getValue(d))}
-                                r={hoveredPoint === i ? 7 : 4}
-                                fill="#1C1C1E"
-                                stroke={config.color}
-                                strokeWidth="2.5"
-                                className="cursor-pointer transition-all"
-                                onMouseEnter={() => setHoveredPoint(i)}
-                                onMouseLeave={() => setHoveredPoint(null)}
-                            />
-                        </g>
+                        <circle
+                            key={i}
+                            cx={getX(i)}
+                            cy={getY(getValue(d))}
+                            r={hoveredPoint === i ? 7 : 4}
+                            /* Use transparent fill so the card background shows through */
+                            fill="transparent"
+                            stroke={config.color}
+                            strokeWidth="2.5"
+                            className="cursor-pointer"
+                            style={{ transition: 'r 0.1s ease' }}
+                            onMouseEnter={() => setHoveredPoint(i)}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                        />
                     ))}
                 </svg>
 
@@ -229,12 +262,14 @@ export default function ProgressLineChart({
                     <div
                         className="absolute bg-white dark:bg-[#2C2C2E] rounded-2xl shadow-xl border border-slate-100 dark:border-white/[0.06] p-3 z-10 pointer-events-none"
                         style={{
-                            left: `${(getX(hoveredPoint) / width) * 100}%`,
-                            top: `${(getY(getValue(filteredData[hoveredPoint])) / height) * 100 - 20}%`,
+                            left: `${(getX(hoveredPoint) / W) * 100}%`,
+                            top: `${(getY(getValue(filteredData[hoveredPoint])) / H) * 100 - 20}%`,
                             transform: 'translateX(-50%)'
                         }}
                     >
-                        <p className="text-xs text-slate-500 dark:text-white/35 mb-1">{filteredData[hoveredPoint].date}</p>
+                        <p className="text-xs text-slate-500 dark:text-white/35 mb-1">
+                            {filteredData[hoveredPoint].date}
+                        </p>
                         <p className="text-sm font-bold text-slate-900 dark:text-white">
                             {getValue(filteredData[hoveredPoint]).toFixed(1)} {config.unit}
                         </p>
@@ -250,8 +285,10 @@ export default function ProgressLineChart({
                 )}
             </div>
 
-            {/* X Axis Labels (First and Last) */}
-            <div className="flex justify-between text-[10px] text-slate-400 dark:text-white/25 font-medium px-2">
+            {/* X-axis labels */}
+            <div className="flex justify-between text-[10px] text-slate-400 dark:text-white/25 font-medium"
+                style={{ paddingLeft: PAD_LEFT, paddingRight: PAD_RIGHT }}
+            >
                 <span>{filteredData[0]?.date}</span>
                 <span>{filteredData[filteredData.length - 1]?.date}</span>
             </div>
