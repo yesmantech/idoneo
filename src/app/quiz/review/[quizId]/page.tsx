@@ -57,9 +57,6 @@ export default function ReviewPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
 
-    // Drawer state (matching QuizRunner)
-    const [drawerExpanded, setDrawerExpanded] = useState(false);
-
     // AI Generation
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -244,7 +241,9 @@ export default function ReviewPage() {
             {/* TOP BAR (Identical to QuizRunner) */}
             {/* ============================================================= */}
             <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
-                <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
+                <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto"
+                    style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+                >
                     {/* Left: Close */}
                     <Link
                         to={`/profile/stats/${quizId}`}
@@ -271,7 +270,7 @@ export default function ReviewPage() {
             {/* ============================================================= */}
             {/* CONTENT (Identical layout to QuizRunner) */}
             {/* ============================================================= */}
-            <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-48">
+            <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-32">
                 {/* Meta info */}
                 <div className="mb-3">
                     <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-wider">
@@ -412,65 +411,40 @@ export default function ReviewPage() {
             </main>
 
             {/* ============================================================= */}
-            {/* BOTTOM DRAWER NAVIGATOR (Identical to QuizRunner) */}
+            {/* BOTTOM NAVIGATOR — clean fixed bar */}
             {/* ============================================================= */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white pb-safe z-40">
-                {/* Drawer Handle */}
-                <div className="relative flex justify-center">
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2">
-                        <div className="relative w-28 h-8">
-                            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 112 32" fill="none" style={{ filter: 'drop-shadow(0 -2px 8px rgba(0,0,0,0.1))' }}>
-                                <path d="M10 32 L18 8 C20 3 24 0 30 0 L82 0 C88 0 92 3 94 8 L102 32 Z" fill="white" />
-                            </svg>
-                            <button
-                                onClick={() => setDrawerExpanded(!drawerExpanded)}
-                                className="absolute left-1/2 -translate-x-1/2 top-2 w-16 h-5 rounded-md bg-gradient-to-b from-[#00B1FF] to-[#0095dd] flex items-center justify-center active:scale-95 transition-transform"
-                                style={{ boxShadow: '0 2px 4px rgba(0,177,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3)' }}
-                            >
-                                <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className={`text-white transition-transform duration-200 ${drawerExpanded ? 'rotate-180' : ''}`}>
-                                    <path d="M1.5 6.5L7 1.5L12.5 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </button>
-                        </div>
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 pb-safe z-40">
+
+                {/* Question Pills Row */}
+                <div className="px-4 pt-2 pb-1">
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-3xl mx-auto">
+                        {wrongAnswers.map((_, idx) => {
+                            const isActive = idx === currentIndex;
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => { setCurrentIndex(idx); setShowAnswer(false); }}
+                                    className={`w-9 h-9 flex-shrink-0 rounded-xl font-semibold text-[13px] transition-all flex items-center justify-center
+                                        ${isActive
+                                            ? 'bg-white text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm'
+                                            : 'bg-slate-100 text-slate-400'}`}
+                                >
+                                    {idx + 1}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
-                <div className="h-px bg-slate-100" />
-
-                {/* Collapsible Question Pills */}
-                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${drawerExpanded ? 'max-h-60' : 'max-h-14'}`}>
-                    <div className="px-4 py-3 border-b border-slate-50">
-                        <div className={`flex gap-2 max-w-3xl mx-auto ${drawerExpanded ? 'flex-wrap justify-center' : 'overflow-x-auto scrollbar-hide'}`}>
-                            {wrongAnswers.map((_, idx) => {
-                                const isActive = idx === currentIndex;
-                                let buttonClass = "bg-slate-200 text-slate-400"; // Default
-                                if (isActive) buttonClass = "bg-white text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm";
-
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={() => {
-                                            setCurrentIndex(idx);
-                                            setShowAnswer(false);
-                                        }}
-                                        className={`w-9 h-9 rounded-xl flex-shrink-0 font-semibold text-[13px] transition-all flex items-center justify-center ${buttonClass}`}
-                                    >
-                                        {idx + 1}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation Buttons */}
-                <div className="px-4 py-3 flex gap-3 max-w-3xl mx-auto">
+                {/* Prev / Next */}
+                <div className="px-4 py-2 flex gap-3 max-w-3xl mx-auto">
                     <button
                         onClick={goPrev}
                         disabled={currentIndex === 0}
-                        className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === 0
-                            ? 'bg-slate-100 text-slate-300'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'}`}
+                        className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all
+                            ${currentIndex === 0
+                                ? 'bg-slate-100 text-slate-300'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'}`}
                     >
                         <ChevronLeft className="w-5 h-5" />
                         Precedente
@@ -479,9 +453,10 @@ export default function ReviewPage() {
                     <button
                         onClick={goNext}
                         disabled={currentIndex === wrongAnswers.length - 1}
-                        className={`flex-1 py-3.5 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all ${currentIndex === wrongAnswers.length - 1
-                            ? 'bg-slate-100 text-slate-300'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'}`}
+                        className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all
+                            ${currentIndex === wrongAnswers.length - 1
+                                ? 'bg-slate-100 text-slate-300'
+                                : 'bg-[#00B1FF] text-white shadow-sm shadow-blue-400/30 active:scale-[0.98]'}`}
                     >
                         Successiva
                         <ChevronRight className="w-5 h-5" />
