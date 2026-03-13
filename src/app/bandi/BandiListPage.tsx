@@ -231,7 +231,7 @@ export default function BandiListPage() {
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6">
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-3 pb-6 space-y-6">
 
 
                 {isMainLoading ? (
