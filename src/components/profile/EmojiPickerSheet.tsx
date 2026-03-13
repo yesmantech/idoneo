@@ -141,14 +141,14 @@ export default function EmojiPickerSheet({
                                 overflow: 'hidden',
                             }}
                         >
-                            <AnimatePresence initial={false} mode="popLayout">
+                            <AnimatePresence initial={false} mode="wait">
                                 {view === 'grid' ? (
                                     <motion.div
                                         key="grid"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.2 }}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.15 }}
                                         className="flex flex-col"
                                         style={{ maxHeight: 'calc(100vh - 140px)' }}
                                     >
@@ -252,10 +252,10 @@ export default function EmojiPickerSheet({
                                 ) : (
                                     <motion.div
                                         key="editor"
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 20 }}
-                                        transition={{ duration: 0.2 }}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.15 }}
                                         className="flex flex-col"
                                     >
                                         {/* Header */}
