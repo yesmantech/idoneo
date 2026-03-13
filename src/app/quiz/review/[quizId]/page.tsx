@@ -202,7 +202,7 @@ export default function ReviewPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+            <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-[#00B1FF] border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -210,11 +210,11 @@ export default function ReviewPage() {
 
     if (error || wrongAnswers.length === 0) {
         return (
-            <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center p-4">
-                <div className={`${error?.includes("🎉") ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"} p-6 rounded-2xl max-w-sm text-center`}>
+            <div className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-4">
+                <div className={`${error?.includes("🎉") ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"} p-6 rounded-2xl max-w-sm text-center`}>
                     {error?.includes("🎉") ? (
-                        <div className="w-16 h-16 mx-auto mb-4 bg-emerald-100 rounded-full flex items-center justify-center">
-                            <Check className="w-8 h-8 text-emerald-600" />
+                        <div className="w-16 h-16 mx-auto mb-4 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                            <Check className="w-8 h-8 text-emerald-400" />
                         </div>
                     ) : (
                         <AlertCircle className="w-8 h-8 mx-auto mb-2" />
@@ -222,7 +222,7 @@ export default function ReviewPage() {
                     <p className="font-medium text-lg">{error || "Nessun errore trovato"}</p>
                     <button
                         onClick={() => navigate(-1)}
-                        className="mt-4 px-6 py-2 bg-white rounded-xl font-bold text-sm shadow-sm"
+                        className="mt-4 px-6 py-2 bg-[var(--card)] rounded-xl font-bold text-sm text-[var(--foreground)] shadow-sm"
                     >
                         Torna indietro
                     </button>
@@ -236,33 +236,34 @@ export default function ReviewPage() {
     const normalizedSelected = currentQuestion ? normalizeDBAnswer(currentQuestion.selectedOption) : null;
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
+        <div className="min-h-screen bg-[var(--background)] flex flex-col">
             {/* ============================================================= */}
-            {/* TOP BAR (Identical to QuizRunner) */}
+            {/* TOP BAR */}
             {/* ============================================================= */}
-            <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
-                <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto"
-                    style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-                >
+            <header
+                className="sticky top-0 z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--card-border)]"
+                style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+            >
+                <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
                     {/* Left: Close */}
                     <Link
                         to={`/profile/stats/${quizId}`}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--card)] hover:opacity-80 transition-opacity"
                     >
-                        <X className="w-5 h-5 text-slate-600" />
+                        <X className="w-5 h-5 text-[var(--foreground)]" />
                     </Link>
 
                     {/* Center: Title/Counter */}
                     <div className="flex flex-col items-center">
-                        <span className="font-bold text-slate-900 text-sm">
+                        <span className="font-bold text-[var(--foreground)] text-sm">
                             Ripasso Errori
                         </span>
-                        <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                        <span className="text-[10px] text-[var(--muted-foreground)] font-semibold uppercase tracking-wider">
                             Domanda {currentIndex + 1}/{wrongAnswers.length}
                         </span>
                     </div>
 
-                    {/* Right: Spacer to balance layout (or settings if needed) */}
+                    {/* Right: Spacer */}
                     <div className="w-10" />
                 </div>
             </header>
@@ -273,13 +274,13 @@ export default function ReviewPage() {
             <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-32">
                 {/* Meta info */}
                 <div className="mb-3">
-                    <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <span className="text-[12px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
                         {currentIndex + 1} / {wrongAnswers.length} • {currentQuestion.subjectName}
                     </span>
                 </div>
 
                 {/* Question Text */}
-                <h2 className="text-[20px] font-bold text-slate-900 leading-[1.4] mb-8">
+                <h2 className="text-[20px] font-bold text-[var(--foreground)] leading-[1.4] mb-8">
                     {currentQuestion.text}
                 </h2>
 
@@ -300,9 +301,9 @@ export default function ReviewPage() {
                         //   - Show correct as GREEN
                         //   - Show selected as RED
 
-                        let cardStyle = "bg-white border-slate-200";
-                        let badgeStyle = "bg-slate-100 text-slate-500";
-                        let textStyle = "text-slate-700";
+                        let cardStyle = "bg-[var(--card)] border-[var(--card-border)]";
+                        let badgeStyle = "bg-[var(--background)] text-[var(--muted-foreground)]";
+                        let textStyle = "text-[var(--foreground)]";
 
                         // Always show the user's WRONG answer
                         if (isSelectedAnswer) {
@@ -413,7 +414,7 @@ export default function ReviewPage() {
             {/* ============================================================= */}
             {/* BOTTOM NAVIGATOR — clean fixed bar */}
             {/* ============================================================= */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 pb-safe z-40">
+            <div className="fixed bottom-0 left-0 right-0 bg-[var(--background)]/95 backdrop-blur-xl border-t border-[var(--card-border)] pb-safe z-40">
 
                 {/* Question Pills Row */}
                 <div className="px-4 pt-2 pb-1">
@@ -426,8 +427,8 @@ export default function ReviewPage() {
                                     onClick={() => { setCurrentIndex(idx); setShowAnswer(false); }}
                                     className={`w-9 h-9 flex-shrink-0 rounded-xl font-semibold text-[13px] transition-all flex items-center justify-center
                                         ${isActive
-                                            ? 'bg-white text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm'
-                                            : 'bg-slate-100 text-slate-400'}`}
+                                            ? 'bg-[var(--card)] text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm'
+                                            : 'bg-[var(--card)] text-[var(--muted-foreground)]'}`}
                                 >
                                     {idx + 1}
                                 </button>
@@ -443,8 +444,8 @@ export default function ReviewPage() {
                         disabled={currentIndex === 0}
                         className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all
                             ${currentIndex === 0
-                                ? 'bg-slate-100 text-slate-300'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-[0.98]'}`}
+                                ? 'bg-[var(--card)] text-[var(--muted-foreground)] opacity-40'
+                                : 'bg-[var(--card)] text-[var(--foreground)] active:scale-[0.98]'}`}
                     >
                         <ChevronLeft className="w-5 h-5" />
                         Precedente
