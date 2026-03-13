@@ -153,19 +153,29 @@ export default function ProgressLineChart({
     const getY = (value: number) =>
         H - PAD_BOT - ((value - domainMin) / domainRange) * (H - PAD_TOP - PAD_BOT);
 
-    // ── Smooth path ──────────────────────────────────────────────────────────
+    // ── Smooth path (monotone cubic hermite — no overshoot) ────────────────
     const pts = filteredData.map((d, i) => ({ x: getX(i), y: getY(getValue(d)) }));
 
     let pathD = `M ${pts[0].x} ${pts[0].y}`;
-    for (let i = 1; i < pts.length; i++) {
-        const prev = pts[i - 1];
-        const curr = pts[i];
-        const cpX = (prev.x + curr.x) / 2;
-        pathD += ` Q ${cpX} ${prev.y}, ${(cpX + curr.x) / 2} ${(prev.y + curr.y) / 2}`;
-    }
-    if (pts.length > 1) {
-        const last = pts[pts.length - 1];
-        pathD += ` T ${last.x} ${last.y}`;
+    if (pts.length === 2) {
+        // Simple line for 2 points
+        pathD += ` L ${pts[1].x} ${pts[1].y}`;
+    } else {
+        // Catmull-Rom to cubic bezier conversion (tension = 0, no overshoot)
+        for (let i = 0; i < pts.length - 1; i++) {
+            const p0 = pts[Math.max(0, i - 1)];
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const p3 = pts[Math.min(pts.length - 1, i + 2)];
+
+            // Tangent vectors (Catmull-Rom with factor 1/6 for cubic bezier)
+            const cp1x = p1.x + (p2.x - p0.x) / 6;
+            const cp1y = p1.y + (p2.y - p0.y) / 6;
+            const cp2x = p2.x - (p3.x - p1.x) / 6;
+            const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+            pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+        }
     }
 
     const areaD = `${pathD} L ${W - PAD_RIGHT} ${H - PAD_BOT} L ${PAD_LEFT} ${H - PAD_BOT} Z`;
