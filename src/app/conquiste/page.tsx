@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, X, Lock } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/context/AuthContext';
 import { badgeService } from '@/lib/badgeService';
 import { BADGE_DEFINITIONS, BadgeDefinition } from '@/lib/badgeDefinitions';
@@ -783,11 +784,9 @@ export default function ConquistePage() {
             {/* Header */}
             <div className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
                 <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
-                    <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full hover:bg-[var(--card)] active:scale-95 flex items-center justify-center transition-all">
-                        <ArrowLeft className="w-5 h-5 text-[var(--foreground)]" />
-                    </button>
+                    <BackButton />
                     <h1 className="text-base font-black text-[var(--foreground)] tracking-tight">Conquiste</h1>
-                    <div className="w-10" />
+                    <div className="w-9" />
                 </div>
             </div>
 

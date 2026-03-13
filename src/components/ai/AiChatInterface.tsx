@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUp, Bot, User, Sparkles, RotateCcw, ArrowLeft, Mic, Copy, Check, ThumbsUp, ThumbsDown, MoreVertical, Trash2, X, Plus, MessageSquare, Mail, Link2, BookOpen, AlertCircle, ChevronDown } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/Button';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -680,13 +681,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                     className="flex-shrink-0 p-4 flex items-center gap-3 z-20 bg-white dark:bg-black border-b border-gray-100 dark:border-[#1A1A1A]"
                     style={{ paddingTop: 'max(16px, env(safe-area-inset-top, 16px))' }}
                 >
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#1E1E1E] hover:bg-gray-200 dark:hover:bg-[#2A2A2A] flex items-center justify-center transition-colors"
-                        title="Indietro"
-                    >
-                        <ArrowLeft className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                    </button>
+                    <BackButton />
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#1E1E1E] dark:to-[#2A2A2A] border border-gray-200 dark:border-[#333] flex items-center justify-center shadow-inner">
                         <Sparkles className="w-5 h-5 text-black dark:text-white" />
                     </div>

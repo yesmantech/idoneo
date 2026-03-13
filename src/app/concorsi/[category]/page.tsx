@@ -8,11 +8,12 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useConcorsoData } from '@/hooks/useConcorsoData';
 import { getContestBySlug } from '@/lib/data';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, Info, Trophy, Users, Calendar, ArrowRight, Sparkles, X, ChevronRight } from 'lucide-react';
+import { Info, Trophy, Users, Calendar, ArrowRight, Sparkles, X, ChevronRight } from 'lucide-react';
 import { getCategoryStyle } from '@/lib/categoryIcons';
 import TierSLoader from '@/components/ui/TierSLoader';
 import SEOHead from '@/components/seo/SEOHead';
 import { useQueryClient } from '@tanstack/react-query';
+import BackButton from '@/components/ui/BackButton';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function ConcorsoHubPage() {
@@ -101,13 +102,8 @@ export default function ConcorsoHubPage() {
 
         {/* Back button */}
         <div className="absolute top-0 left-0 right-0 z-20 pt-safe px-4">
-          <div className="h-14 flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/40 text-white border border-white/30 hover:bg-white/50 transition-all shadow-sm"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
+          <div className="h-14 flex items-center">
+            <BackButton variant="glass" />
           </div>
         </div>
 

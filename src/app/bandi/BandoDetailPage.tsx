@@ -25,6 +25,7 @@ import {
     ChevronUp,
     Shield
 } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { fetchBandoBySlug, saveBando, unsaveBando, isUserSaved, Bando, EDUCATION_LEVELS } from '@/lib/bandiService';
 import { getCategoryStyle } from '@/lib/categoryIcons';
 import BandoSkeleton from '@/components/bandi/BandoSkeleton';
@@ -76,10 +77,10 @@ export default function BandoDetailPage() {
 
             {/* Navbar (Glass) */}
             <div className="sticky top-0 z-40 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 data-[scrolled=true]:shadow-soft transition-all">
-                <div className="flex items-center justify-between px-4 h-14 max-w-lg lg:max-w-3xl mx-auto">
-                    <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 dark:hover:text-white transition-all">
-                        <ArrowLeft className="w-6 h-6" />
-                    </button>
+                <div className="flex items-center justify-between px-4 h-14 max-w-lg lg:max-w-3xl mx-auto"
+                    style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+                >
+                    <BackButton />
                     <span className="font-bold text-lg bg-gradient-to-r from-brand-blue to-brand-cyan bg-clip-text text-transparent">
                         Dettagli Concorso
                     </span>
