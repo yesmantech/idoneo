@@ -59,16 +59,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             {/* Cinematic Global Texture */}
             <div className="grain-overlay" aria-hidden="true" />
 
-            {/* Fixed top safe area cover to prevent overscroll showing empty area */}
-            {isNativeApp && !isAdmin && (
-                <div
-                    className="fixed top-0 left-0 right-0 z-[100]"
-                    style={{
-                        height: 'env(safe-area-inset-top, 0px)',
-                        backgroundColor: 'var(--background)'
-                    }}
-                />
-            )}
+            {/* Safe area is handled per-page via pt-safe class */}
 
             {/* Sidebar (Desktop) & Drawer (Mobile) */}
             {isAdmin ? <AdminSidebar /> : <Sidebar />}
