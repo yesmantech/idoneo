@@ -56,10 +56,9 @@ export async function initializeNativeApp() {
     if (!Capacitor.isNativePlatform()) return;
 
     try {
-        // Configure Status Bar - dark background with light icons
-        await StatusBar.setStyle({ style: Style.Light });
-        await StatusBar.setBackgroundColor({ color: '#0F172A' });
+        // Configure Status Bar - transparent overlay, dark icons for light backgrounds
         await StatusBar.setOverlaysWebView({ overlay: true });
+        await StatusBar.setStyle({ style: Style.Dark });
 
         // Configure Keyboard behavior - hide accessory bar
         await Keyboard.setAccessoryBarVisible({ isVisible: false });
