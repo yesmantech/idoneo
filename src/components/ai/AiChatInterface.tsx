@@ -588,42 +588,22 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             fetch: async (url, init) => {
                 console.log('[AI Coach] Fetching:', url, 'platform:', Capacitor.getPlatform());
                 try {
-                    // CapacitorHttp patches window.fetch on native to bypass WKWebView's
-                    // cross-origin block. However, it buffers the entire response (no streaming).
-                    // On native: receive full response, then re-emit it as a ReadableStream
-                    // line-by-line with small delays to simulate progressive streaming.
-                    const response = await fetch(url, {
+                    // CapacitorHttp patches window.fetch on native (needed for Supabase etc.)
+                    // BUT it buffers responses — no streaming.
+                    // It saves the original WKWebView fetch as window.CapacitorWebFetch.
+                    // CSP now allows connect-src https://idoneo.ai, so this works.
+                    // CapacitorWebFetch supports ReadableStream → real token-by-token streaming.
+                    const streamingFetch = Capacitor.isNativePlatform()
+                        ? ((window as any).CapacitorWebFetch ?? fetch)
+                        : fetch;
+
+                    const response = await streamingFetch(url, {
                         ...init,
                         mode: 'cors',
                         credentials: 'omit',
                     });
                     console.log('[AI Coach] Response status:', response.status, 'ok:', response.ok);
-
-                    if (!Capacitor.isNativePlatform() || !response.ok) {
-                        return response;
-                    }
-
-                    // Native: simulate streaming by dripping the response line-by-line
-                    const fullText = await response.text();
-                    const lines = fullText.split('\n');
-                    const encoder = new TextEncoder();
-
-                    const stream = new ReadableStream({
-                        async start(controller) {
-                            for (const line of lines) {
-                                controller.enqueue(encoder.encode(line + '\n'));
-                                // Small delay between lines for progressive feel
-                                await new Promise(r => setTimeout(r, 15));
-                            }
-                            controller.close();
-                        }
-                    });
-
-                    return new Response(stream, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: response.headers,
-                    });
+                    return response;
                 } catch (err) {
                     console.error('[AI Coach] Fetch error:', err);
                     throw err;

@@ -20,14 +20,16 @@ const openai = createOpenAI({
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // CORS: Allow Capacitor native WebView origins for streaming
-    const allowedOrigins = ['capacitor://localhost', 'https://localhost'];
+    // CORS: Allow all Capacitor/WebView origins for native streaming
+    const allowedOrigins = ['capacitor://localhost', 'https://localhost', 'http://localhost'];
     const origin = req.headers.origin || '';
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
+    if (allowedOrigins.includes(origin) || origin === '') {
+        // Allow the specific origin, or '*' if no origin header (WKWebView native fetch)
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
     }
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
 
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {

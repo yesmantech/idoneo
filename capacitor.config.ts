@@ -43,9 +43,6 @@ const config: CapacitorConfig = {
   appName: 'Idoneo',
   webDir: 'dist',
   server: {
-    // URL of the development server (useful for Live Reload)
-    // url: 'http://localhost:3000',
-    // cleartext: true,
     // Use HTTPS scheme for better security when using assets
     iosScheme: 'https',
   },
