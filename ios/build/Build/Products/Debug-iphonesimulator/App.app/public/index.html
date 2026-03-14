@@ -14,6 +14,10 @@
   <meta name="author" content="Idoneo" />
   <meta name="robots" content="index, follow" />
 
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://api.openai.com https://*.vercel.app https://fonts.googleapis.com https://fonts.gstatic.com;" />
+
   <!-- Canonical -->
   <link rel="canonical" href="https://idoneo.ai/" />
 
@@ -36,16 +40,16 @@
   <meta name="twitter:image" content="https://idoneo.ai/icon-512x512.png" />
 
   <!-- PWA Meta Tags -->
-  <meta name="theme-color" content="#0F172A" />
+  <meta name="theme-color" content="#F5F5F7" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Idoneo" />
 
-  <!-- Icons -->
-  <link rel="icon" type="image/png" href="/icon-192x192.png" />
-  <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png" />
-  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
+  <!-- Icons & PWA Assets -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -76,16 +80,58 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script type="module" crossorigin src="/assets/index-BBBGEo7o.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/react-vendor-B--z-fyW.js">
-  <link rel="modulepreload" crossorigin href="/assets/router-ClfHAwMg.js">
-  <link rel="modulepreload" crossorigin href="/assets/framer-BdaCTGm4.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-CIvuJI4W.js">
-  <link rel="modulepreload" crossorigin href="/assets/icons-ByDj-hsa.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-QF7jdbCP.css">
+  <script type="module" crossorigin src="/assets/index-D_zIvbVE.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/react-vendor-wiweH7-9.js">
+  <link rel="modulepreload" crossorigin href="/assets/router-YgLwQIvZ.js">
+  <link rel="modulepreload" crossorigin href="/assets/framer-BX4Hb1jw.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-BRrOyjaW.js">
+  <link rel="modulepreload" crossorigin href="/assets/icons-DPVmroup.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-BZ6Pe4pw.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
+  <!-- Global Error Handler for Mobile Debugging -->
+  <script>
+    window.onerror = function (message, source, lineno, colno, error) {
+      var el = document.createElement('div');
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.background = 'white';
+      el.style.color = 'black';
+      el.style.zIndex = '999999';
+      el.style.padding = '20px';
+      el.style.overflow = 'auto';
+      el.style.fontFamily = 'monospace';
+      el.style.fontSize = '12px';
+      el.innerHTML = '<h2 style="color:red; font-size:16px;">Errore Critico</h2>' +
+        '<p><strong>Message:</strong> ' + message + '</p>' +
+        '<p><strong>Source:</strong> ' + source + ':' + lineno + ':' + colno + '</p>' +
+        '<pre style="white-space:pre-wrap;"><strong>Stack:</strong> ' + (error ? error.stack : 'N/A') + '</pre>';
+      document.body.appendChild(el);
+    };
+    window.addEventListener('unhandledrejection', function (event) {
+      var el = document.createElement('div');
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.background = 'white';
+      el.style.color = 'black';
+      el.style.zIndex = '999999';
+      el.style.padding = '20px';
+      el.style.overflow = 'auto';
+      el.style.fontFamily = 'monospace';
+      el.style.fontSize = '12px';
+      el.innerHTML = '<h2 style="color:red; font-size:16px;">Promessa Fallita</h2>' +
+        '<p><strong>Reason:</strong> ' + event.reason + '</p>';
+      document.body.appendChild(el);
+    });
+  </script>
+
   <!-- iOS Overscroll Prevention (allows horizontal swipes) -->
   <script>
     (function () {
@@ -130,10 +176,67 @@
     })();
   </script>
 
+  <style>
+    #boot-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #F5F5F7;
+      /* Light mode default */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999998;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      transition: opacity 0.5s ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #boot-loader {
+        background: #0F172A;
+        color: white;
+      }
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 177, 255, 0.1);
+      border-top: 4px solid #00B1FF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .boot-text {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-size: 18px;
+    }
+  </style>
+
+  <div id="boot-loader">
+    <div class="spinner"></div>
+    <div class="boot-text">IDONEO</div>
+    <div style="font-size: 14px; opacity: 0.6; margin-top: 8px;">Caricamento applicazione...</div>
+  </div>
+
   <!-- Contenitore React -->
   <div id="root"></div>
 
-  <!-- ENTRYPOINT LOCALE: parte da index.tsx -->
 </body>
 
 </html>

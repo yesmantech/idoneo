@@ -1,0 +1,23 @@
+moduledependenciestarget: \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Modules/module.modulemap \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CapacitorCordova.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/System/Library/Frameworks/UIKit.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/AppDelegate.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVViewController.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDV.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVAvailability.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVPlugin.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVPluginResult.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVCommandDelegate.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVInvokedUrlCommand.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/System/Library/Frameworks/WebKit.framework/Modules/module.modulemap \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVURLProtocol.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVScreenOrientationDelegate.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVWebViewProcessPoolFactory.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVAvailabilityDeprecated.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVCommandDelegateImpl.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVPluginManager.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVConfigParser.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/CDVPlugin+Resources.h \
+  /Users/alessandrovalenza/Dev/idoneo/ios/build/Build/Products/Debug-iphonesimulator/Cordova.framework/Headers/NSDictionary+CordovaPreferences.h

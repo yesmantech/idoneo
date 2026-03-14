@@ -17,8 +17,7 @@
 			"splashImmersive": true
 		},
 		"StatusBar": {
-			"style": "LIGHT",
-			"backgroundColor": "#0F172A",
+			"style": "DARK",
 			"overlaysWebView": true
 		},
 		"Keyboard": {
@@ -30,6 +29,9 @@
 				"sound",
 				"alert"
 			]
+		},
+		"CapacitorHttp": {
+			"enabled": true
 		}
 	},
 	"ios": {
@@ -37,7 +39,7 @@
 		"preferredContentMode": "mobile",
 		"allowsLinkPreview": false,
 		"scheme": "idoneo",
-		"backgroundColor": "#0F172A"
+		"backgroundColor": "#FFFFFF"
 	},
 	"packageClassList": [
 		"AppPlugin",
@@ -48,6 +50,7 @@
 		"PushNotificationsPlugin",
 		"SharePlugin",
 		"SplashScreenPlugin",
-		"StatusBarPlugin"
+		"StatusBarPlugin",
+		"SecureStoragePlugin"
 	]
 }
