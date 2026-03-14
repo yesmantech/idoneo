@@ -20,6 +20,20 @@ const openai = createOpenAI({
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+    // CORS: Allow Capacitor native WebView origins for streaming
+    const allowedOrigins = ['capacitor://localhost', 'https://localhost'];
+    const origin = req.headers.origin || '';
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
+    }
+
     try {
         const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
         const { messages, userId } = body || {};

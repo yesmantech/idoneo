@@ -70,6 +70,9 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
+    CapacitorHttp: {
+      enabled: true,
+    },
   },
   ios: {
     // Extend content to edges (no safe area padding)

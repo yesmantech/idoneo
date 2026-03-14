@@ -586,9 +586,19 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             credentials: 'omit',
             headers: { 'Content-Type': 'application/json' },
             fetch: async (url, init) => {
-                console.log('[AI Coach] Fetching:', url, 'mode:', init?.mode);
+                console.log('[AI Coach] Fetching:', url, 'platform:', Capacitor.getPlatform());
                 try {
-                    const response = await fetch(url, {
+                    // On native, CapacitorHttp patches window.fetch to route through the
+                    // native bridge (NSURLSession/OkHttp). This doesn't support ReadableStream,
+                    // so the AI response arrives all at once instead of streaming.
+                    // Capacitor saves the original WebView fetch as window.CapacitorWebFetch.
+                    // We use it here to get proper streaming support.
+                    // CORS is handled by the API endpoint (Access-Control-Allow-Origin).
+                    const nativeFetch = Capacitor.isNativePlatform()
+                        ? ((window as any).CapacitorWebFetch || fetch)
+                        : fetch;
+
+                    const response = await nativeFetch(url, {
                         ...init,
                         mode: 'cors',
                         credentials: 'omit',
