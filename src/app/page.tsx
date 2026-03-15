@@ -83,10 +83,8 @@ export default function HomePage() {
     try { const c = JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}'); return !c?.categories?.length; } catch { return true; }
   });
 
-  // ⚠️ TEMPORARY: Force redirect to onboarding for testing — REMOVE AFTER TESTING!
-  useEffect(() => {
-    navigate('/login');
-  }, [navigate]);
+
+
 
   // Auto-start onboarding for first-time users
   useEffect(() => {
