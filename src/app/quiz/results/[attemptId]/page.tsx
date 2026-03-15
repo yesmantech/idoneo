@@ -631,6 +631,7 @@ export default function QuizResultsPage() {
                                     <Link
                                         key={q.id}
                                         to={`/quiz/explanations/${attemptId}/${q.id}`}
+                                        state={{ attempt }}
                                         className="block bg-[var(--card)] border border-[var(--card-border)] rounded-2xl lg:rounded-3xl p-4 lg:p-5 transition-all hover:shadow-lg hover:-translate-y-0.5 shadow-sm group"
                                     >
                                         <div className="flex items-start gap-3">

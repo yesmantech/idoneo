@@ -21,6 +21,7 @@
 			"overlaysWebView": true
 		},
 		"Keyboard": {
+			"resize": "ionic",
 			"resizeOnFullScreen": true
 		},
 		"PushNotifications": {

@@ -97,13 +97,6 @@ export default function ProfileImageBottomSheet({
                             <div className="flex flex-col gap-[6px] px-3 pb-4">
 
                                 <ActionRow
-                                    icon={<Camera style={{ width: 20, height: 20, color: '#fff' }} />}
-                                    iconBg="#3A3A3C"
-                                    label="Scatta Foto"
-                                    onClick={() => { hapticLight(); onTakePhoto(); }}
-                                />
-
-                                <ActionRow
                                     icon={<ImageIcon style={{ width: 20, height: 20, color: '#fff' }} />}
                                     iconBg="#3A3A3C"
                                     label="Scegli dalla Galleria"

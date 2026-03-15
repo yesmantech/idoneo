@@ -205,10 +205,14 @@ export default function EmojiPickerSheet({
                                         <div
                                             ref={scrollRef}
                                             className="px-3 pb-4"
+                                            onTouchMove={(e) => e.stopPropagation()}
                                             style={{
                                                 maxHeight: '50vh',
-                                                overflowY: 'scroll',
+                                                overflowY: 'auto',
                                                 overflowX: 'hidden',
+                                                WebkitOverflowScrolling: 'touch',
+                                                overscrollBehavior: 'contain',
+                                                touchAction: 'pan-y',
                                             }}
                                         >
                                             <div
@@ -237,7 +241,6 @@ export default function EmojiPickerSheet({
                                                             background: 'transparent',
                                                             cursor: 'pointer',
                                                             padding: 0,
-                                                            touchAction: 'manipulation',
                                                             WebkitTapHighlightColor: 'transparent',
                                                         }}
                                                     >

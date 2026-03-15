@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import BackButton from '@/components/ui/BackButton';
 import {
-    ChevronLeft,
     Trophy,
     Target,
     TrendingUp,
@@ -23,17 +23,13 @@ import {
 // Tier S Informational Page
 // =============================================================================
 export default function PunteggiPage() {
+    const navigate = useNavigate();
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24">
             {/* Header */}
             <header className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
                 <div className="h-14 px-4 flex items-center gap-4 max-w-3xl mx-auto">
-                    <Link
-                        to="/"
-                        className="p-2 rounded-full bg-slate-100 dark:bg-[#111] hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </Link>
+                    <BackButton onClick={() => navigate(-1)} />
                     <h1 className="text-lg font-bold">Come Funziona</h1>
                 </div>
             </header>

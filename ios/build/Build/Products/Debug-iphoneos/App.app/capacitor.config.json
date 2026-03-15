@@ -1,0 +1,57 @@
+{
+	"appId": "com.idoneo.app",
+	"appName": "Idoneo",
+	"webDir": "dist",
+	"server": {
+		"iosScheme": "https"
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"launchAutoHide": true,
+			"backgroundColor": "#00B1FF",
+			"showSpinner": false,
+			"iosSpinnerStyle": "small",
+			"spinnerColor": "#ffffff",
+			"splashFullScreen": true,
+			"splashImmersive": true
+		},
+		"StatusBar": {
+			"style": "DARK",
+			"overlaysWebView": true
+		},
+		"Keyboard": {
+			"resize": "body",
+			"resizeOnFullScreen": true
+		},
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		},
+		"CapacitorHttp": {
+			"enabled": true
+		}
+	},
+	"ios": {
+		"contentInset": "never",
+		"preferredContentMode": "mobile",
+		"allowsLinkPreview": false,
+		"scheme": "idoneo",
+		"backgroundColor": "#FFFFFF"
+	},
+	"packageClassList": [
+		"AppPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"CAPNetworkPlugin",
+		"PreferencesPlugin",
+		"PushNotificationsPlugin",
+		"SharePlugin",
+		"SplashScreenPlugin",
+		"StatusBarPlugin",
+		"SecureStoragePlugin"
+	]
+}

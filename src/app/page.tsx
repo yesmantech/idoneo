@@ -14,6 +14,7 @@
  */
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // TEMPORARY: for testing redirect
 import { Plus } from "lucide-react";
 import { getCategories, getAllSearchableItems, type Category, type SearchItem } from "../lib/data";
 import { useAuth } from "@/context/AuthContext";
@@ -31,61 +32,107 @@ import { fetchRecentlyUsed, fetchNewArrivals, fetchMostPopular, fetchRecentCateg
 // =============================================================================
 // MAIN HOME PAGE
 // =============================================================================
-export default function HomePage() {
-  const { profile, user } = useAuth();
-  const { hasCompletedContext, startOnboarding } = useOnboarding();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [searchItems, setSearchItems] = useState<SearchItem[]>([]);
-  const [loading, setLoading] = useState(true);
+const HOME_CACHE_KEY = 'idoneo_home_cache';
+const HOME_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-  // New section states
-  const [recentlyUsed, setRecentlyUsed] = useState<RecentlyUsedItem[]>([]);
-  const [newArrivals, setNewArrivals] = useState<NewArrivalQuiz[]>([]);
-  const [popularQuizzes, setPopularQuizzes] = useState<PopularQuiz[]>([]);
-  const [recentCategories, setRecentCategories] = useState<Category[]>([]);
+function readHomeCache(userId: string | undefined) {
+  try {
+    const raw = localStorage.getItem(HOME_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed.userId !== (userId ?? 'anon')) return null; // different user
+    if (Date.now() - parsed.ts > HOME_CACHE_TTL) return null; // expired
+    return parsed;
+  } catch { return null; }
+}
+
+function writeHomeCache(userId: string | undefined, data: object) {
+  try {
+    localStorage.setItem(HOME_CACHE_KEY, JSON.stringify({ userId: userId ?? 'anon', ts: Date.now(), ...data }));
+  } catch { /* quota exceeded, ignore */ }
+}
+
+export default function HomePage() {
+  const { profile, user, loading: authLoading } = useAuth();
+  const { hasCompletedContext, startOnboarding } = useOnboarding();
+  const navigate = useNavigate(); // TEMPORARY: for testing redirect
+
+  // ── INSTANT: lazy initializers read localStorage synchronously ─────────────
+  // useState's lazy initializer (() => ...) runs exactly once on mount,
+  // before auth resolves. This gives us instant content from cache.
+  const [categories, setCategories] = useState<Category[]>(() => {
+    try { return JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}')?.categories ?? []; } catch { return []; }
+  });
+  const [searchItems, setSearchItems] = useState<SearchItem[]>(() => {
+    try { return JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}')?.searchItems ?? []; } catch { return []; }
+  });
+  const [recentlyUsed, setRecentlyUsed] = useState<RecentlyUsedItem[]>(() => {
+    try { return JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}')?.recentlyUsed ?? []; } catch { return []; }
+  });
+  const [newArrivals, setNewArrivals] = useState<NewArrivalQuiz[]>(() => {
+    try { return JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}')?.newArrivals ?? []; } catch { return []; }
+  });
+  const [popularQuizzes, setPopularQuizzes] = useState<PopularQuiz[]>(() => {
+    try { return JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}')?.popularQuizzes ?? []; } catch { return []; }
+  });
+  const [recentCategories, setRecentCategories] = useState<Category[]>(() => {
+    try { return JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}')?.recentCategories ?? []; } catch { return []; }
+  });
+  // loading=false if we have cached categories (enough to show the page)
+  const [loading, setLoading] = useState<boolean>(() => {
+    try { const c = JSON.parse(localStorage.getItem(HOME_CACHE_KEY) || '{}'); return !c?.categories?.length; } catch { return true; }
+  });
+
+  // ⚠️ TEMPORARY: Force redirect to onboarding for testing — REMOVE AFTER TESTING!
+  useEffect(() => {
+    navigate('/login');
+  }, [navigate]);
 
   // Auto-start onboarding for first-time users
   useEffect(() => {
     if (!loading && !hasCompletedContext('homepage')) {
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        startOnboarding('homepage');
-      }, 500);
+      const timer = setTimeout(() => startOnboarding('homepage'), 500);
       return () => clearTimeout(timer);
     }
   }, [loading, hasCompletedContext, startOnboarding]);
 
+  // ── BACKGROUND: refresh data from network ─────────────────────────────────
+  // Runs after auth resolves. Fetches fresh data and updates both state
+  // and localStorage cache. The UI updates silently without any shift
+  // because sections already have data from cache.
   useEffect(() => {
-    // Core data
+    if (authLoading) return;
+
     Promise.all([
       getCategories(),
-      getAllSearchableItems()
-    ]).then(([cats, items]) => {
-      setCategories(cats);
-      setSearchItems(items);
+      getAllSearchableItems(),
+      user?.id ? fetchRecentlyUsed(user.id, 5) : Promise.resolve([]),
+      fetchNewArrivals(30, 10),
+      fetchMostPopular(5),
+      fetchRecentCategories(8),
+    ]).then(([cats, items, recent, arrivals, popular, recCats]) => {
+      const data = {
+        categories: cats as Category[],
+        searchItems: items as SearchItem[],
+        recentlyUsed: recent as RecentlyUsedItem[],
+        newArrivals: arrivals as NewArrivalQuiz[],
+        popularQuizzes: popular as PopularQuiz[],
+        recentCategories: recCats as Category[],
+      };
+      setCategories(data.categories);
+      setSearchItems(data.searchItems);
+      setRecentlyUsed(data.recentlyUsed);
+      setNewArrivals(data.newArrivals);
+      setPopularQuizzes(data.popularQuizzes);
+      setRecentCategories(data.recentCategories);
       setLoading(false);
+      writeHomeCache(user?.id, data);
     });
 
-    // New sections data (non-blocking)
-    fetchNewArrivals(30, 10).then(setNewArrivals);
-    fetchMostPopular(5).then(setPopularQuizzes);
-    fetchRecentCategories(8).then(setRecentCategories);
-
-    // Offline Sync Trigger
     import("@/lib/offlineService").then(({ offlineService }) => {
-      if (navigator.onLine) {
-        offlineService.syncAndClean().then(count => {
-        });
-      }
+      if (navigator.onLine) offlineService.syncAndClean();
     });
-  }, []);
-
-  // Fetch recently used when user is available
-  useEffect(() => {
-    if (user?.id) {
-      fetchRecentlyUsed(user.id, 5).then(setRecentlyUsed);
-    }
-  }, [user?.id]);
+  }, [authLoading, user?.id]);
 
   // Personalization: if user completed onboarding with selected categories,
   // show those first. Otherwise fall back to generic top 8.
@@ -126,10 +173,16 @@ export default function HomePage() {
         </Reveal>
 
         {/* 3. RECENTLY USED - Quick access for returning users */}
-        {recentlyUsed.length > 0 && (
+        {/* Always reserve space while auth is resolving (prevents CLS).
+            Once settled: show for logged-in users (even empty → skeleton),
+            hide entirely for anonymous users with no history. */}
+        {(authLoading || !!user?.id || recentlyUsed.length > 0) && (
           <section className="mb-8 lg:mb-10">
             <Reveal width="100%" delay={0.4}>
-              <RecentlyUsedSection items={recentlyUsed} />
+              <RecentlyUsedSection
+                items={recentlyUsed}
+                loading={authLoading || (!!user?.id && recentlyUsed.length === 0)}
+              />
             </Reveal>
           </section>
         )}

@@ -30,7 +30,7 @@
  * - Regular users see `LeaderboardViewLegacy`
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useLocation } from 'react-router-dom';
 import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
@@ -46,6 +46,27 @@ import InfoModal from '@/components/leaderboard/InfoModal';
 import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';
 import SEOHead from '@/components/seo/SEOHead';
 import { Button } from '@/components/ui/Button';
+
+// ── localStorage SWR cache helpers ─────────────────────────────────────────
+const LB_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+function lbCacheKey(selection: string, userId?: string) {
+    return `lb_cache_${selection}_${userId ?? 'anon'}`;
+}
+function readLbCache(selection: string, userId?: string) {
+    try {
+        const raw = localStorage.getItem(lbCacheKey(selection, userId));
+        if (!raw) return null;
+        const p = JSON.parse(raw);
+        if (Date.now() - p.ts > LB_CACHE_TTL) return null;
+        return p;
+    } catch { return null; }
+}
+function writeLbCache(selection: string, userId: string | undefined, data: object) {
+    try {
+        localStorage.setItem(lbCacheKey(selection, userId), JSON.stringify({ ts: Date.now(), ...data }));
+    } catch { }
+}
+
 
 function LeagueCountdown() {
     const [timeLeft, setTimeLeft] = useState('--g --o --m');
@@ -113,11 +134,19 @@ export default function UnifiedLeaderboardPage() {
     const [activeQuizzes, setActiveQuizzes] = useState<QuizOption[]>([]);
     const [otherQuizzes, setOtherQuizzes] = useState<QuizOption[]>([]);
 
-    // Data State
-    const [data, setData] = useState<LeaderboardEntry[]>([]);
-    const [userEntry, setUserEntry] = useState<LeaderboardEntry | null>(null);
-    const [participantsCount, setParticipantsCount] = useState(0);
-    const [loading, setLoading] = useState(true);
+    // Data State — lazy initializers from localStorage for instant render
+    const [data, setData] = useState<LeaderboardEntry[]>(() => {
+        try { return readLbCache('xp', undefined)?.data ?? []; } catch { return []; }
+    });
+    const [userEntry, setUserEntry] = useState<LeaderboardEntry | null>(() => {
+        try { return readLbCache('xp', undefined)?.userEntry ?? null; } catch { return null; }
+    });
+    const [participantsCount, setParticipantsCount] = useState<number>(() => {
+        try { return readLbCache('xp', undefined)?.participantsCount ?? 0; } catch { return 0; }
+    });
+    const [loading, setLoading] = useState<boolean>(() => {
+        try { return !readLbCache('xp', undefined)?.data?.length; } catch { return true; }
+    });
 
     // 1. Fetch Options (Active & Others)
     const { startOnboarding, hasCompletedContext, isActive: isTourActive, activeContext } = useOnboarding();
@@ -180,17 +209,25 @@ export default function UnifiedLeaderboardPage() {
 
     // 2. Fetch Leaderboard Data on Selection Change
     useEffect(() => {
-        async function loadLeaderboard() {
+        // Show cached data immediately (no loading flash)
+        const cached = readLbCache(selection, user?.id);
+        if (cached?.data?.length) {
+            setData(cached.data);
+            setParticipantsCount(cached.participantsCount ?? 0);
+            setUserEntry(cached.userEntry ?? null);
+            setLoading(false);
+        } else {
             setLoading(true);
+        }
+
+        async function loadLeaderboard() {
             try {
                 let entries: LeaderboardEntry[] = [];
                 let pCount = 0;
                 let personalEntry: LeaderboardEntry | null = null;
 
                 if (selection === 'xp') {
-                    // Fetch Active Season ID
                     const activeSeasonId = await xpService.getActiveSeasonId();
-
                     const [topEntries, total, myRank] = await Promise.all([
                         leaderboardService.getXPLeaderboard(activeSeasonId),
                         leaderboardService.getXPParticipantsCount(activeSeasonId),
@@ -220,6 +257,7 @@ export default function UnifiedLeaderboardPage() {
                 setData(entries);
                 setParticipantsCount(pCount);
                 setUserEntry(personalEntry);
+                writeLbCache(selection, user?.id, { data: entries, participantsCount: pCount, userEntry: personalEntry });
             } catch (error) {
                 console.error("Error loading leaderboard", error);
             } finally {
@@ -228,6 +266,7 @@ export default function UnifiedLeaderboardPage() {
         }
         loadLeaderboard();
     }, [selection, user, location.key]);
+
 
     // Computed Props
     const isXP = selection === 'xp';

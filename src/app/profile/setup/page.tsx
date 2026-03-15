@@ -70,11 +70,11 @@ export default function ProfileSetupPage() {
                 setAvatarUrl(profile.avatar_url);
             } else {
                 // Set random default mascot for new users
-                setAvatarUrl(getRandomMascot());
+                setAvatarUrl('emoji:🦦:#007AFF');
             }
         } else {
             // No profile yet, preload a mascot
-            setAvatarUrl(getRandomMascot());
+            setAvatarUrl('emoji:🦦:#007AFF');
         }
     }, [profile]);
 
@@ -328,7 +328,7 @@ export default function ProfileSetupPage() {
                 }}
                 onRestoreDefault={() => {
                     setShowImageSheet(false);
-                    setAvatarUrl(getRandomMascot());
+                    setAvatarUrl('emoji:🦦:#007AFF');
                     hapticLight();
                 }}
             />
@@ -337,7 +337,7 @@ export default function ProfileSetupPage() {
             <EmojiPickerSheet
                 isOpen={showEmojiPicker}
                 onClose={() => setShowEmojiPicker(false)}
-                initialEmoji={avatarUrl?.startsWith('emoji:') ? avatarUrl.split(':')[1] : '😀'}
+                initialEmoji={avatarUrl?.startsWith('emoji:') ? avatarUrl.split(':')[1] : '🦦'}
                 initialColor={avatarUrl?.startsWith('emoji:') ? avatarUrl.split(':').slice(2).join(':') : '#007AFF'}
                 onSave={(emoji, bgColor) => {
                     setAvatarUrl(`emoji:${emoji}:${bgColor}`);

@@ -45,7 +45,7 @@ export default function StepPreferences({ data, onChange, onNext, canAdvance }: 
     };
 
     return (
-        <div className="flex-1 flex flex-col px-6 py-6 overflow-y-auto">
+        <div className="flex-1 flex flex-col px-6 py-6 overflow-y-auto pb-28">
             {/* Headline */}
             <div className="space-y-2 mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
@@ -119,11 +119,8 @@ export default function StepPreferences({ data, onChange, onNext, canAdvance }: 
                 </div>
             </div>
 
-            {/* Spacer */}
-            <div className="flex-1" />
-
-            {/* CTA */}
-            <div className="pt-4 pb-[env(safe-area-inset-bottom)] sticky bottom-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent pt-8">
+            {/* Fixed CTA at bottom */}
+            <div className="fixed bottom-0 left-0 right-0 px-6 pb-safe pt-3 bg-[var(--background)]/95 backdrop-blur-md z-40">
                 <Button variant="primary" size="lg" fullWidth onClick={onNext} disabled={!canAdvance}>
                     Continua
                 </Button>

@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Trophy, TrendingUp, AlertTriangle, CheckCircle2, BarChart3, Info, X, Sparkles } from 'lucide-react';
+import { Trophy, TrendingUp, AlertTriangle, CheckCircle2, BarChart3, Info, X, Sparkles } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import SEOHead from '@/components/seo/SEOHead';
 
 // ============================================
@@ -60,12 +61,7 @@ export default function PreparazionePage() {
             {/* Header */}
             <div className="bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
                 <div className="px-4 h-14 flex items-center gap-3">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100/50 dark:bg-[#111]/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
-                    >
-                        <ChevronLeft className="w-6 h-6" />
-                    </button>
+                        <BackButton />
                     <h1 className="text-lg font-bold text-[var(--foreground)]">Livello di Preparazione</h1>
                 </div>
             </div>

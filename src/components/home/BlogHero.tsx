@@ -118,8 +118,9 @@ function BlogHeroSkeleton() {
 // ================== MAIN COMPONENT ==================
 
 export default function BlogHero() {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [loading, setLoading] = useState(true);
+    // Start with placeholder posts immediately — no loading state.
+    // Real posts merge in silently from Supabase in background.
+    const [posts, setPosts] = useState<BlogPost[]>(PLACEHOLDER_POSTS);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -132,37 +133,23 @@ export default function BlogHero() {
                     .order('published_at', { ascending: false })
                     .limit(8);
 
-                // Merge fetched data with placeholders if fetched data is scarce
-                // For demonstration, we'll ALWAYS add placeholders if we have few posts.
-                // In production, we might want to remove this or make it conditional on content population.
-
                 const fetchedPosts = (data as unknown as BlogPost[]) || [];
-                const combinedPosts = [...fetchedPosts, ...PLACEHOLDER_POSTS];
-
-                // Deduplicate by ID just in case
-                const uniquePosts = Array.from(new Map(combinedPosts.map(p => [p.id, p])).values());
-
-                setPosts(uniquePosts);
+                if (fetchedPosts.length > 0) {
+                    const combined = [...fetchedPosts, ...PLACEHOLDER_POSTS];
+                    const unique = Array.from(new Map(combined.map(p => [p.id, p])).values());
+                    setPosts(unique);
+                }
             } catch (err) {
                 console.error('Failed to fetch blog posts:', err);
-                // Fallback to placeholders on error
-                setPosts(PLACEHOLDER_POSTS);
-            } finally {
-                setLoading(false);
+                // Already showing placeholders, nothing to do
             }
         };
-
         fetchPosts();
     }, []);
 
-    if (loading) return <BlogHeroSkeleton />;
-
-    // Ensure we have something to show
-    const displayPosts = posts.length > 0 ? posts : PLACEHOLDER_POSTS;
-
     return (
         <section className="w-full pt-[max(1.5rem,env(safe-area-inset-top))] bg-slate-50/50 dark:bg-black/50 overflow-hidden">
-            <BlogCarousel posts={displayPosts} />
+            <BlogCarousel posts={posts} />
         </section>
     );
 }

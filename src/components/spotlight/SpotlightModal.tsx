@@ -50,7 +50,8 @@ import {
     Shield,
     MapPin,
     Briefcase,
-    Activity
+    Activity,
+    SlidersHorizontal
 } from 'lucide-react';
 import Fuse from 'fuse.js';
 import { useSpotlight } from '@/context/SpotlightContext';
@@ -61,6 +62,7 @@ import { hapticLight, hapticSelection } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import { analytics } from '@/lib/analytics';
 import { getCategoryStyle } from '@/lib/categoryIcons';
+import { useWindowHeight } from '@/hooks/useKeyboardHeight';
 
 // ============================================================================
 // TYPES & CONFIG
@@ -152,6 +154,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
+    const keyboardHeight = useWindowHeight();
 
     // Fetch search items when modal opens (with caching)
     useEffect(() => {
@@ -355,328 +358,257 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-[8vh] sm:pt-[12vh] px-4">
-                {/* Backdrop with blur */}
+            <div
+                className="fixed inset-0 z-[9999] flex items-end sm:items-start sm:justify-center sm:pt-[10vh] sm:px-4"
+            >
+                {/* Backdrop */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
+                    transition={{ duration: 0.2 }}
                     onClick={close}
-                    className="absolute inset-0 bg-slate-950/60 backdrop-blur-xl"
+                    className="absolute inset-0 bg-black/40 dark:bg-black/60"
                 />
 
-                {/* Spotlight Window */}
+                {/* Spotlight Sheet */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.96, y: -20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96, y: -20 }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-                    className="relative w-full max-w-2xl bg-white/90 dark:bg-black/90 backdrop-blur-2xl rounded-[32px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] border border-white/20 dark:border-white/10 overflow-hidden flex flex-col max-h-[75vh]"
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 40 }}
+                    transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+                    className="relative w-full sm:max-w-xl bg-[var(--card)] rounded-t-[32px] sm:rounded-[28px] shadow-2xl flex flex-col overflow-hidden"
+                    style={{
+                        maxHeight: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px)` : '82dvh',
+                        border: '1px solid var(--card-border)',
+                        transition: 'max-height 0.28s cubic-bezier(0.33, 1, 0.68, 1)',
+                    }}
                     onKeyDown={handleKeyDown}
                 >
-                    {/* Cinematic Grain Overlay */}
-                    <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]"
-                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
-                    />
-                    {/* Decorative gradient border */}
-                    <div className="absolute inset-0 rounded-[28px] p-[1px] bg-gradient-to-br from-[#00B1FF]/20 via-transparent to-[#00B1FF]/10 pointer-events-none" />
+                    {/* Drag handle (mobile only) */}
+                    <div className="sm:hidden w-10 h-1 rounded-full bg-[var(--foreground)] opacity-10 mx-auto mt-3 mb-0 shrink-0" />
 
-                    {/* Search Input */}
-                    <form onSubmit={handleSearch} className="relative shrink-0">
-                        <div className="flex items-center gap-4 px-6 py-5 border-b border-slate-100 dark:border-slate-800">
-                            <div className="relative">
-                                <Search className="w-6 h-6 text-[#00B1FF]" />
-                                <motion.div
-                                    animate={{ scale: [1, 1.2, 1] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                    className="absolute inset-0 bg-[#00B1FF]/20 rounded-full blur-md"
-                                />
-                            </div>
+                    {/* ── SEARCH BAR ── */}
+                    <form onSubmit={handleSearch} className="shrink-0 px-4 pt-4 pb-3">
+                        <div
+                            className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                            style={{ background: 'var(--background)' }}
+                        >
+                            <Search className="w-5 h-5 shrink-0" style={{ color: '#00B1FF' }} />
                             <input
                                 ref={inputRef}
                                 type="text"
-                                placeholder="Cerca concorsi, profili, azioni..."
+                                placeholder="Cerca concorsi, profili..."
                                 value={query}
                                 onChange={(e) => {
                                     setQuery(e.target.value);
                                     setSelectedIndex(0);
                                 }}
-                                className="flex-1 bg-transparent text-xl font-bold tracking-tight text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-medium focus:outline-none"
+                                className="flex-1 bg-transparent text-[17px] font-semibold text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-30 focus:outline-none"
                             />
-                            <div className="flex items-center gap-2">
-                                {/* Keyboard hint */}
-                                <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-[#111] rounded-lg">
-                                    <kbd className="text-[10px] font-bold text-slate-500 dark:text-slate-400">ESC</kbd>
-                                </div>
+                            {query ? (
                                 <button
                                     type="button"
-                                    onClick={close}
-                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                                    onClick={() => setQuery('')}
+                                    className="p-1 rounded-full"
+                                    style={{ background: 'var(--card-border)' }}
                                 >
-                                    <X className="w-5 h-5 text-slate-400" />
+                                    <X className="w-3.5 h-3.5 text-[var(--foreground)] opacity-60" />
                                 </button>
-                            </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => { close(); navigate('/concorsi/search'); }}
+                                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors active:scale-95"
+                                    style={{ background: 'var(--background)' }}
+                                >
+                                    <SlidersHorizontal className="w-[18px] h-[18px]" style={{ color: '#00B1FF' }} />
+                                </button>
+                            )}
                         </div>
                     </form>
 
-                    {/* Results Area */}
+                    {/* ── RESULTS ── */}
                     <div
                         ref={listRef}
-                        className="flex-1 overflow-y-auto overscroll-contain py-3 scrollbar-hide"
+                        className="flex-1 overflow-y-auto overscroll-contain scrollbar-hide pb-safe"
                     >
                         {query.trim() ? (
                             /* Search Results */
                             searchResults.length > 0 ? (
-                                <div className="px-3">
-                                    <div className="px-4 py-2 flex items-center justify-between">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                            Risultati
-                                        </span>
-                                        <span className="text-[10px] font-medium text-slate-400">
-                                            {searchResults.length} trovati
+                                <div>
+                                    <div className="px-6 py-2">
+                                        <span className="text-[10px] font-black text-[var(--foreground)] opacity-40 uppercase tracking-widest">
+                                            {searchResults.length} Risultati
                                         </span>
                                     </div>
-                                    {searchResults.map((item, idx) => {
+                                    {searchResults.map((item) => {
                                         const itemIndex = currentIndex++;
+                                        const isSelected = selectedIndex === itemIndex;
                                         return (
                                             <button
                                                 key={item.id}
                                                 data-index={itemIndex}
                                                 onClick={() => handleSelectItem({ type: 'search', data: item })}
-                                                className={cn(
-                                                    "w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-4 transition-all duration-150 group",
-                                                    selectedIndex === itemIndex
-                                                        ? "bg-[#00B1FF]/10 dark:bg-[#00B1FF]/15"
-                                                        : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                                )}
+                                                className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
+                                                style={isSelected ? { background: 'var(--background)' } : {}}
                                             >
-                                                {renderItemIcon(item, selectedIndex === itemIndex)}
+                                                {renderItemIcon(item, isSelected)}
                                                 <div className="flex-1 min-w-0">
-                                                    <div className={cn(
-                                                        "text-[15px] font-bold truncate transition-colors",
-                                                        selectedIndex === itemIndex ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"
-                                                    )}>
-                                                        {item.title}
-                                                    </div>
-                                                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                                                        {getTypeLabel(item.type)}
-                                                    </div>
+                                                    <div className="text-[15px] font-bold text-[var(--foreground)] truncate">{item.title}</div>
+                                                    <div className="text-[11px] font-semibold text-[var(--foreground)] opacity-40 uppercase tracking-wide">{getTypeLabel(item.type)}</div>
                                                 </div>
-                                                <ChevronRight className={cn(
-                                                    "w-5 h-5 transition-all",
-                                                    selectedIndex === itemIndex
-                                                        ? "text-[#00B1FF] opacity-100 translate-x-0"
-                                                        : "text-slate-300 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
-                                                )} />
+                                                <ChevronRight className="w-4 h-4 opacity-30 shrink-0" style={{ color: 'var(--foreground)' }} />
                                             </button>
                                         );
                                     })}
                                 </div>
                             ) : (
-                                <div className="px-6 py-12 text-center">
-                                    <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-slate-100 dark:bg-[#111] flex items-center justify-center">
-                                        <Search className="w-7 h-7 text-slate-300 dark:text-slate-600" />
+                                <div className="px-6 py-14 text-center">
+                                    <div
+                                        className="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center"
+                                        style={{ background: 'var(--background)' }}
+                                    >
+                                        <Search className="w-6 h-6 text-[var(--foreground)] opacity-25" />
                                     </div>
-                                    <p className="text-slate-500 dark:text-slate-400 font-medium">
-                                        Nessun risultato per "{query}"
-                                    </p>
-                                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
-                                        Prova con un termine diverso
-                                    </p>
+                                    <p className="text-[15px] font-semibold text-[var(--foreground)] opacity-50">Nessun risultato</p>
+                                    <p className="text-[13px] text-[var(--foreground)] opacity-30 mt-1">Prova con un termine diverso</p>
                                 </div>
                             )
                         ) : (
-                            /* Default State: Continue, Recent, Actions */
-                            <div className="space-y-6">
+                            /* Default: Continue, Recent, Explore */
+                            <div className="space-y-0">
                                 {/* Continue Section */}
                                 {activeQuizzes.length > 0 && (
-                                    <div className="px-3">
-                                        <div className="px-4 py-2 flex items-center gap-2">
-                                            <Zap className="w-4 h-4 text-amber-500" />
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <div>
+                                        <div className="px-6 py-2 pt-1">
+                                            <span className="text-[10px] font-black text-[var(--foreground)] opacity-40 uppercase tracking-widest flex items-center gap-1.5">
+                                                <Zap className="w-3.5 h-3.5 text-amber-500" />
                                                 Continua a prepararti
                                             </span>
                                         </div>
                                         {activeQuizzes.slice(0, 3).map((quiz) => {
                                             const itemIndex = currentIndex++;
+                                            const isSelected = selectedIndex === itemIndex;
                                             return (
                                                 <button
                                                     key={quiz.id}
                                                     data-index={itemIndex}
                                                     onClick={() => handleSelectItem({ type: 'continue', data: quiz })}
-                                                    className={cn(
-                                                        "w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-4 transition-all duration-150 group",
-                                                        selectedIndex === itemIndex
-                                                            ? "bg-amber-50 dark:bg-amber-900/20"
-                                                            : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                                    )}
+                                                    className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
+                                                    style={isSelected ? { background: 'var(--background)' } : {}}
                                                 >
-                                                    <div className={cn(
-                                                        "w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all",
-                                                        selectedIndex === itemIndex
-                                                            ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-500/25"
-                                                            : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
-                                                    )}>
-                                                        <TrendingUp className="w-5 h-5" />
+                                                    <div className="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 bg-amber-100 dark:bg-amber-900/30">
+                                                        <TrendingUp className="w-5 h-5 text-amber-500" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="text-[15px] font-bold text-slate-900 dark:text-white truncate">
-                                                            {quiz.title}
-                                                        </div>
+                                                        <div className="text-[15px] font-bold text-[var(--foreground)] truncate">{quiz.title}</div>
                                                         {quiz.role?.title && (
-                                                            <div className="text-[11px] font-medium text-slate-400 truncate">
-                                                                {quiz.role.title}
-                                                            </div>
+                                                            <div className="text-[12px] text-[var(--foreground)] opacity-40 truncate">{quiz.role.title}</div>
                                                         )}
                                                     </div>
                                                     <div className={cn(
-                                                        "px-2.5 py-1 rounded-lg text-[12px] font-black",
-                                                        quiz.accuracy >= 80
-                                                            ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
-                                                            : quiz.accuracy >= 60
-                                                                ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
-                                                                : "bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400"
-                                                    )}>
-                                                        {quiz.accuracy}%
-                                                    </div>
+                                                        "px-2 py-0.5 rounded-full text-[12px] font-black",
+                                                        quiz.accuracy >= 80 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" :
+                                                        quiz.accuracy >= 60 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600" :
+                                                        "bg-rose-100 dark:bg-rose-900/30 text-rose-500"
+                                                    )}>{quiz.accuracy}%</div>
                                                 </button>
                                             );
                                         })}
+                                        <div className="h-px mx-4 my-1" style={{ background: 'var(--card-border)' }} />
                                     </div>
                                 )}
 
                                 {/* Recent Searches */}
                                 {recentSearches.length > 0 && (
-                                    <div className="px-3">
-                                        <div className="px-4 py-2 flex items-center gap-2">
-                                            <Clock className="w-4 h-4 text-slate-400" />
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <div>
+                                        <div className="px-6 py-2">
+                                            <span className="text-[10px] font-black text-[var(--foreground)] opacity-40 uppercase tracking-widest flex items-center gap-1.5">
+                                                <Clock className="w-3.5 h-3.5" />
                                                 Ricerche recenti
                                             </span>
                                         </div>
-                                        {recentSearches.slice(0, 3).map((search) => {
+                                        {recentSearches.slice(0, 4).map((search) => {
                                             const itemIndex = currentIndex++;
+                                            const isSelected = selectedIndex === itemIndex;
                                             return (
                                                 <button
                                                     key={search}
                                                     data-index={itemIndex}
                                                     onClick={() => handleSelectItem({ type: 'recent', data: search })}
-                                                    className={cn(
-                                                        "w-full text-left px-4 py-3 rounded-2xl flex items-center gap-4 transition-all duration-150 group",
-                                                        selectedIndex === itemIndex
-                                                            ? "bg-slate-100 dark:bg-[#111]"
-                                                            : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                                    )}
+                                                    className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
+                                                    style={isSelected ? { background: 'var(--background)' } : {}}
                                                 >
-                                                    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#111] flex items-center justify-center shrink-0">
-                                                        <Clock className="w-4 h-4 text-slate-400" />
+                                                    <div
+                                                        className="w-9 h-9 rounded-[12px] flex items-center justify-center shrink-0"
+                                                        style={{ background: 'var(--background)' }}
+                                                    >
+                                                        <Clock className="w-4 h-4 text-[var(--foreground)] opacity-40" />
                                                     </div>
-                                                    <span className="text-[14px] font-medium text-slate-600 dark:text-slate-300 truncate">
-                                                        {search}
-                                                    </span>
-                                                    <ArrowRight className="w-4 h-4 text-slate-300 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    <span className="text-[15px] font-medium text-[var(--foreground)] opacity-70 truncate flex-1">{search}</span>
+                                                    <ArrowRight className="w-4 h-4 opacity-20 shrink-0" style={{ color: 'var(--foreground)' }} />
                                                 </button>
                                             );
                                         })}
+                                        <div className="h-px mx-4 my-1" style={{ background: 'var(--card-border)' }} />
                                     </div>
                                 )}
 
-                                {/* Smart Browse Section (Tier S) */}
-                                <div className="px-3">
-                                    <div className="px-4 py-3 flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Sparkles className="w-4 h-4 text-brand-cyan" />
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                                Esplora Concorsi
-                                            </span>
-                                        </div>
+                                {/* Explore Concorsi */}
+                                <div className="px-4 py-3">
+                                    <div className="px-2 pb-2">
+                                        <span className="text-[10px] font-black text-[var(--foreground)] opacity-40 uppercase tracking-widest flex items-center gap-1.5">
+                                            <Sparkles className="w-3.5 h-3.5 text-[#00B1FF]" />
+                                            Esplora Concorsi
+                                        </span>
                                     </div>
 
+                                    {/* Advanced Search CTA */}
+                                    <button
+                                        onClick={() => { close(); navigate('/concorsi/search'); }}
+                                        className="w-full mb-3 p-4 rounded-[20px] flex items-center justify-between group transition-all active:scale-[0.98]"
+                                        style={{ background: '#00B1FF' }}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-[12px] bg-white/20 flex items-center justify-center">
+                                                <Search className="w-4.5 h-4.5 text-white" />
+                                            </div>
+                                            <div className="text-left">
+                                                <div className="font-bold text-white text-[15px]">Ricerca Avanzata</div>
+                                                <div className="text-white/70 text-[12px] font-medium">Filtra per categoria e tipo</div>
+                                            </div>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform" />
+                                    </button>
+
+                                    {/* Quick category chips */}
                                     <div className="grid grid-cols-2 gap-2">
-                                        {/* Advanced Search - Tier S Button */}
-                                        <button
-                                            onClick={() => {
-                                                close();
-                                                navigate('/concorsi/search');
-                                            }}
-                                            className="col-span-2 p-4 rounded-[24px] bg-brand-blue hover:opacity-90 active:scale-[0.98] transition-all text-white shadow-sm flex items-center justify-between group relative overflow-hidden"
-                                        >
-                                            <div className="flex items-center gap-3 relative z-10">
-                                                <div className="w-10 h-10 rounded-[18%] bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                                    <Search className="w-5 h-5 text-white" />
+                                        {[
+                                            { label: 'Militari', url: '/concorsi/forze-armate', Icon: Shield, color: '#3B82F6' },
+                                            { label: 'Amministrativi', url: '/concorsi/amministrativi', Icon: Briefcase, color: '#8B5CF6' },
+                                            { label: 'Enti Locali', url: '/concorsi/enti-locali', Icon: MapPin, color: '#F97316' },
+                                            { label: 'Sanità', url: '/concorsi/sanita', Icon: Activity, color: '#F43F5E' },
+                                        ].map(({ label, url, Icon, color }) => (
+                                            <button
+                                                key={label}
+                                                onClick={() => { close(); navigate(url); }}
+                                                className="p-3 rounded-[16px] flex items-center gap-2.5 text-left transition-all active:scale-[0.97]"
+                                                style={{ background: 'var(--background)', border: '1px solid var(--card-border)' }}
+                                            >
+                                                <div
+                                                    className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
+                                                    style={{ background: color + '18' }}
+                                                >
+                                                    <Icon className="w-4 h-4" style={{ color }} />
                                                 </div>
-                                                <div className="text-left">
-                                                    <div className="font-bold text-lg">Ricerca Avanzata</div>
-                                                    <div className="text-white/80 text-xs font-medium">Trova il tuo concorso ideale</div>
-                                                </div>
-                                            </div>
-                                            <ArrowRight className="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform relative z-10" />
-                                        </button>
-
-                                        {/* Quick Category Filters - Updated style */}
-                                        <button
-                                            onClick={() => { close(); navigate('/concorsi/forze-armate'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-brand-blue/50 hover:shadow-md hover:shadow-brand-blue/5 transition-all text-left flex items-center gap-3 group"
-                                        >
-                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 text-blue-600 flex items-center justify-center group-hover:from-blue-500 group-hover:to-blue-600 group-hover:text-white transition-all">
-                                                <Shield className="w-4 h-4" />
-                                            </div>
-                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Militari</span>
-                                        </button>
-
-                                        <button
-                                            onClick={() => { close(); navigate('/concorsi/amministrativi'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-brand-purple/50 hover:shadow-md hover:shadow-brand-purple/5 transition-all text-left flex items-center gap-3 group"
-                                        >
-                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/10 text-purple-600 flex items-center justify-center group-hover:from-purple-500 group-hover:to-purple-600 group-hover:text-white transition-all">
-                                                <Briefcase className="w-4 h-4" />
-                                            </div>
-                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Amministrativi</span>
-                                        </button>
-
-                                        <button
-                                            onClick={() => { close(); navigate('/concorsi/enti-locali'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-brand-orange/50 hover:shadow-md hover:shadow-brand-orange/5 transition-all text-left flex items-center gap-3 group"
-                                        >
-                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 text-orange-600 flex items-center justify-center group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all">
-                                                <MapPin className="w-4 h-4" />
-                                            </div>
-                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Enti Locali</span>
-                                        </button>
-
-                                        <button
-                                            onClick={() => { close(); navigate('/concorsi/sanita'); }}
-                                            className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-100 dark:border-slate-700 hover:border-rose-500/50 hover:shadow-md hover:shadow-rose-500/5 transition-all text-left flex items-center gap-3 group"
-                                        >
-                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-600/10 text-rose-600 flex items-center justify-center group-hover:from-rose-500 group-hover:to-rose-600 group-hover:text-white transition-all">
-                                                <Activity className="w-4 h-4" />
-                                            </div>
-                                            <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">Sanità</span>
-                                        </button>
+                                                <span className="text-[13px] font-semibold text-[var(--foreground)]">{label}</span>
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
                         )}
-                    </div>
-
-                    {/* Footer with keyboard hints */}
-                    <div className="hidden sm:flex px-6 py-3 bg-slate-50 dark:bg-[#111]/50 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-[11px] font-bold text-slate-400 shrink-0">
-                        <div className="flex items-center gap-4">
-                            <span className="flex items-center gap-1.5">
-                                <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded shadow-sm">↑</kbd>
-                                <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded shadow-sm">↓</kbd>
-                                <span className="ml-1">naviga</span>
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                                <kbd className="px-2 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded shadow-sm">↵</kbd>
-                                <span className="ml-1">seleziona</span>
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <Command className="w-3 h-3" />
-                            <span>K per aprire</span>
-                        </div>
                     </div>
                 </motion.div>
             </div>

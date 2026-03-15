@@ -10,9 +10,10 @@ import { RecentlyUsedItem } from '@/lib/homeSectionsService';
 
 interface RecentlyUsedSectionProps {
     items: RecentlyUsedItem[];
+    loading?: boolean;
 }
 
-export default function RecentlyUsedSection({ items }: RecentlyUsedSectionProps) {
+export default function RecentlyUsedSection({ items, loading }: RecentlyUsedSectionProps) {
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
@@ -22,7 +23,31 @@ export default function RecentlyUsedSection({ items }: RecentlyUsedSectionProps)
         }
     };
 
-    if (!items || items.length === 0) return null;
+    if (!loading && (!items || items.length === 0)) return null;
+
+    // Skeleton placeholder
+    if (loading) {
+        return (
+            <div className="max-w-7xl lg:mx-auto">
+                <div className="flex items-center gap-2.5 px-4 lg:px-8 mb-4 lg:mb-6">
+                    <div className="w-9 h-9 rounded-[12px] bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                    <div className="h-5 w-36 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                </div>
+                <div className="flex overflow-x-hidden gap-3 lg:gap-4 pl-4 lg:pl-8 py-6 -my-6">
+                    {[0, 1, 2].map(i => (
+                        <div
+                            key={i}
+                            className="flex-shrink-0 rounded-[28px] bg-slate-200 dark:bg-slate-700 animate-pulse"
+                            style={{
+                                width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
+                                height: 'clamp(210px, 24vh, 280px)',
+                            }}
+                        />
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl lg:mx-auto">

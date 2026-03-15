@@ -1,0 +1,16 @@
+# Idoneo SEO
+
+User-agent: *
+Allow: /
+
+# Disallow admin and internal paths
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /waitlist
+Disallow: /profile/setup
+
+# Sitemap
+Sitemap: https://idoneo.ai/sitemap.xml
+
+# Crawl-delay (optional)
+Crawl-delay: 1

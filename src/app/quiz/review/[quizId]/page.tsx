@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { X, ChevronLeft, ChevronRight, Check, Lightbulb, Loader2, ChevronDown } from "lucide-react";
+import BackButton from "@/components/ui/BackButton";
 
 // =============================================================================
 // TYPES
@@ -244,27 +245,34 @@ export default function ReviewPage() {
                 className="sticky top-0 z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--card-border)]"
                 style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
             >
-                <div className="h-14 px-4 flex items-center justify-between max-w-3xl mx-auto">
-                    {/* Left: Close */}
-                    <Link
-                        to={`/profile/stats/${quizId}`}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--card)] hover:opacity-80 transition-opacity"
-                    >
-                        <X className="w-5 h-5 text-[var(--foreground)]" />
-                    </Link>
+                <div className="h-14 px-4 flex items-center gap-3 max-w-3xl mx-auto">
+                    {/* Left: Back */}
+                    <BackButton />
 
-                    {/* Center: Title/Counter */}
-                    <div className="flex flex-col items-center">
-                        <span className="font-bold text-[var(--foreground)] text-sm">
+                    {/* Center: Title + progress */}
+                    <div className="flex-1 flex flex-col items-center">
+                        <span className="font-bold text-[var(--foreground)] text-[15px] tracking-tight">
                             Ripasso Errori
                         </span>
-                        <span className="text-[10px] text-[var(--muted-foreground)] font-semibold uppercase tracking-wider">
-                            Domanda {currentIndex + 1}/{wrongAnswers.length}
+                        <span className="text-[10px] text-[var(--muted-foreground)] font-semibold tabular-nums">
+                            {currentIndex + 1} di {wrongAnswers.length}
                         </span>
                     </div>
 
-                    {/* Right: Spacer */}
-                    <div className="w-10" />
+                    {/* Right: Progress pill */}
+                    <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                        <span className="text-[11px] font-black text-red-500 tabular-nums">
+                            {wrongAnswers.length}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Thin progress bar */}
+                <div className="h-[2px] bg-[var(--card-border)]">
+                    <div
+                        className="h-full bg-gradient-to-r from-[#00B1FF] to-[#0066FF] transition-all duration-300 ease-out"
+                        style={{ width: `${((currentIndex + 1) / wrongAnswers.length) * 100}%` }}
+                    />
                 </div>
             </header>
 
@@ -272,11 +280,12 @@ export default function ReviewPage() {
             {/* CONTENT (Identical layout to QuizRunner) */}
             {/* ============================================================= */}
             <main className="flex-1 px-5 py-6 max-w-3xl mx-auto w-full pb-32">
-                {/* Meta info */}
-                <div className="mb-3">
-                    <span className="text-[12px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
-                        {currentIndex + 1} / {wrongAnswers.length} • {currentQuestion.subjectName}
+                {/* Subject + Error tag */}
+                <div className="flex items-center gap-2 mb-4">
+                    <span className="text-[11px] font-bold text-[var(--foreground)] opacity-50 uppercase tracking-widest">
+                        {currentQuestion.subjectName}
                     </span>
+                    <span className="text-[11px] font-bold text-red-500 uppercase tracking-widest">• Errata</span>
                 </div>
 
                 {/* Question Text */}
@@ -456,10 +465,10 @@ export default function ReviewPage() {
                         disabled={currentIndex === wrongAnswers.length - 1}
                         className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all
                             ${currentIndex === wrongAnswers.length - 1
-                                ? 'bg-slate-100 text-slate-300'
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
                                 : 'bg-[#00B1FF] text-white shadow-sm shadow-blue-400/30 active:scale-[0.98]'}`}
                     >
-                        Successiva
+                        Prossimo Errore
                         <ChevronRight className="w-5 h-5" />
                     </button>
                 </div>

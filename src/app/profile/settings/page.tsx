@@ -8,8 +8,9 @@ import { useTheme } from '@/context/ThemeContext';
 import { supabase } from '@/lib/supabaseClient';
 import { deleteUserAccount } from '@/lib/accountService';
 import { useNavigate } from 'react-router-dom';
+import BackButton from '@/components/ui/BackButton';
 import {
-    ArrowLeft, ChevronRight, Pencil, Check, AlertTriangle, Loader2,
+    ChevronRight, Pencil, Check, AlertTriangle, Loader2,
     Sun, Moon, Monitor, LogOut, Mail, FileText, Shield,
     User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus, PlayCircle
 } from 'lucide-react';
@@ -199,12 +200,7 @@ export default function ProfileSettingsPage() {
             {/* ─── Header ─── */}
             <header className="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md pt-safe">
                 <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
-                    <button
-                        onClick={() => navigate('/profile')}
-                        className="w-10 h-10 rounded-full bg-[var(--card)] border border-[var(--card-border)] flex items-center justify-center"
-                    >
-                        <ArrowLeft className="w-5 h-5 text-[var(--foreground)]" />
-                    </button>
+                    <BackButton onClick={() => navigate('/profile')} />
                     <h1 className="text-[17px] font-bold text-[var(--foreground)]">Impostazioni</h1>
                     <div className="w-10" />
                 </div>

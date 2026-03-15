@@ -11,10 +11,12 @@ import { ArrowUp, Bot, User, Sparkles, RotateCcw, ArrowLeft, Mic, Copy, Check, T
 import BackButton from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/Button';
 import { supabase } from '@/lib/supabaseClient';
+import { useWindowHeight } from '@/hooks/useKeyboardHeight';
 
-// On native Capacitor (iOS/Android), relative URLs resolve to localhost which has no server.
-// Use the absolute Vercel deployment URL instead.
-const AI_CHAT_API = Capacitor.isNativePlatform() ? 'https://idoneo.ai/api/chat' : '/api/chat';
+// The Service Worker intercepts POST /api/chat from inside the WKWebView (same-origin https://localhost/)
+// and proxies it to https://idoneo.ai/api/chat with real ReadableStream streaming.
+// On web, Vite's dev proxy / Vercel handles /api/chat directly.
+const AI_CHAT_API = '/api/chat';
 console.log('[AI Coach] Platform:', Capacitor.getPlatform(), 'isNative:', Capacitor.isNativePlatform(), 'origin:', window.location.origin, 'API:', AI_CHAT_API);
 
 // iOS-style Share icon (square open at top + upward arrow)
@@ -581,29 +583,54 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
 
     const { messages, sendMessage, status, error, setMessages } = useChat({
         transport: new DefaultChatTransport({
-            api: AI_CHAT_API,
+            api: Capacitor.isNativePlatform() ? 'https://idoneo.ai/api/chat' : '/api/chat',
             body: { userId: user?.id },
             credentials: 'omit',
             headers: { 'Content-Type': 'application/json' },
             fetch: async (url, init) => {
                 console.log('[AI Coach] Fetching:', url, 'platform:', Capacitor.getPlatform());
                 try {
-                    // CapacitorHttp patches window.fetch on native (needed for Supabase etc.)
-                    // BUT it buffers responses — no streaming.
-                    // It saves the original WKWebView fetch as window.CapacitorWebFetch.
-                    // CSP now allows connect-src https://idoneo.ai, so this works.
-                    // CapacitorWebFetch supports ReadableStream → real token-by-token streaming.
-                    const streamingFetch = Capacitor.isNativePlatform()
-                        ? ((window as any).CapacitorWebFetch ?? fetch)
-                        : fetch;
-
-                    const response = await streamingFetch(url, {
+                    // With CapacitorHttp enabled, native fetch is extremely stable (no Load failed),
+                    // but it buffers the ENTIRE response. True streaming is blocked by an iOS 
+                    // WebKit bug with HTTP/2 POST requests (Bug 228229).
+                    const response = await fetch(url, {
                         ...init,
                         mode: 'cors',
                         credentials: 'omit',
                     });
                     console.log('[AI Coach] Response status:', response.status, 'ok:', response.ok);
-                    return response;
+
+                    if (!Capacitor.isNativePlatform() || !response.ok) {
+                        return response;
+                    }
+
+                    // Native: bounded streaming simulation to avoid the 20-second lag!
+                    const fullText = await response.text();
+                    const lines = fullText.split('\n');
+                    const encoder = new TextEncoder();
+
+                    // Max 1.5 seconds total typing time. Faster if few lines.
+                    // This creates a smooth typing effect instantly after the API responds (2.5s),
+                    // without ever taking 20 seconds to finish.
+                    const delayPerLine = Math.min(15, 1500 / Math.max(lines.length, 1));
+
+                    const stream = new ReadableStream({
+                        async start(controller) {
+                            for (const line of lines) {
+                                controller.enqueue(encoder.encode(line + '\n'));
+                                if (delayPerLine > 0) {
+                                    await new Promise(r => setTimeout(r, delayPerLine));
+                                }
+                            }
+                            controller.close();
+                        }
+                    });
+
+                    return new Response(stream, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: response.headers,
+                    });
                 } catch (err) {
                     console.error('[AI Coach] Fetch error:', err);
                     throw err;
@@ -643,46 +670,45 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
         return !hasText && !hasTools;
     })();
 
-    // Container-based scrolling (body is position:fixed, window doesn't scroll)
+    // Container-based scrolling
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const keyboardHeight = useWindowHeight();
 
-    // Lock body scroll when chat is mounted (prevents iOS body bounce interfering)
+    // On native iOS Safari/Capacitor, ensure the body doesn't bounce.
+    // The useKeyboardHeight hook handles the actual shifting.
     useEffect(() => {
-        const originalOverflow = document.body.style.overflow;
-        const originalPosition = document.body.style.position;
-        const originalWidth = document.body.style.width;
-        const originalHeight = document.body.style.height;
-        const scrollY = window.scrollY;
-
+        if (!Capacitor.isNativePlatform()) return;
         document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        document.body.style.top = `-${scrollY}px`;
-
-        return () => {
-            document.body.style.overflow = originalOverflow;
-            document.body.style.position = originalPosition;
-            document.body.style.width = originalWidth;
-            document.body.style.height = originalHeight;
-            document.body.style.top = '';
-            window.scrollTo(0, scrollY);
-        };
+        return () => { document.body.style.overflow = ''; };
     }, []);
 
-    const scrollToBottom = () => {
-        if (!autoScroll || !scrollContainerRef.current) return;
+    const scrollToBottom = (force?: boolean) => {
+        // Triple-rAF ensures layout is fully computed before reading scrollHeight.
+        // We scroll only the inner container, NOT the window.
         requestAnimationFrame(() => {
-            const el = scrollContainerRef.current;
-            if (el) el.scrollTop = el.scrollHeight;
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const el = scrollContainerRef.current;
+                    if (el) el.scrollTop = el.scrollHeight;
+                });
+            });
         });
+        // Belt-and-suspenders: also scroll after a small delay for iOS
+        if (force) {
+            setTimeout(() => {
+                const el = scrollContainerRef.current;
+                if (el) el.scrollTop = el.scrollHeight;
+            }, 100);
+            setTimeout(() => {
+                const el = scrollContainerRef.current;
+                if (el) el.scrollTop = el.scrollHeight;
+            }, 300);
+        }
     };
 
     const handleScroll = () => {
-        const el = scrollContainerRef.current;
-        if (!el) return;
-        const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-        setAutoScroll(isNearBottom);
+        // Keep for future use but don't gate scrollToBottom
     };
 
     const handleNewChat = async () => {
@@ -692,20 +718,54 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
         setMessages([WELCOME_MESSAGE]);
     };
 
+    // Scroll to bottom on mount (after history is loaded) and on every message change
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, autoScroll]);
+        scrollToBottom(true);
+    }, [messages.length]);
+
+    // Continuous scroll-to-bottom during streaming
+    // During streaming, the messages array reference doesn't change (only text inside),
+    // so the useEffect([messages]) dependency won't trigger. We poll instead.
+    useEffect(() => {
+        if (!isStreaming) return;
+        const interval = setInterval(() => {
+            const el = scrollContainerRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+        }, 120);
+        return () => clearInterval(interval);
+    }, [isStreaming]);
+
+    // Also scroll immediately on first mount
+    useEffect(() => {
+        scrollToBottom(true);
+    }, []);
+
+    // Auto-scroll when keyboard opens/closes
+    useEffect(() => {
+        if (keyboardHeight > 0) {
+            scrollToBottom(true);
+        }
+    }, [keyboardHeight]);
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         const text = inputValue.trim();
         if (!text || isStreaming) return;
         setInputValue('');
+        // Scroll immediately after sending so user sees their message + loading dots
+        setTimeout(() => scrollToBottom(true), 50);
         await sendMessage({ text });
     };
 
     return (
-        <div className="fixed inset-0 bg-white dark:bg-black text-black dark:text-white font-sans" style={{ overflow: 'hidden' }}>
+        <div 
+            className="fixed left-0 right-0 top-0 bg-white dark:bg-black text-black dark:text-white font-sans" 
+            style={{ 
+                overflow: 'hidden', 
+                bottom: `${keyboardHeight}px`,
+                transition: 'bottom 0.28s cubic-bezier(0.33, 1, 0.68, 1)'
+            }}
+        >
             <div className="flex flex-col w-full h-full" style={{ maxWidth: '48rem', margin: '0 auto' }}>
 
                 {/* ── HEADER ── */}

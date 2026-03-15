@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { BlogPost, BlogCategory } from "@/types/blog";
-import { Search, X, ChevronLeft, Calendar, Clock, ArrowRight } from "lucide-react";
+import { Search, X, Calendar, Clock, ArrowRight } from "lucide-react";
+import BackButton from "@/components/ui/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { hapticSelection, hapticLight } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
@@ -99,15 +100,7 @@ export default function BlogIndexPage() {
                 <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
                     {/* Left: Back Button */}
                     {!isSearchOpen && (
-                        <button
-                            onClick={() => { hapticLight(); navigate('/'); }}
-                            className="flex items-center gap-2 group p-1 -ml-1"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#111] flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                                <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                            </div>
-                            <span className="font-bold text-[15px] text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Indietro</span>
-                        </button>
+                        <BackButton onClick={() => { hapticLight(); navigate('/'); }} />
                     )}
 
                     {/* Search Bar - Premium Expandable */}

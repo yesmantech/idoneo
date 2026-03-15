@@ -95,30 +95,45 @@ export default function OnboardingContainer() {
 
     return (
         <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] flex flex-col relative overflow-hidden">
-            {/* Header: Back + Skip + Progress */}
+            {/* Header: Back + Step Counter + Skip + Progress */}
             {step > 0 && step < TOTAL_STEPS - 1 && (
-                <div className="sticky top-0 z-50 bg-white/80 dark:bg-[var(--background)]/80 backdrop-blur-xl border-b border-slate-100 dark:border-white/[0.08] px-4 pt-[env(safe-area-inset-top)] pb-3">
-                    <div className="flex items-center justify-between mb-3 pt-3">
+                <div
+                    className="sticky top-0 z-50 bg-[var(--background)]/95 backdrop-blur-xl border-b border-[var(--card-border)]"
+                    style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+                >
+                    <div className="flex items-center justify-between px-4 h-14">
+                        {/* Left: Back button */}
                         <button
                             onClick={goBack}
-                            className="flex items-center gap-1 text-[var(--foreground)] opacity-60 hover:opacity-100 transition-opacity active:scale-[0.97]"
+                            className="flex items-center gap-1 text-[#00B1FF] active:scale-[0.97] transition-all -ml-1 py-2 pr-3"
                         >
                             <ChevronLeft className="w-5 h-5" />
-                            <span className="text-sm font-medium">Indietro</span>
+                            <span className="text-[15px] font-semibold">Indietro</span>
                         </button>
+
+                        {/* Center: Step counter pill */}
+                        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                            <span className="text-[12px] font-bold text-[var(--foreground)] opacity-40 tabular-nums">
+                                {step} di {TOTAL_STEPS - 2}
+                            </span>
+                        </div>
+
+                        {/* Right: Skip button */}
                         <button
                             onClick={skipOnboarding}
-                            className="text-sm font-medium text-[var(--foreground)] opacity-40 hover:opacity-60 transition-opacity"
+                            className="text-[15px] font-medium text-[var(--foreground)] opacity-35 hover:opacity-60 transition-opacity py-2 pl-3"
                         >
                             Salta
                         </button>
                     </div>
-                    {/* Progress Bar — brand gradient */}
-                    <div className="h-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-r from-[#00B1FF] to-[#0066FF] rounded-full transition-all duration-500 ease-out"
-                            style={{ width: `${progress}%` }}
-                        />
+                    {/* Progress Bar — thick, rounded, brand gradient */}
+                    <div className="px-4 pb-3">
+                        <div className="h-[5px] bg-[var(--card)] rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-[#00B1FF] to-[#0066FF] rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
                     </div>
                 </div>
             )}

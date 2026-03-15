@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Target, Layers, Clock, FileText, CheckCircle2, AlertTriangle, Trophy, Star, Shield, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Target, Layers, Clock, FileText, CheckCircle2, AlertTriangle, Trophy, Star, Shield, Zap } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 
 interface ScoreInfoPageProps {
     onBack: () => void;
@@ -15,12 +15,7 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
         <div className="fixed inset-0 z-[60] bg-[var(--background)] flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
             {/* Header */}
             <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--background)]/90 backdrop-blur-md sticky top-0 z-10 transition-colors">
-                <button
-                    onClick={onBack}
-                    className="p-3 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-[var(--foreground)] opacity-40 hover:opacity-100 transition-colors"
-                >
-                    <ArrowLeft className="w-6 h-6" />
-                </button>
+                <BackButton onClick={onBack} />
                 <h1 className="font-black text-lg text-[var(--foreground)]">Come funziona</h1>
                 <div className="w-12" /> {/* Spacer for centering title */}
             </div>

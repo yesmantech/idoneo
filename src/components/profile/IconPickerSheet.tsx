@@ -217,9 +217,12 @@ export default function IconPickerSheet({
                                         <div
                                             ref={scrollRef}
                                             className="overflow-y-auto px-3 pb-4"
+                                            onTouchMove={(e) => e.stopPropagation()}
                                             style={{
                                                 maxHeight: '50vh',
                                                 WebkitOverflowScrolling: 'touch',
+                                                overscrollBehavior: 'contain',
+                                                touchAction: 'pan-y',
                                             }}
                                         >
                                             <div
@@ -251,7 +254,6 @@ export default function IconPickerSheet({
                                                                 background: 'transparent',
                                                                 cursor: 'pointer',
                                                                 padding: 2,
-                                                                touchAction: 'manipulation',
                                                                 WebkitTapHighlightColor: 'transparent',
                                                             }}
                                                         >

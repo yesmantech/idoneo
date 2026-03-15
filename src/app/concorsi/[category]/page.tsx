@@ -148,7 +148,7 @@ export default function ConcorsoHubPage() {
 
           <div className="flex flex-col gap-3">
             {(() => {
-              const catStyle = getCategoryStyle(category.replace(/-/g, ' '));
+              const catStyle = getCategoryStyle((category || '').replace(/-/g, ' '));
               const CategoryIcon = catStyle.Icon;
               return allQuizzes.length > 0 ? (
                 allQuizzes.map(quiz => {

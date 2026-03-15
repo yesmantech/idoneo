@@ -3,7 +3,7 @@
 import { Lightbulb, Loader2, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import DOMPurify from "dompurify";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 
 // Components
@@ -59,46 +59,50 @@ interface QuestionDetails {
 export default function ExplanationPage() {
     const { attemptId, questionId } = useParams<{ attemptId: string; questionId: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const [attempt, setAttempt] = useState<any>(null);
+    // Cache the attempt so navigating between questions doesn't re-fetch
+    const [attempt, setAttempt] = useState<any>((location.state as any)?.attempt || null);
     const [currentAnswer, setCurrentAnswer] = useState<RichAnswer | null>(null);
     const [questionDetails, setQuestionDetails] = useState<QuestionDetails | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!attempt); // Only show loader if we don't have the attempt yet
     const [isGenerating, setIsGenerating] = useState(false);
 
-    // Single effect: Load attempt + find answer + fetch question details
+    // Effect 1: Load attempt ONLY if not already cached
     useEffect(() => {
-        if (!attemptId || !questionId) return;
+        if (!attemptId || attempt) return;
 
-        const loadAll = async () => {
+        const fetchAttempt = async () => {
             setLoading(true);
-            setQuestionDetails(null);
-            setCurrentAnswer(null);
-
-            // 1. Load the attempt
             const { data: attemptData } = await supabase
                 .from("quiz_attempts")
                 .select("*")
                 .eq("id", attemptId)
                 .single();
 
-            if (!attemptData) {
-                setLoading(false);
-                return;
-            }
-            setAttempt(attemptData);
+            if (attemptData) setAttempt(attemptData);
+            setLoading(false);
+        };
 
-            // 2. Try to find the answer in the attempt's answers array
-            const answers = attemptData.answers || [];
-            const ans = answers.find((a: any) =>
-                String(a.questionId || a.question_id || a.id || '') === String(questionId)
-            );
+        fetchAttempt();
+    }, [attemptId]); // Only depends on attemptId, NOT questionId
 
-            if (ans) {
-                setCurrentAnswer(ans);
-            } else {
-                // V11 Fallback: if answer not found in attempt (data mismatch),
-                // fetch the question directly and construct a minimal answer
+    // Effect 2: Resolve current answer + fetch explanation (instant, no loader)
+    useEffect(() => {
+        if (!attempt || !questionId) return;
+
+        setQuestionDetails(null);
+
+        const answers = attempt.answers || [];
+        const ans = answers.find((a: any) =>
+            String(a.questionId || a.question_id || a.id || '') === String(questionId)
+        );
+
+        if (ans) {
+            setCurrentAnswer(ans);
+        } else {
+            // Fallback: fetch question directly
+            (async () => {
                 const { data: qData } = await supabase
                     .from("questions_safe")
                     .select("id, text, subject_id, option_a, option_b, option_c, option_d, explanation")
@@ -106,7 +110,6 @@ export default function ExplanationPage() {
                     .single();
 
                 if (qData) {
-                    // Try to find which answer was given (by matching question text)
                     const textMatch = answers.find((a: any) =>
                         a.text && qData.text && a.text.trim() === qData.text.trim()
                     );
@@ -132,25 +135,24 @@ export default function ExplanationPage() {
                         setQuestionDetails({ id: qData.id, explanation: qData.explanation, image_url: null });
                     }
                 }
-            }
+            })();
+            return; // explanation already handled above
+        }
 
-            // 3. Fetch question details (explanation) if not already set
-            const qId = ans ? (ans.questionId || ans.question_id || ans.id) : questionId;
-            const { data: qDetails } = await supabase
-                .from("questions_safe")
-                .select("id, explanation")
-                .eq("id", qId)
-                .single();
-
-            if (qDetails) setQuestionDetails(prev => prev || (qDetails as any));
-            setLoading(false);
-        };
-
-        loadAll();
-    }, [attemptId, questionId]);
+        // Fetch explanation in background (non-blocking, no spinner)
+        const qId = ans.questionId || ans.question_id || ans.id;
+        supabase
+            .from("questions_safe")
+            .select("id, explanation")
+            .eq("id", qId)
+            .single()
+            .then(({ data: qDetails }) => {
+                if (qDetails) setQuestionDetails(qDetails as any);
+            });
+    }, [attempt, questionId]);
 
     const handleGenerateExplanation = async () => {
-        if (!currentAnswer || !questionDetails) return;
+        if (!currentAnswer) return;
 
         setIsGenerating(true);
         try {
@@ -166,10 +168,10 @@ export default function ExplanationPage() {
 
             if (error) throw error;
             if (data?.explanation) {
-                setQuestionDetails({
-                    ...questionDetails,
+                setQuestionDetails(prev => ({
+                    ...(prev || { id: currentAnswer.questionId, image_url: null }),
                     explanation: data.explanation
-                });
+                }));
             }
         } catch (error) {
             console.error("Error generating explanation:", error);
@@ -181,12 +183,10 @@ export default function ExplanationPage() {
 
     // Helper to get the actual text of the correct answer
     const getCorrectAnswerText = (answer: RichAnswer) => {
-        // If correctOption perfectly matches an option key (a, b, c, d)
         if (answer.correctOption && ['a', 'b', 'c', 'd'].includes(answer.correctOption)) {
             return (answer.options as any)[answer.correctOption];
         }
 
-        // If correctOption contains the actual text already (or we fallback)
         for (const key of ['a', 'b', 'c', 'd']) {
             const text = (answer.options as any)[key];
             if (checkIsCorrect(key, answer.correctOption, answer.options)) {
@@ -196,7 +196,7 @@ export default function ExplanationPage() {
         return answer.correctOption || "Risposta Corretta Sconosciuta";
     };
 
-    // Navigation Helper
+    // Navigation helpers — pass cached attempt in state so next page doesn't re-fetch
     const goToNextError = () => {
         if (!attempt) return;
         const errors = attempt.answers.filter((a: any) => !a.isCorrect);
@@ -207,9 +207,8 @@ export default function ExplanationPage() {
         if (currentIndex !== -1 && currentIndex < errors.length - 1) {
             const next = errors[currentIndex + 1];
             const nextId = next.questionId || next.question_id || next.id;
-            navigate(`/quiz/explanations/${attemptId}/${nextId}`);
+            navigate(`/quiz/explanations/${attemptId}/${nextId}`, { state: { attempt } });
         } else {
-            // Cycle or stop?
             alert("Hai visto tutti gli errori!");
             navigate(`/quiz/results/${attemptId}`);
         }
@@ -225,7 +224,7 @@ export default function ExplanationPage() {
         if (currentIndex > 0) {
             const prev = errors[currentIndex - 1];
             const prevId = prev.questionId || prev.question_id || prev.id;
-            navigate(`/quiz/explanations/${attemptId}/${prevId}`);
+            navigate(`/quiz/explanations/${attemptId}/${prevId}`, { state: { attempt } });
         } else {
             navigate(`/quiz/results/${attemptId}`);
         }

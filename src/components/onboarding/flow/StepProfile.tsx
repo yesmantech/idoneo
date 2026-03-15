@@ -24,11 +24,11 @@ function TierSPills({ options, selected, onChange, columns = 2 }: { options: Pil
                         onClick={() => { hapticLight(); onChange(opt.value); }}
                         className={`
                             px-3 py-3 rounded-2xl text-[14px] font-semibold text-center leading-tight
-                            transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                            transition-[background-color,border-color,color,box-shadow,transform] duration-300 ease-out
                             border active:scale-[0.97]
                             ${isSelected
                                 ? 'bg-[#00B1FF]/10 dark:bg-[#00B1FF]/15 border-[#00B1FF] text-[#00B1FF] shadow-sm shadow-[#00B1FF]/10'
-                                : 'bg-white dark:bg-white/[0.04] border-slate-100 dark:border-white/[0.08] text-[var(--foreground)] opacity-80 hover:opacity-100 shadow-soft hover:shadow-md hover:scale-[1.01]'
+                                : 'bg-white dark:bg-white/[0.04] border-slate-100 dark:border-white/[0.08] text-[var(--foreground)] shadow-soft'
                             }
                         `}
                     >
@@ -71,7 +71,7 @@ interface StepProfileProps {
 
 export default function StepProfile({ data, onChange, onNext, canAdvance }: StepProfileProps) {
     return (
-        <div className="flex-1 flex flex-col px-6 py-6 overflow-y-auto">
+        <div className="flex-1 flex flex-col px-6 py-6 overflow-y-auto pb-28">
             {/* Headline */}
             <div className="space-y-2 mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
@@ -106,11 +106,8 @@ export default function StepProfile({ data, onChange, onNext, canAdvance }: Step
                 <TierSPills options={MOTIVATION_OPTIONS} selected={data.motivation} onChange={(v) => onChange({ motivation: v })} />
             </div>
 
-            {/* Spacer */}
-            <div className="flex-1" />
-
-            {/* CTA */}
-            <div className="pt-4 pb-[env(safe-area-inset-bottom)] sticky bottom-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent pt-8">
+            {/* Fixed CTA at bottom */}
+            <div className="fixed bottom-0 left-0 right-0 px-6 pb-safe pt-3 bg-[var(--background)]/95 backdrop-blur-md z-40">
                 <Button variant="primary" size="lg" fullWidth onClick={onNext} disabled={!canAdvance}>
                     Continua
                 </Button>

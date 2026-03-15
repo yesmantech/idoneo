@@ -1,0 +1,1 @@
+const l={draft:{label:"Bozza",color:"text-slate-600",bgColor:"bg-slate-100"},scheduled:{label:"Programmato",color:"text-blue-600",bgColor:"bg-blue-100"},published:{label:"Pubblicato",color:"text-emerald-600",bgColor:"bg-emerald-100"},archived:{label:"Archiviato",color:"text-amber-600",bgColor:"bg-amber-100"}};export{l as S};

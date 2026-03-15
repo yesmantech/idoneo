@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import BackButton from '@/components/ui/BackButton';
 import {
     Search,
-    ChevronLeft,
     Filter,
     X,
     Trophy,
@@ -139,12 +139,7 @@ export default function ConcorsiSearchPage() {
             {/* Desktop / Mobile Header */}
             <header className="sticky top-0 z-40 bg-[var(--background)] backdrop-blur-xl border-b border-[var(--card-border)] pt-safe">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all"
-                    >
-                        <ChevronLeft className="w-6 h-6" />
-                    </button>
+                    <BackButton />
 
                     <div className="flex-1">
                         <h1 className="text-xl font-bold text-[var(--foreground)] tracking-tight">Ricerca Concorsi</h1>

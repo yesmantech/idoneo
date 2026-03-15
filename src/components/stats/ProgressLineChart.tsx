@@ -190,14 +190,18 @@ export default function ProgressLineChart({
             <FilterBar metric={metric} setMetric={setMetric} timeRange={timeRange} setTimeRange={setTimeRange} />
 
             {/* SVG chart */}
-            <div className="w-full overflow-visible relative">
-                <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto overflow-visible">
+            <div className="w-full overflow-hidden relative">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" style={{ overflow: 'hidden' }}>
                     <defs>
                         <linearGradient id={`grad-${metric}`} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor={config.color} stopOpacity="0.25" />
                             <stop offset="60%" stopColor={config.color} stopOpacity="0.06" />
                             <stop offset="100%" stopColor={config.color} stopOpacity="0" />
                         </linearGradient>
+                        {/* Clip path keeps the chart content inside the SVG bounds */}
+                        <clipPath id={`clip-${metric}`}>
+                            <rect x={PAD_LEFT} y={0} width={W - PAD_LEFT - PAD_RIGHT} height={H} />
+                        </clipPath>
                     </defs>
 
                     {/* Y-axis grid lines + labels */}
@@ -235,36 +239,38 @@ export default function ProgressLineChart({
                         );
                     })}
 
-                    {/* Area fill */}
-                    <path d={areaD} fill={`url(#grad-${metric})`} />
+                    {/* Clipped group: area + line + dots stay inside chart bounds */}
+                    <g clipPath={`url(#clip-${metric})`}>
+                        {/* Area fill */}
+                        <path d={areaD} fill={`url(#grad-${metric})`} />
 
-                    {/* Line */}
-                    <path
-                        d={pathD}
-                        fill="none"
-                        stroke={config.color}
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-
-                    {/* Dots */}
-                    {filteredData.map((d, i) => (
-                        <circle
-                            key={i}
-                            cx={getX(i)}
-                            cy={getY(getValue(d))}
-                            r={hoveredPoint === i ? 7 : 4}
-                            /* Use transparent fill so the card background shows through */
-                            fill="transparent"
+                        {/* Line */}
+                        <path
+                            d={pathD}
+                            fill="none"
                             stroke={config.color}
                             strokeWidth="2.5"
-                            className="cursor-pointer"
-                            style={{ transition: 'r 0.1s ease' }}
-                            onMouseEnter={() => setHoveredPoint(i)}
-                            onMouseLeave={() => setHoveredPoint(null)}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                         />
-                    ))}
+
+                        {/* Dots */}
+                        {filteredData.map((d, i) => (
+                            <circle
+                                key={i}
+                                cx={getX(i)}
+                                cy={getY(getValue(d))}
+                                r={hoveredPoint === i ? 7 : 4}
+                                fill="transparent"
+                                stroke={config.color}
+                                strokeWidth="2.5"
+                                className="cursor-pointer"
+                                style={{ transition: 'r 0.1s ease' }}
+                                onMouseEnter={() => setHoveredPoint(i)}
+                                onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                        ))}
+                    </g>
                 </svg>
 
                 {/* Tooltip */}

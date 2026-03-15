@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { supabase } from "@/lib/supabaseClient";
 import { ChevronLeft } from 'lucide-react';
-import { Button } from "@/components/ui/Button";
+import BackButton from "@/components/ui/BackButton";
 import { useOnboarding } from "@/context/OnboardingProvider";
 import { useAuth } from "@/context/AuthContext";
 
@@ -99,7 +99,7 @@ export default function QuizStatsPage() {
             };
         },
         enabled: !!user && !!quizId,
-        staleTime: 1000 * 60 * 5
+        staleTime: 1000 * 60 * 30 // 30 min — match app-wide default for PersistQueryClientProvider
     });
 
     const [attempts, setAttempts] = useState<AttemptWithDetails[]>([]);
@@ -331,7 +331,32 @@ export default function QuizStatsPage() {
     };
 
     if (loading) return (
-        <TierSLoader message="Analisi performance in corso..." />
+        <div className="min-h-screen bg-[var(--background)] text-text-primary pb-24 pt-safe">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-6">
+                {/* Header skeleton */}
+                <div className="flex items-center gap-4 py-4">
+                    <div className="w-12 h-12 rounded-full bg-[var(--card)] animate-pulse" />
+                    <div className="flex-1 text-center space-y-1.5">
+                        <div className="h-5 w-40 rounded-lg bg-[var(--card)] animate-pulse mx-auto" />
+                        <div className="h-3 w-28 rounded-lg bg-[var(--card)] animate-pulse mx-auto" />
+                    </div>
+                    <div className="w-12" />
+                </div>
+                {/* KPI grid skeleton */}
+                <div className="grid grid-cols-2 gap-3">
+                    {[0,1,2,3].map(i => (
+                        <div key={i} className="h-24 rounded-[20px] bg-[var(--card)] animate-pulse" />
+                    ))}
+                </div>
+                {/* Coaching block skeleton */}
+                <div className="space-y-3">
+                    <div className="h-5 w-36 rounded-lg bg-[var(--card)] animate-pulse" />
+                    {[0,1].map(i => (
+                        <div key={i} className="h-[72px] rounded-2xl bg-[var(--card)] animate-pulse" />
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 
     return (
@@ -341,13 +366,7 @@ export default function QuizStatsPage() {
 
                 {/* Header */}
                 <div className="flex items-center justify-between gap-4 py-4">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        className="h-[48px] w-[48px] p-0 rounded-full"
-                        onClick={() => navigate("/profile")}
-                        icon={<ChevronLeft className="w-6 h-6" />}
-                    />
+                    <BackButton onClick={() => navigate('/profile')} />
                     <div className="flex-1 text-center">
                         <h1 className="text-xl font-black text-slate-900 dark:text-white leading-tight line-clamp-1">{quizTitle}</h1>
                         <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest mt-0.5">Statistiche Dettagliate</p>

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 // DIRECT IMPORTS — User-facing pages (instant navigation, zero delay)
 // ============================================================================
 import LoginPage from './app/login/page';
+import WelcomePage from './app/welcome/page';
 import WaitlistPage from './app/waitlist/page';
 import RecoverPasswordPage from './app/recover-password/page';
 import UpdatePasswordPage from './app/update-password/page';
@@ -98,6 +99,7 @@ import { StreakCelebration } from './components/gamification/StreakCelebration';
 import { BadgeUnlockCelebration } from './components/gamification/BadgeUnlockCelebration';
 // REMOVED: streakService import — streak is now 100% server-side (handle_new_attempt_xp trigger)
 import { CinematicGrain } from './components/ui/CinematicGrain';
+import TierSLoader from './components/ui/TierSLoader';
 import { removeBootLoader } from './lib/domUtils';
 import { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -164,15 +166,9 @@ function ScrollToTop() {
     return null;
 }
 
-// Loading fallback for lazy-loaded components
-const AdminLoading = () => (
-    <div className="flex items-center justify-center min-h-screen bg-[var(--background)]">
-        <div className="text-center">
-            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-[var(--foreground)] opacity-60">Caricamento...</p>
-        </div>
-    </div>
-);
+// Loading fallback for lazy-loaded admin pages — uses the same TierSLoader for consistency
+const AdminLoading = () => <TierSLoader />;
+
 
 export default function App() {
     // Initialize native app features on mount
@@ -231,6 +227,7 @@ export default function App() {
                                             <BadgeUnlockCelebration />
                                             <Suspense fallback={null}>
                                                 <Routes>
+                                                    <Route path="/welcome" element={<WelcomePage />} />
                                                     <Route path="/login" element={<LoginPage />} />
                                                     <Route path="/recover-password" element={<RecoverPasswordPage />} />
                                                     <Route path="/update-password" element={<UpdatePasswordPage />} />
