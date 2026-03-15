@@ -24,6 +24,11 @@ const SLIDES = [
         image: '/images/welcome-quiz.png',
     },
     {
+        headline: 'Il tuo coach\nAI personale',
+        subtitle: 'Chiedi qualsiasi cosa, ti guida verso il risultato',
+        image: '/images/welcome-ai.png',
+    },
+    {
         headline: 'Monitora i tuoi\nprogressi',
         subtitle: 'Statistiche dettagliate per migliorare ogni giorno',
         image: '/images/welcome-stats.png',
@@ -32,11 +37,6 @@ const SLIDES = [
         headline: 'Sfida gli altri\ncandidati',
         subtitle: 'Classifiche settimanali e badge esclusivi',
         image: '/images/welcome-leaderboard.png',
-    },
-    {
-        headline: 'Il tuo coach\nAI personale',
-        subtitle: 'Chiedi qualsiasi cosa, ti guida verso il risultato',
-        image: '/images/welcome-ai.png',
     },
 ];
 
@@ -95,26 +95,26 @@ export default function WelcomePage() {
 
     return (
         <div
-            className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] font-sans flex flex-col relative overflow-hidden"
-            style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+            className="min-h-[100dvh] font-sans flex flex-col relative overflow-hidden"
+            style={{ paddingTop: 'env(safe-area-inset-top, 0px)', background: '#06080F', color: '#fff' }}
         >
-            {/* ─── Ambient gradient background ─── */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div
-                    className="absolute rounded-full blur-[120px] opacity-[0.07]"
-                    style={{ width: 400, height: 400, top: '-5%', left: '-20%', background: 'linear-gradient(135deg, #00B1FF, #0066FF)' }}
-                />
-                <div
-                    className="absolute rounded-full blur-[120px] opacity-[0.05]"
-                    style={{ width: 350, height: 350, bottom: '10%', right: '-15%', background: 'linear-gradient(135deg, #0066FF, #00B1FF)' }}
-                />
-            </div>
+            {/* Inject blob animation */}
+            <style>{`@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(15px,-10px) scale(1.05)}66%{transform:translate(-10px,8px) scale(.97)}}`}</style>
 
-            {/* ─── Logo ─── */}
-            <div
-                className={`flex justify-center pt-14 pb-2 relative z-10 transition-all duration-700 ease-out ${show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
-            >
-                <img src="/icon.svg" alt="Idoneo" className="w-11 h-11 rounded-[13px]" />
+            {/* ─── Dark gradient background (same as login) ─── */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div
+                    className="absolute rounded-full"
+                    style={{ width: 350, height: 350, top: '-8%', right: '-15%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,120,255,0.12) 0%, transparent 60%)', animation: 'blobFloat 12s ease-in-out infinite' }}
+                />
+                <div
+                    className="absolute rounded-full"
+                    style={{ width: 300, height: 300, bottom: '-10%', left: '-10%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,50,200,0.08) 0%, transparent 55%)', animation: 'blobFloat 16s ease-in-out infinite 4s' }}
+                />
+                <div
+                    className="absolute inset-0"
+                    style={{ opacity: 0.25, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.012) 1px, transparent 1px)', backgroundSize: '32px 32px' }}
+                />
             </div>
 
             {/* ─── Carousel ─── */}
@@ -154,7 +154,7 @@ export default function WelcomePage() {
                                 </h2>
 
                                 {/* Subtitle */}
-                                <p className="text-[14px] font-medium text-[var(--foreground)] opacity-40 text-center max-w-[260px]">
+                                <p className="text-[14px] font-medium text-white/40 text-center max-w-[260px]">
                                     {slide.subtitle}
                                 </p>
                             </div>
@@ -175,7 +175,7 @@ export default function WelcomePage() {
                                 style={{
                                     width: current === i ? 24 : 7,
                                     height: 7,
-                                    backgroundColor: current === i ? '#00B1FF' : 'var(--foreground)',
+                                    backgroundColor: current === i ? '#00B1FF' : 'rgba(255,255,255,0.25)',
                                     opacity: current === i ? 1 : 0.15,
                                 }}
                             />
@@ -191,25 +191,32 @@ export default function WelcomePage() {
             >
                 {/* Primary CTA */}
                 <button
-                    onClick={() => { hapticLight(); navigate('/login'); }}
+                    onClick={() => {
+                        hapticLight();
+                        if (current < SLIDES.length - 1) {
+                            goTo(current + 1);
+                        } else {
+                            navigate('/profile/setup');
+                        }
+                    }}
                     className="w-full h-[54px] rounded-2xl flex items-center justify-center active:scale-[0.97] transition-transform"
                     style={{
-                        background: 'linear-gradient(135deg, #00B1FF, #0066FF)',
-                        boxShadow: '0 8px 32px rgba(0,102,255,0.25)',
+                        background: '#0095FF',
+                        boxShadow: '0 4px 16px rgba(0,60,200,0.3)',
                     }}
                 >
                     <span className="text-[16px] font-bold text-white tracking-tight">
-                        Inizia Gratis
+                        {current < SLIDES.length - 1 ? 'Continua' : 'Inizia'}
                     </span>
                 </button>
 
                 {/* Secondary */}
                 <button
-                    onClick={() => { hapticLight(); navigate('/login'); }}
+                    onClick={() => { hapticLight(); navigate('/profile/setup'); }}
                     className="w-full mt-3 py-3 text-center"
                 >
-                    <span className="text-[13px] font-medium text-[var(--foreground)] opacity-40">
-                        Ho già un account? <span className="text-[#00B1FF] font-semibold opacity-100">Accedi</span>
+                    <span className="text-[13px] font-medium text-white/40">
+                        Salta la preview
                     </span>
                 </button>
             </div>

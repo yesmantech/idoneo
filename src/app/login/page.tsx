@@ -135,11 +135,11 @@ export default function LoginPage() {
         e.preventDefault(); setLoading(true); setError(null);
         try {
             const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pw });
-            if (!signInErr) { hapticSuccess(); nav('/profile/setup'); return; }
+            if (!signInErr) { hapticSuccess(); nav('/welcome'); return; }
 
             const { data, error: signUpErr } = await supabase.auth.signUp({
                 email, password: pw,
-                options: { emailRedirectTo: `${window.location.origin}/profile/setup` },
+                options: { emailRedirectTo: `${window.location.origin}/welcome` },
             });
             if (signUpErr) throw signUpErr;
             if (data?.user?.identities?.length === 0) {
@@ -327,7 +327,7 @@ export default function LoginPage() {
                             </div>
 
                             {/* Google */}
-                            <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/profile/setup` } }); }}
+                            <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/welcome` } }); }}
                                 style={{
                                     width: '100%', height: 52, borderRadius: 14, border: '1px solid rgba(255,255,255,0.10)',
                                     background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, fontWeight: 600,
@@ -347,7 +347,7 @@ export default function LoginPage() {
                             </button>
 
                             {/* Apple */}
-                            <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: `${window.location.origin}/profile/setup` } }); }}
+                            <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: `${window.location.origin}/welcome` } }); }}
                                 style={{
                                     width: '100%', height: 52, borderRadius: 14, border: '1px solid rgba(255,255,255,0.10)',
                                     background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, fontWeight: 600,
