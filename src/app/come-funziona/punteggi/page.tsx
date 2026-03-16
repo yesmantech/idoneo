@@ -83,9 +83,9 @@ function PrepContent() {
                 <div className="w-16 h-16 bg-cyan-50 dark:bg-cyan-900/30 rounded-2xl flex items-center justify-center mx-auto text-cyan-500 mb-2">
                     <Target className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-black text-[var(--foreground)]">Punteggio di Preparazione</h2>
+                <h2 className="text-2xl font-black text-[var(--foreground)]">Punteggio e Classifica</h2>
                 <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed">
-                    Misuriamo la tua preparazione da 0 a 100 con la formula: (Volume + Copertura + Costanza) × Accuratezza.
+                    Lo stesso punteggio da 0 a 100 è usato sia per la tua preparazione che per la classifica del concorso: <strong>(Volume + Copertura + Costanza) × Accuratezza</strong>.
                 </p>
             </div>
 
