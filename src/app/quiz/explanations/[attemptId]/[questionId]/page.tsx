@@ -63,10 +63,14 @@ export default function ExplanationPage() {
 
     // Cache the attempt so navigating between questions doesn't re-fetch
     const [attempt, setAttempt] = useState<any>((location.state as any)?.attempt || null);
-    const [currentAnswer, setCurrentAnswer] = useState<RichAnswer | null>(null);
     const [questionDetails, setQuestionDetails] = useState<QuestionDetails | null>(null);
     const [loading, setLoading] = useState(!attempt); // Only show loader if we don't have the attempt yet
     const [isGenerating, setIsGenerating] = useState(false);
+
+    // State-based navigation: track errors list + current index
+    const [errors, setErrors] = useState<RichAnswer[]>([]);
+    const [errorIndex, setErrorIndex] = useState(0);
+    const currentAnswer = errors[errorIndex] || null;
 
     // Effect 1: Load attempt ONLY if not already cached
     useEffect(() => {
@@ -87,69 +91,35 @@ export default function ExplanationPage() {
         fetchAttempt();
     }, [attemptId]); // Only depends on attemptId, NOT questionId
 
-    // Effect 2: Resolve current answer + fetch explanation (instant, no loader)
+    // Effect 2: Build errors list + find initial index from URL questionId
     useEffect(() => {
-        if (!attempt || !questionId) return;
+        if (!attempt) return;
+        const allAnswers = attempt.answers || [];
+        const errorList = allAnswers.filter((a: any) => !a.isCorrect);
+        setErrors(errorList);
 
-        setQuestionDetails(null);
-
-        const answers = attempt.answers || [];
-        const ans = answers.find((a: any) =>
+        // Find the starting index from the URL questionId
+        const startIdx = errorList.findIndex((a: any) =>
             String(a.questionId || a.question_id || a.id || '') === String(questionId)
         );
+        setErrorIndex(startIdx >= 0 ? startIdx : 0);
+    }, [attempt, questionId]);
 
-        if (ans) {
-            setCurrentAnswer(ans);
-        } else {
-            // Fallback: fetch question directly
-            (async () => {
-                const { data: qData } = await supabase
-                    .from("questions_safe")
-                    .select("id, text, subject_id, option_a, option_b, option_c, option_d, explanation")
-                    .eq("id", questionId)
-                    .single();
+    // Effect 3: Fetch explanation when currentAnswer changes
+    useEffect(() => {
+        if (!currentAnswer) return;
+        setQuestionDetails(null);
 
-                if (qData) {
-                    const textMatch = answers.find((a: any) =>
-                        a.text && qData.text && a.text.trim() === qData.text.trim()
-                    );
-
-                    const fallbackAnswer: RichAnswer = {
-                        questionId: qData.id,
-                        text: qData.text || '',
-                        subjectId: qData.subject_id || '',
-                        subjectName: textMatch?.subjectName || '',
-                        selectedOption: textMatch?.selectedOption || null,
-                        correctOption: textMatch?.correctOption || null,
-                        isCorrect: textMatch?.isCorrect || false,
-                        isSkipped: textMatch ? (textMatch.isSkipped || false) : true,
-                        options: {
-                            a: qData.option_a || '',
-                            b: qData.option_b || '',
-                            c: qData.option_c || '',
-                            d: qData.option_d || '',
-                        }
-                    };
-                    setCurrentAnswer(fallbackAnswer);
-                    if (qData.explanation) {
-                        setQuestionDetails({ id: qData.id, explanation: qData.explanation, image_url: null });
-                    }
-                }
-            })();
-            return; // explanation already handled above
-        }
-
-        // Fetch explanation in background (non-blocking, no spinner)
-        const qId = ans.questionId || ans.question_id || ans.id;
+        const qId = currentAnswer.questionId || (currentAnswer as any).question_id || (currentAnswer as any).id;
         supabase
             .from("questions_safe")
             .select("id, explanation")
             .eq("id", qId)
             .single()
-            .then(({ data: qDetails }) => {
+            .then(({ data: qDetails }: any) => {
                 if (qDetails) setQuestionDetails(qDetails as any);
             });
-    }, [attempt, questionId]);
+    }, [currentAnswer?.questionId, errorIndex]);
 
     const handleGenerateExplanation = async () => {
         if (!currentAnswer) return;
@@ -196,35 +166,18 @@ export default function ExplanationPage() {
         return answer.correctOption || "Risposta Corretta Sconosciuta";
     };
 
-    // Navigation helpers — pass cached attempt in state so next page doesn't re-fetch
+    // State-based navigation — no route change, no re-render, stable bottom bar
     const goToNextError = () => {
-        if (!attempt) return;
-        const errors = attempt.answers.filter((a: any) => !a.isCorrect);
-        const currentIndex = errors.findIndex((a: any) =>
-            String(a.questionId || a.question_id || a.id || '') === String(questionId)
-        );
-
-        if (currentIndex !== -1 && currentIndex < errors.length - 1) {
-            const next = errors[currentIndex + 1];
-            const nextId = next.questionId || next.question_id || next.id;
-            navigate(`/quiz/explanations/${attemptId}/${nextId}`, { state: { attempt } });
+        if (errorIndex < errors.length - 1) {
+            setErrorIndex(errorIndex + 1);
         } else {
-            alert("Hai visto tutti gli errori!");
             navigate(`/quiz/results/${attemptId}`);
         }
     };
 
     const goToPrevError = () => {
-        if (!attempt) return;
-        const errors = attempt.answers.filter((a: any) => !a.isCorrect);
-        const currentIndex = errors.findIndex((a: any) =>
-            String(a.questionId || a.question_id || a.id || '') === String(questionId)
-        );
-
-        if (currentIndex > 0) {
-            const prev = errors[currentIndex - 1];
-            const prevId = prev.questionId || prev.question_id || prev.id;
-            navigate(`/quiz/explanations/${attemptId}/${prevId}`, { state: { attempt } });
+        if (errorIndex > 0) {
+            setErrorIndex(errorIndex - 1);
         } else {
             navigate(`/quiz/results/${attemptId}`);
         }
