@@ -238,15 +238,27 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
         loadActiveQuizzes();
     }, [isOpen]);
 
-    // Focus input when modal opens
+    // Focus input + iOS body scroll lock
     useEffect(() => {
         if (isOpen) {
             setQuery('');
             setSelectedIndex(0);
             setTimeout(() => inputRef.current?.focus(), 50);
+            // iOS-safe body scroll lock: position:fixed preserves scroll inside modal
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.left = '0';
+            document.body.style.right = '0';
             document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
+            return () => {
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.left = '';
+                document.body.style.right = '';
+                document.body.style.overflow = '';
+                window.scrollTo(0, scrollY);
+            };
         }
     }, [isOpen]);
 
@@ -364,6 +376,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                 className="fixed inset-0 z-[9999] bg-black/40 dark:bg-black/60"
                 style={{
                     animation: 'spotlightFadeIn 0.2s ease-out forwards',
+                    touchAction: 'none',
                 }}
             />
 
@@ -433,8 +446,13 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                     {/* ── RESULTS ── */}
                     <div
                         ref={listRef}
-                        className="flex-1 overflow-y-auto overscroll-contain scrollbar-hide pb-safe"
-                        style={{ WebkitOverflowScrolling: 'touch' }}
+                        className="flex-1 overflow-y-auto overscroll-contain scrollbar-hide"
+                        style={{
+                            WebkitOverflowScrolling: 'touch',
+                            touchAction: 'pan-y',
+                            paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))',
+                            minHeight: 0,
+                        }}
                     >
                         {query.trim() ? (
                             /* Search Results */
