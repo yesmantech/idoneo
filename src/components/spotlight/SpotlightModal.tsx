@@ -238,19 +238,22 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
         loadActiveQuizzes();
     }, [isOpen]);
 
-    // Focus input + iOS body scroll lock
+    // Focus input + iOS body scroll lock (deferred to not block animation)
     useEffect(() => {
         if (isOpen) {
             setQuery('');
             setSelectedIndex(0);
-            setTimeout(() => inputRef.current?.focus(), 50);
-            // iOS-safe body scroll lock: position:fixed preserves scroll inside modal
             const scrollY = window.scrollY;
-            document.body.style.position = 'fixed';
-            document.body.style.top = `-${scrollY}px`;
-            document.body.style.left = '0';
-            document.body.style.right = '0';
-            document.body.style.overflow = 'hidden';
+            // Defer body lock to next frame so animation isn't blocked
+            requestAnimationFrame(() => {
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${scrollY}px`;
+                document.body.style.left = '0';
+                document.body.style.right = '0';
+                document.body.style.overflow = 'hidden';
+            });
+            // Focus after animation completes
+            setTimeout(() => inputRef.current?.focus(), 300);
             return () => {
                 document.body.style.position = '';
                 document.body.style.top = '';
@@ -370,17 +373,15 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
     return (
         <>
-            {/* Backdrop — blocks bg scroll */}
+            {/* Backdrop */}
             <div
                 onClick={close}
                 onTouchMove={e => e.preventDefault()}
                 className="fixed inset-0 z-[9999]"
                 style={{
-                    background: 'rgba(0,0,0,0.35)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)',
+                    background: 'rgba(0,0,0,0.4)',
                     touchAction: 'none',
-                    animation: 'spotFade 0.2s ease forwards',
+                    animation: 'spotFade 0.18s ease forwards',
                 }}
             />
 
