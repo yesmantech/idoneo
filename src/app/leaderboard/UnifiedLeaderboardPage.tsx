@@ -32,7 +32,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate as useNav } from 'react-router-dom';
 import { leaderboardService, LeaderboardEntry } from '@/lib/leaderboardService';
 import { xpService } from '@/lib/xpService';
 import { useAuth } from '@/context/AuthContext';
@@ -43,7 +43,6 @@ import LeaderboardSelector, { QuizOption } from '@/components/leaderboard/Leader
 import LeaderboardView from '@/components/leaderboard/LeaderboardView';
 import LeaderboardViewLegacy from '@/components/leaderboard/LeaderboardViewLegacy';
 import InfoModal from '@/components/leaderboard/InfoModal';
-import ScoreInfoPage from '@/components/leaderboard/ScoreInfoPage';
 import SEOHead from '@/components/seo/SEOHead';
 import { Button } from '@/components/ui/Button';
 
@@ -120,6 +119,7 @@ export default function UnifiedLeaderboardPage() {
 
     const { user, profile, isModalDismissed, dismissModal } = useAuth();
     const location = useLocation();
+    const navigate = useNav();
     // Use role-based check instead of hardcoded emails
     const isAdmin = profile?.role === 'admin';
 
@@ -274,7 +274,6 @@ export default function UnifiedLeaderboardPage() {
 
     // State for Info System
     const [showInfoModal, setShowInfoModal] = useState(false);
-    const [showInfoPage, setShowInfoPage] = useState(false);
     const [infoType, setInfoType] = useState<'prep' | 'xp'>('xp');
 
     // Auto-Onboarding Check for Global XP
@@ -433,17 +432,10 @@ export default function UnifiedLeaderboardPage() {
                 type={infoType}
                 onMoreInfo={() => {
                     setShowInfoModal(false);
-                    setShowInfoPage(true);
                     dismissModal(infoType === 'xp' ? 'xp_info' : 'prep_info');
+                    navigate(`/come-funziona/punteggi?tab=${infoType}`);
                 }}
             />
-
-            {showInfoPage && (
-                <ScoreInfoPage
-                    onBack={() => setShowInfoPage(false)}
-                    initialTab={infoType}
-                />
-            )}
 
         </div>
     );

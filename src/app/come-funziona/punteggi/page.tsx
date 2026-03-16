@@ -1,32 +1,29 @@
 "use client";
 
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import BackButton from '@/components/ui/BackButton';
 import {
-    Trophy,
-    Target,
-    TrendingUp,
-    AlertTriangle,
-    Calculator,
-    BarChart3,
-    Users,
-    Zap,
-    CheckCircle2,
-    XCircle,
-    Minus
+    Trophy, Target, Layers, FileText, Zap,
+    CheckCircle2, Clock, Shield, Star, BarChart3
 } from 'lucide-react';
 
 // =============================================================================
-// COME FUNZIONA - PUNTEGGI PAGE
-// Tier S Informational Page
+// COME FUNZIONA PAGE — unified Punteggio + XP tabs
+// This is a real route so #root handles scroll — works on iOS Capacitor.
 // =============================================================================
+
 export default function PunteggiPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState<'prep' | 'xp'>(
+        searchParams.get('tab') === 'xp' ? 'xp' : 'prep'
+    );
+
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24">
-            {/* Header */}
+            {/* Sticky Header */}
             <header className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe">
                 <div className="h-14 px-4 flex items-center gap-4 max-w-3xl mx-auto">
                     <BackButton onClick={() => navigate(-1)} />
@@ -34,293 +31,158 @@ export default function PunteggiPage() {
                 </div>
             </header>
 
-            <div className="max-w-3xl mx-auto px-4 py-8 space-y-10">
+            <div className="max-w-lg mx-auto px-5 py-6 space-y-8">
 
-                {/* Hero Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center"
-                >
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-[24px] bg-[#00B1FF]/10 dark:bg-[#00B1FF]/15 flex items-center justify-center">
-                        <Calculator className="w-10 h-10 text-[#00B1FF]" />
-                    </div>
-                    <h1 className="text-3xl font-black mb-3">Come Calcoliamo i Punteggi</h1>
-                    <p className="text-slate-500 dark:text-slate-400 text-lg max-w-md mx-auto">
-                        Scopri come funziona il sistema di valutazione di Idoneo
-                    </p>
-                </motion.div>
-
-                {/* Section 1: Quiz Scoring */}
-                <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-[var(--card)] rounded-[32px] p-6 border border-[var(--card-border)] shadow-soft"
-                >
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                            <BarChart3 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-black">Punteggio Quiz</h2>
-                            <p className="text-sm text-slate-500">Come viene calcolato il voto</p>
-                        </div>
-                    </div>
-
-                    <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                        Ogni quiz utilizza le regole ufficiali del concorso specifico. Ecco come funziona tipicamente:
-                    </p>
-
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
-                            <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                            <div>
-                                <span className="font-bold text-emerald-700 dark:text-emerald-300">Risposta Corretta</span>
-                                <p className="text-sm text-emerald-600 dark:text-emerald-400">+1 punto (o secondo regole concorso)</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800">
-                            <XCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" />
-                            <div>
-                                <span className="font-bold text-red-700 dark:text-red-300">Risposta Errata</span>
-                                <p className="text-sm text-red-600 dark:text-red-400">-0.25 (penalità variabile)</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-[#111]/50 border border-slate-100 dark:border-slate-700">
-                            <Minus className="w-6 h-6 text-slate-500 flex-shrink-0" />
-                            <div>
-                                <span className="font-bold text-slate-700 dark:text-slate-300">Non Risposta</span>
-                                <p className="text-sm text-slate-500">0 punti (nessuna penalità)</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 p-4 rounded-2xl bg-[#00B1FF]/10 border border-[#00B1FF]/20">
-                        <p className="text-sm text-[#00B1FF] font-medium">
-                            💡 <strong>Consiglio:</strong> Se non sei sicuro, lascia la risposta in bianco per evitare penalità!
-                        </p>
-                    </div>
-                </motion.section>
-
-                {/* Section 2: Readiness Level */}
-                <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="bg-[var(--card)] rounded-[32px] p-6 border border-[var(--card-border)] shadow-soft"
-                >
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                            <Trophy className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-black">Livello di Preparazione</h2>
-                            <p className="text-sm text-slate-500">L'algoritmo che valuta il tuo progresso</p>
-                        </div>
-                    </div>
-
-                    <p className="text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
-                        Il livello usa la formula: <strong>(Volume + Copertura + Costanza) × Accuratezza</strong>.
-                        Si attiva dopo almeno <strong>2 simulazioni</strong>.
-                    </p>
-
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111]/50 border border-slate-100 dark:border-slate-700 mb-6">
-                        <p className="text-sm font-mono text-center text-slate-600 dark:text-slate-300">
-                            Score = (V×33% + C×33% + R×33%) × Accuratezza
-                        </p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
-                            <div className="flex items-center gap-3 mb-2">
-                                <Trophy className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                                <h3 className="font-bold text-emerald-700 dark:text-emerald-300">Pronto</h3>
-                            </div>
-                            <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                                Media superiore a <strong>90/100</strong>. Sei preparato per l'esame ufficiale!
-                            </p>
-                        </div>
-
-                        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                            <div className="flex items-center gap-3 mb-2">
-                                <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                                <h3 className="font-bold text-amber-700 dark:text-amber-300">A Buon Punto</h3>
-                            </div>
-                            <p className="text-sm text-amber-600 dark:text-amber-400">
-                                Media tra <strong>70/100</strong> e <strong>90/100</strong>. Continua così, manca poco!
-                            </p>
-                        </div>
-
-                        <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                            <div className="flex items-center gap-3 mb-2">
-                                <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                                <h3 className="font-bold text-red-700 dark:text-red-300">Da Migliorare</h3>
-                            </div>
-                            <p className="text-sm text-red-600 dark:text-red-400">
-                                Media inferiore a <strong>70/100</strong>. Serve più allenamento, non mollare!
-                            </p>
-                        </div>
-                    </div>
-                </motion.section>
-
-                {/* Section 3: Leaderboard */}
-                <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-[var(--card)] rounded-[32px] p-6 border border-[var(--card-border)] shadow-soft"
-                >
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-[#00B1FF]/20 flex items-center justify-center">
-                            <Users className="w-6 h-6 text-[#00B1FF]" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-black">Classifica</h2>
-                            <p className="text-sm text-slate-500">Come funziona il ranking</p>
-                        </div>
-                    </div>
-
-                    <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                        La classifica ti mostra la tua posizione rispetto agli altri candidati dello stesso concorso.
-                    </p>
-
-                    <div className="space-y-4">
-                        <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
-                                <BarChart3 className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Volume (33.33%)</h4>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Domande totali risposte rispetto alla banca dati. Più ti alleni, più sale.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                                <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Copertura (33.33%)</h4>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Domande uniche risposte correttamente. Solo le risposte giuste contano.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-                                <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Costanza (33.33%)</h4>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Stabilità dei risultati nelle ultime 10 simulazioni. Decade dopo 30 giorni di inattività.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                                <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-900 dark:text-slate-100">Accuratezza (Moltiplicatore)</h4>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Media pesata delle ultime 10 simulazioni — le più recenti contano di più. Moltiplica il punteggio dei 3 fattori.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-[#00B1FF]/10 to-emerald-500/10 border border-[#00B1FF]/20">
-                        <p className="text-sm text-slate-600 dark:text-slate-300">
-                            🏆 <strong>Score = (V×33% + C×33% + R×33%) × Accuratezza</strong> L'accuratezza agisce come moltiplicatore: se rispondi tutto sbagliato, il punteggio è 0.
-                        </p>
-                    </div>
-                </motion.section>
-
-                {/* Section 4: XP System */}
-                <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="bg-[var(--card)] rounded-[32px] p-6 border border-[var(--card-border)] shadow-soft"
-                >
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                            <Zap className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-black">Sistema XP</h2>
-                            <p className="text-sm text-slate-500">Punti esperienza e classifiche</p>
-                        </div>
-                    </div>
-
-                    <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                        Gli XP misurano quanto ti alleni su Idoneo. Servono per scalare le classifiche globali e tracciare il tuo impegno.
-                    </p>
-
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
-                            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
-                                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">+1</span>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-emerald-700 dark:text-emerald-300">XP per risposta corretta unica</h4>
-                                <p className="text-sm text-emerald-600 dark:text-emerald-400">1 XP per ogni nuova domanda risposta correttamente. Ripetere le stesse non dà XP.</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800">
-                            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
-                                <Trophy className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-amber-700 dark:text-amber-300">Classifica Settimanale</h4>
-                                <p className="text-sm text-amber-600 dark:text-amber-400">La classifica XP si azzera ogni settimana</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800">
-                            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0">
-                                <BarChart3 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-purple-700 dark:text-purple-300">XP Totali</h4>
-                                <p className="text-sm text-purple-600 dark:text-purple-400">I tuoi XP totali restano sempre nel profilo</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 p-4 rounded-2xl bg-[#00B1FF]/10 border border-[#00B1FF]/20">
-                        <p className="text-sm text-[#00B1FF] font-medium">
-                            💡 <strong>Nota:</strong> Gli XP misurano l'impegno, non la preparazione. Usa il "Livello di Preparazione" per valutare quanto sei pronto per l'esame!
-                        </p>
-                    </div>
-                </motion.section>
-
-
-                {/* CTA */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="text-center pt-4"
-                >
-                    <Link
-                        to="/"
-                        className="inline-flex items-center gap-2 px-8 py-4 bg-[#00B1FF] hover:bg-[#0099e6] text-white font-bold rounded-full shadow-lg shadow-[#00B1FF]/30 transition-all active:scale-95"
+                {/* Segmented Tabs */}
+                <div className="flex p-1 bg-slate-100 dark:bg-[#111] rounded-[14px] relative border border-slate-200 dark:border-slate-700">
+                    <motion.div
+                        layoutId="pageTabIndicator"
+                        className="absolute inset-y-1 bg-white dark:bg-slate-700 rounded-[10px] shadow-sm z-0"
+                        initial={false}
+                        animate={{ left: activeTab === 'prep' ? '4px' : '50%', width: 'calc(50% - 4px)' }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    />
+                    <button
+                        onClick={() => setActiveTab('prep')}
+                        className={`flex-1 relative z-10 py-2.5 text-[13px] font-bold text-center transition-colors ${activeTab === 'prep' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}
                     >
-                        <Target className="w-5 h-5" />
-                        Inizia ad allenarti
-                    </Link>
-                </motion.div>
+                        Punteggio
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('xp')}
+                        className={`flex-1 relative z-10 py-2.5 text-[13px] font-bold text-center transition-colors ${activeTab === 'xp' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                    >
+                        XP e Classifiche
+                    </button>
+                </div>
 
+                {/* Tab Content */}
+                <AnimatePresence mode="wait">
+                    {activeTab === 'prep' ? (
+                        <PrepContent key="prep" />
+                    ) : (
+                        <XPContent key="xp" />
+                    )}
+                </AnimatePresence>
+
+            </div>
+        </div>
+    );
+}
+
+// ─── Prep Content ────────────────────────────────────────────────────────────
+function PrepContent() {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-8"
+        >
+            <div className="text-center space-y-3">
+                <div className="w-16 h-16 bg-cyan-50 dark:bg-cyan-900/30 rounded-2xl flex items-center justify-center mx-auto text-cyan-500 mb-2">
+                    <Target className="w-8 h-8" />
+                </div>
+                <h2 className="text-2xl font-black text-[var(--foreground)]">Punteggio di Preparazione</h2>
+                <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed">
+                    Misuriamo la tua preparazione da 0 a 100 con la formula: (Volume + Copertura + Costanza) × Accuratezza.
+                </p>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-[#111]/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
+                <p className="text-sm font-mono text-center text-[var(--foreground)] opacity-70">
+                    Score = (V×33% + C×33% + R×33%) × Accuratezza
+                </p>
+            </div>
+
+            <div className="space-y-4">
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider pl-1">I 3 Fattori + Moltiplicatore</h3>
+                <InfoCard icon={<Layers className="w-5 h-5" />} title="Volume" subtitle="Domande Totali (33.33%)" text="Misura quante domande hai affrontato rispetto alla banca dati. Più ti alleni, più sale." color="cyan" />
+                <InfoCard icon={<FileText className="w-5 h-5" />} title="Copertura" subtitle="Banca Dati (33.33%)" text="Quante domande diverse hai visto. Premia chi esplora tutta la banca dati invece di ripetere sempre le stesse." color="purple" />
+                <InfoCard icon={<Zap className="w-5 h-5" />} title="Costanza" subtitle="Affidabilità (33.33%)" text="Quanto sono stabili i tuoi risultati nelle ultime 10 simulazioni. Meno varianza = più affidabilità. Decade se non ti alleni per 30 giorni." color="amber" />
+                <InfoCard icon={<CheckCircle2 className="w-5 h-5" />} title="Accuratezza" subtitle="Moltiplicatore (×0.00 – ×1.00)" text="Media pesata delle ultime 10 simulazioni — le più recenti contano di più. Se migliori, il punteggio sale più velocemente." color="emerald" />
+            </div>
+
+            <div className="space-y-4">
+                <h3 className="text-sm font-bold text-[var(--foreground)] opacity-40 uppercase tracking-wider pl-1">Esempi</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="bg-[var(--card)] p-4 rounded-2xl border border-[var(--card-border)] shadow-sm">
+                        <div className="font-bold text-[var(--foreground)] mb-1">Utente Principiante</div>
+                        <div className="text-[13px] text-[var(--foreground)] opacity-50">Pochi quiz ma 100% corretti → <span className="text-amber-500 font-bold">Punteggio Medio-Basso</span> (Manca volume e copertura)</div>
+                    </div>
+                    <div className="bg-[var(--card)] p-4 rounded-2xl border border-[var(--card-border)] shadow-sm">
+                        <div className="font-bold text-[var(--foreground)] mb-1">Utente Esperto</div>
+                        <div className="text-[13px] text-[var(--foreground)] opacity-50">Tanti quiz, 85% corretti, attivo oggi → <span className="text-emerald-500 font-bold">Punteggio Alto</span></div>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
+// ─── XP Content ──────────────────────────────────────────────────────────────
+function XPContent() {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-8"
+        >
+            <div className="text-center space-y-3">
+                <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto text-amber-500 mb-2">
+                    <Trophy className="w-8 h-8" />
+                </div>
+                <h2 className="text-2xl font-black text-[var(--foreground)]">XP e Classifiche</h2>
+                <p className="text-[var(--foreground)] opacity-50 font-medium leading-relaxed">
+                    Gli XP premiano il tuo impegno quotidiano. Scala la <strong>Gold League</strong> sfidando gli altri utenti ogni due settimane.
+                </p>
+            </div>
+
+            <div className="space-y-4">
+                <InfoCard icon={<Zap className="w-5 h-5" />} title="Come guadagni XP" subtitle="1 Risposta = 1 XP" text="Ottieni un punto esperienza per ogni risposta corretta, sia nelle simulazioni ufficiali che nelle prove personalizzate." color="amber" />
+                <InfoCard icon={<Clock className="w-5 h-5" />} title="Stagioni da 14 giorni" subtitle="Reset periodico" text="La classifica si azzera ogni due settimane. Questo dà a tutti, anche ai nuovi arrivati, la possibilità di vincere la lega." color="blue" />
+                <InfoCard icon={<Shield className="w-5 h-5" />} title="XP Totali vs Stagionali" subtitle="Cosa rimane?" text="I tuoi XP totali non scadono mai e rimangono nel tuo profilo. Solo il punteggio valido per la classifica viene resettato." color="emerald" />
+            </div>
+
+            <div className="bg-slate-900 text-white p-6 rounded-3xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                    <Star className="w-32 h-32" />
+                </div>
+                <h3 className="text-lg font-bold mb-4 relative z-10">XP vs Punteggio</h3>
+                <div className="space-y-4 relative z-10">
+                    <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase mb-1">XP (Punti Esperienza)</div>
+                        <p className="text-sm font-medium text-slate-200">Misurano <strong>quanto ti alleni</strong>. Premiano la quantità e la costanza.</p>
+                    </div>
+                    <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase mb-1">Punteggio (0-100)</div>
+                        <p className="text-sm font-medium text-slate-200">Misura <strong>quanto sei bravo</strong> in uno specifico concorso. Premia la qualità.</p>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
+// ─── Shared InfoCard ─────────────────────────────────────────────────────────
+function InfoCard({ icon, title, subtitle, text, color }: { icon: React.ReactNode; title: string; subtitle: string; text: string; color: string }) {
+    const bgColors: Record<string, string> = {
+        cyan: 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-500',
+        emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500',
+        amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-500',
+        purple: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500',
+        blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-500',
+    };
+    return (
+        <div className="bg-[var(--card)] p-5 rounded-[20px] shadow-sm border border-[var(--card-border)] flex gap-4 transition-colors">
+            <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center ${bgColors[color] || bgColors.cyan}`}>
+                {icon}
+            </div>
+            <div>
+                <h4 className="font-bold text-[var(--foreground)] text-[16px]">{title}</h4>
+                <div className="text-xs font-bold text-[var(--foreground)] opacity-40 uppercase tracking-wide mb-2">{subtitle}</div>
+                <p className="text-[13px] text-[var(--foreground)] opacity-60 leading-relaxed font-medium">{text}</p>
             </div>
         </div>
     );
