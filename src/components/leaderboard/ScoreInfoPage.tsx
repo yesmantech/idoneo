@@ -12,17 +12,16 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
     const [activeTab, setActiveTab] = useState<'prep' | 'xp'>(initialTab);
 
     return (
-        <div className="fixed inset-0 z-[60] bg-[var(--background)] flex flex-col">
-            {/* Header */}
-            <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--card)] z-10">
+        <div className="fixed inset-0 z-[60] bg-[var(--background)] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Header — sticky inside the scrolling container */}
+            <div className="sticky top-0 z-10 px-4 pt-safe pb-4 flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--card)]">
                 <BackButton onClick={onBack} />
                 <h1 className="font-black text-lg text-[var(--foreground)]">Come funziona</h1>
                 <div className="w-12" /> {/* Spacer for centering title */}
             </div>
 
-            {/* Content Container */}
-            <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
-                <div className="p-5 max-w-lg mx-auto pb-20">
+            {/* Scrollable Content */}
+            <div className="p-5 max-w-lg mx-auto pb-20">
 
                     {/* Tabs / Segmented Control */}
                     <div className="flex p-1 bg-slate-100 dark:bg-[#111] rounded-[14px] mb-8 relative border border-slate-200 dark:border-slate-700">
@@ -34,7 +33,7 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
                             animate={{
                                 left: activeTab === 'prep' ? '4px' : '50%',
                                 width: 'calc(50% - 4px)',
-                                x: activeTab === 'xp' ? '0%' : '0%' // Adjust if needed but left/width is easier
+                                x: activeTab === 'xp' ? '0%' : '0%'
                             }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         />
@@ -62,7 +61,6 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
                         )}
                     </AnimatePresence>
 
-                </div>
             </div>
         </div>
     );
