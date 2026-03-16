@@ -371,6 +371,7 @@ export const leaderboardService = {
                 .from("concorso_leaderboard")
                 .select(`
                 score,
+                coverage_score,
                 quiz_id,
                 last_calculated_at,
                 quiz:quizzes (
@@ -420,6 +421,7 @@ export const leaderboardService = {
                     ...quiz,
                     category: categoryTitle || undefined,
                     accuracy: Math.round(row.score || 0),
+                    coverage: Math.round(((row as any).coverage_score || 0) * 100),
                     lastPlayed: row.last_calculated_at
                 });
             }
@@ -439,6 +441,7 @@ export const leaderboardService = {
                     ...quiz,
                     category: categoryTitle || undefined,
                     accuracy: Math.round(row.score || 0),
+                    coverage: 0,
                     lastPlayed: row.created_at
                 });
             }

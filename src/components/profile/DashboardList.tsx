@@ -45,7 +45,7 @@ export default function DashboardList({ userId }: DashboardListProps) {
                         quizId={q.id}
                         title={q.title}
                         category={q.category}
-                        progress={q.accuracy || 0}
+                        progress={q.coverage || 0}
                         onClick={() => navigate(`/profile/stats/${q.id}`)}
                     />
                 ))}
