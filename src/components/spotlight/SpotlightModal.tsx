@@ -226,7 +226,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
                     const quizzes = await leaderboardService.getUserActiveQuizzes(user.id);
-                    setActiveQuizzes(quizzes.slice(0, 5));
+                    setActiveQuizzes(quizzes.slice(0, 3));
                 }
             } catch (e) {
                 console.warn('Failed to load active quizzes:', e);
@@ -374,10 +374,13 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
             <div
                 onClick={close}
                 onTouchMove={e => e.preventDefault()}
-                className="fixed inset-0 z-[9999] bg-black/40 dark:bg-black/60"
+                className="fixed inset-0 z-[9999]"
                 style={{
-                    animation: 'spotlightFadeIn 0.2s ease-out forwards',
+                    background: 'rgba(0,0,0,0.35)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
                     touchAction: 'none',
+                    animation: 'spotFade 0.2s ease forwards',
                 }}
             />
 
@@ -395,15 +398,17 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                         maxHeight: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px)` : '82dvh',
                         border: '1px solid var(--card-border)',
                         overflow: 'hidden',
-                        willChange: 'transform, opacity',
-                        animation: 'spotlightSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards',
+                        animation: 'spotSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     }}
                     onKeyDown={handleKeyDown}
                 >
-                    {/* Inject keyframes */}
+                    {/* Inject keyframes — GPU-composited via translate3d */}
                     <style>{`
-                        @keyframes spotlightFadeIn { from { opacity: 0; } to { opacity: 1; } }
-                        @keyframes spotlightSlideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+                        @keyframes spotFade { from { opacity: 0; } to { opacity: 1; } }
+                        @keyframes spotSlide {
+                            from { transform: translate3d(0, 100%, 0); opacity: 0; }
+                            to   { transform: translate3d(0, 0, 0); opacity: 1; }
+                        }
                     `}</style>
                     {/* Drag handle (mobile only) */}
                     <div className="sm:hidden w-10 h-1 rounded-full bg-[var(--foreground)] opacity-10 mx-auto mt-3 mb-0 shrink-0" />
