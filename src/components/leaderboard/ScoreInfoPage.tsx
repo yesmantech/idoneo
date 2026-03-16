@@ -12,16 +12,16 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
     const [activeTab, setActiveTab] = useState<'prep' | 'xp'>(initialTab);
 
     return (
-        <div className="fixed inset-0 z-[60] bg-[var(--background)] flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
+        <div className="fixed inset-0 z-[60] bg-[var(--background)] flex flex-col">
             {/* Header */}
-            <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--background)]/90 backdrop-blur-md sticky top-0 z-10 transition-colors">
+            <div className="flex-none px-4 pt-safe pb-4 flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--card)] z-10">
                 <BackButton onClick={onBack} />
                 <h1 className="font-black text-lg text-[var(--foreground)]">Come funziona</h1>
                 <div className="w-12" /> {/* Spacer for centering title */}
             </div>
 
             {/* Content Container */}
-            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}>
+            <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                 <div className="p-5 max-w-lg mx-auto pb-20">
 
                     {/* Tabs / Segmented Control */}
