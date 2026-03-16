@@ -159,7 +159,7 @@ export default function LoginPage() {
 
     return (
         <div style={{
-            minHeight: '100dvh', background: '#06080F', color: '#fff',
+            minHeight: '100dvh', background: 'var(--background)', color: 'var(--foreground)',
             fontFamily: "'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif",
             display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
             paddingTop: 'env(safe-area-inset-top,0px)',
@@ -171,19 +171,14 @@ export default function LoginPage() {
                 <div style={{
                     position: 'absolute', width: 350, height: 350,
                     top: '-8%', right: '-15%', borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(0,120,255,0.12) 0%, transparent 60%)',
+                    background: 'radial-gradient(circle, rgba(0,120,255,0.10) 0%, transparent 60%)',
                     animation: 'blobFloat 12s ease-in-out infinite',
                 }}/>
                 <div style={{
                     position: 'absolute', width: 300, height: 300,
                     bottom: '-10%', left: '-10%', borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(0,50,200,0.08) 0%, transparent 55%)',
+                    background: 'radial-gradient(circle, rgba(0,50,200,0.07) 0%, transparent 55%)',
                     animation: 'blobFloat 16s ease-in-out infinite 4s',
-                }}/>
-                <div style={{
-                    position: 'absolute', inset: 0, opacity: 0.25,
-                    backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.012) 1px, transparent 1px)',
-                    backgroundSize: '32px 32px',
                 }}/>
             </div>
 
@@ -208,7 +203,7 @@ export default function LoginPage() {
                         transition: 'all 1s cubic-bezier(0.22,1,0.36,1) 0.25s',
                     }}>
                         <h1 style={{ textAlign: 'center', lineHeight: 1.12, letterSpacing: '-0.045em', margin: 0 }}>
-                            <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'rgba(255,255,255,0.94)' }}>
+                            <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'var(--foreground)', opacity: 0.94 }}>
                                 Passa i concorsi
                             </span>
                             <span style={{
@@ -219,12 +214,12 @@ export default function LoginPage() {
                                 filter: 'drop-shadow(0 0 24px rgba(0,180,255,0.25))',
                                 animation: 'shimBtn 4s ease-in-out infinite',
                             }}>in Settimane,</span>
-                            <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'rgba(255,255,255,0.94)', marginTop: 2 }}>
+                            <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'var(--foreground)', opacity: 0.94, marginTop: 2 }}>
                                 non Anni
                             </span>
                         </h1>
                         <p style={{
-                            fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.35)',
+                            fontSize: 14, fontWeight: 500, color: 'var(--foreground)', opacity: 0.35,
                             marginTop: 8, textAlign: 'center', maxWidth: 260, lineHeight: 1.5,
                         }}>
                             La piattaforma preferita dagli italiani per prepararsi ai concorsi pubblici
@@ -262,10 +257,10 @@ export default function LoginPage() {
 
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 60px' }}>
                         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-                            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: '#fff' }}>
+                            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--foreground)' }}>
                                 Inizia
                             </h1>
-                            <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.35)', marginTop: 8 }}>
+                            <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--foreground)', opacity: 0.35, marginTop: 8 }}>
                                 Accedi o crea il tuo account
                             </p>
                         </div>
@@ -278,8 +273,8 @@ export default function LoginPage() {
                                         onChange={e => setEmail(e.target.value)} required autoComplete="email"
                                         style={{
                                             width: '100%', height: 52, padding: '0 16px',
-                                            borderRadius: 14, border: '1px solid rgba(255,255,255,0.10)',
-                                            background: 'rgba(255,255,255,0.06)', color: '#fff',
+                                            borderRadius: 14, border: '1px solid var(--card-border)',
+                                            background: 'var(--card)', color: 'var(--foreground)',
                                             fontSize: 15, fontWeight: 500, outline: 'none', boxSizing: 'border-box',
                                         }} />
                                 </div>
@@ -296,12 +291,12 @@ export default function LoginPage() {
                                             autoComplete="password"
                                             style={{
                                                 width: '100%', height: 52, padding: '0 48px 0 16px',
-                                                borderRadius: 14, border: '1px solid rgba(255,255,255,0.10)',
-                                                background: 'rgba(255,255,255,0.06)', color: '#fff',
+                                                borderRadius: 14, border: '1px solid var(--card-border)',
+                                                background: 'var(--card)', color: 'var(--foreground)',
                                                 fontSize: 15, fontWeight: 500, outline: 'none', boxSizing: 'border-box',
                                             }} />
                                         <button type="button" onClick={() => setShowPw(!showPw)} tabIndex={-1}
-                                            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', padding: 6 }}>
+                                            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--foreground)', opacity: 0.25, cursor: 'pointer', padding: 6 }}>
                                             {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
                                     </div>
@@ -321,16 +316,16 @@ export default function LoginPage() {
 
                             {/* Separator */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '20px 0' }}>
-                                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-                                <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.28)', flexShrink: 0 }}>oppure</span>
-                                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+                                <div style={{ flex: 1, height: 1, background: 'var(--card-border)' }} />
+                                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--foreground)', opacity: 0.28, flexShrink: 0 }}>oppure</span>
+                                <div style={{ flex: 1, height: 1, background: 'var(--card-border)' }} />
                             </div>
 
                             {/* Google */}
                             <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/welcome` } }); }}
                                 style={{
-                                    width: '100%', height: 52, borderRadius: 14, border: '1px solid rgba(255,255,255,0.10)',
-                                    background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, fontWeight: 600,
+                                    width: '100%', height: 52, borderRadius: 14, border: '1px solid var(--card-border)',
+                                    background: 'var(--card)', color: 'var(--foreground)', fontSize: 15, fontWeight: 600,
                                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                                     transition: 'transform .15s ease',
                                 }}
@@ -349,15 +344,15 @@ export default function LoginPage() {
                             {/* Apple */}
                             <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: `${window.location.origin}/welcome` } }); }}
                                 style={{
-                                    width: '100%', height: 52, borderRadius: 14, border: '1px solid rgba(255,255,255,0.10)',
-                                    background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, fontWeight: 600,
+                                    width: '100%', height: 52, borderRadius: 14, border: '1px solid var(--card-border)',
+                                    background: 'var(--card)', color: 'var(--foreground)', fontSize: 15, fontWeight: 600,
                                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                                     marginTop: 10, transition: 'transform .15s ease',
                                 }}
                                 onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.98)')}
                                 onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
                             >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--foreground)">
                                     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                                 </svg>
                                 Continua con Apple
@@ -374,9 +369,9 @@ export default function LoginPage() {
                         <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 40px rgba(16,185,129,0.18)' }}>
                             <Sparkles style={{ width: 40, height: 40, color: '#34D399' }} />
                         </div>
-                        <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 8, color: '#fff' }}>Controlla l'email</h1>
-                        <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.4)', marginBottom: 28, lineHeight: 1.6 }}>Ti abbiamo inviato un link di conferma. Cliccalo per attivare il tuo account!</p>
-                        <button onClick={goBack} style={{ fontSize: 14, fontWeight: 700, color: '#38D9FF', background: 'none', border: 'none', cursor: 'pointer' }}>Torna alla home</button>
+                        <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 8, color: 'var(--foreground)' }}>Controlla l'email</h1>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--foreground)', opacity: 0.4, marginBottom: 28, lineHeight: 1.6 }}>Ti abbiamo inviato un link di conferma. Cliccalo per attivare il tuo account!</p>
+                        <button onClick={goBack} style={{ fontSize: 14, fontWeight: 700, color: '#0095FF', background: 'none', border: 'none', cursor: 'pointer' }}>Torna alla home</button>
                     </div>
                 </div>
             )}
