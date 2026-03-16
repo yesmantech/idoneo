@@ -442,8 +442,7 @@ export default function ReviewPage() {
                     </button>
 
                     <button
-                        onClick={goNext}
-                        disabled={currentIndex === wrongAnswers.length - 1}
+                        onClick={() => { if (currentIndex < wrongAnswers.length - 1) goNext(); }}
                         className="flex-1 py-3.5 rounded-2xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all bg-[#00B1FF] text-white active:scale-[0.98]"
                     >
                         Prossimo Errore
