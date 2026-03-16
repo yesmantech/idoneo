@@ -357,35 +357,36 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
     let currentIndex = 0;
 
     return (
-        <AnimatePresence>
+        <>
+            {/* Backdrop — pure CSS */}
             <div
-                className="fixed inset-0 z-[9999] flex flex-col justify-end sm:justify-start sm:items-center sm:pt-[10vh] sm:px-4"
-            >
-                {/* Backdrop */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={close}
-                    className="absolute inset-0 bg-black/40 dark:bg-black/60"
-                />
+                onClick={close}
+                className="fixed inset-0 z-[9999] bg-black/40 dark:bg-black/60"
+                style={{
+                    animation: 'spotlightFadeIn 0.2s ease-out forwards',
+                }}
+            />
 
-                {/* Spotlight Sheet */}
-                <motion.div
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 60 }}
-                    transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+            {/* Spotlight Sheet — pure CSS slide-up */}
+            <div
+                className="fixed inset-x-0 bottom-0 sm:inset-auto sm:top-[10vh] sm:left-1/2 sm:-translate-x-1/2 z-[10000] flex flex-col justify-end sm:justify-start sm:items-center sm:px-4"
+            >
+                <div
                     className="relative w-full sm:max-w-xl bg-[var(--card)] rounded-t-[32px] sm:rounded-[28px] shadow-2xl flex flex-col"
                     style={{
                         maxHeight: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px - env(safe-area-inset-top, 0px))` : '82dvh',
                         border: '1px solid var(--card-border)',
-                        transition: 'max-height 0.25s ease-out',
                         overflow: 'hidden',
+                        willChange: 'transform, opacity',
+                        animation: 'spotlightSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards',
                     }}
                     onKeyDown={handleKeyDown}
                 >
+                    {/* Inject keyframes */}
+                    <style>{`
+                        @keyframes spotlightFadeIn { from { opacity: 0; } to { opacity: 1; } }
+                        @keyframes spotlightSlideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+                    `}</style>
                     {/* Drag handle (mobile only) */}
                     <div className="sm:hidden w-10 h-1 rounded-full bg-[var(--foreground)] opacity-10 mx-auto mt-3 mb-0 shrink-0" />
 
@@ -612,8 +613,8 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                             </div>
                         )}
                     </div>
-                </motion.div>
+                </div>
             </div>
-        </AnimatePresence>
+        </>
     );
 }
