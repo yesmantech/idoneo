@@ -41,6 +41,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         location.pathname.startsWith('/concorsi') ||
         location.pathname.startsWith('/quiz') ||
         location.pathname.startsWith('/ai-assistant') ||
+        location.pathname.startsWith('/come-funziona') ||
         location.pathname === '/profile/settings' ||
         location.pathname.startsWith('/profile/stats') ||
         location.pathname.startsWith('/preparazione') ||
@@ -55,6 +56,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         location.pathname.startsWith('/leaderboard') ||
         location.pathname.startsWith('/bandi') ||
         location.pathname.startsWith('/conquiste') ||
+        location.pathname.startsWith('/come-funziona') ||
         location.pathname.startsWith('/ai-assistant');
 
     const isLeaderboard = location.pathname.startsWith('/leaderboard');
