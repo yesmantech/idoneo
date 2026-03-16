@@ -242,8 +242,7 @@ export default function ReviewPage() {
             {/* TOP BAR */}
             {/* ============================================================= */}
             <header
-                className="sticky top-0 z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--card-border)]"
-                style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+                className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--card-border)] pt-safe"
             >
                 <div className="h-14 px-4 flex items-center gap-3 max-w-3xl mx-auto">
                     {/* Left: Back */}
@@ -285,7 +284,7 @@ export default function ReviewPage() {
                     <span className="text-[11px] font-bold text-[var(--foreground)] opacity-50 uppercase tracking-widest">
                         {currentQuestion.subjectName}
                     </span>
-                    <span className="text-[11px] font-bold text-red-500 uppercase tracking-widest">• Errata</span>
+                    <span className="text-[11px] font-bold text-red-500 dark:text-red-400 uppercase tracking-widest">• Errata</span>
                 </div>
 
                 {/* Question Text */}
@@ -311,21 +310,22 @@ export default function ReviewPage() {
                         //   - Show selected as RED
 
                         let cardStyle = "bg-[var(--card)] border-[var(--card-border)]";
-                        let badgeStyle = "bg-[var(--background)] text-[var(--muted-foreground)]";
-                        let textStyle = "text-[var(--foreground)]";
+                        let badgeStyle = "bg-slate-100 dark:bg-[#111] text-slate-500 dark:text-slate-400";
+                        let textStyle = "text-[var(--foreground)] opacity-80";
 
-                        // Always show the user's WRONG answer
-                        if (isSelectedAnswer) {
-                            cardStyle = "bg-red-50 border-red-500";
-                            badgeStyle = "bg-red-500 text-white";
-                            textStyle = "text-red-700";
-                        }
-
-                        // If user asks to reveal, show the CORRECT answer
                         if (showAnswer && isCorrectAnswer) {
-                            cardStyle = "bg-emerald-50 border-emerald-500";
+                            // Correct answer (revealed)
+                            cardStyle = "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500";
                             badgeStyle = "bg-emerald-500 text-white";
-                            textStyle = "text-emerald-700";
+                            textStyle = "text-emerald-700 dark:text-emerald-400";
+                        } else if (isSelectedAnswer) {
+                            // User's wrong answer
+                            cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500";
+                            badgeStyle = "bg-red-500 text-white";
+                            textStyle = "text-red-700 dark:text-red-400";
+                        } else if (showAnswer) {
+                            // Non-selected, non-correct options (dimmed when answer revealed)
+                            cardStyle = "bg-slate-50 dark:bg-black/50 border-slate-100 dark:border-slate-800 opacity-50";
                         }
 
                         return (
@@ -346,6 +346,9 @@ export default function ReviewPage() {
                                 {/* Icons for Correct/Wrong */}
                                 {showAnswer && isCorrectAnswer && (
                                     <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                )}
+                                {isSelectedAnswer && (
+                                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                                 )}
                             </div>
                         );
@@ -423,38 +426,16 @@ export default function ReviewPage() {
             {/* ============================================================= */}
             {/* BOTTOM NAVIGATOR — clean fixed bar */}
             {/* ============================================================= */}
-            <div className="fixed bottom-0 left-0 right-0 bg-[var(--background)]/95 backdrop-blur-xl border-t border-[var(--card-border)] pb-safe z-40">
-
-                {/* Question Pills Row */}
-                <div className="px-4 pt-2 pb-1">
-                    <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-3xl mx-auto">
-                        {wrongAnswers.map((_, idx) => {
-                            const isActive = idx === currentIndex;
-                            return (
-                                <button
-                                    key={idx}
-                                    onClick={() => { setCurrentIndex(idx); setShowAnswer(false); }}
-                                    className={`w-9 h-9 flex-shrink-0 rounded-xl font-semibold text-[13px] transition-all flex items-center justify-center
-                                        ${isActive
-                                            ? 'bg-[var(--card)] text-[#00B1FF] border-2 border-[#00B1FF] shadow-sm'
-                                            : 'bg-[var(--card)] text-[var(--muted-foreground)]'}`}
-                                >
-                                    {idx + 1}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
+            <div className="fixed bottom-0 left-0 right-0 bg-[var(--card)] border-t border-[var(--card-border)] pb-safe z-40">
                 {/* Prev / Next */}
-                <div className="px-4 py-2 flex gap-3 max-w-3xl mx-auto">
+                <div className="px-4 py-3 flex gap-3 max-w-3xl mx-auto">
                     <button
                         onClick={goPrev}
                         disabled={currentIndex === 0}
-                        className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all
+                        className={`flex-1 py-3.5 rounded-2xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all border border-[var(--card-border)]
                             ${currentIndex === 0
-                                ? 'bg-[var(--card)] text-[var(--muted-foreground)] opacity-40'
-                                : 'bg-[var(--card)] text-[var(--foreground)] active:scale-[0.98]'}`}
+                                ? 'bg-[var(--background)] text-[var(--muted-foreground)] opacity-40'
+                                : 'bg-[var(--background)] text-[var(--foreground)] active:scale-[0.98]'}`}
                     >
                         <ChevronLeft className="w-5 h-5" />
                         Precedente
@@ -463,10 +444,7 @@ export default function ReviewPage() {
                     <button
                         onClick={goNext}
                         disabled={currentIndex === wrongAnswers.length - 1}
-                        className={`flex-1 py-3 rounded-xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all
-                            ${currentIndex === wrongAnswers.length - 1
-                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
-                                : 'bg-[#00B1FF] text-white shadow-sm shadow-blue-400/30 active:scale-[0.98]'}`}
+                        className="flex-1 py-3.5 rounded-2xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all bg-[#00B1FF] text-white active:scale-[0.98]"
                     >
                         Prossimo Errore
                         <ChevronRight className="w-5 h-5" />
