@@ -96,24 +96,20 @@ export default function WelcomePage() {
     return (
         <div
             className="min-h-[100dvh] font-sans flex flex-col relative overflow-hidden"
-            style={{ paddingTop: 'env(safe-area-inset-top, 0px)', background: '#06080F', color: '#fff' }}
+            style={{ paddingTop: 'env(safe-area-inset-top, 0px)', background: 'var(--background)', color: 'var(--foreground)' }}
         >
             {/* Inject blob animation */}
             <style>{`@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(15px,-10px) scale(1.05)}66%{transform:translate(-10px,8px) scale(.97)}}`}</style>
 
-            {/* ─── Dark gradient background (same as login) ─── */}
+            {/* ─── Gradient background (same as login) ─── */}
             <div className="fixed inset-0 pointer-events-none">
                 <div
                     className="absolute rounded-full"
-                    style={{ width: 350, height: 350, top: '-8%', right: '-15%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,120,255,0.12) 0%, transparent 60%)', animation: 'blobFloat 12s ease-in-out infinite' }}
+                    style={{ width: 350, height: 350, top: '-8%', right: '-15%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,120,255,0.10) 0%, transparent 60%)', animation: 'blobFloat 12s ease-in-out infinite' }}
                 />
                 <div
                     className="absolute rounded-full"
-                    style={{ width: 300, height: 300, bottom: '-10%', left: '-10%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,50,200,0.08) 0%, transparent 55%)', animation: 'blobFloat 16s ease-in-out infinite 4s' }}
-                />
-                <div
-                    className="absolute inset-0"
-                    style={{ opacity: 0.25, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.012) 1px, transparent 1px)', backgroundSize: '32px 32px' }}
+                    style={{ width: 300, height: 300, bottom: '-10%', left: '-10%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,50,200,0.07) 0%, transparent 55%)', animation: 'blobFloat 16s ease-in-out infinite 4s' }}
                 />
             </div>
 
@@ -154,7 +150,7 @@ export default function WelcomePage() {
                                 </h2>
 
                                 {/* Subtitle */}
-                                <p className="text-[14px] font-medium text-white/40 text-center max-w-[260px]">
+                                <p className="text-[14px] font-medium text-[var(--foreground)] opacity-40 text-center max-w-[260px]">
                                     {slide.subtitle}
                                 </p>
                             </div>
@@ -175,8 +171,8 @@ export default function WelcomePage() {
                                 style={{
                                     width: current === i ? 24 : 7,
                                     height: 7,
-                                    backgroundColor: current === i ? '#00B1FF' : 'rgba(255,255,255,0.25)',
-                                    opacity: current === i ? 1 : 0.15,
+                                    backgroundColor: current === i ? '#00B1FF' : 'var(--foreground)',
+                                    opacity: current === i ? 1 : 0.2,
                                 }}
                             />
                         </button>
@@ -215,7 +211,7 @@ export default function WelcomePage() {
                     onClick={() => { hapticLight(); navigate('/profile/setup'); }}
                     className="w-full mt-3 py-3 text-center"
                 >
-                    <span className="text-[13px] font-medium text-white/40">
+                    <span className="text-[13px] font-medium text-[var(--foreground)] opacity-40">
                         Salta la preview
                     </span>
                 </button>
