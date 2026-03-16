@@ -387,7 +387,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                 <div
                     className="relative w-full sm:max-w-xl bg-[var(--card)] rounded-t-[32px] sm:rounded-[28px] shadow-2xl flex flex-col"
                     style={{
-                        maxHeight: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px - env(safe-area-inset-top, 0px))` : '82dvh',
+                        maxHeight: '82dvh',
                         border: '1px solid var(--card-border)',
                         overflow: 'hidden',
                         willChange: 'transform, opacity',
