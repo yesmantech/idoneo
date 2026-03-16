@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import BackButton from '@/components/ui/BackButton';
 import {
     Search,
@@ -243,19 +242,22 @@ export default function ConcorsiSearchPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <AnimatePresence mode="popLayout">
-                            {quizzes.map((quiz, i) => (
-                                <motion.div
-                                    key={quiz.id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: Math.min(i * 0.05, 0.4) }}
-                                    layout
-                                >
-                                    <QuizSearchCard quiz={quiz} />
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
+                        <style>{`
+                            @keyframes cardIn {
+                                from { opacity: 0; transform: translate3d(0, 12px, 0); }
+                                to   { opacity: 1; transform: translate3d(0, 0, 0); }
+                            }
+                        `}</style>
+                        {quizzes.map((quiz, i) => (
+                            <div
+                                key={quiz.id}
+                                style={{
+                                    animation: `cardIn 0.3s ease ${Math.min(i * 0.04, 0.3)}s both`,
+                                }}
+                            >
+                                <QuizSearchCard quiz={quiz} />
+                            </div>
+                        ))}
                     </div>
                 )}
 
@@ -378,23 +380,29 @@ function TierSFilterModal({
     if (!isOpen) return null;
 
     return (
-        <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-4 focus:outline-none">
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                />
-
-                <motion.div
-                    initial={{ y: "100%" }}
-                    animate={{ y: 0 }}
-                    exit={{ y: "100%" }}
-                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    className="relative w-full max-w-lg bg-[var(--background)] rounded-[40px] shadow-2xl overflow-hidden border border-[var(--card-border)]"
+        <>
+            <div
+                onClick={onClose}
+                className="fixed inset-0 z-[100]"
+                style={{
+                    background: 'rgba(0,0,0,0.4)',
+                    animation: 'filterFade 0.18s ease forwards',
+                }}
+            />
+            <div className="fixed inset-x-0 bottom-0 z-[101] px-4 pb-4">
+                <div
+                    className="w-full max-w-lg mx-auto bg-[var(--background)] rounded-[40px] shadow-2xl overflow-hidden border border-[var(--card-border)]"
+                    style={{
+                        animation: 'filterSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    }}
                 >
+                    <style>{`
+                        @keyframes filterFade { from { opacity: 0; } to { opacity: 1; } }
+                        @keyframes filterSlide {
+                            from { transform: translate3d(0, 100%, 0); }
+                            to   { transform: translate3d(0, 0, 0); }
+                        }
+                    `}</style>
                     <div className="p-8 pb-10">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="text-2xl font-black text-[var(--foreground)] tracking-tight">Filtri Avanzati</h2>
@@ -472,9 +480,9 @@ function TierSFilterModal({
                                         onClick={() => setFilters(f => ({ ...f, isOfficial: f.isOfficial === true ? undefined : true, offset: 0 }))}
                                         className={`w-12 h-7 rounded-full transition-all relative ${filters.isOfficial === true ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}`}
                                     >
-                                        <motion.div
-                                            animate={{ x: filters.isOfficial === true ? 20 : 4 }}
-                                            className="absolute top-1 left-0 w-5 h-5 bg-white rounded-full shadow-sm"
+                                        <div
+                                            className="absolute top-1 left-0 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
+                                            style={{ transform: filters.isOfficial === true ? 'translateX(20px)' : 'translateX(4px)' }}
                                         />
                                     </button>
                                 </div>
@@ -499,8 +507,8 @@ function TierSFilterModal({
                             </button>
                         </div>
                     </div>
-                </motion.div>
+                </div>
             </div>
-        </AnimatePresence>
+        </>
     );
 }
