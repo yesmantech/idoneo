@@ -240,7 +240,8 @@ export default function ExplanationPage() {
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-32 md:pb-36 transition-colors duration-500">
             {/* Header */}
-            <div className="sticky top-0 z-20 bg-[var(--card)] border-b border-[var(--card-border)] px-4 h-16 flex items-center justify-between shadow-sm">
+            <div className="sticky top-0 z-20 bg-[var(--card)] border-b border-[var(--card-border)] px-4 pt-safe shadow-sm">
+                <div className="h-14 flex items-center justify-between">
                 <button
                     onClick={() => navigate(`/quiz/results/${attemptId}`)}
                     className="flex items-center gap-2 text-[var(--foreground)] opacity-50 hover:opacity-100 font-medium transition-all"
@@ -250,6 +251,7 @@ export default function ExplanationPage() {
                 </button>
                 <div className="font-bold text-[var(--foreground)]">Spiegazione</div>
                 <div className="w-20" /> {/* Spacer */}
+                </div>
             </div>
 
             <div className="max-w-3xl mx-auto px-6 py-8">
@@ -367,7 +369,7 @@ export default function ExplanationPage() {
             </div>
 
             {/* Footer Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--card)] border-t border-[var(--card-border)] shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex items-center justify-between sm:justify-center gap-4 transition-colors z-40 bg-opacity-95 backdrop-blur-md">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--card)] border-t border-[var(--card-border)] flex items-center justify-between sm:justify-center gap-4 transition-colors z-40 pb-safe">
                 <button
                     onClick={goToPrevError}
                     className="px-6 py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
