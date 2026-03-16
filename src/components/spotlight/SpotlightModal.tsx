@@ -370,9 +370,10 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
     return (
         <>
-            {/* Backdrop — pure CSS */}
+            {/* Backdrop — blocks bg scroll */}
             <div
                 onClick={close}
+                onTouchMove={e => e.preventDefault()}
                 className="fixed inset-0 z-[9999] bg-black/40 dark:bg-black/60"
                 style={{
                     animation: 'spotlightFadeIn 0.2s ease-out forwards',
@@ -380,14 +381,18 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                 }}
             />
 
-            {/* Spotlight Sheet — pure CSS slide-up */}
+            {/* Spotlight Sheet — positioned above keyboard */}
             <div
-                className="fixed inset-x-0 bottom-0 sm:inset-auto sm:top-[10vh] sm:left-1/2 sm:-translate-x-1/2 z-[10000] flex flex-col justify-end sm:justify-start sm:items-center sm:px-4"
+                className="fixed inset-x-0 z-[10000] sm:inset-auto sm:top-[10vh] sm:left-1/2 sm:-translate-x-1/2 sm:px-4"
+                style={{
+                    bottom: keyboardHeight > 0 ? keyboardHeight : 0,
+                    transition: 'bottom 0.25s ease-out',
+                }}
             >
                 <div
                     className="relative w-full sm:max-w-xl bg-[var(--card)] rounded-t-[32px] sm:rounded-[28px] shadow-2xl flex flex-col"
                     style={{
-                        maxHeight: '82dvh',
+                        maxHeight: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px)` : '82dvh',
                         border: '1px solid var(--card-border)',
                         overflow: 'hidden',
                         willChange: 'transform, opacity',
