@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Settings } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 import { Link, useNavigate } from 'react-router-dom';
@@ -73,7 +72,7 @@ export default function BandiWatchlistPage() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
             {/* Header */}
-            <div className="bg-white dark:bg-black sticky top-0 z-30 border-b border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-black sticky top-0 z-30 border-b border-slate-100 dark:border-slate-800 pt-safe">
                 <div className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                         <BackButton />
@@ -121,24 +120,19 @@ export default function BandiWatchlistPage() {
                                     <img src="/icons/flame-red.png" alt="" className="w-4 h-4 object-contain" /> In scadenza questa settimana
                                 </h2>
                                 <div className="space-y-3">
-                                    <AnimatePresence mode="popLayout">
-                                        {closingThisWeek.map((bando, i) => (
-                                            <motion.div
-                                                key={bando.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, x: -100 }}
-                                                transition={{ delay: i * 0.05 }}
-                                                layout
-                                            >
-                                                <BandoCard
-                                                    bando={bando}
-                                                    isSaved={true}
-                                                    onSaveToggle={() => handleUnsave(bando.id)}
-                                                />
-                                            </motion.div>
-                                        ))}
-                                    </AnimatePresence>
+                                    <style>{`@keyframes bandoIn { from { opacity: 0; transform: translate3d(0,12px,0); } to { opacity: 1; transform: translate3d(0,0,0); } }`}</style>
+                                    {closingThisWeek.map((bando, i) => (
+                                        <div
+                                            key={bando.id}
+                                            style={{ animation: `bandoIn 0.3s ease ${i * 0.04}s both` }}
+                                        >
+                                            <BandoCard
+                                                bando={bando}
+                                                isSaved={true}
+                                                onSaveToggle={() => handleUnsave(bando.id)}
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
                             </section>
                         )}
@@ -150,24 +144,18 @@ export default function BandiWatchlistPage() {
                                     Prossimamente
                                 </h2>
                                 <div className="space-y-3">
-                                    <AnimatePresence mode="popLayout">
-                                        {closingLater.map((bando, i) => (
-                                            <motion.div
-                                                key={bando.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, x: -100 }}
-                                                transition={{ delay: i * 0.05 }}
-                                                layout
-                                            >
-                                                <BandoCard
-                                                    bando={bando}
-                                                    isSaved={true}
-                                                    onSaveToggle={() => handleUnsave(bando.id)}
-                                                />
-                                            </motion.div>
-                                        ))}
-                                    </AnimatePresence>
+                                    {closingLater.map((bando, i) => (
+                                        <div
+                                            key={bando.id}
+                                            style={{ animation: `bandoIn 0.3s ease ${i * 0.04}s both` }}
+                                        >
+                                            <BandoCard
+                                                bando={bando}
+                                                isSaved={true}
+                                                onSaveToggle={() => handleUnsave(bando.id)}
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
                             </section>
                         )}
@@ -175,24 +163,18 @@ export default function BandiWatchlistPage() {
                         {/* Closed tab */}
                         {activeTab === 'chiusi' && (
                             <div className="space-y-3">
-                                <AnimatePresence mode="popLayout">
-                                    {closedBandi.map((bando, i) => (
-                                        <motion.div
-                                            key={bando.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, x: -100 }}
-                                            transition={{ delay: i * 0.05 }}
-                                            layout
-                                        >
-                                            <BandoCard
-                                                bando={bando}
-                                                isSaved={true}
-                                                onSaveToggle={() => handleUnsave(bando.id)}
-                                            />
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
+                                {closedBandi.map((bando, i) => (
+                                    <div
+                                        key={bando.id}
+                                        style={{ animation: `bandoIn 0.3s ease ${i * 0.04}s both` }}
+                                    >
+                                        <BandoCard
+                                            bando={bando}
+                                            isSaved={true}
+                                            onSaveToggle={() => handleUnsave(bando.id)}
+                                        />
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
