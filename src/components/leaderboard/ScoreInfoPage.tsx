@@ -21,7 +21,7 @@ export default function ScoreInfoPage({ onBack, initialTab = 'prep' }: ScoreInfo
             </div>
 
             {/* Content Container */}
-            <div className="flex-1 overflow-y-auto bg-[var(--background)]">
+            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}>
                 <div className="p-5 max-w-lg mx-auto pb-20">
 
                     {/* Tabs / Segmented Control */}
