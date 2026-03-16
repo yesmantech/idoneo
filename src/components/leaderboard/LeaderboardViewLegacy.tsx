@@ -114,7 +114,7 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                         </div>
                         <div className="text-center w-full">
                             <div className="font-bold text-sm text-text-primary truncate">{second.user.nickname}</div>
-                            <div className="text-xs font-black text-text-tertiary">{Math.round(second.score)}</div>
+                            <div className="text-xs font-black text-text-tertiary">{second.score} <span className="text-[10px] uppercase opacity-70">{metricLabel}</span></div>
                         </div>
                     </>
                 )}
@@ -153,7 +153,7 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
                         </div>
                         <div className="text-center w-full">
                             <div className="font-bold text-sm text-text-primary truncate">{third.user.nickname}</div>
-                            <div className="text-xs font-black text-text-tertiary">{Math.round(third.score)}</div>
+                            <div className="text-xs font-black text-text-tertiary">{third.score} <span className="text-[10px] uppercase opacity-70">{metricLabel}</span></div>
                         </div>
                     </>
                 )}
