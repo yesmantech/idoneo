@@ -305,13 +305,13 @@ export default function LoginPage() {
                                     </div>
                                 </div>
                                 {error && <div style={{ padding: '12px 16px', borderRadius: 14, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#FCA5A5', fontSize: 13, fontWeight: 500, textAlign: 'center', marginBottom: 10 }}>{error}</div>}
-                                <button type="button" onClick={() => { hapticSuccess(); nav('/welcome'); }} style={{
+                                <button type="submit" disabled={loading} style={{
                                     width: '100%', height: 52, borderRadius: 14, border: 'none', marginTop: 4,
                                     background: '#0095FF',
                                     color: '#fff', fontSize: 16, fontWeight: 700,
-                                    cursor: 'pointer',
+                                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1,
                                     boxShadow: '0 4px 16px rgba(0,60,200,0.3)', transition: 'all .2s ease',
-                                }}>Continua</button>
+                                }}>{loading ? '...' : 'Continua'}</button>
                             </form>
 
                             {/* Separator */}
