@@ -89,6 +89,13 @@ export function StreakCelebration() {
 
         const handleStreakUpdate = (e: any) => {
             const { streak: newStreak, isMilestone: milestone } = e.detail;
+
+            // Guard: only show once per day per session
+            const today = new Date().toISOString().slice(0, 10);
+            const shown = sessionStorage.getItem('streak_celebrated_today');
+            if (shown === today) return; // Already celebrated today
+            sessionStorage.setItem('streak_celebrated_today', today);
+
             const tierUnlock = TIER_THRESHOLDS.includes(newStreak);
 
             setStreak(newStreak);
