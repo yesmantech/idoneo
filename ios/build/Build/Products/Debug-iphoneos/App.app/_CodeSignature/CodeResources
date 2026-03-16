@@ -6,7 +6,7 @@
 	<dict>
 		<key>App.debug.dylib</key>
 		<data>
-		F/34/gCN/LWNcoRPVVdzrR4IYM8=
+		/ZcQxMgAQ/qUt4/ke/fy27H8KF0=
 		</data>
 		<key>AppIcon60x60@2x.png</key>
 		<data>
@@ -42,7 +42,7 @@
 		</data>
 		<key>Frameworks/Capacitor.framework/Capacitor</key>
 		<data>
-		jmVaBuVhnGPUsrVbsDqIM1V/O/c=
+		ge8mVbnB6WNTi+GwDNxnCjGA3vM=
 		</data>
 		<key>Frameworks/Capacitor.framework/Info.plist</key>
 		<data>
@@ -62,7 +62,7 @@
 		</data>
 		<key>Frameworks/Cordova.framework/Cordova</key>
 		<data>
-		lhIWGWgJ1s3xIkIz4IH5ZOvGWPw=
+		avYCxb3DHEWFjNbqUxsxhov/oE8=
 		</data>
 		<key>Frameworks/Cordova.framework/Info.plist</key>
 		<data>
@@ -86,7 +86,7 @@
 		</data>
 		<key>__preview.dylib</key>
 		<data>
-		wtTgiTBwxlXYnrOySAUdylXYKFA=
+		imluCRU0V82VfhOAeXtpKQMzvv8=
 		</data>
 		<key>capacitor.config.json</key>
 		<data>
@@ -915,7 +915,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			fmIrZ9Pugh9hH4s7Snyn6LTL7qcK1CQFGSoSgNlhZoU=
+			ySOhIIetbBSKvBx2PpPKNcO7FQ/zEk+kB564KmUy/eA=
 			</data>
 		</dict>
 		<key>AppIcon60x60@2x.png</key>
@@ -978,7 +978,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			fENXIvfQIxxQz3BjIl9aUGRM3zlQN8F4kGLT+L1R8S8=
+			05RB/namUkKmn8OJi7z28bSav5maBQWy0OduaIcZ6m8=
 			</data>
 		</dict>
 		<key>Frameworks/Capacitor.framework/Info.plist</key>
@@ -1013,7 +1013,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			TnF+vYWpoAU7qFcFXFyL3B1xY4DH03fnmPHWAs/5AIY=
+			4WzG1IFBEdzKOsp0Fp885MyeX2fBqA1A6DTedc3g0og=
 			</data>
 		</dict>
 		<key>Frameworks/Cordova.framework/Info.plist</key>
@@ -1041,7 +1041,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			top3bRCU2liibBumGsZ4o4lXaQfazVRoY0jR37c9wiY=
+			bEui8qVBrB3WEXs9A5xi+b6RpbGQ4dMEagP1QDmKCb4=
 			</data>
 		</dict>
 		<key>capacitor.config.json</key>
