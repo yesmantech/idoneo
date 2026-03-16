@@ -151,6 +151,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
     const [isLoadingQuizzes, setIsLoadingQuizzes] = useState(false);
     const [activeSection, setActiveSection] = useState<'search' | 'actions' | 'recent' | 'continue'>('search');
     const [searchItems, setSearchItems] = useState<SearchItem[]>(propItems);
+    const [contentReady, setContentReady] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
@@ -216,9 +217,21 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
         return items;
     }, [query, searchResults, activeQuizzes, recentSearches]);
 
-    // Load active quizzes when modal opens
+    // Two-phase render: animate shell first, then render content
     useEffect(() => {
-        if (!isOpen) return;
+        if (isOpen) {
+            setContentReady(false);
+            // Let the slide-up animation complete before rendering heavy content
+            const timer = setTimeout(() => setContentReady(true), 280);
+            return () => clearTimeout(timer);
+        } else {
+            setContentReady(false);
+        }
+    }, [isOpen]);
+
+    // Load active quizzes AFTER animation (deferred)
+    useEffect(() => {
+        if (!contentReady) return;
 
         const loadActiveQuizzes = async () => {
             setIsLoadingQuizzes(true);
@@ -236,7 +249,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
         };
 
         loadActiveQuizzes();
-    }, [isOpen]);
+    }, [contentReady]);
 
     // Focus input + iOS body scroll lock (deferred to not block animation)
     useEffect(() => {
@@ -454,7 +467,8 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                         </div>
                     </form>
 
-                    {/* ── RESULTS ── */}
+                    {/* ── RESULTS (deferred until animation completes) ── */}
+                    {contentReady && (
                     <div
                         ref={listRef}
                         className="flex-1 overflow-y-auto overscroll-contain scrollbar-hide"
@@ -463,6 +477,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                             touchAction: 'pan-y',
                             paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))',
                             minHeight: 0,
+                            animation: 'spotFade 0.15s ease forwards',
                         }}
                     >
                         {query.trim() ? (
@@ -590,6 +605,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                             </div>
                         )}
                     </div>
+                    )}
                 </div>
             </div>
         </>

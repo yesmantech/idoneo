@@ -215,8 +215,19 @@ export default function ConcorsiSearchPage() {
             {/* Results */}
             <main className="max-w-7xl mx-auto px-4 pt-6">
                 {loading ? (
-                    <div className="py-20 flex flex-col items-center">
-                        <TierSLoader message="Ricerca in corso..." />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[1,2,3,4].map(i => (
+                            <div key={i} className="bg-[var(--card)] rounded-3xl border border-[var(--card-border)] p-5 animate-pulse">
+                                <div className="flex gap-4">
+                                    <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 shrink-0" />
+                                    <div className="flex-1 space-y-3">
+                                        <div className="w-20 h-3 bg-slate-100 dark:bg-slate-800 rounded" />
+                                        <div className="w-full h-5 bg-slate-100 dark:bg-slate-800 rounded" />
+                                        <div className="w-16 h-4 bg-slate-50 dark:bg-slate-800/50 rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : error ? (
                     <div className="py-20 text-center space-y-4">
