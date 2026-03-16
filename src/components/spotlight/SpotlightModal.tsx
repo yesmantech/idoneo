@@ -581,58 +581,6 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                                     </div>
                                 )}
 
-                                {/* Explore Concorsi */}
-                                <div className="px-4 py-3">
-                                    <div className="px-2 pb-2">
-                                        <span className="text-[10px] font-black text-[var(--foreground)] opacity-40 uppercase tracking-widest flex items-center gap-1.5">
-                                            <Sparkles className="w-3.5 h-3.5 text-[#00B1FF]" />
-                                            Esplora Concorsi
-                                        </span>
-                                    </div>
-
-                                    {/* Advanced Search CTA */}
-                                    <button
-                                        onClick={() => { close(); navigate('/concorsi/search'); }}
-                                        className="w-full mb-3 p-4 rounded-[20px] flex items-center justify-between group transition-all active:scale-[0.98]"
-                                        style={{ background: '#00B1FF' }}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-[12px] bg-white/20 flex items-center justify-center">
-                                                <Search className="w-4.5 h-4.5 text-white" />
-                                            </div>
-                                            <div className="text-left">
-                                                <div className="font-bold text-white text-[15px]">Ricerca Avanzata</div>
-                                                <div className="text-white/70 text-[12px] font-medium">Filtra per categoria e tipo</div>
-                                            </div>
-                                        </div>
-                                        <ArrowRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform" />
-                                    </button>
-
-                                    {/* Quick category chips */}
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {[
-                                            { label: 'Militari', url: '/concorsi/forze-armate', Icon: Shield, color: '#3B82F6' },
-                                            { label: 'Amministrativi', url: '/concorsi/amministrativi', Icon: Briefcase, color: '#8B5CF6' },
-                                            { label: 'Enti Locali', url: '/concorsi/enti-locali', Icon: MapPin, color: '#F97316' },
-                                            { label: 'Sanità', url: '/concorsi/sanita', Icon: Activity, color: '#F43F5E' },
-                                        ].map(({ label, url, Icon, color }) => (
-                                            <button
-                                                key={label}
-                                                onClick={() => { close(); navigate(url); }}
-                                                className="p-3 rounded-[16px] flex items-center gap-2.5 text-left transition-all active:scale-[0.97]"
-                                                style={{ background: 'var(--background)', border: '1px solid var(--card-border)' }}
-                                            >
-                                                <div
-                                                    className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
-                                                    style={{ background: color + '18' }}
-                                                >
-                                                    <Icon className="w-4 h-4" style={{ color }} />
-                                                </div>
-                                                <span className="text-[13px] font-semibold text-[var(--foreground)]">{label}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         )}
                     </div>
