@@ -359,7 +359,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
     return (
         <AnimatePresence>
             <div
-                className="fixed inset-0 z-[9999] flex items-end sm:items-start sm:justify-center sm:pt-[10vh] sm:px-4"
+                className="fixed inset-0 z-[9999] flex flex-col justify-end sm:justify-start sm:items-center sm:pt-[10vh] sm:px-4"
             >
                 {/* Backdrop */}
                 <motion.div
@@ -373,15 +373,16 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
 
                 {/* Spotlight Sheet */}
                 <motion.div
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 60 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 40 }}
-                    transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-                    className="relative w-full sm:max-w-xl bg-[var(--card)] rounded-t-[32px] sm:rounded-[28px] shadow-2xl flex flex-col overflow-hidden"
+                    exit={{ opacity: 0, y: 60 }}
+                    transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+                    className="relative w-full sm:max-w-xl bg-[var(--card)] rounded-t-[32px] sm:rounded-[28px] shadow-2xl flex flex-col"
                     style={{
-                        maxHeight: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px)` : '82dvh',
+                        maxHeight: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px - env(safe-area-inset-top, 0px))` : '82dvh',
                         border: '1px solid var(--card-border)',
-                        transition: 'max-height 0.28s cubic-bezier(0.33, 1, 0.68, 1)',
+                        transition: 'max-height 0.25s ease-out',
+                        overflow: 'hidden',
                     }}
                     onKeyDown={handleKeyDown}
                 >
@@ -432,6 +433,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                     <div
                         ref={listRef}
                         className="flex-1 overflow-y-auto overscroll-contain scrollbar-hide pb-safe"
+                        style={{ WebkitOverflowScrolling: 'touch' }}
                     >
                         {query.trim() ? (
                             /* Search Results */
