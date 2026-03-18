@@ -56,9 +56,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(401).json({ error: 'Unauthorized: invalid token' });
             }
             userId = user.id;
-        } else {
-            // Fallback: try client-sent userId (backwards compatibility during migration)
-            userId = body?.userId;
         }
 
         if (!userId) {
