@@ -1,6 +1,7 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 1. Validate CORS and method
@@ -10,6 +11,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method !== 'POST') {
         return res.status(405).send('Method not allowed');
+    }
+
+    // SEC-002 FIX: Verify admin role via JWT
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+        const supabaseAuth = createClient(
+            process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '',
+            process.env.VITE_SUPABASE_ANON_KEY || ''
+        );
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+        if (authError || !user) {
+            return res.status(401).json({ error: 'Unauthorized: invalid token' });
+        }
+        // Check admin role
+        const adminSupabase = createClient(
+            process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '',
+            process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+        );
+        const { data: profile } = await adminSupabase.from('profiles').select('role').eq('id', user.id).single();
+        if (!profile || profile.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: admin access required' });
+        }
+    } catch (e) {
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {

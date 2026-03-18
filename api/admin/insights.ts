@@ -17,6 +17,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(405).send('Method not allowed');
     }
 
+    // SEC-002 FIX: Verify admin role via JWT
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const supabaseAuth = createClient(
+        process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '',
+        process.env.VITE_SUPABASE_ANON_KEY || ''
+    );
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (authError || !user) {
+        return res.status(401).json({ error: 'Unauthorized: invalid token' });
+    }
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    if (!profile || profile.role !== 'admin') {
+        return res.status(403).json({ error: 'Forbidden: admin access required' });
+    }
+
     try {
         // Collect DB Analytics
         const { data: quizAttempts } = await supabase

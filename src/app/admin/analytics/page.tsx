@@ -82,9 +82,15 @@ export default function AdminAnalyticsPage() {
             console.log('AdminAnalyticsPage: Analyzing pasted data via Vercel Edge...');
             // In development this calls Vite proxy if configured, or absolute url for Vercel
             const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/api/admin/analyze' : '/api/admin/analyze';
+            // SEC-002 FIX: Send JWT for admin verification
+            const { supabase } = await import('@/lib/supabaseClient');
+            const { data: { session } } = await supabase.auth.getSession();
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}),
+                },
                 body: JSON.stringify({ data: pastedData })
             });
             const result = await response.json();

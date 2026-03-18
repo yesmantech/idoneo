@@ -128,9 +128,14 @@ export const insightService = {
      */
     async generateAIInsights(): Promise<Insight[]> {
         const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/api/admin/insights' : '/api/admin/insights';
+        // SEC-002 FIX: Send JWT for admin verification
+        const { data: { session } } = await supabase.auth.getSession();
         const response = await fetch(apiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}),
+            },
             body: JSON.stringify({})
         });
 

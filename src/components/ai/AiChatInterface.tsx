@@ -590,11 +590,21 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             fetch: async (url, init) => {
                 console.log('[AI Coach] Fetching:', url, 'platform:', Capacitor.getPlatform());
                 try {
+                    // SEC-001 FIX: Add JWT Authorization header
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const authHeaders: Record<string, string> = {
+                        ...(init?.headers as Record<string, string> || {}),
+                    };
+                    if (session?.access_token) {
+                        authHeaders['Authorization'] = `Bearer ${session.access_token}`;
+                    }
+
                     // With CapacitorHttp enabled, native fetch is extremely stable (no Load failed),
                     // but it buffers the ENTIRE response. True streaming is blocked by an iOS 
                     // WebKit bug with HTTP/2 POST requests (Bug 228229).
                     const response = await fetch(url, {
                         ...init,
+                        headers: authHeaders,
                         mode: 'cors',
                         credentials: 'omit',
                     });

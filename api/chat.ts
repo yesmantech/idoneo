@@ -21,14 +21,14 @@ const openai = createOpenAI({
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // CORS: Allow all Capacitor/WebView origins for native streaming
-    const allowedOrigins = ['capacitor://localhost', 'https://localhost', 'http://localhost'];
+    const allowedOrigins = ['capacitor://localhost', 'https://localhost', 'http://localhost', 'https://idoneo.ai'];
     const origin = req.headers.origin || '';
     if (allowedOrigins.includes(origin) || origin === '') {
         // Allow the specific origin, or '*' if no origin header (WKWebView native fetch)
         res.setHeader('Access-Control-Allow-Origin', origin || '*');
     }
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'false');
 
     // Handle CORS preflight
@@ -38,10 +38,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
         const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-        const { messages, userId } = body || {};
+        const { messages } = body || {};
+
+        // SEC-001 FIX: Extract userId from JWT instead of trusting client-sent value
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.replace('Bearer ', '');
+        let userId: string | null = null;
+
+        if (token) {
+            // Verify the JWT with Supabase to get the authenticated user
+            const { data: { user }, error: authError } = await createClient(
+                process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '',
+                process.env.VITE_SUPABASE_ANON_KEY || ''
+            ).auth.getUser(token);
+
+            if (authError || !user) {
+                return res.status(401).json({ error: 'Unauthorized: invalid token' });
+            }
+            userId = user.id;
+        } else {
+            // Fallback: try client-sent userId (backwards compatibility during migration)
+            userId = body?.userId;
+        }
 
         if (!userId) {
-            return res.status(401).json({ error: 'Unauthorized: userId required' });
+            return res.status(401).json({ error: 'Unauthorized: authentication required' });
         }
 
         // Convert UIMessages (from useChat frontend) to ModelMessages (for streamText)

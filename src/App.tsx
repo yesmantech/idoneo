@@ -37,6 +37,8 @@ import AiAssistantPage from './app/ai-assistant/page';
 import PunteggiPage from './app/come-funziona/punteggi/page';
 import BrandGuidelinesPage from './app/brand/page';
 import PreparazionePage from './app/preparazione/page';
+import PrivacyPolicyPage from './app/privacy/page';
+import TermsPage from './app/terms/page';
 import BandiListPage from './app/bandi/BandiListPage';
 import BandoDetailPage from './app/bandi/BandoDetailPage';
 import BandiWatchlistPage from './app/bandi/BandiWatchlistPage';
@@ -85,6 +87,7 @@ const AdminEntiListPage = React.lazy(() => import('./app/admin/enti/page'));
 // STATIC IMPORTS (Required at startup, cannot be lazy)
 // ============================================================================
 import AdminGuard from './components/auth/AdminGuard';
+import SiteLockGate from './components/auth/SiteLockGate';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -209,6 +212,7 @@ export default function App() {
     }, []);
 
     return (
+        <SiteLockGate>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}>
             <BrowserRouter>
                 <ScrollToTop />
@@ -295,6 +299,8 @@ export default function App() {
                                                     <Route path="/come-funziona/punteggi" element={<MainLayout><PunteggiPage /></MainLayout>} />
                                                     <Route path="/brand" element={<BrandGuidelinesPage />} />
                                                     <Route path="/preparazione" element={<PreparazionePage />} />
+                                                    <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                                                    <Route path="/terms" element={<TermsPage />} />
 
                                                     {/* Demo Pages */}
                                                     <Route path="/demo/flames" element={<FlamesDemoPage />} />
@@ -358,5 +364,6 @@ export default function App() {
             </BrowserRouter>
             <ReactQueryDevtools initialIsOpen={false} />
         </PersistQueryClientProvider>
+        </SiteLockGate>
     );
 }
