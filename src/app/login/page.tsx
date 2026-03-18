@@ -9,6 +9,21 @@ import { supabase } from '@/lib/supabaseClient';
 import { Sparkles, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import SEOHead from '@/components/seo/SEOHead';
 import { hapticLight, hapticSuccess } from '@/lib/haptics';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
+
+interface AppleSignInResult {
+    identityToken: string;
+    authorizationCode: string;
+    user: string;
+    email?: string;
+    givenName?: string;
+    familyName?: string;
+}
+interface AppleSignInPlugin {
+    authorize(): Promise<AppleSignInResult>;
+}
+const AppleSignIn = registerPlugin<AppleSignInPlugin>('AppleSignIn');
 
 type View = 'landing' | 'auth';
 
@@ -322,7 +337,27 @@ export default function LoginPage() {
                             </div>
 
                             {/* Google */}
-                            <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/welcome` } }); }}
+                            <button onClick={async () => {
+                                hapticLight();
+                                if (Capacitor.isNativePlatform()) {
+                                    const { data, error } = await supabase.auth.signInWithOAuth({
+                                        provider: 'google',
+                                        options: {
+                                            redirectTo: 'com.idoneo.app://welcome',
+                                            skipBrowserRedirect: true,
+                                        },
+                                    });
+                                    if (data?.url) {
+                                        await Browser.open({
+                                            url: data.url,
+                                            presentationStyle: 'popover',
+                                            toolbarColor: '#000000',
+                                        });
+                                    }
+                                } else {
+                                    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/welcome` } });
+                                }
+                            }}
                                 style={{
                                     width: '100%', height: 52, borderRadius: 14, border: '1px solid var(--card-border)',
                                     background: 'var(--card)', color: 'var(--foreground)', fontSize: 15, fontWeight: 600,
@@ -341,8 +376,72 @@ export default function LoginPage() {
                                 Continua con Google
                             </button>
 
+                            {/* Facebook */}
+                            <button onClick={async () => {
+                                hapticLight();
+                                if (Capacitor.isNativePlatform()) {
+                                    const { data, error } = await supabase.auth.signInWithOAuth({
+                                        provider: 'facebook',
+                                        options: {
+                                            redirectTo: 'com.idoneo.app://welcome',
+                                            skipBrowserRedirect: true,
+                                        },
+                                    });
+                                    if (data?.url) {
+                                        await Browser.open({
+                                            url: data.url,
+                                            presentationStyle: 'popover',
+                                            toolbarColor: '#000000',
+                                        });
+                                    }
+                                } else {
+                                    await supabase.auth.signInWithOAuth({ provider: 'facebook', options: { redirectTo: `${window.location.origin}/welcome` } });
+                                }
+                            }}
+                                style={{
+                                    width: '100%', height: 52, borderRadius: 14, border: '1px solid var(--card-border)',
+                                    background: 'var(--card)', color: 'var(--foreground)', fontSize: 15, fontWeight: 600,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                    marginTop: 10, transition: 'transform .15s ease',
+                                }}
+                                onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.98)')}
+                                onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+                                </svg>
+                                Continua con Facebook
+                            </button>
                             {/* Apple */}
-                            <button onClick={async () => { hapticLight(); await supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: `${window.location.origin}/welcome` } }); }}
+                            <button onClick={async () => {
+                                hapticLight();
+                                setError(null);
+                                try {
+                                    if (Capacitor.isNativePlatform()) {
+                                        // Native: use the Apple Sign In popup (Face ID)
+                                        const result = await AppleSignIn.authorize();
+                                        // Pass the ID token to Supabase
+                                        const { error: supaErr } = await supabase.auth.signInWithIdToken({
+                                            provider: 'apple',
+                                            token: result.identityToken,
+                                        });
+                                        if (supaErr) throw supaErr;
+                                        hapticSuccess();
+                                        nav('/welcome');
+                                    } else {
+                                        // Web: standard OAuth redirect
+                                        await supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: `${window.location.origin}/welcome` } });
+                                    }
+                                } catch (err: any) {
+                                    const msg = err?.message || '';
+                                    // Suppress user-cancelled and all Apple AuthorizationError codes
+                                    if (msg.includes('canceled') || msg.includes('cancelled') || msg.includes('1001') || msg.includes('1000') || msg.includes('AuthorizationError')) {
+                                        // User cancelled or Apple auth not configured — silent
+                                    } else {
+                                        setError('Errore durante il login con Apple. Riprova.');
+                                    }
+                                }
+                            }}
                                 style={{
                                     width: '100%', height: 52, borderRadius: 14, border: '1px solid var(--card-border)',
                                     background: 'var(--card)', color: 'var(--foreground)', fontSize: 15, fontWeight: 600,
