@@ -105,6 +105,17 @@ export async function deleteUserAccount(): Promise<DeleteAccountResult> {
         // Step 3: Sign out (session is now invalid anyway)
         await supabase.auth.signOut();
 
+        // SEC-030: Purge service worker caches to prevent stale data on shared devices
+        if ('caches' in window) {
+            try {
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.filter(n => n.includes('supabase') || n.includes('api'))
+                        .map(n => caches.delete(n))
+                );
+            } catch (e) { /* SW cache clear is best-effort */ }
+        }
+
         return { success: true };
 
     } catch (error) {

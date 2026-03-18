@@ -531,6 +531,13 @@ export default function ProfileSettingsPage() {
                     <button
                         onClick={async () => {
                             await supabase.auth.signOut();
+                            // SEC-030: Purge SW caches to prevent stale data on shared devices
+                            if ('caches' in window) {
+                                try {
+                                    const names = await caches.keys();
+                                    await Promise.all(names.filter(n => n.includes('supabase') || n.includes('api')).map(n => caches.delete(n)));
+                                } catch (e) { /* best-effort */ }
+                            }
                             navigate('/', { replace: true });
                         }}
                         className="w-full flex items-center gap-4 px-5 py-5 active:bg-white/5 transition-colors"
