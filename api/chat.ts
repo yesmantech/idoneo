@@ -65,8 +65,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(401).json({ error: 'Unauthorized: authentication required' });
         }
 
-        // Convert UIMessages (from useChat frontend) to ModelMessages (for streamText)
+        // SEC-017 FIX: Input validation — prevent unbounded memory/token abuse
         const incomingMessages = messages || [];
+        if (!Array.isArray(incomingMessages)) {
+            return res.status(400).json({ error: 'Invalid messages format' });
+        }
+        if (incomingMessages.length > 50) {
+            return res.status(400).json({ error: 'Too many messages (max 50)' });
+        }
+        for (const msg of incomingMessages) {
+            const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content || '');
+            if (content.length > 10000) {
+                return res.status(400).json({ error: 'Message too long (max 10000 chars)' });
+            }
+        }
+
+        // Convert UIMessages (from useChat frontend) to ModelMessages (for streamText)
         const modelMessages = await convertToModelMessages(incomingMessages);
 
         // No artificial delay — OpenAI's natural latency provides enough "thinking" time

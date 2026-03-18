@@ -14,6 +14,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'Email is required' });
     }
 
+    // SEC-019 FIX: Strict email validation to prevent header injection
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== 'string' || !emailRegex.test(email) || email.length > 254) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+    // Reject emails with newlines (header injection vector)
+    if (email.includes('\n') || email.includes('\r')) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+
     // Simple auth check — only allow calls from our own frontend
     const origin = req.headers.origin || req.headers.referer || '';
     const allowedOrigins = ['https://idoneo.ai', 'https://www.idoneo.ai', 'capacitor://localhost', 'http://localhost'];
@@ -22,7 +32,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const displayName = name || 'Aspirante Idoneo';
+    // Sanitize name field — strip newlines and limit length
+    const displayName = (typeof name === 'string' ? name.replace(/[\r\n]/g, '').slice(0, 100) : null) || 'Aspirante Idoneo';
 
     try {
         await resend.emails.send({

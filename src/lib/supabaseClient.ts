@@ -32,20 +32,10 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    "Supabase env vars mancanti. Controlla VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY in .env.local"
+  console.error(
+    "Supabase env vars mancanti. Controlla VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY in .env.local",
+    { VITE_SUPABASE_URL: supabaseUrl ? 'Presente' : 'MANCANTE', VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? 'Presente' : 'MANCANTE' }
   );
-  // Show error on screen for debugging production white screen issues
-  if (typeof document !== 'undefined') {
-    document.body.innerHTML = `
-      <div style="padding: 20px; font-family: sans-serif; text-align: center; color: #333;">
-        <h1 style="color: #ef4444;">Configurazione Mancante</h1>
-        <p>Le variabili d'ambiente di Supabase non sono state caricate correttamente.</p>
-        <p style="font-size: 0.9em; opacity: 0.8;">VITE_SUPABASE_URL: ${supabaseUrl ? 'Presente' : 'MANCANTE'}</p>
-        <p style="font-size: 0.9em; opacity: 0.8;">VITE_SUPABASE_ANON_KEY: ${supabaseAnonKey ? 'Presente' : 'MANCANTE'}</p>
-      </div>
-    `;
-  }
 }
 
 import { SupabaseNativeStorage } from "./SupabaseStorage";

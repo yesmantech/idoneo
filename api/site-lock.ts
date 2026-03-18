@@ -51,7 +51,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
             // Set HttpOnly cookie
             res.setHeader(
                 'Set-Cookie',
-                `${COOKIE_NAME}=${TOKEN_VALUE}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${MAX_AGE}`
+                `${COOKIE_NAME}=${TOKEN_VALUE}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${MAX_AGE}`
             );
             return res.json({ success: true });
         }

@@ -39,16 +39,9 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
                     </div>
 
                     <h2 className="text-2xl font-bold text-red-900 dark:text-red-100 mb-2">Accesso Negato</h2>
-                    <p className="text-red-700 dark:text-red-300 mb-6 font-medium">
+                    <p className="text-red-700 dark:text-red-300 mb-8 font-medium">
                         Non hai i permessi necessari per accedere a questa sezione amministrativa.
                     </p>
-
-                    <div className="text-sm text-red-600/80 dark:text-red-400/80 mb-8 bg-red-100/50 dark:bg-red-900/40 p-4 rounded-lg text-left">
-                        <div className="font-bold mb-1">Dettagli Debug:</div>
-                        <div>User: {user?.email}</div>
-                        <div>Role: {profile?.role || 'Nessuno (o non caricato)'}</div>
-                        <div>ID: {user?.id}</div>
-                    </div>
 
                     <div className="flex flex-col gap-3">
                         <button
