@@ -200,7 +200,7 @@ CONOSCENZA PIATTAFORMA:
                             });
                         } catch (e: any) {
                             console.error('get_user_overview error:', e);
-                            return JSON.stringify({ message: 'Errore temporaneo nel recupero dati. Riprova.', error: e.message });
+                            return JSON.stringify({ message: "Errore temporaneo nel recupero dati. Riprova." });
                         }
                     }
                 }),
@@ -275,7 +275,7 @@ CONOSCENZA PIATTAFORMA:
                             return JSON.stringify(results);
                         } catch (e: any) {
                             console.error('get_mistakes_by_topic error:', e);
-                            return JSON.stringify({ message: 'Errore temporaneo nel recupero errori per materia.', error: e.message });
+                            return JSON.stringify({ message: "Errore temporaneo nel recupero dati. Riprova." });
                         }
                     }
                 }),
@@ -349,7 +349,7 @@ CONOSCENZA PIATTAFORMA:
                             return JSON.stringify(mistakes);
                         } catch (e: any) {
                             console.error('analyze_mistake_patterns error:', e);
-                            return JSON.stringify({ message: 'Errore temporaneo nell\'analisi degli errori.', error: e.message });
+                            return JSON.stringify({ message: "Errore temporaneo nel recupero dati. Riprova." });
                         }
                     }
                 }),
@@ -431,7 +431,7 @@ CONOSCENZA PIATTAFORMA:
                             });
                         } catch (e: any) {
                             console.error('search_bandi execution error:', e);
-                            return JSON.stringify({ error: e.message });
+                            return JSON.stringify({ error: 'Errore nel recupero bandi. Riprova più tardi.' });
                         }
                     }
                 }),
@@ -566,7 +566,7 @@ Usa un tono caldo e incoraggiante. Formatta con markdown.`
                             });
                         } catch (e: any) {
                             console.error('orientamento_bandi error:', e);
-                            return JSON.stringify({ error: e.message });
+                            return JSON.stringify({ error: 'Errore nel recupero bandi. Riprova più tardi.' });
                         }
                     }
                 }),
