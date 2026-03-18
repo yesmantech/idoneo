@@ -197,6 +197,9 @@ export default function AdminUploadCsvPage() {
 
       if (toInsert.length === 0) throw new Error("Nessuna riga valida da importare.");
 
+      // SEC-026 FIX: Limit bulk insert size to prevent DoS
+      if (toInsert.length > 2000) throw new Error('Importazione limitata a 2000 domande per volta.');
+
       const { error } = await supabase.from("questions").insert(toInsert);
       if (error) throw error;
 
@@ -221,12 +224,35 @@ export default function AdminUploadCsvPage() {
     let errors = 0;
 
     try {
+      // SEC-027 FIX: Validate file count, MIME type, and file size
+      const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB per file
+      const MAX_IMAGE_COUNT = 50;
+
+      if (imageFiles.length > MAX_IMAGE_COUNT) {
+        setImageMsg({ type: 'error', text: `Troppi file. Massimo ${MAX_IMAGE_COUNT} immagini per volta.` });
+        setUploadingImages(false);
+        return;
+      }
+
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
+        // Validate MIME type
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          console.warn('Skipping invalid type:', file.name, file.type);
+          errors++;
+          continue;
+        }
+        // Validate size
+        if (file.size > MAX_IMAGE_SIZE) {
+          console.warn('Skipping oversized file:', file.name, file.size);
+          errors++;
+          continue;
+        }
         const name = normalizeImageName(file.name);
-        const { error } = await supabase.storage.from(BUCKET).upload(name, file, { upsert: true });
+        const { error } = await supabase.storage.from(BUCKET).upload(name, file, { upsert: true, contentType: file.type });
         if (error) {
-          console.error("Upload fail:", name, error);
+          console.error('Upload fail:', name, error);
           errors++;
         }
         else count++;

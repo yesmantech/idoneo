@@ -79,27 +79,31 @@ export default function ProfileSetupPage() {
     }, [profile]);
 
     // Handle file upload (from Choose Image or Take Photo)
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+
+        // SEC-025 FIX: Validate MIME type and file size
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            setError('Formato non supportato. Usa JPEG, PNG, WebP o GIF.');
+            return;
+        }
+        if (file.size > MAX_SIZE_BYTES) {
+            setError('L\'immagine è troppo grande. Massimo 5MB.');
+            return;
+        }
+
         try {
             setUploading(true);
             setError(null);
             hapticLight();
 
-            if (!event.target.files || event.target.files.length === 0) {
-                throw new Error('Devi selezionare un\'immagine da caricare.');
-            }
-
-            const file = event.target.files[0];
-            const MAX_FILE_SIZE = 2 * 1024 * 1024;
-            const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-
-            if (file.size > MAX_FILE_SIZE) throw new Error('L\'immagine è troppo grande. Massimo 2MB.');
-            if (!ALLOWED_TYPES.includes(file.type)) throw new Error('Formato non supportato. Usa JPEG, PNG o WebP.');
-
-            const fileExt = file.name.split('.').pop();
+            const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
             const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
 
-            const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
+            const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file, { contentType: file.type });
             if (uploadError) throw uploadError;
 
             const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);

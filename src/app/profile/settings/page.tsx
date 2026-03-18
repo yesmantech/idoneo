@@ -12,14 +12,15 @@ import BackButton from '@/components/ui/BackButton';
 import {
     ChevronRight, Pencil, Check, AlertTriangle, Loader2,
     Sun, Moon, Monitor, LogOut, Mail, FileText, Shield,
-    User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus, PlayCircle
+    User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus, PlayCircle,
+    Vibrate, Volume2
 } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
 import ProfileImageBottomSheet from '@/components/profile/ProfileImageBottomSheet';
 import EmojiPickerSheet from '@/components/profile/EmojiPickerSheet';
 import IconPickerSheet from '@/components/profile/IconPickerSheet';
-import { hapticLight } from '@/lib/haptics';
+import { hapticLight, getHapticsEnabled, setHapticsEnabled } from '@/lib/haptics';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
 // =============================================================================
@@ -51,6 +52,12 @@ export default function ProfileSettingsPage() {
     const [showImageSheet, setShowImageSheet] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showIconPicker, setShowIconPicker] = useState(false);
+
+    // Preference toggles
+    const [hapticsOn, setHapticsOn] = useState(() => getHapticsEnabled());
+    const [soundsOn, setSoundsOn] = useState(() => {
+        try { const v = localStorage.getItem('idoneo_sounds_enabled'); return v === null ? true : v === 'true'; } catch { return true; }
+    });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -94,14 +101,27 @@ export default function ProfileSettingsPage() {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
 
+        // SEC-025 FIX: Validate MIME type and file size
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            showToast('error', 'Formato non supportato. Usa JPG, PNG, WebP o GIF.');
+            return;
+        }
+        if (file.size > MAX_SIZE_BYTES) {
+            showToast('error', 'Immagine troppo grande. Massimo 5MB.');
+            return;
+        }
+
         try {
             setSaving(true);
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+            const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+            // Use user's own ID as folder prefix to enforce ownership at path level
+            const fileName = `${user?.id}/${user?.id}-${Date.now()}.${fileExt}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(fileName, file);
+                .upload(fileName, file, { contentType: file.type });
             if (uploadError) throw uploadError;
 
             const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
@@ -454,6 +474,22 @@ export default function ProfileSettingsPage() {
                         onClick={() => setShowThemeSelector(true)}
                     />
                     <Divider />
+                    {/* Haptics Toggle */}
+                    <ToggleRow
+                        icon={<Vibrate className="w-6 h-6" strokeWidth={2.5} />}
+                        label="Vibrazioni"
+                        enabled={hapticsOn}
+                        onToggle={(v) => { setHapticsOn(v); setHapticsEnabled(v); if (v) hapticLight(); }}
+                    />
+                    <Divider />
+                    {/* Sound Toggle */}
+                    <ToggleRow
+                        icon={<Volume2 className="w-6 h-6" strokeWidth={2.5} />}
+                        label="Suoni"
+                        enabled={soundsOn}
+                        onToggle={(v) => { setSoundsOn(v); try { localStorage.setItem('idoneo_sounds_enabled', String(v)); } catch {} }}
+                    />
+                    <Divider />
                     {/* Reset Onboarding Row */}
                     <SettingsRow
                         icon={<PlayCircle className="w-6 h-6" strokeWidth={2.5} />}
@@ -587,5 +623,37 @@ function SettingsRow({ icon, label, value, external, onClick }: {
                 <ChevronRight className="w-5 h-5 text-[var(--foreground)] opacity-25 flex-shrink-0" />
             )}
         </button>
+    );
+}
+
+function ToggleRow({ icon, label, enabled, onToggle }: {
+    icon: React.ReactNode;
+    label: string;
+    enabled: boolean;
+    onToggle: (v: boolean) => void;
+}) {
+    return (
+        <div className="w-full flex items-center gap-4 px-5 py-5">
+            <span className="text-[var(--foreground)] opacity-40 flex-shrink-0">{icon}</span>
+            <span className="flex-1 text-left text-[16px] font-semibold text-[var(--foreground)]">{label}</span>
+            <button
+                onClick={() => onToggle(!enabled)}
+                style={{
+                    width: 52, height: 32, borderRadius: 16, padding: 2,
+                    background: enabled ? '#34C759' : 'rgba(120,120,128,0.2)',
+                    transition: 'background .25s ease',
+                    border: 'none', cursor: 'pointer',
+                    position: 'relative', display: 'flex', alignItems: 'center',
+                }}
+            >
+                <div style={{
+                    width: 28, height: 28, borderRadius: 14,
+                    background: '#fff',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                    transform: enabled ? 'translateX(20px)' : 'translateX(0px)',
+                    transition: 'transform .25s ease',
+                }} />
+            </button>
+        </div>
     );
 }
