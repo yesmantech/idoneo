@@ -490,16 +490,6 @@ export default function ProfileSettingsPage() {
                         onToggle={(v) => { setSoundsOn(v); try { localStorage.setItem('idoneo_sounds_enabled', String(v)); } catch {} }}
                     />
                     <Divider />
-                    {/* Reset Onboarding Row */}
-                    <SettingsRow
-                        icon={<PlayCircle className="w-6 h-6" strokeWidth={2.5} />}
-                        label="Rivivi Tutorial"
-                        onClick={() => {
-                            resetOnboarding();
-                            showToast('success', 'Tutorial riattivato! Naviga nell\'app per rivederlo.');
-                        }}
-                    />
-                    <Divider />
                     {/* Change Preferences Row */}
                     <SettingsRow
                         icon={<Settings className="w-6 h-6" strokeWidth={2.5} />}
