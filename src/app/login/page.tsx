@@ -146,11 +146,33 @@ export default function LoginPage() {
     const openAuth = () => { hapticLight(); setView('auth'); setError(null); setSuccess(false); setEmail(''); setPw(''); };
     const goBack = () => { hapticLight(); setView('landing'); setError(null); setSuccess(false); };
 
+    // Smart post-login routing: skip welcome/onboarding for returning users
+    const navigateAfterLogin = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) { nav('/welcome'); return; }
+            const { data: prof } = await supabase
+                .from('profiles')
+                .select('nickname, onboarding_completed_at')
+                .eq('id', session.user.id)
+                .single();
+            if (prof?.nickname && prof?.onboarding_completed_at) {
+                nav('/'); // Returning user — skip everything
+            } else if (prof?.nickname) {
+                nav('/onboarding'); // Has profile but no onboarding
+            } else {
+                nav('/welcome'); // Brand new user
+            }
+        } catch {
+            nav('/welcome'); // Fallback
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); setLoading(true); setError(null);
         try {
             const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pw });
-            if (!signInErr) { hapticSuccess(); nav('/welcome'); return; }
+            if (!signInErr) { hapticSuccess(); await navigateAfterLogin(); return; }
 
             const { data, error: signUpErr } = await supabase.auth.signUp({
                 email, password: pw,
@@ -450,7 +472,7 @@ export default function LoginPage() {
                                         });
                                         if (supaErr) throw supaErr;
                                         hapticSuccess();
-                                        nav('/welcome');
+                                        await navigateAfterLogin();
                                     } else {
                                         // Web: standard OAuth redirect
                                         await supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: `${window.location.origin}/welcome` } });

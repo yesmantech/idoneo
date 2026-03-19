@@ -57,6 +57,13 @@ export default function ProfileSetupPage() {
 
     useEffect(() => { requestAnimationFrame(() => setTimeout(() => setShow(true), 60)); }, []);
 
+    // Guard: redirect returning users who already completed setup
+    useEffect(() => {
+        if (profile?.nickname && profile?.onboarding_completed_at) {
+            navigate('/', { replace: true });
+        }
+    }, [profile, navigate]);
+
     // Image picker states (same as settings)
     const [showImageSheet, setShowImageSheet] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);

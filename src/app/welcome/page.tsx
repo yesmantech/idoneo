@@ -16,6 +16,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hapticLight } from '@/lib/haptics';
+import { useAuth } from '@/context/AuthContext';
 
 // ─── Slide data ───
 const SLIDES = [
@@ -43,12 +44,21 @@ const SLIDES = [
 
 export default function WelcomePage() {
     const navigate = useNavigate();
+    const { profile, loading: authLoading } = useAuth();
     const [current, setCurrent] = useState(0);
     const [show, setShow] = useState(false);
     const [exiting, setExiting] = useState(false);
     const touchStartX = useRef(0);
     const touchDeltaX = useRef(0);
     const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Guard: redirect returning users who already completed setup
+    useEffect(() => {
+        if (authLoading) return;
+        if (profile?.nickname && profile?.onboarding_completed_at) {
+            navigate('/', { replace: true });
+        }
+    }, [authLoading, profile, navigate]);
 
     useEffect(() => {
         requestAnimationFrame(() => setShow(true));
