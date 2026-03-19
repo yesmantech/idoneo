@@ -504,7 +504,6 @@ export default function ProfileSettingsPage() {
                     <SettingsRow
                         icon={<Settings className="w-6 h-6" strokeWidth={2.5} />}
                         label="Modifica Preferenze"
-                        value={profile?.onboarding_goal || undefined}
                         onClick={() => navigate('/onboarding')}
                     />
                 </div>

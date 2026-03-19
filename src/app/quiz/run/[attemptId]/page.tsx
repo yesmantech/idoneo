@@ -63,6 +63,7 @@ import { useOnboarding } from "@/context/OnboardingProvider";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { AnimatePresence } from "framer-motion";
 import { X, Settings, ChevronUp, ChevronLeft, ChevronRight, Check, Flag, AlertTriangle, Lock } from "lucide-react";
+import { soundCorrect, soundWrong } from "@/lib/sounds";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -458,8 +459,8 @@ export default function QuizRunnerPage() {
                 const correctOption = data.correctOption || null;
 
                 // Haptic feedback
-                if (isCorrect) hapticSuccess();
-                else hapticError();
+                if (isCorrect) { hapticSuccess(); soundCorrect(); }
+                else { hapticError(); soundWrong(); }
 
                 // Update with server-validated result
                 const updatedList = [...answeringRef.current];

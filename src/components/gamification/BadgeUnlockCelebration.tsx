@@ -5,6 +5,7 @@ import Confetti from 'react-confetti';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { BADGE_DEFINITIONS } from '@/lib/badgeDefinitions';
 import { hapticSuccess, hapticLight } from '@/lib/haptics';
+import { soundBadgeUnlock } from '@/lib/sounds';
 import { useTheme } from '@/context/ThemeContext';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
@@ -70,8 +71,7 @@ export function BadgeUnlockCelebration() {
             setActiveBadgeId(nextBadge);
             setQueue(prev => prev.slice(1));
             hapticSuccess();
-            setTimeout(hapticLight, 200);
-            setTimeout(hapticSuccess, 400);
+            soundBadgeUnlock();
         }
     }, [queue, location.pathname, activeBadgeId]);
 

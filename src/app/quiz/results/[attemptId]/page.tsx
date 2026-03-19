@@ -50,6 +50,7 @@ import { FailBadge } from "@/components/ui/FailBadge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import { soundQuizComplete, soundQuizFail } from "@/lib/sounds";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -245,9 +246,13 @@ export default function QuizResultsPage() {
             is_offline: attemptId?.startsWith('local-') || false
         });
 
-        if (!passed) return; // No confetti for fail
+        if (!passed) {
+            soundQuizFail();
+            return; // No confetti for fail
+        }
 
         confettiFiredRef.current = true;
+        soundQuizComplete();
         const correctPercentage = (attempt.correct / total) * 100;
 
         let particleCount = 50;
