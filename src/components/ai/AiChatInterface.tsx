@@ -823,7 +823,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 <div
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
-                    className="flex-1 min-h-0 px-4 pt-4 pb-4 space-y-6"
+                    className="flex-1 min-h-0 px-4 pt-4 pb-4 space-y-6 flex flex-col justify-end"
                     style={{
                         overflowY: 'auto',
                         WebkitOverflowScrolling: 'touch',
