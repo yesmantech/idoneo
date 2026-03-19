@@ -87,7 +87,7 @@ const AdminEntiListPage = React.lazy(() => import('./app/admin/enti/page'));
 // STATIC IMPORTS (Required at startup, cannot be lazy)
 // ============================================================================
 import AdminGuard from './components/auth/AdminGuard';
-import SiteLockGate from './components/auth/SiteLockGate';
+
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -212,7 +212,6 @@ export default function App() {
     }, []);
 
     return (
-        <SiteLockGate>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}>
             <BrowserRouter>
                 <ScrollToTop />
@@ -364,6 +363,5 @@ export default function App() {
             </BrowserRouter>
             <ReactQueryDevtools initialIsOpen={false} />
         </PersistQueryClientProvider>
-        </SiteLockGate>
     );
 }
