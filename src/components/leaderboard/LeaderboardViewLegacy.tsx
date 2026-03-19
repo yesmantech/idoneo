@@ -98,7 +98,7 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
     const isGold = theme === 'gold';
 
     return (
-        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] pb-6 px-2 pt-16 overflow-visible">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] pb-6 px-2 pt-6">
             {/* 2nd Place - Silver */}
             <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-1">
                 {second && (
@@ -120,13 +120,14 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
             </div>
 
             {/* 1st Place - Gold */}
-            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[130px] -mt-14 order-2 z-20 overflow-visible">
+            <div className="flex flex-col items-center gap-1 w-1/3 max-w-[130px] -mt-14 order-2 z-20">
                 {first && (
                     <>
-                        <div className="relative group scale-110">
-                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-none z-50">
-                                <Crown className="w-10 h-10 text-amber-400 fill-amber-400 drop-shadow-md animate-bounce-subtle" />
-                            </div>
+                        {/* Crown — in normal flow, not absolute */}
+                        <div className="flex justify-center pointer-events-none mb-1">
+                            <Crown className="w-10 h-10 text-amber-400 fill-amber-400 drop-shadow-md animate-bounce-subtle" />
+                        </div>
+                        <div className="relative group">
                             <div className={`w-24 h-24 rounded-[32px] border-[3px] ${isGold ? 'border-amber-300 dark:border-amber-500/50' : 'border-cyan-300 dark:border-cyan-500/50'} bg-[var(--card)] ${isGold ? 'shadow-[0_8px_24px_rgba(251,191,36,0.3)]' : 'shadow-[0_8px_24px_rgba(6,182,212,0.3)]'} p-0.5 flex items-center justify-center z-10 relative ${isGold ? 'ring-4 ring-amber-50 dark:ring-amber-900/20' : 'ring-4 ring-cyan-50 dark:ring-cyan-900/20'}`}>
                                 <UserAvatar src={first.user.avatarUrl} name={first.user.nickname} size="2xl" className="!rounded-[24px]" />
                             </div>
