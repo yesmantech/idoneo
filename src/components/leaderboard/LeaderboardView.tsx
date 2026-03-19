@@ -75,7 +75,7 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
             <div ref={parentRef} className="flex-1 overflow-y-auto scrollbar-hide relative bg-[var(--card)]">
                 <div className="px-4 pb-24 pt-4">
                     {/* PODIUM */}
-                    <div className="mb-8">
+                    <div className="mb-8 overflow-visible">
                         <Podium top3={top3} metricLabel={metricLabel} />
                     </div>
 
@@ -130,7 +130,7 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
     const [first, second, third] = top3;
 
     return (
-        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] px-2 pt-16 overflow-visible">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] px-2 pt-20 overflow-visible">
             {/* 2nd Place - Silver */}
             <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-1">
                 {second && (
