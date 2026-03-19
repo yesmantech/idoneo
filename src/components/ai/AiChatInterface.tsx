@@ -684,6 +684,8 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const keyboardHeight = useWindowHeight();
+    const mountedRef = useRef(false);
+    useEffect(() => { const t = setTimeout(() => { mountedRef.current = true; }, 300); return () => clearTimeout(t); }, []);
 
     // On native iOS Safari/Capacitor, ensure the body doesn't bounce.
     // The useKeyboardHeight hook handles the actual shifting.
@@ -773,7 +775,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
             style={{ 
                 overflow: 'hidden', 
                 bottom: `${keyboardHeight}px`,
-                transition: 'bottom 0.28s cubic-bezier(0.33, 1, 0.68, 1)'
+                transition: mountedRef.current ? 'bottom 0.28s cubic-bezier(0.33, 1, 0.68, 1)' : 'none'
             }}
         >
             <div className="flex flex-col w-full h-full" style={{ maxWidth: '48rem', margin: '0 auto' }}>
@@ -943,7 +945,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </div>
 
                 {/* ── INPUT ── */}
-                <div className="flex-shrink-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 8px) + 8px)' }}>
+                <div className="flex-shrink-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
 
                     {messages.length <= 1 && (
                         <div className="flex overflow-x-auto gap-2 pb-3 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">
