@@ -13,7 +13,7 @@ import {
     ChevronRight, Pencil, Check, AlertTriangle, Loader2,
     Sun, Moon, Monitor, LogOut, Mail, FileText, Shield,
     User, Palette, ExternalLink, X, Instagram, AtSign, Share2, UserPlus, PlayCircle,
-    Vibrate, Volume2
+    Vibrate, Volume2, Settings
 } from 'lucide-react';
 import DeleteAccountModal from '@/components/profile/DeleteAccountModal';
 import ThemeSelectorModal from '@/components/profile/ThemeSelectorModal';
@@ -498,6 +498,14 @@ export default function ProfileSettingsPage() {
                             resetOnboarding();
                             showToast('success', 'Tutorial riattivato! Naviga nell\'app per rivederlo.');
                         }}
+                    />
+                    <Divider />
+                    {/* Change Preferences Row */}
+                    <SettingsRow
+                        icon={<Settings className="w-6 h-6" strokeWidth={2.5} />}
+                        label="Modifica Preferenze"
+                        value={profile?.onboarding_goal || undefined}
+                        onClick={() => navigate('/onboarding')}
                     />
                 </div>
 
