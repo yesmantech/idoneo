@@ -33,7 +33,7 @@ function ctx(): AudioContext | null {
 function canPlay(): boolean {
     try {
         const v = localStorage.getItem('idoneo_sounds_enabled');
-        return v === null ? true : v === 'true';
+        return v === null ? false : v === 'true';
     } catch { return true; }
 }
 

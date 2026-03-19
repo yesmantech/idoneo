@@ -56,7 +56,7 @@ export default function ProfileSettingsPage() {
     // Preference toggles
     const [hapticsOn, setHapticsOn] = useState(() => getHapticsEnabled());
     const [soundsOn, setSoundsOn] = useState(() => {
-        try { const v = localStorage.getItem('idoneo_sounds_enabled'); return v === null ? true : v === 'true'; } catch { return true; }
+        try { const v = localStorage.getItem('idoneo_sounds_enabled'); return v === null ? false : v === 'true'; } catch { return false; }
     });
 
     const fileInputRef = useRef<HTMLInputElement>(null);

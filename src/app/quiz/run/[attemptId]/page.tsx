@@ -149,15 +149,17 @@ export default function QuizRunnerPage() {
     // Modes - Load from localStorage for persistence
     const [instantCheck, setInstantCheck] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('quiz_instant_check') === 'true';
+            const v = localStorage.getItem('quiz_instant_check');
+            return v === null ? true : v === 'true';
         }
-        return false;
+        return true;
     });
     const [autoNext, setAutoNext] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('quiz_auto_next') === 'true';
+            const v = localStorage.getItem('quiz_auto_next');
+            return v === null ? true : v === 'true';
         }
-        return false;
+        return true;
     });
     const [quizConfig, setQuizConfig] = useState<{
         useCustomPassThreshold: boolean;
