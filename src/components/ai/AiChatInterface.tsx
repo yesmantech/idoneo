@@ -823,7 +823,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 <div
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
-                    className="flex-1 min-h-0 px-4 pt-4 pb-4 space-y-6 flex flex-col justify-end"
+                    className="flex-1 min-h-0 px-4 pt-4 pb-4 space-y-6"
                     style={{
                         overflowY: 'auto',
                         WebkitOverflowScrolling: 'touch',
@@ -943,7 +943,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </div>
 
                 {/* ── INPUT ── */}
-                <div className="flex-shrink-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(var(--safe-area-bottom, 8px)+8px)]">
+                <div className="flex-shrink-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 8px) + 8px)' }}>
 
                     {messages.length <= 1 && (
                         <div className="flex overflow-x-auto gap-2 pb-3 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">
