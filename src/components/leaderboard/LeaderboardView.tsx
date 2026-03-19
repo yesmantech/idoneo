@@ -75,7 +75,7 @@ export default function LeaderboardView({ data, loading, theme, metricLabel, emp
             <div ref={parentRef} className="flex-1 overflow-y-auto scrollbar-hide relative bg-[var(--card)]">
                 <div className="px-4 pb-24 pt-4">
                     {/* PODIUM */}
-                    <div className="mb-8 overflow-visible">
+                    <div className="mb-8">
                         <Podium top3={top3} metricLabel={metricLabel} />
                     </div>
 
@@ -130,7 +130,7 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
     const [first, second, third] = top3;
 
     return (
-        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] px-2 pt-20 overflow-visible">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] px-2 pt-6">
             {/* 2nd Place - Silver */}
             <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-1">
                 {second && (
@@ -152,13 +152,14 @@ const Podium = ({ top3, metricLabel }: { top3: LeaderboardEntry[], metricLabel: 
             </div>
 
             {/* 1st Place - Gold */}
-            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[130px] -mt-14 order-2 z-20 overflow-visible">
+            <div className="flex flex-col items-center gap-1 w-1/3 max-w-[130px] -mt-14 order-2 z-20">
                 {first && (
                     <>
-                        <div className="relative group scale-110">
-                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-none z-50">
-                                <Crown className="w-10 h-10 text-amber-400 fill-amber-400 drop-shadow-md animate-bounce-subtle" />
-                            </div>
+                        {/* Crown — in normal flow, not absolute */}
+                        <div className="flex justify-center pointer-events-none mb-1">
+                            <Crown className="w-10 h-10 text-amber-400 fill-amber-400 drop-shadow-md animate-bounce-subtle" />
+                        </div>
+                        <div className="relative group">
                             <div className="w-24 h-24 rounded-[32px] border-[3px] border-amber-300 dark:border-amber-500/50 bg-[var(--card)] shadow-[0_8px_24px_rgba(251,191,36,0.3)] p-0.5 flex items-center justify-center z-10 relative ring-4 ring-amber-50 dark:ring-amber-900/20">
                                 <UserAvatar src={first.user.avatarUrl} name={first.user.nickname} size="2xl" className="!rounded-[24px]" />
                             </div>
