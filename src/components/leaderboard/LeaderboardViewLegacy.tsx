@@ -98,7 +98,7 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
     const isGold = theme === 'gold';
 
     return (
-        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] pb-6 px-2 pt-6">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] pb-6 px-2 pt-10">
             {/* 2nd Place - Silver */}
             <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-1">
                 {second && (
