@@ -15,6 +15,9 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		647A402293167B07271D8A98 /* AppleSignInPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A609433696B915B564662303 /* AppleSignInPlugin.swift */; };
+		85A4405F9E3D2D44D9192C06 /* CustomBridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CA40D1AE64132F60BB1F22 /* CustomBridgeViewController.swift */; };
+		BFE2496C9745ECF8F2FEF559 /* AppleSignInPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = D6164E3A83F828047063AA02 /* AppleSignInPlugin.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +31,9 @@
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		A609433696B915B564662303 /* AppleSignInPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleSignInPlugin.swift; path = App/AppleSignInPlugin.swift; sourceTree = SOURCE_ROOT; };
+		A7CA40D1AE64132F60BB1F22 /* CustomBridgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CustomBridgeViewController.swift; path = App/CustomBridgeViewController.swift; sourceTree = SOURCE_ROOT; };
+		D6164E3A83F828047063AA02 /* AppleSignInPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppleSignInPlugin.m; path = App/AppleSignInPlugin.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +54,9 @@
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
+				A609433696B915B564662303 /* AppleSignInPlugin.swift */,
+				D6164E3A83F828047063AA02 /* AppleSignInPlugin.m */,
+				A7CA40D1AE64132F60BB1F22 /* CustomBridgeViewController.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -156,6 +165,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				647A402293167B07271D8A98 /* AppleSignInPlugin.swift in Sources */,
+				BFE2496C9745ECF8F2FEF559 /* AppleSignInPlugin.m in Sources */,
+				85A4405F9E3D2D44D9192C06 /* CustomBridgeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -295,8 +307,9 @@
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = SJQ7PNL6AC;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -318,8 +331,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = SJQ7PNL6AC;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;

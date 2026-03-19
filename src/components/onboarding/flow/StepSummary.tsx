@@ -129,7 +129,7 @@ export default function StepSummary({ data, onComplete, saving }: StepSummaryPro
     return (
         <div
             className="flex-1 flex flex-col relative overflow-hidden bg-[var(--background)]"
-            style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+            style={{ paddingTop: 'var(--safe-area-top, 0px)' }}
         >
             <CSSConfetti />
 

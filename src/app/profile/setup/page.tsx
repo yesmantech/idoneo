@@ -35,15 +35,14 @@ const DEFAULT_MASCOTS = [
 // Pick a random default mascot
 const getRandomMascot = () => DEFAULT_MASCOTS[Math.floor(Math.random() * DEFAULT_MASCOTS.length)];
 
-// Decorative icons — same pattern as Login/Onboarding Welcome
+// Decorative icons — static (no animations to avoid iOS lag)
 const decorativeIcons = [
-    { Icon: Star, color: 'text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/20', top: '10%', left: '8%', size: 'w-12 h-12', delay: '0s' },
-    { Icon: Cloud, color: 'text-sky-400', bg: 'bg-sky-100 dark:bg-sky-900/20', top: '8%', right: '10%', size: 'w-14 h-14', delay: '0.4s' },
-    { Icon: Zap, color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/20', bottom: '18%', left: '6%', size: 'w-11 h-11', delay: '0.8s' },
-    { Icon: Heart, color: 'text-rose-400', bg: 'bg-rose-100 dark:bg-rose-900/20', bottom: '14%', right: '8%', size: 'w-12 h-12', delay: '1.2s' },
-    { Icon: Shield, color: 'text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-900/20', top: '45%', left: '4%', size: 'w-10 h-10', delay: '1.6s' },
-    { Icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/20', top: '40%', right: '5%', size: 'w-13 h-13', delay: '2s' },
+    { Icon: Star, color: 'text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/20', top: '10%', left: '8%', size: 'w-12 h-12' },
+    { Icon: Cloud, color: 'text-sky-400', bg: 'bg-sky-100 dark:bg-sky-900/20', top: '8%', right: '10%', size: 'w-14 h-14' },
+    { Icon: Zap, color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/20', bottom: '18%', left: '6%', size: 'w-11 h-11' },
+    { Icon: Heart, color: 'text-rose-400', bg: 'bg-rose-100 dark:bg-rose-900/20', bottom: '14%', right: '8%', size: 'w-12 h-12' },
 ];
+
 
 export default function ProfileSetupPage() {
     const navigate = useNavigate();
@@ -54,6 +53,9 @@ export default function ProfileSetupPage() {
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [show, setShow] = useState(false);
+
+    useEffect(() => { requestAnimationFrame(() => setTimeout(() => setShow(true), 60)); }, []);
 
     // Image picker states (same as settings)
     const [showImageSheet, setShowImageSheet] = useState(false);
@@ -185,16 +187,13 @@ export default function ProfileSetupPage() {
     return (
         <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] font-sans flex flex-col justify-center overflow-hidden relative transition-colors duration-500">
 
-            {/* Floating Decorative Icons */}
+            {/* Floating Decorative Icons — static, no animations */}
             <div className="absolute inset-0 pointer-events-none">
                 {decorativeIcons.map((item, idx) => (
                     <div
                         key={idx}
-                        className={`absolute rounded-full flex items-center justify-center ${item.bg} ${item.size} animate-in fade-in zoom-in duration-1000 opacity-60 dark:opacity-40`}
-                        style={{
-                            top: item.top, left: item.left, right: item.right, bottom: item.bottom,
-                            animationDelay: item.delay, animationFillMode: 'both',
-                        }}
+                        className={`absolute rounded-full flex items-center justify-center ${item.bg} ${item.size} opacity-50 dark:opacity-30`}
+                        style={{ top: item.top, left: item.left, right: (item as any).right, bottom: (item as any).bottom }}
                     >
                         <item.Icon className={`w-1/2 h-1/2 ${item.color}`} strokeWidth={2.5} />
                     </div>
@@ -202,10 +201,14 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Content Container */}
-            <div className="w-full max-w-md mx-auto px-6 py-8 flex flex-col items-center justify-center space-y-8 animate-in slide-in-from-bottom-10 fade-in duration-700 delay-300 relative z-10">
+            <div className="w-full max-w-md mx-auto px-6 py-8 flex flex-col items-center justify-center space-y-8 relative z-10">
 
                 {/* Header */}
-                <div className="space-y-3 text-center w-full">
+                <div className="space-y-3 text-center w-full" style={{
+                    opacity: show ? 1 : 0,
+                    transform: show ? 'translateY(0)' : 'translateY(-16px)',
+                    transition: 'opacity 0.5s ease, transform 0.5s ease',
+                }}>
                     <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--foreground)] leading-[1.1]">
                         Completa il profilo
                     </h1>
@@ -214,10 +217,14 @@ export default function ProfileSetupPage() {
                     </h2>
                 </div>
 
-                {/* Avatar — shows default mascot or chosen avatar with edit button */}
-                <div className="relative group cursor-pointer shrink-0" onClick={() => { hapticLight(); setShowImageSheet(true); }}>
+                {/* Avatar */}
+                <div className="relative group cursor-pointer shrink-0" onClick={() => { hapticLight(); setShowImageSheet(true); }} style={{
+                    opacity: show ? 1 : 0,
+                    transform: show ? 'scale(1)' : 'scale(0.85)',
+                    transition: 'opacity 0.5s ease 0.1s, transform 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s',
+                }}>
                     {/* Outer glow ring */}
-                    <div className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-[#00B1FF]/20 to-[#0066FF]/20 blur-md group-hover:from-[#00B1FF]/30 group-hover:to-[#0066FF]/30 transition-all duration-300" />
+                    <div className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-[#00B1FF]/20 to-[#0066FF]/20 group-hover:from-[#00B1FF]/30 group-hover:to-[#0066FF]/30 transition-all duration-300" />
 
                     {/* Avatar circle — renders emoji/icon/image/mascot at full size */}
                     <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-white/[0.04] border-[3px] border-white/80 dark:border-white/[0.1] shadow-xl shadow-black/5 transition-all duration-300 group-hover:scale-[1.03] group-active:scale-[0.97]">
@@ -268,7 +275,11 @@ export default function ProfileSetupPage() {
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="w-full space-y-5">
+                <form onSubmit={handleSubmit} className="w-full space-y-5" style={{
+                    opacity: show ? 1 : 0,
+                    transform: show ? 'translateY(0)' : 'translateY(20px)',
+                    transition: 'opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s',
+                }}>
                     <div className="space-y-2">
                         <label className="text-[13px] font-bold text-[var(--foreground)] opacity-60 uppercase tracking-wide ml-1">
                             Nickname

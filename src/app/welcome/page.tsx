@@ -10,6 +10,7 @@
  * - Auto-advance every 4s (pauses on touch)
  * - Gradient background matching brand
  * - Fixed bottom CTA buttons
+ * - Smooth exit transition to profile setup
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
@@ -44,6 +45,7 @@ export default function WelcomePage() {
     const navigate = useNavigate();
     const [current, setCurrent] = useState(0);
     const [show, setShow] = useState(false);
+    const [exiting, setExiting] = useState(false);
     const touchStartX = useRef(0);
     const touchDeltaX = useRef(0);
     const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -69,6 +71,15 @@ export default function WelcomePage() {
         setCurrent(idx);
         startAuto();
     };
+
+    // Navigate to profile setup — immediate, no overlapping exit animation
+    const exitToSetup = useCallback(() => {
+        if (exiting) return;
+        setExiting(true);
+        if (autoRef.current) clearInterval(autoRef.current);
+        hapticLight();
+        navigate('/profile/setup');
+    }, [exiting, navigate]);
 
     // Touch handlers
     const onTouchStart = (e: React.TouchEvent) => {
@@ -96,7 +107,11 @@ export default function WelcomePage() {
     return (
         <div
             className="min-h-[100dvh] font-sans flex flex-col relative overflow-hidden"
-            style={{ paddingTop: 'env(safe-area-inset-top, 0px)', background: 'var(--background)', color: 'var(--foreground)' }}
+            style={{
+                paddingTop: 'var(--safe-area-top, 0px)',
+                background: 'var(--background)',
+                color: 'var(--foreground)',
+            }}
         >
             {/* Inject blob animation */}
             <style>{`@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(15px,-10px) scale(1.05)}66%{transform:translate(-10px,8px) scale(.97)}}`}</style>
@@ -139,7 +154,7 @@ export default function WelcomePage() {
                                     <img
                                         src={slide.image}
                                         alt=""
-                                        className="w-[280px] h-[280px] object-contain drop-shadow-2xl"
+                                        className="w-[280px] h-[280px] object-contain"
                                         draggable={false}
                                     />
                                 </div>
@@ -183,18 +198,19 @@ export default function WelcomePage() {
             {/* ─── Bottom CTA area ─── */}
             <div
                 className={`relative z-10 px-6 pb-4 pt-4 transition-all duration-700 delay-300 ease-out ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-                style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))' }}
+                style={{ paddingBottom: 'max(24px, var(--safe-area-bottom, 24px))' }}
             >
                 {/* Primary CTA */}
                 <button
                     onClick={() => {
-                        hapticLight();
                         if (current < SLIDES.length - 1) {
+                            hapticLight();
                             goTo(current + 1);
                         } else {
-                            navigate('/profile/setup');
+                            exitToSetup();
                         }
                     }}
+                    disabled={exiting}
                     className="w-full h-[54px] rounded-2xl flex items-center justify-center active:scale-[0.97] transition-transform"
                     style={{
                         background: '#0095FF',
@@ -208,7 +224,8 @@ export default function WelcomePage() {
 
                 {/* Secondary */}
                 <button
-                    onClick={() => { hapticLight(); navigate('/profile/setup'); }}
+                    onClick={exitToSetup}
+                    disabled={exiting}
                     className="w-full mt-3 py-3 text-center"
                 >
                     <span className="text-[13px] font-medium text-[var(--foreground)] opacity-40">

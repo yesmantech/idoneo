@@ -177,7 +177,7 @@ export default function LoginPage() {
             minHeight: '100dvh', background: 'var(--background)', color: 'var(--foreground)',
             fontFamily: "'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif",
             display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
-            paddingTop: 'env(safe-area-inset-top,0px)',
+            paddingTop: 'var(--safe-area-top, 0px)',
         }}>
             <SEOHead title="Idoneo — Passa i Concorsi in Settimane, Non Anni" description="Quiz intelligenti, statistiche e un coach AI per il tuo concorso." />
 
@@ -199,68 +199,91 @@ export default function LoginPage() {
 
             {/* ═══ PAGE 1 — LANDING ═══ */}
             {view === 'landing' && (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: -16 }}>
-                    {/* Hero */}
-                    <div style={{
-                        opacity: show ? 1 : 0,
-                        transform: show ? 'scale(1)' : 'scale(0.9)',
-                        transition: 'all 1.2s cubic-bezier(0.22,1,0.36,1) 0s',
-                    }}>
-                        <HeroImage />
-                    </div>
-
-                    {/* Headline */}
-                    <div style={{
-                        display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        padding: '0 28px',
-                        opacity: show ? 1 : 0,
-                        transform: show ? 'translateY(0)' : 'translateY(26px)',
-                        transition: 'all 1s cubic-bezier(0.22,1,0.36,1) 0.25s',
-                    }}>
-                        <h1 style={{ textAlign: 'center', lineHeight: 1.12, letterSpacing: '-0.045em', margin: 0 }}>
-                            <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'var(--foreground)', opacity: 0.94 }}>
-                                Passa i concorsi
-                            </span>
-                            <span style={{
-                                display: 'block', fontSize: 42, fontWeight: 900, marginTop: 2,
-                                background: 'linear-gradient(120deg, #38D9FF 10%, #4B8AFF 50%, #38D9FF 90%)',
-                                backgroundSize: '200% 100%',
-                                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                                filter: 'drop-shadow(0 0 24px rgba(0,180,255,0.25))',
-                                animation: 'shimBtn 4s ease-in-out infinite',
-                            }}>in Settimane,</span>
-                            <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'var(--foreground)', opacity: 0.94, marginTop: 2 }}>
-                                non Anni
-                            </span>
-                        </h1>
-                        <p style={{
-                            fontSize: 14, fontWeight: 500, color: 'var(--foreground)', opacity: 0.35,
-                            marginTop: 8, textAlign: 'center', maxWidth: 260, lineHeight: 1.5,
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* Centered content */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: -16 }}>
+                        {/* Hero */}
+                        <div style={{
+                            opacity: show ? 1 : 0,
+                            transform: show ? 'scale(1)' : 'scale(0.9)',
+                            transition: 'all 1.2s cubic-bezier(0.22,1,0.36,1) 0s',
                         }}>
-                            La piattaforma preferita dagli italiani per prepararsi ai concorsi pubblici
-                        </p>
+                            <HeroImage />
+                        </div>
+
+                        {/* Headline */}
+                        <div style={{
+                            display: 'flex', flexDirection: 'column', alignItems: 'center',
+                            padding: '0 28px',
+                            opacity: show ? 1 : 0,
+                            transform: show ? 'translateY(0)' : 'translateY(26px)',
+                            transition: 'all 1s cubic-bezier(0.22,1,0.36,1) 0.25s',
+                        }}>
+                            <h1 style={{ textAlign: 'center', lineHeight: 1.12, letterSpacing: '-0.045em', margin: 0 }}>
+                                <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'var(--foreground)', opacity: 0.94 }}>
+                                    Passa i concorsi
+                                </span>
+                                <span style={{
+                                    display: 'block', fontSize: 42, fontWeight: 900, marginTop: 2,
+                                    background: 'linear-gradient(120deg, #38D9FF 10%, #4B8AFF 50%, #38D9FF 90%)',
+                                    backgroundSize: '200% 100%',
+                                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                                    filter: 'drop-shadow(0 0 24px rgba(0,180,255,0.25))',
+                                    animation: 'shimBtn 4s ease-in-out infinite',
+                                }}>in Settimane,</span>
+                                <span style={{ display: 'block', fontSize: 34, fontWeight: 800, color: 'var(--foreground)', opacity: 0.94, marginTop: 2 }}>
+                                    non Anni
+                                </span>
+                            </h1>
+                            <p style={{
+                                fontSize: 14, fontWeight: 500, color: 'var(--foreground)', opacity: 0.35,
+                                marginTop: 8, textAlign: 'center', maxWidth: 260, lineHeight: 1.5,
+                            }}>
+                                La piattaforma preferita dagli italiani per prepararsi ai concorsi pubblici
+                            </p>
+                        </div>
+
+                        {/* CTA */}
+                        <div style={{
+                            marginTop: 24, padding: '0 22px', width: '100%',
+                            opacity: show ? 1 : 0,
+                            transform: show ? 'translateY(0)' : 'translateY(14px)',
+                            transition: 'all 1s cubic-bezier(0.22,1,0.36,1) 0.4s',
+                            boxSizing: 'border-box',
+                        }}>
+                            <div style={{ maxWidth: 380, margin: '0 auto' }}>
+                                <button onClick={openAuth} style={{
+                                    width: '100%', height: 58, borderRadius: 30, border: 'none',
+                                    background: '#0095FF',
+                                    color: '#fff', fontSize: 17, fontWeight: 700, letterSpacing: '-0.01em', cursor: 'pointer',
+                                    boxShadow: '0 4px 16px rgba(0,60,200,0.3)',
+                                    transition: 'transform .15s ease',
+                                }}
+                                    onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
+                                    onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                >Inizia</button>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* CTA */}
+                    {/* Legal Footer — fixed at bottom, always visible */}
                     <div style={{
-                        marginTop: 24, padding: '0 22px', width: '100%',
+                        position: 'fixed',
+                        bottom: 0, left: 0, right: 0,
+                        padding: '10px 22px',
+                        paddingBottom: 'max(14px, env(safe-area-inset-bottom, 14px))',
+                        display: 'flex', justifyContent: 'center', gap: 16,
+                        zIndex: 10,
                         opacity: show ? 1 : 0,
-                        transform: show ? 'translateY(0)' : 'translateY(14px)',
-                        transition: 'all 1s cubic-bezier(0.22,1,0.36,1) 0.4s',
-                        boxSizing: 'border-box',
+                        transition: 'opacity 1s ease 0.6s',
                     }}>
-                        <div style={{ maxWidth: 380, margin: '0 auto' }}>
-                            <button onClick={openAuth} style={{
-                                width: '100%', height: 58, borderRadius: 30, border: 'none',
-                                background: '#0095FF',
-                                color: '#fff', fontSize: 17, fontWeight: 700, letterSpacing: '-0.01em', cursor: 'pointer',
-                                boxShadow: '0 4px 16px rgba(0,60,200,0.3)',
-                                transition: 'transform .15s ease',
-                            }}
-                                onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
-                                onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                            >Inizia</button>
-                        </div>
+                        <Link to="/privacy" style={{ fontSize: 12, fontWeight: 500, color: 'var(--foreground)', opacity: 0.35, textDecoration: 'none' }}>
+                            Privacy Policy
+                        </Link>
+                        <span style={{ fontSize: 12, color: 'var(--foreground)', opacity: 0.2 }}>·</span>
+                        <Link to="/terms" style={{ fontSize: 12, fontWeight: 500, color: 'var(--foreground)', opacity: 0.35, textDecoration: 'none' }}>
+                            Termini e Condizioni
+                        </Link>
                     </div>
                 </div>
             )}
@@ -456,6 +479,14 @@ export default function LoginPage() {
                                 </svg>
                                 Continua con Apple
                             </button>
+
+                            {/* Legal disclaimer */}
+                            <p style={{ fontSize: 11, fontWeight: 400, color: 'var(--foreground)', opacity: 0.25, textAlign: 'center', marginTop: 20, lineHeight: 1.5 }}>
+                                Registrandoti accetti i{' '}
+                                <Link to="/terms" style={{ color: 'var(--foreground)', opacity: 0.6, textDecoration: 'underline' }}>Termini e Condizioni</Link>
+                                {' '}e la{' '}
+                                <Link to="/privacy" style={{ color: 'var(--foreground)', opacity: 0.6, textDecoration: 'underline' }}>Privacy Policy</Link>
+                            </p>
                         </div>
                     </div>
                 </div>

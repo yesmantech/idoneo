@@ -61,7 +61,7 @@ export default function ProfileImageBottomSheet({
                         exit={{ y: '100%', opacity: 0 }}
                         transition={{ type: 'spring', damping: 28, stiffness: 300, mass: 0.8 }}
                         className="fixed z-[101] left-4 right-4"
-                        style={{ bottom: 'max(16px, env(safe-area-inset-bottom, 16px))' }}
+                        style={{ bottom: 'max(16px, var(--safe-area-bottom, 16px))' }}
                     >
                         <div
                             className="overflow-hidden"

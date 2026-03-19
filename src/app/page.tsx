@@ -171,15 +171,13 @@ export default function HomePage() {
         </Reveal>
 
         {/* 3. RECENTLY USED - Quick access for returning users */}
-        {/* Always reserve space while auth is resolving (prevents CLS).
-            Once settled: show for logged-in users (even empty → skeleton),
-            hide entirely for anonymous users with no history. */}
-        {(authLoading || !!user?.id || recentlyUsed.length > 0) && (
+        {/* Only show when user has actual recent items — no skeleton for empty state */}
+        {recentlyUsed.length > 0 && (
           <section className="mb-8 lg:mb-10">
             <Reveal width="100%" delay={0.4}>
               <RecentlyUsedSection
                 items={recentlyUsed}
-                loading={authLoading || (!!user?.id && recentlyUsed.length === 0)}
+                loading={false}
               />
             </Reveal>
           </section>

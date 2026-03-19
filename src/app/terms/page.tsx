@@ -35,7 +35,7 @@ export default function TermsPage() {
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--foreground)]/5 safe-area-inset">
+            <div className="sticky top-0 z-10 border-b border-[var(--foreground)]/5" style={{ background: 'color-mix(in srgb, var(--background) 95%, transparent)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', paddingTop: 'var(--safe-area-top, env(safe-area-inset-top, 0px))' }}>
                 <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
                     <BackButton />
                     <div>

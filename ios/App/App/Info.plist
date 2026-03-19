@@ -60,5 +60,17 @@
 			</dict>
 		</dict>
 	</dict>
+	<!-- URL Scheme for OAuth deep links (Google, Apple Sign In callbacks) -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.idoneo.app</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>com.idoneo.app</string>
+		</dict>
+	</array>
 </dict>
 </plist>

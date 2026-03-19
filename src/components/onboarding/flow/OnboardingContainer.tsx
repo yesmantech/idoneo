@@ -99,7 +99,7 @@ export default function OnboardingContainer() {
             {step > 0 && step < TOTAL_STEPS - 1 && (
                 <div
                     className="sticky top-0 z-50 bg-[var(--background)]/95 backdrop-blur-xl border-b border-[var(--card-border)]"
-                    style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+                    style={{ paddingTop: 'var(--safe-area-top, 0px)' }}
                 >
                     <div className="flex items-center justify-between px-4 h-14">
                         {/* Left: Back button */}

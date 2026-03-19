@@ -50,7 +50,7 @@ export default function BottomNavigation() {
                 style={{
                     background: bgColor,
                     paddingTop: '12px',
-                    paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
+                    paddingBottom: 'max(8px, var(--safe-area-bottom, 8px))',
                     transition: 'background-color 0.3s ease',
                 }}
             >

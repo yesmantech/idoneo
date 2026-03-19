@@ -430,7 +430,7 @@ function TierSFilterModal({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] border-t border-[var(--card-border)] bg-[var(--background)]">
+                <div className="p-6 pb-[max(1.5rem,var(--safe-area-bottom))] border-t border-[var(--card-border)] bg-[var(--background)]">
                     <div className="flex gap-3">
                         <button
                             onClick={() => {

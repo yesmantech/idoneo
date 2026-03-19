@@ -475,7 +475,7 @@ export default function SpotlightModal({ items: propItems = [] }: SpotlightModal
                         style={{
                             WebkitOverflowScrolling: 'touch',
                             touchAction: 'pan-y',
-                            paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))',
+                            paddingBottom: 'max(24px, var(--safe-area-bottom, 0px))',
                             minHeight: 0,
                             animation: 'spotFade 0.15s ease forwards',
                         }}

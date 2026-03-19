@@ -85,7 +85,7 @@ export default function StepWelcome({ onNext, onSkip }: StepWelcomeProps) {
             </div>
 
             {/* Safe area bottom */}
-            <div className="h-[env(safe-area-inset-bottom)]" />
+            <div className="h-[var(--safe-area-bottom)]" />
         </div>
     );
 }

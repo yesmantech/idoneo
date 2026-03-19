@@ -20,12 +20,12 @@ const pageVariants = {
     enter: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.18, ease: EASE }
+        transition: { duration: 0.28, ease: EASE }
     },
     exit: {
         opacity: 0,
         y: -4,
-        transition: { duration: 0.12, ease: EASE }
+        transition: { duration: 0.08, ease: EASE }
     }
 };
 
@@ -82,7 +82,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         animate="enter"
                         exit="exit"
                         className={`flex-1 ${hideBottomNav ? 'pb-8' : (isLeaderboard ? 'pb-0' : 'pb-20')} lg:pb-8`}
-                        style={isNativeApp && !isAdmin && !hasOwnSafeArea ? { paddingTop: 'env(safe-area-inset-top, 0px)' } : undefined}
+                        style={isNativeApp && !isAdmin && !hasOwnSafeArea ? { paddingTop: 'var(--safe-area-top, 0px)' } : undefined}
                     >
                         {children}
                     </motion.main>

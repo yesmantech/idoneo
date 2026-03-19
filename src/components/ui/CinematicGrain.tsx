@@ -1,6 +1,13 @@
 import React from 'react';
 
 export const CinematicGrain = () => {
+    // Skip grain overlay on Android — the full-screen SVG feTurbulence filter
+    // with mix-blend-overlay causes unnecessary GPU compositing overhead
+    // on Android WebView, especially during scroll.
+    if (typeof document !== 'undefined' && document.documentElement.classList.contains('capacitor-android')) {
+        return null;
+    }
+
     return (
         <div className="pointer-events-none fixed inset-0 z-40 h-full w-full opacity-[0.035] mix-blend-overlay">
             <div

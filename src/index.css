@@ -330,6 +330,28 @@ body {
   --sar: env(safe-area-inset-right, 0px);
 }
 
+/* Android: env(safe-area-inset-*) returns 0px in WebView,
+   so we override with fixed values for status bar and gesture nav bar */
+html.capacitor-android {
+  --safe-area-top: var(--android-status-height, 40px);
+  --sat: var(--android-status-height, 40px);
+  --safe-area-bottom: var(--android-nav-height, 24px);
+  --sab: var(--android-nav-height, 24px);
+}
+
+/* Android performance: reduce backdrop-blur on sticky/fixed headers.
+   backdrop-filter is expensive on Android WebView — it re-composites
+   every frame during scroll. Use a higher-opacity background instead. */
+html.capacitor-android .sticky,
+html.capacitor-android [class*="fixed"] {
+  --tw-backdrop-blur: blur(4px) !important;
+}
+
+/* Disable grain overlay on Android (handled in component too) */
+html.capacitor-android .grain-overlay {
+  display: none !important;
+}
+
 /* Utility classes for safe area padding */
 .safe-area-top,
 .pt-safe {

@@ -639,7 +639,7 @@ export default function CustomQuizWizardPage() {
             </main>
 
             {/* Fixed Bottom Start Button */}
-            <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+            <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, var(--safe-area-bottom))' }}>
                 <div className="max-w-lg mx-auto flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-[10px] uppercase font-bold text-[var(--foreground)] opacity-40 tracking-wider">Domande</span>

@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { Clock, HelpCircle, Trophy, ChevronLeft, AlertCircle, Play, CheckCircle2, XCircle, MinusCircle, Rocket } from "lucide-react";
+import { Clock, HelpCircle, Trophy, AlertCircle, Play, CheckCircle2, XCircle, MinusCircle, Rocket } from "lucide-react";
 import { analytics } from "@/lib/analytics";
 import { motion } from "framer-motion";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { hapticLight, hapticSuccess } from "@/lib/haptics";
 import { Button } from "@/components/ui/Button";
+import BackButton from "@/components/ui/BackButton";
 
 // V5 FIX: Fisher-Yates shuffle (replaces biased Array.sort(random))
 function shuffleArray<T>(array: T[]): T[] {
@@ -52,6 +53,7 @@ export default function OfficialQuizStarterPage() {
         points_correct: number;
         points_wrong: number;
         points_blank: number;
+        categoryIconUrl?: string;
     } | null>(null);
 
     // Initial fetch of Quiz Details only
@@ -77,7 +79,7 @@ export default function OfficialQuizStarterPage() {
 
                 let query = supabase
                     .from("quizzes")
-                    .select("id, title, time_limit, points_correct, points_wrong, points_blank");
+                    .select("id, title, time_limit, points_correct, points_wrong, points_blank, category_id");
 
                 if (isUUID) query = query.eq("id", quizSlug);
                 else query = query.eq("slug", quizSlug);
@@ -89,6 +91,17 @@ export default function OfficialQuizStarterPage() {
                 }
 
                 quiz = result.data;
+
+                // Fetch category icon separately
+                let categoryIconUrl: string | undefined;
+                if (quiz.category_id) {
+                    const { data: cat } = await supabase
+                        .from("categories")
+                        .select("home_banner_url")
+                        .eq("id", quiz.category_id)
+                        .single();
+                    categoryIconUrl = cat?.home_banner_url || undefined;
+                }
 
                 // 3. Fetch Rules for precise count
                 const { data: rules } = await supabase
@@ -105,7 +118,8 @@ export default function OfficialQuizStarterPage() {
                     question_count: totalQuestions,
                     points_correct: quiz.points_correct ?? 1,
                     points_wrong: quiz.points_wrong ?? 0,
-                    points_blank: quiz.points_blank ?? 0
+                    points_blank: quiz.points_blank ?? 0,
+                    categoryIconUrl,
                 };
 
                 setQuizDetails(details);
@@ -310,25 +324,15 @@ export default function OfficialQuizStarterPage() {
                 `
             }} />
 
-            {/* Glass Navigation Bar */}
-            <div className="sticky top-0 z-50 bg-white/60 dark:bg-black/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 pt-safe">
-                <div className="px-4 h-14 flex items-center justify-between max-w-lg mx-auto">
-                    <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => { hapticLight(); navigate(-1); }}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-white/5 shadow-soft border border-slate-200/50 dark:border-white/10 text-slate-600 dark:text-slate-300 active:scale-90 transition-transform"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </motion.button>
-                    <div className="font-black text-xs uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                        Simulazione Ufficiale
-                    </div>
-                    <div className="w-10"></div>
+            {/* Floating back button */}
+            <div className="sticky top-0 z-50 pt-safe">
+                <div className="px-4 pt-3 pb-2 max-w-lg mx-auto">
+                    <BackButton />
                 </div>
             </div>
 
-            <main className="relative z-10 px-6 py-6 max-w-lg mx-auto flex flex-col justify-center min-h-[calc(100vh-140px)]">
-                {/* Header Hero - Balanced */}
+            <main className="relative z-10 px-6 pb-6 max-w-lg mx-auto flex flex-col">
+                {/* Header Hero */}
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -338,13 +342,19 @@ export default function OfficialQuizStarterPage() {
                         initial={{ scale: 0, rotate: -15 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: "spring", damping: 15, delay: 0.1 }}
-                        className="w-20 h-20 bg-gradient-to-br from-brand-blue to-cyan-400 rounded-[24px] mx-auto flex items-center justify-center mb-4 shadow-xl shadow-brand-blue/20 text-white relative group"
+                        className="w-20 h-20 rounded-[24px] mx-auto flex items-center justify-center mb-4 shadow-xl shadow-brand-blue/20 relative overflow-hidden"
                     >
-                        <div className="absolute inset-0 bg-white/20 rounded-[24px] blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
-                        <Rocket className="w-10 h-10 relative z-10" />
-
-                        {/* Decorative glint */}
-                        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-white/30 to-transparent rounded-[24px] pointer-events-none" />
+                        {quizDetails?.categoryIconUrl ? (
+                            <img
+                                src={quizDetails.categoryIconUrl}
+                                alt={quizDetails.title}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-brand-blue to-cyan-400 flex items-center justify-center text-white">
+                                <Rocket className="w-10 h-10" />
+                            </div>
+                        )}
                     </motion.div>
 
                     <h1 className="text-2xl font-black tracking-tight text-[var(--foreground)] mb-2 leading-tight">{quizDetails?.title}</h1>
@@ -468,7 +478,7 @@ export default function OfficialQuizStarterPage() {
             </main>
 
             {/* Fixed Bottom Start Button - Balanced */}
-            <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+            <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/5 z-50 transition-colors" style={{ paddingBottom: 'max(16px, var(--safe-area-bottom))' }}>
                 <div className="max-w-lg mx-auto">
                     <Button
                         variant="primary"

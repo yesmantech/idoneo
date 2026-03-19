@@ -238,7 +238,7 @@ export default function ProfileSettingsPage() {
                                 exit={{ opacity: 0, y: -20, x: '-50%', transition: { duration: 0.2, ease: 'easeIn' } }}
                                 transition={{ duration: 0.3, ease: [0.18, 0.89, 0.32, 1.28] }}
                                 className="fixed left-1/2 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full whitespace-nowrap"
-                                style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
+                                style={{ top: 'calc(var(--safe-area-top, 0px) + 20px)' }}
                             >
                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${msg.type === 'success' ? 'bg-green-500' : 'bg-red-500'
                                     }`}>
@@ -514,15 +514,13 @@ export default function ProfileSettingsPage() {
                     <SettingsRow
                         icon={<FileText className="w-6 h-6" strokeWidth={2.5} />}
                         label="Termini e Condizioni"
-                        external
-                        onClick={() => window.open('https://idoneo.ai/legal/terms', '_blank')}
+                        onClick={() => navigate('/terms')}
                     />
                     <Divider />
                     <SettingsRow
                         icon={<Shield className="w-6 h-6" strokeWidth={2.5} />}
                         label="Privacy Policy"
-                        external
-                        onClick={() => window.open('https://idoneo.ai/legal/privacy', '_blank')}
+                        onClick={() => navigate('/privacy')}
                     />
                 </div>
 

@@ -23,10 +23,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Rocket, Clock, HelpCircle, CheckCircle2, XCircle, MinusCircle } from "lucide-react";
+import { Rocket, Clock, HelpCircle, CheckCircle2, XCircle, MinusCircle } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import TierSLoader from "@/components/ui/TierSLoader";
 import { hapticLight, hapticSuccess } from "@/lib/haptics";
+import BackButton from "@/components/ui/BackButton";
 
 export default function RulesPage() {
   const { contestSlug } = useParams<{ category: string; contestSlug: string; type: string }>();
@@ -139,20 +140,10 @@ export default function RulesPage() {
           `
       }} />
 
-      {/* Glass Navigation Bar */}
-      <div className="sticky top-0 z-50 bg-white/60 dark:bg-black/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 pt-safe">
-        <div className="px-4 h-16 flex items-center justify-between max-w-lg mx-auto">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { hapticLight(); navigate(-1); }}
-            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 shadow-soft border border-slate-200/50 dark:border-white/10 text-slate-600 dark:text-slate-300 active:scale-90 transition-transform"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </motion.button>
-          <div className="font-black text-xs uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-            Briefing (v2.1)
-          </div>
-          <div className="w-10"></div>
+      {/* Floating back button */}
+      <div className="sticky top-0 z-50 pt-safe">
+        <div className="px-4 pt-3 pb-2 max-w-lg mx-auto">
+          <BackButton />
         </div>
       </div>
 

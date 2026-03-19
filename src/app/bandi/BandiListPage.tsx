@@ -195,7 +195,7 @@ export default function BandiListPage() {
             {/* Tier S Header */}
             <div
                 className="bg-[var(--background)] sticky top-0 z-30 border-b border-[var(--card-border)]"
-                style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+                style={{ paddingTop: 'var(--safe-area-top, 0px)' }}
             >
                 <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
                     <div>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, AlertTriangle, Trash2, Loader2 } from 'lucide-react';
+import { useWindowHeight } from '@/hooks/useKeyboardHeight';
 
 interface DeleteAccountModalProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ export default function DeleteAccountModal({
     error = null
 }: DeleteAccountModalProps) {
     const [confirmText, setConfirmText] = useState('');
+    const keyboardHeight = useWindowHeight();
     const isValid = confirmText === 'ELIMINA';
 
     if (!isOpen) return null;
@@ -37,15 +39,28 @@ export default function DeleteAccountModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-200"
+        >
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={handleClose}
             />
 
-            {/* Modal — bottom sheet on mobile, centered on desktop */}
-            <div className="relative bg-[var(--card)] w-full max-w-sm rounded-t-3xl sm:rounded-3xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300 sm:mx-4">
+            {/* Modal — centered, shifts up when iOS keyboard opens */}
+            <div
+                className="relative bg-[var(--card)] w-full max-w-sm rounded-3xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300 mx-4 overflow-y-auto"
+                style={{
+                    maxHeight: keyboardHeight > 0
+                        ? `calc(100vh - ${keyboardHeight}px - 40px)`
+                        : '90vh',
+                    transform: keyboardHeight > 0
+                        ? `translateY(-${keyboardHeight / 2}px)`
+                        : undefined,
+                    transition: 'transform 0.25s ease-out, max-height 0.25s ease-out',
+                }}
+            >
 
                 {/* Close button */}
                 {!isDeleting && (
@@ -105,7 +120,7 @@ export default function DeleteAccountModal({
                             Digita <span className="font-bold text-rose-400 opacity-100">ELIMINA</span> per confermare
                         </p>
 
-                        {/* Input field */}
+                        {/* Input field — no autoFocus to avoid immediate keyboard on iOS */}
                         <input
                             type="text"
                             value={confirmText}
@@ -113,7 +128,6 @@ export default function DeleteAccountModal({
                             placeholder="ELIMINA"
                             className="w-full px-4 py-4 bg-[var(--background)] rounded-2xl text-center font-bold text-[16px] tracking-[0.2em] text-[var(--foreground)] placeholder-[var(--foreground)]/15 focus:outline-none focus:ring-2 focus:ring-rose-500/30 transition-all"
                             autoComplete="off"
-                            autoFocus
                         />
 
                         {/* Buttons */}

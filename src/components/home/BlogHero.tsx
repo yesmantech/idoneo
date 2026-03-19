@@ -148,7 +148,7 @@ export default function BlogHero() {
     }, []);
 
     return (
-        <section className="w-full pt-[max(1.5rem,env(safe-area-inset-top))] bg-slate-50/50 dark:bg-black/50 overflow-hidden">
+        <section className="w-full pt-[max(1.5rem,var(--safe-area-top))] bg-slate-50/50 dark:bg-black/50 overflow-hidden">
             <BlogCarousel posts={posts} />
         </section>
     );

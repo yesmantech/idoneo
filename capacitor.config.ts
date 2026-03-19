@@ -65,9 +65,6 @@ const config: CapacitorConfig = {
       resize: 'body' as any,
       resizeOnFullScreen: true,
     },
-    PushNotifications: {
-      presentationOptions: ['badge', 'sound', 'alert'],
-    },
     CapacitorHttp: {
       enabled: true,
     },
@@ -83,6 +80,12 @@ const config: CapacitorConfig = {
     scheme: 'idoneo',
     // DEFINITIVE FIX: Match background color to dark mode
     backgroundColor: '#FFFFFF',
+  },
+  android: {
+    // Background color for the WebView
+    backgroundColor: '#FFFFFF',
+    // Custom URL scheme for deep linking
+    // scheme: 'idoneo',
   },
 };
 

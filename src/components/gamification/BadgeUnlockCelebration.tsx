@@ -10,9 +10,27 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
  * Global component that listens for new badges and displays a celebration modal.
- * "Tier S" Masterpiece Redesign: Incorporates deep cinematic shadows,
- * pure glassmorphism, glowing typography, and dynamic particle/aura effects.
+ * Redesigned to match the BadgeDetailModal cinematic dark style with glossy 3D badge images.
  */
+
+// Map badge color classes to hex for glow effects
+const colorMap: Record<string, string> = {
+    'from-blue-400 to-cyan-400': '#38bdf8',
+    'from-amber-400 to-orange-500': '#f59e0b',
+    'from-slate-700 to-slate-900': '#64748b',
+    'from-pink-400 to-rose-500': '#f472b6',
+    'from-yellow-400 to-amber-500': '#facc15',
+    'from-red-500 to-maroon-700': '#ef4444',
+    'from-cyan-400 to-blue-600': '#22d3ee',
+    'from-emerald-400 to-teal-600': '#34d399',
+    'from-indigo-600 to-purple-900': '#818cf8',
+    'from-orange-500 to-red-600': '#f97316',
+    'from-slate-300 to-slate-500': '#cbd5e1',
+    'from-blue-400 to-indigo-600': '#60a5fa',
+    'from-pink-400 via-purple-500 to-cyan-400': '#c084fc',
+    'from-purple-400 to-indigo-600': '#a78bfa',
+};
+
 export function BadgeUnlockCelebration() {
     const location = useLocation();
     const { resolvedTheme } = useTheme();
@@ -51,22 +69,29 @@ export function BadgeUnlockCelebration() {
             const nextBadge = queue[0];
             setActiveBadgeId(nextBadge);
             setQueue(prev => prev.slice(1));
-            // Trigger a slightly longer success haptic sequence for premium feel
             hapticSuccess();
             setTimeout(hapticLight, 200);
             setTimeout(hapticSuccess, 400);
         }
     }, [queue, location.pathname, activeBadgeId]);
 
-    // 3. Status Bar Theme Management
+    // 3. Lock #root scroll while celebration is active
+    useEffect(() => {
+        if (!activeBadgeId) return;
+        const root = document.getElementById('root');
+        if (root) {
+            const prev = root.style.overflow;
+            root.style.overflow = 'hidden';
+            return () => { root.style.overflow = prev; };
+        }
+    }, [activeBadgeId]);
+
+    // 4. Status Bar Theme Management
     useEffect(() => {
         const updateStatusBar = async () => {
             const meta = document.querySelector('meta[name="theme-color"]');
-
-            // For the celebration, we force a stunning dark contextual overlay even in light mode,
-            // or adapt it with heavy blur. We'll use a deep slate color for the status bar during modal.
-            const activeColor = resolvedTheme === 'dark' ? '#020617' : '#0F172A'; // Darker than usual for contrast
-            const activeStyle = Style.Dark; // Force dark-style content (white icons) during modal
+            const activeColor = '#0a0a0a';
+            const activeStyle = Style.Dark;
 
             if (activeBadgeId) {
                 meta?.setAttribute('content', activeColor);
@@ -75,7 +100,7 @@ export function BadgeUnlockCelebration() {
                     await StatusBar.setStyle({ style: activeStyle });
                 } catch (e) { /* ignore web errors */ }
             } else {
-                const fallbackColor = resolvedTheme === 'dark' ? '#0F172A' : '#F3F5F7';
+                const fallbackColor = resolvedTheme === 'dark' ? '#000000' : '#F5F5F7';
                 const fallbackStyle = resolvedTheme === 'dark' ? Style.Dark : Style.Light;
                 meta?.setAttribute('content', fallbackColor);
                 try {
@@ -94,6 +119,7 @@ export function BadgeUnlockCelebration() {
     };
 
     const activeBadge = activeBadgeId ? BADGE_DEFINITIONS.find(b => b.id === activeBadgeId) : null;
+    const glowColor = activeBadge ? (colorMap[activeBadge.color] || '#60a5fa') : '#60a5fa';
 
     return (
         <AnimatePresence>
@@ -103,133 +129,136 @@ export function BadgeUnlockCelebration() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    // Tier S Backdrop: Deep cinematic radial gradient focusing on the center
-                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0a]"
                 >
-                    {/* Immersive Background Layers */}
-                    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-2xl"></div>
-                    <div className={`absolute inset-0 opacity-40 mix-blend-color bg-gradient-to-b ${activeBadge.color}`}></div>
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_60%)]"></div>
+                    {/* Radial background glow */}
+                    <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                            background: `radial-gradient(ellipse at 50% 35%, ${glowColor}18 0%, transparent 55%)`,
+                        }}
+                    />
 
+                    {/* Ambient glow layer 1 — large breathing bleed */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: [0.15, 0.3, 0.15], scale: [0.9, 1.2, 0.9] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute top-[12%] w-80 h-80 rounded-full blur-[120px] pointer-events-none"
+                        style={{ background: glowColor }}
+                    />
+
+                    {/* Ambient glow layer 2 — tighter ring */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.25 }}
+                        transition={{ delay: 0.2 }}
+                        className="absolute top-[20%] w-52 h-52 rounded-full blur-[60px] pointer-events-none"
+                        style={{ background: glowColor }}
+                    />
+
+                    {/* Confetti */}
                     <Confetti
                         width={windowSize.width}
                         height={windowSize.height}
                         recycle={false}
-                        numberOfPieces={600}
-                        gravity={0.12}
-                        initialVelocityY={20}
-                        colors={['#FFD700', '#FFFFFF', '#00B1FF', '#A855F7', '#FF9F0A']}
+                        numberOfPieces={500}
+                        gravity={0.1}
+                        initialVelocityY={18}
+                        colors={['#FFD700', '#FFFFFF', glowColor, '#A855F7', '#FF9F0A']}
+                        style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
                     />
 
+                    {/* Main content */}
                     <motion.div
-                        initial={{ scale: 0.85, opacity: 0, y: 40 }}
+                        initial={{ scale: 0.85, opacity: 0, y: 30 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: -20 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.8 }}
-                        className="relative w-full max-w-md px-6 flex flex-col items-center"
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="relative z-10 flex flex-col items-center px-8 max-w-sm w-full"
                     >
-                        {/* 🌟 Glowing Aura Behind Badge */}
+                        {/* Badge image — hero (glossy 3D PNG) */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 0.5, scale: [1, 1.2, 1] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            className={`absolute top-10 w-64 h-64 bg-gradient-to-br ${activeBadge.color} blur-[80px] rounded-full z-0`}
-                        />
-
-                        {/* 🏆 The Badge Avatar */}
-                        <div className="relative z-10 mb-12 flex justify-center mt-8">
-                            <motion.div
-                                initial={{ scale: 0, rotate: -20, y: 20 }}
-                                animate={{ scale: 1, rotate: 0, y: 0 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-                                whileHover={{ scale: 1.05, rotate: 2 }}
-                                className="group relative"
-                            >
-                                {/* Outer Glow Ring */}
-                                <div className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-br from-white/40 to-transparent blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                                {/* Badge Body */}
-                                <div className={`w-44 h-44 rounded-[2.5rem] bg-gradient-to-br ${activeBadge.color} p-[2px] shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden`}>
-
-                                    {/* Glass Specular Highlight */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-white/80 opacity-60 z-10 mix-blend-overlay pointer-events-none"></div>
-                                    <div className="absolute -inset-[100%] bg-gradient-to-r from-transparent via-white/20 to-transparent rotate-45 translate-x-[-100%] animate-[shimmer_3s_infinite_ease-in-out] z-20"></div>
-
-                                    {/* Inner Depessed Area */}
-                                    <div className="w-full h-full bg-slate-950/30 backdrop-blur-md rounded-[2.4rem] flex items-center justify-center border-t border-l border-white/40 border-b border-r border-black/40 relative overflow-hidden shadow-inner">
-                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_0%,transparent_100%)]"></div>
-
-                                        <motion.div
-                                            initial={{ scale: 0.5, opacity: 0 }}
-                                            animate={{ scale: 1.8, opacity: 1 }}
-                                            transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
-                                            className="text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] z-30"
-                                        >
-                                            {activeBadge.icon}
-                                        </motion.div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-
-                        {/* 📜 Elegant Text Content Structure */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4, ease: "easeOut" }}
-                            className="w-full flex flex-col items-center text-center z-10 mb-12"
+                            initial={{ scale: 0, rotate: -30 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: 'spring', stiffness: 260, damping: 10, delay: 0.1 }}
+                            className="mb-6"
                         >
-                            <div className="flex items-center gap-2 mb-3">
-                                <Sparkles className="w-4 h-4 text-amber-400" />
-                                <span className="text-sm font-bold text-amber-400 tracking-[0.2em] uppercase">
-                                    Achievement Sbloccato
-                                </span>
-                                <Sparkles className="w-4 h-4 text-amber-400" />
-                            </div>
-
-                            <h3 className="text-5xl lg:text-6xl font-black tracking-tight text-white mb-6 drop-shadow-lg">
-                                {activeBadge.name}
-                            </h3>
-
-                            <div className="w-12 h-1 bg-white/20 rounded-full mb-6"></div>
-
-                            <p className="text-xl leading-relaxed text-slate-300 font-medium max-w-[280px]">
-                                {activeBadge.description}
-                            </p>
-
-                            <p className="text-sm border border-white/10 bg-white/5 rounded-full px-4 py-2 mt-6 text-slate-400 font-medium tracking-wide">
-                                {activeBadge.requirement}
-                            </p>
+                            <img
+                                src={activeBadge.imageSrc}
+                                alt={activeBadge.name}
+                                className="w-52 h-52 object-contain"
+                                style={{
+                                    filter: `drop-shadow(0 0 40px ${glowColor}50) drop-shadow(0 8px 24px rgba(0,0,0,0.5))`,
+                                }}
+                            />
                         </motion.div>
 
-                        {/* 🚀 Action Button */}
+                        {/* "Achievement Sbloccato" label */}
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.6, ease: "easeOut" }}
-                            className="w-full z-10"
+                            transition={{ delay: 0.3 }}
+                            className="flex items-center gap-2 mb-4"
                         >
-                            <button
-                                onClick={handleDismiss}
-                                className="relative w-full py-4 rounded-2xl font-bold text-lg text-white shadow-2xl transition-all duration-300 active:scale-95 group overflow-hidden"
+                            <Sparkles className="w-4 h-4" style={{ color: glowColor }} />
+                            <span
+                                className="text-[11px] font-bold uppercase tracking-[0.2em]"
+                                style={{ color: glowColor }}
                             >
-                                {/* Base gradient matching the badge style */}
-                                <div className={`absolute inset-0 bg-gradient-to-r ${activeBadge.color} opacity-90`}></div>
-
-                                {/* Glass overlay for button */}
-                                <div className="absolute inset-0 bg-white/10 border-t border-white/30 rounded-2xl mix-blend-overlay"></div>
-
-                                {/* Button Hover Aura */}
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20"></div>
-
-                                <span className="relative z-10 flex items-center justify-center gap-2">
-                                    {queue.length > 0 ? "Mostra il prossimo" : "Chiudi e continua"}
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </span>
-                            </button>
+                                Conquista Sbloccata
+                            </span>
+                            <Sparkles className="w-4 h-4" style={{ color: glowColor }} />
                         </motion.div>
 
+                        {/* Title */}
+                        <motion.h2
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.35 }}
+                            className="text-[32px] font-black text-white text-center tracking-tight mb-4"
+                            style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
+                        >
+                            {activeBadge.name}
+                        </motion.h2>
+
+                        {/* Description */}
+                        <motion.p
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.45 }}
+                            className="text-[16px] text-white/50 text-center leading-relaxed max-w-[300px] mb-3"
+                        >
+                            {activeBadge.description}
+                        </motion.p>
+
+                        {/* Requirement pill */}
+                        <motion.p
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.55 }}
+                            className="text-[13px] text-white/30 text-center leading-relaxed max-w-[280px] px-4 py-2 rounded-full border border-white/[0.06] bg-white/[0.03]"
+                        >
+                            {activeBadge.requirement}
+                        </motion.p>
+                    </motion.div>
+
+                    {/* Bottom button */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7 }}
+                        className="absolute bottom-0 left-0 right-0 p-6 pb-8 safe-area-bottom z-20"
+                    >
+                        <button
+                            onClick={handleDismiss}
+                            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-[15px] bg-[#00B1FF] text-white active:scale-[0.97] transition-transform"
+                            style={{ boxShadow: '0 4px 24px -4px rgba(0,177,255,0.4)' }}
+                        >
+                            <span>{queue.length > 0 ? 'Mostra la prossima' : 'Chiudi e continua'}</span>
+                            <ArrowRight className="w-5 h-5" />
+                        </button>
                     </motion.div>
                 </motion.div>
             )}

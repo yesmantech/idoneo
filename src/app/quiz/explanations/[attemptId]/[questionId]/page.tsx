@@ -332,7 +332,7 @@ export default function ExplanationPage() {
                 </button>
                 <button
                     onClick={goToNextError}
-                    className="px-8 py-3.5 rounded-2xl bg-[#00B1FF] text-white font-bold hover:bg-blue-500 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 flex-1 sm:flex-none"
+                    className="px-8 py-3.5 rounded-2xl bg-[#00B1FF] text-white font-bold active:scale-[0.98] transition-all shadow-lg shadow-[#00B1FF]/30 flex items-center justify-center gap-2 flex-1 sm:flex-none"
                 >
                     <span>Prossimo Errore</span>
                     <ChevronRight className="w-5 h-5" />

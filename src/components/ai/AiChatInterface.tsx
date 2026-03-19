@@ -392,7 +392,7 @@ function MessageActions({ text }: { text: string }) {
                             exit={{ opacity: 0, y: -20, x: '-50%', transition: { duration: 0.2, ease: 'easeIn' } }}
                             transition={{ duration: 0.3, ease: [0.18, 0.89, 0.32, 1.28] }}
                             className="fixed left-1/2 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#2C2C2E] border border-gray-100 dark:border-[#3A3A3C] shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] rounded-full whitespace-nowrap"
-                            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
+                            style={{ top: 'calc(var(--safe-area-top, 0px) + 20px)' }}
                         >
                             <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                                 <Check className="w-3 h-3 text-white" strokeWidth={3} />
@@ -781,7 +781,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 {/* ── HEADER ── */}
                 <div
                     className="flex-shrink-0 p-4 flex items-center gap-3 z-20 bg-white dark:bg-black border-b border-gray-100 dark:border-[#1A1A1A]"
-                    style={{ paddingTop: 'max(16px, env(safe-area-inset-top, 16px))' }}
+                    style={{ paddingTop: 'max(16px, var(--safe-area-top, 16px))' }}
                 >
                     <BackButton />
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#1E1E1E] dark:to-[#2A2A2A] border border-gray-200 dark:border-[#333] flex items-center justify-center shadow-inner">
@@ -943,7 +943,7 @@ function AiChatInner({ initialMessages }: { initialMessages: any[] }) {
                 </div>
 
                 {/* ── INPUT ── */}
-                <div className="flex-shrink-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(env(safe-area-inset-bottom,8px)+8px)]">
+                <div className="flex-shrink-0 z-20 border-t border-gray-100 dark:border-[#1A1A1A] bg-white dark:bg-black px-4 pt-3 pb-[calc(var(--safe-area-bottom, 8px)+8px)]">
 
                     {messages.length <= 1 && (
                         <div className="flex overflow-x-auto gap-2 pb-3 no-scrollbar scroll-smooth [-webkit-overflow-scrolling:touch] max-w-3xl mx-auto px-1">

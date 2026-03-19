@@ -43,6 +43,8 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { Keyboard, KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 import { App } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
+import { supabase } from '@/lib/supabaseClient';
 
 // ============================================================================
 // INITIALIZATION
@@ -54,6 +56,19 @@ import { App } from '@capacitor/app';
  */
 export async function initializeNativeApp() {
     if (!Capacitor.isNativePlatform()) return;
+
+    // Add platform class to HTML element for platform-specific CSS
+    const platform = Capacitor.getPlatform(); // 'ios' | 'android' | 'web'
+    document.documentElement.classList.add(`capacitor-${platform}`);
+
+    // On Android, env(safe-area-inset-*) returns 0px in WebView
+    // even with edge-to-edge enabled. Set CSS variable fallbacks.
+    // Status bar: ~24dp (at mdpi) ≈ 40px CSS on most devices.
+    // Gesture nav bar: ~48dp ≈ 24px CSS.
+    if (platform === 'android') {
+        document.documentElement.style.setProperty('--android-status-height', '40px');
+        document.documentElement.style.setProperty('--android-nav-height', '24px');
+    }
 
     try {
         // Configure Status Bar - transparent overlay, dark icons for light backgrounds
@@ -78,13 +93,48 @@ export async function initializeNativeApp() {
             }
         });
 
-        // Handle app URL open (deep links)
-        App.addListener('appUrlOpen', (event) => {
-            // Handle deep link navigation here
-            const path = new URL(event.url).pathname;
-            if (path) {
-                window.location.href = path;
+        // Handle app URL open (deep links + OAuth callbacks)
+        App.addListener('appUrlOpen', async (event) => {
+            const url = event.url;
+
+            // Supabase OAuth callback — contains token fragment
+            // Format: idoneo://welcome#access_token=...&refresh_token=...
+            if (url.includes('access_token') || url.includes('refresh_token') || url.includes('error_description')) {
+                // Close the in-app browser
+                try { await Browser.close(); } catch (_) {}
+
+                // Extract the fragment and feed it to Supabase
+                // Supabase looks at window.location.hash so we set it
+                const hashPart = url.split('#')[1];
+                if (hashPart) {
+                    // Parse tokens from fragment
+                    const params = new URLSearchParams(hashPart);
+                    const accessToken = params.get('access_token');
+                    const refreshToken = params.get('refresh_token');
+
+                    if (accessToken && refreshToken) {
+                        const { error } = await supabase.auth.setSession({
+                            access_token: accessToken,
+                            refresh_token: refreshToken,
+                        });
+                        if (!error) {
+                            window.location.href = '/welcome';
+                            return;
+                        }
+                    }
+                }
+
+                // Fallback: let Supabase parse from the URL itself
+                await supabase.auth.getSession();
+                window.location.href = '/welcome';
+                return;
             }
+
+            // Standard deep link navigation
+            try {
+                const path = new URL(url).pathname;
+                if (path) window.location.href = path;
+            } catch (_) {}
         });
 
         // Handle app state changes

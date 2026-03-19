@@ -97,63 +97,66 @@ const Podium = ({ top3, theme, metricLabel }: { top3: LeaderboardEntry[], theme:
     const [first, second, third] = top3;
     const isGold = theme === 'gold';
 
-    // Colors
-    const rankBg = isGold ? 'bg-brand-orange' : 'bg-brand-cyan';
-
     return (
-        <div className="flex items-end justify-center gap-4 mb-4 min-h-[220px] pb-6 px-4 pt-24 overflow-visible">
-            {/* 2nd Place */}
-            <div className="flex flex-col items-center gap-2 w-1/3 max-w-[100px]">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 min-h-[220px] pb-6 px-2 pt-16 overflow-visible">
+            {/* 2nd Place - Silver */}
+            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-1">
                 {second && (
                     <>
-                        <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft flex items-center justify-center bg-white`}>
-                                <UserAvatar src={second.user.avatarUrl} name={second.user.nickname} size="xl" />
+                        <div className="relative group">
+                            <div className="w-20 h-20 rounded-[28px] border-[3px] border-slate-200 dark:border-slate-700 bg-[var(--card)] shadow-[0_4px_12px_rgba(0,0,0,0.1)] p-0.5 flex items-center justify-center z-10 relative">
+                                <UserAvatar src={second.user.avatarUrl} name={second.user.nickname} size="xl" className="!rounded-[20px]" />
                             </div>
-                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-white dark:border-slate-800">2</div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[var(--card)] shadow-sm z-20">
+                                2
+                            </div>
                         </div>
-                        <div className="text-center w-full">
-                            <div className="font-bold text-sm text-text-primary truncate">{second.user.nickname}</div>
-                            <div className="text-xs font-black text-text-tertiary">{second.score} <span className="text-[10px] uppercase opacity-70">{metricLabel}</span></div>
+                        <div className="text-center w-full mt-1">
+                            <div className="font-bold text-[13px] text-[var(--foreground)] truncate px-1">{second.user.nickname}</div>
+                            <div className="text-[11px] font-bold text-[var(--foreground)] opacity-50">{Math.round(second.score)} {metricLabel}</div>
                         </div>
                     </>
                 )}
             </div>
 
-            {/* 1st Place */}
-            <div className="flex flex-col items-center gap-2 w-1/3 max-w-[120px] -mt-10 z-10">
+            {/* 1st Place - Gold */}
+            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[130px] -mt-14 order-2 z-20 overflow-visible">
                 {first && (
                     <>
-                        <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className="absolute -top-9 left-1/2 -translate-x-1/2 animate-[float_3s_ease-in-out_infinite]">
-                                <Crown className="w-8 h-8 text-amber-500 fill-amber-400/40 drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]" strokeWidth={2} />
+                        <div className="relative group scale-110">
+                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-none z-50">
+                                <Crown className="w-10 h-10 text-amber-400 fill-amber-400 drop-shadow-md animate-bounce-subtle" />
                             </div>
-                            <div className={`w-24 h-24 rounded-squircle border-4 ${isGold ? 'border-brand-orange' : 'border-brand-cyan'} flex items-center justify-center bg-white shadow-card`}>
-                                <UserAvatar src={first.user.avatarUrl} name={first.user.nickname} size="2xl" />
+                            <div className={`w-24 h-24 rounded-[32px] border-[3px] ${isGold ? 'border-amber-300 dark:border-amber-500/50' : 'border-cyan-300 dark:border-cyan-500/50'} bg-[var(--card)] ${isGold ? 'shadow-[0_8px_24px_rgba(251,191,36,0.3)]' : 'shadow-[0_8px_24px_rgba(6,182,212,0.3)]'} p-0.5 flex items-center justify-center z-10 relative ${isGold ? 'ring-4 ring-amber-50 dark:ring-amber-900/20' : 'ring-4 ring-cyan-50 dark:ring-cyan-900/20'}`}>
+                                <UserAvatar src={first.user.avatarUrl} name={first.user.nickname} size="2xl" className="!rounded-[24px]" />
                             </div>
-                            <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 ${rankBg} text-white text-[13px] font-black w-7 h-7 flex items-center justify-center rounded-full shadow-lg border-2 border-white`}>1</div>
+                            <div className={`absolute -bottom-3.5 left-1/2 -translate-x-1/2 ${isGold ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-cyan-400 to-cyan-500'} text-white text-[12px] font-black px-4 py-0.5 rounded-full border-2 border-[var(--card)] shadow-md z-20 flex items-center gap-1`}>
+                                <span>1</span>
+                            </div>
                         </div>
-                        <div className="text-center w-full mt-2">
-                            <div className="font-black text-base text-text-primary truncate">{first.user.nickname}</div>
-                            <div className={`text-sm font-black ${isGold ? 'text-brand-orange' : 'text-brand-cyan'}`}>{first.score} <span className="text-[10px] uppercase opacity-70">{metricLabel}</span></div>
+                        <div className="text-center w-full mt-3">
+                            <div className="font-black text-[15px] text-[var(--foreground)] truncate px-1">{first.user.nickname}</div>
+                            <div className={`text-[13px] font-bold ${isGold ? 'text-amber-500' : 'text-cyan-500'}`}>{first.score} <span className="text-[10px] opacity-75">{metricLabel}</span></div>
                         </div>
                     </>
                 )}
             </div>
 
-            {/* 3rd Place */}
-            <div className="flex flex-col items-center gap-2 w-1/3 max-w-[100px]">
+            {/* 3rd Place - Bronze */}
+            <div className="flex flex-col items-center gap-3 w-1/3 max-w-[110px] order-3">
                 {third && (
                     <>
-                        <div className="relative group hover:scale-105 transition-transform duration-300">
-                            <div className={`w-16 h-16 rounded-squircle border-4 border-white shadow-soft flex items-center justify-center bg-white`}>
-                                <UserAvatar src={third.user.avatarUrl} name={third.user.nickname} size="xl" />
+                        <div className="relative group">
+                            <div className="w-20 h-20 rounded-[28px] border-[3px] border-orange-200 dark:border-orange-800/50 bg-[var(--card)] shadow-[0_4px_12px_rgba(0,0,0,0.1)] p-0.5 flex items-center justify-center z-10 relative">
+                                <UserAvatar src={third.user.avatarUrl} name={third.user.nickname} size="xl" className="!rounded-[20px]" />
                             </div>
-                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-white dark:border-slate-800">3</div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[var(--card)] shadow-sm z-20">
+                                3
+                            </div>
                         </div>
-                        <div className="text-center w-full">
-                            <div className="font-bold text-sm text-text-primary truncate">{third.user.nickname}</div>
-                            <div className="text-xs font-black text-text-tertiary">{third.score} <span className="text-[10px] uppercase opacity-70">{metricLabel}</span></div>
+                        <div className="text-center w-full mt-1">
+                            <div className="font-bold text-[13px] text-[var(--foreground)] truncate px-1">{third.user.nickname}</div>
+                            <div className="text-[11px] font-bold text-[var(--foreground)] opacity-50">{Math.round(third.score)} {metricLabel}</div>
                         </div>
                     </>
                 )}

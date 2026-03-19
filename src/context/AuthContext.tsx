@@ -162,6 +162,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // Clear query cache on logout
                 queryClient.removeQueries({ queryKey: ['profile'] });
             }
+
+            // Send welcome email for brand-new users (created within last 60s)
+            if (_event === 'SIGNED_IN' && session?.user) {
+                const createdAt = new Date(session.user.created_at).getTime();
+                const now = Date.now();
+                const isNewUser = (now - createdAt) < 60_000; // created within 60 seconds
+                const emailSentKey = `idoneo_welcome_sent_${session.user.id}`;
+                if (isNewUser && !localStorage.getItem(emailSentKey)) {
+                    localStorage.setItem(emailSentKey, '1');
+                    const email = session.user.email;
+                    const name = session.user.user_metadata?.full_name
+                        || session.user.user_metadata?.name
+                        || session.user.user_metadata?.given_name
+                        || null;
+                    if (email) {
+                        fetch('/api/welcome-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, name }),
+                        }).catch(() => { /* fire & forget */ });
+                    }
+                }
+            }
+
             setAuthLoading(false);
         });
 

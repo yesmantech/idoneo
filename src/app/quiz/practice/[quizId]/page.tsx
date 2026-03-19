@@ -270,7 +270,7 @@ export default function PracticeStartPage() {
             {/* ── Header ─────────────────────────────────────────────────────── */}
             <header
                 className="sticky top-0 z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--card-border)]"
-                style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+                style={{ paddingTop: 'var(--safe-area-top, 0px)' }}
             >
                 <div className="h-14 px-4 flex items-center justify-between max-w-lg mx-auto">
                     <BackButton />
@@ -410,7 +410,7 @@ export default function PracticeStartPage() {
             {/* ── Sticky CTA ─────────────────────────────────────────────────── */}
             <div
                 className="fixed bottom-0 left-0 right-0 px-4 pt-3 bg-[var(--background)]/90 backdrop-blur-xl border-t border-[var(--card-border)]"
-                style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))' }}
+                style={{ paddingBottom: 'max(20px, var(--safe-area-bottom, 20px))' }}
             >
                 <div className="max-w-lg mx-auto">
                     <motion.button

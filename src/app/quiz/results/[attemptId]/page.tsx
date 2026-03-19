@@ -414,7 +414,7 @@ export default function QuizResultsPage() {
             {/* ============================================================= */}
             <div
                 className="bg-[var(--card)] border-b border-[var(--card-border)] pb-6 lg:pb-8 px-6 text-center relative"
-                style={{ paddingTop: 'calc(env(safe-area-inset-top) + 2.5rem)' }}
+                style={{ paddingTop: 'calc(var(--safe-area-top) + 2.5rem)' }}
             >
                 <div className="max-w-4xl mx-auto">
                     {/* Status Badge */}

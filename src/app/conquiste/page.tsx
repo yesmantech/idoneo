@@ -152,7 +152,7 @@ function RecordDetailModal({ record, onClose }: { record: PersonalRecord; onClos
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-[#0a0a0a]"
+                className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden"
             >
                 {/* Radial background glow — identical to badges */}
                 <div
@@ -511,6 +511,16 @@ function BadgeDetailModal({ badge, onClose }: { badge: Badge; onClose: () => voi
     const [isGenerating, setIsGenerating] = useState(false);
     const [showShareSheet, setShowShareSheet] = useState(false);
 
+    // Lock scroll on #root (the actual scroll container — body is position:fixed)
+    useEffect(() => {
+        const root = document.getElementById('root');
+        if (root) {
+            const prev = root.style.overflow;
+            root.style.overflow = 'hidden';
+            return () => { root.style.overflow = prev; };
+        }
+    }, []);
+
     // Cleanup blob URL on unmount to prevent memory leak
     useEffect(() => {
         return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
@@ -564,7 +574,7 @@ function BadgeDetailModal({ badge, onClose }: { badge: Badge; onClose: () => voi
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-[#0a0a0a]"
+                className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden"
             >
                 {/* Radial background glow */}
                 {badge.unlocked && (
