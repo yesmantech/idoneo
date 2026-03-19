@@ -436,15 +436,30 @@ a,
 }
 
 @keyframes bounce-subtle {
-
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.3));
+  }
+
+  25% {
+    transform: translateY(-5px) rotate(-3deg) scale(1.05);
+    filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.5));
   }
 
   50% {
-    transform: translateY(-4px);
+    transform: translateY(-8px) rotate(0deg) scale(1.08);
+    filter: drop-shadow(0 6px 12px rgba(251, 191, 36, 0.6));
   }
+
+  75% {
+    transform: translateY(-5px) rotate(3deg) scale(1.05);
+    filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.5));
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 3s ease-in-out infinite;
 }
 
 /* Chat message fade-in (replaces Framer Motion for scroll perf) */
