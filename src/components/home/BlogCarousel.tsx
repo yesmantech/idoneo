@@ -79,8 +79,8 @@ interface CarouselItemProps {
 function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
     return (
         <div
-            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-0"
-            style={{ width: `${cardWidth}px` }}
+            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-0 will-change-transform"
+            style={{ width: `${cardWidth}px`, transform: 'translateZ(0)' }}
         >
             <Link
                 to={`/blog/${post.slug}`}
@@ -110,9 +110,9 @@ function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
                 </div>
 
                 {/* Content Overlay */}
-                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end items-start gap-1 md:gap-3">
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end items-start gap-1 md:gap-3" style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}>
                     {post.category?.name && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-slate-900/40 backdrop-blur-md text-white text-[10px] md:text-xs font-black uppercase tracking-wider mb-1 border border-white/20">
+                        <span className="px-2.5 py-0.5 rounded-full bg-slate-900/70 text-white text-[10px] md:text-xs font-black uppercase tracking-wider mb-1 border border-white/20">
                             {post.category.name}
                         </span>
                     )}
