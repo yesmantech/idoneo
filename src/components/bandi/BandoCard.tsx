@@ -57,12 +57,9 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                             <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                                 {bando.ente?.name || 'Ente non specificato'}
                             </p>
-                            <motion.h4
-                                layoutId={`bando-title-${bando.id}`}
-                                className="font-semibold text-slate-900 dark:text-white text-sm mt-1 line-clamp-2"
-                            >
+                            <h4 className="font-semibold text-slate-900 dark:text-white text-sm mt-1 line-clamp-2">
                                 {bando.short_title || bando.title}
-                            </motion.h4>
+                            </h4>
                             <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
                                 {displaySeats(bando.seats_total) && (
                                     <span className="flex items-center gap-1">
@@ -111,12 +108,9 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                         </div>
 
                         {/* Title */}
-                        <motion.h3
-                            layoutId={`bando-title-${bando.id}`}
-                            className="font-black text-lg text-[var(--foreground)] leading-tight mb-auto line-clamp-3 group-hover:text-[#00B1FF] transition-colors duration-300"
-                        >
+                        <h3 className="font-black text-lg text-[var(--foreground)] leading-tight mb-auto line-clamp-3 group-hover:text-[#00B1FF] transition-colors duration-300">
                             {bando.short_title || bando.title}
-                        </motion.h3>
+                        </h3>
 
                         {/* Footer Info */}
                         <div className="pt-4 border-t border-[var(--card-border)] mt-auto space-y-4">
@@ -168,12 +162,9 @@ export default function BandoCard({ bando, variant = 'default', onSaveToggle, is
                         </div>
 
                         {/* Title */}
-                        <motion.h3
-                            layoutId={`bando-title-${bando.id}`}
-                            className="font-semibold text-slate-900 dark:text-white line-clamp-2 leading-tight"
-                        >
+                        <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 leading-tight">
                             {bando.short_title || bando.title}
-                        </motion.h3>
+                        </h3>
 
                         {/* Meta info */}
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-sm text-slate-500 dark:text-slate-400">

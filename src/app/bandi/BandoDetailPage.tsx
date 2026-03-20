@@ -118,12 +118,9 @@ export default function BandoDetailPage() {
                             })()}
                         </motion.div>
 
-                        <motion.h1
-                            layoutId={`bando-title-${bando.id}`}
-                            className="text-2xl font-bold text-white mb-2 leading-tight"
-                        >
+                        <h1 className="text-2xl font-bold text-white mb-2 leading-tight">
                             {bando.title}
-                        </motion.h1>
+                        </h1>
                         <p className="text-brand-cyan font-medium text-sm mb-6 bg-brand-cyan/10 px-3 py-1 rounded-full border border-brand-cyan/20">
                             {bando.ente?.name}
                         </p>
