@@ -76,10 +76,11 @@ export default function BandoDetailPage() {
         <div className="min-h-screen bg-canvas-light dark:bg-slate-950 font-sans pb-32">
 
             {/* Navbar (Glass) */}
-            <div className="sticky top-0 z-40 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 data-[scrolled=true]:shadow-soft transition-all">
-                <div className="flex items-center justify-between px-4 h-14 max-w-lg lg:max-w-3xl mx-auto"
-                    style={{ paddingTop: 'var(--safe-area-top, 0px)' }}
-                >
+            <div
+                className="sticky top-0 z-40 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 shadow-soft transition-all"
+                style={{ paddingTop: 'var(--safe-area-top, 0px)' }}
+            >
+                <div className="flex items-center justify-between px-4 h-14 max-w-lg lg:max-w-3xl mx-auto">
                     <BackButton />
                     <span className="font-bold text-lg bg-gradient-to-r from-brand-blue to-brand-cyan bg-clip-text text-transparent">
                         Dettagli Concorso
