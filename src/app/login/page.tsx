@@ -421,7 +421,7 @@ export default function LoginPage() {
                                 Continua con Google
                             </button>
 
-                            {/* Facebook */}
+                            {/* Facebook — TEMPORANEAMENTE NASCOSTO (in attesa verifica Meta Business)
                             <button onClick={async () => {
                                 hapticLight();
                                 if (Capacitor.isNativePlatform()) {
@@ -457,6 +457,7 @@ export default function LoginPage() {
                                 </svg>
                                 Continua con Facebook
                             </button>
+                            */}
                             {/* Apple */}
                             <button onClick={async () => {
                                 hapticLight();
