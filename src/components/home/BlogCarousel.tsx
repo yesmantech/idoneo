@@ -42,12 +42,11 @@ export default function BlogCarousel({ posts }: BlogCarouselProps) {
     }, [containerWidth, padding, gap, rightPeek]);
 
     return (
-        <div className="w-full max-w-7xl lg:mx-auto overflow-hidden">
+        <div className="w-full max-w-7xl lg:mx-auto" style={{ overflowX: 'clip' }}>
             <div
                 ref={containerRef}
-                className="flex overflow-x-auto snap-x snap-mandatory scroll-pl-4 lg:scroll-pl-8 scrollbar-hide pb-8 pt-2 relative z-10 pl-4 lg:pl-8"
+                className="flex overflow-x-auto snap-x snap-mandatory scroll-pl-4 lg:scroll-pl-8 scrollbar-hide pb-8 pt-2 pl-4 lg:pl-8"
                 style={{
-                    scrollBehavior: 'smooth',
                     gap: `${gap}px`,
                     WebkitOverflowScrolling: 'touch',
                 }}
@@ -79,45 +78,45 @@ interface CarouselItemProps {
 function CarouselItem({ post, cardWidth, priority }: CarouselItemProps) {
     return (
         <div
-            className="snap-start shrink-0 relative flex flex-col items-center justify-center p-0 will-change-transform"
-            style={{ width: `${cardWidth}px`, transform: 'translateZ(0)' }}
+            className="snap-start shrink-0 p-0"
+            style={{ width: `${cardWidth}px`, isolation: 'isolate' }}
         >
             <Link
                 to={`/blog/${post.slug}`}
-                className="block w-full relative overflow-hidden rounded-[28px] md:rounded-[32px] 
-                           shadow-lg transition-transform duration-500 ease-out 
-                           active:scale-[0.98] bg-white dark:bg-[#111] 
-                           border border-slate-100 dark:border-slate-700/50 group"
-                style={{ aspectRatio: '16 / 9' }}
+                className="block w-full rounded-[28px] md:rounded-[32px] 
+                           shadow-lg bg-black
+                           border border-slate-100 dark:border-slate-700/50"
+                style={{ aspectRatio: '16 / 9', isolation: 'isolate', position: 'relative', overflow: 'hidden' }}
             >
-                {/* Image */}
-                <div className="absolute inset-0 w-full h-full">
-                    {post.cover_image_url ? (
-                        <img
-                            src={post.cover_image_url}
-                            alt={post.title}
-                            loading={priority ? "eager" : "lazy"}
-                            decoding="async"
-                            // @ts-ignore
-                            fetchpriority={priority ? "high" : "auto"}
-                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900" />
-                    )}
+                {/* Image — rendered as a background-like layer */}
+                {post.cover_image_url ? (
+                    <img
+                        src={post.cover_image_url}
+                        alt={post.title}
+                        loading={priority ? "eager" : "lazy"}
+                        decoding="async"
+                        // @ts-ignore
+                        fetchpriority={priority ? "high" : "auto"}
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900" />
+                )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                </div>
+                {/* Gradient scrim */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                {/* Content Overlay */}
-                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end items-start gap-1 md:gap-3" style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}>
+                {/* Content — uses relative positioning to stay in normal flow on its own layer */}
+                <div
+                    className="relative z-10 w-full h-full p-5 md:p-10 flex flex-col justify-end items-start gap-1 md:gap-3"
+                >
                     {post.category?.name && (
                         <span className="px-2.5 py-0.5 rounded-full bg-slate-900/70 text-white text-[10px] md:text-xs font-black uppercase tracking-wider mb-1 border border-white/20">
                             {post.category.name}
                         </span>
                     )}
 
-                    <h3 className="text-xl md:text-3xl font-extrabold text-white line-clamp-2 leading-tight drop-shadow-lg">
+                    <h3 className="text-xl md:text-3xl font-extrabold text-white line-clamp-2 leading-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
                         {post.title}
                     </h3>
 
