@@ -205,9 +205,11 @@ export default function BandiListPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2.5">
+                        {/* Notifications — archived until implemented
                         <Link to="/bandi/alerts" className="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Gestisci notifiche">
                             <Bell className="w-[22px] h-[22px] text-slate-400 dark:text-slate-500" strokeWidth={1.8} />
                         </Link>
+                        */}
                         <Link to="/bandi/watchlist">
                             <Button
                                 variant="primary"
