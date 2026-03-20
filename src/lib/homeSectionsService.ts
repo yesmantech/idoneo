@@ -11,6 +11,7 @@ export interface RecentlyUsedItem {
     quizTitle: string;
     categorySlug: string;
     categoryTitle: string;
+    categoryBannerUrl?: string;
     lastAttemptAt: string;
     attemptCount: number;
 }
@@ -31,6 +32,7 @@ export interface PopularQuiz {
     quizTitle: string;
     categorySlug: string;
     categoryTitle: string;
+    categoryBannerUrl?: string;
     totalAttempts: number;
 }
 
@@ -49,7 +51,7 @@ export async function fetchRecentlyUsed(userId: string, limit = 5): Promise<Rece
                 quiz_id,
                 quiz:quizzes (
                     id, slug, title, is_archived,
-                    category:categories (slug, title, is_archived)
+                    category:categories (slug, title, is_archived, home_banner_url)
                 ),
                 created_at
             `)
@@ -78,6 +80,7 @@ export async function fetchRecentlyUsed(userId: string, limit = 5): Promise<Rece
                     quizTitle: quiz.title,
                     categorySlug: quiz.category?.slug || '',
                     categoryTitle: quiz.category?.title || '',
+                    categoryBannerUrl: quiz.category?.home_banner_url || undefined,
                     lastAttemptAt: attempt.created_at,
                     attemptCount: 0
                 });
@@ -160,7 +163,7 @@ export async function fetchMostPopular(limit = 5): Promise<PopularQuiz[]> {
             .select(`
                 quiz:quizzes (
                     id, slug, title, is_archived,
-                    category:categories (slug, title, is_archived)
+                    category:categories (slug, title, is_archived, home_banner_url)
                 )
             `)
             .limit(500);
@@ -195,6 +198,7 @@ export async function fetchMostPopular(limit = 5): Promise<PopularQuiz[]> {
                 quizTitle: quiz.title,
                 categorySlug: quiz.category?.slug || '',
                 categoryTitle: quiz.category?.title || '',
+                categoryBannerUrl: quiz.category?.home_banner_url || undefined,
                 totalAttempts: count
             }));
     } catch (err) {

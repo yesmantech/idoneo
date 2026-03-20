@@ -11,9 +11,17 @@ export default function PopularSection({ quizzes }: PopularSectionProps) {
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
-        if (scrollRef.current) {
-            const amount = direction === 'left' ? -280 : 280;
-            scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+        if (!scrollRef.current) return;
+        const container = scrollRef.current;
+        const firstCard = container.querySelector('[class*="snap-start"]') as HTMLElement;
+        if (!firstCard) return;
+        const gap = parseFloat(getComputedStyle(container).gap) || 12;
+        const cardWidth = firstCard.offsetWidth + gap;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        if (direction === 'left') {
+            container.scrollTo({ left: Math.max(0, container.scrollLeft - cardWidth), behavior: 'smooth' });
+        } else {
+            container.scrollTo({ left: Math.min(maxScroll, container.scrollLeft + cardWidth), behavior: 'smooth' });
         }
     };
 
@@ -108,9 +116,10 @@ function PopularCard({ quiz, rank }: { key?: string; quiz: PopularQuiz; rank: nu
     return (
         <Link
             to={`/concorsi/${quiz.categorySlug}/${quiz.quizSlug}`}
-            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[220px] lg:w-full"
+            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full lg:w-full"
             style={{
                 width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
+                height: 'clamp(210px, 24vh, 280px)',
             } as React.CSSProperties}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
@@ -118,25 +127,35 @@ function PopularCard({ quiz, rank }: { key?: string; quiz: PopularQuiz; rank: nu
                 className="relative overflow-hidden flex items-center justify-center shrink-0"
                 style={{ aspectRatio: '2 / 1', width: '100%' }}
             >
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
-                <div
-                    className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
-                />
-                <div
-                    className="relative z-10 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
-                    style={{
-                        width: '64px',
-                        height: '64px',
-                        borderRadius: '20px',
-                        background: 'rgba(255,255,255,0.25)',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
-                        border: '1px solid rgba(255,255,255,0.2)'
-                    }}
-                >
-                    <Icon className="text-white w-8 h-8" strokeWidth={1.5} />
-                </div>
+                {quiz.categoryBannerUrl ? (
+                    <img
+                        src={quiz.categoryBannerUrl}
+                        alt={quiz.categoryTitle}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                ) : (
+                    <>
+                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
+                        <div
+                            className="absolute inset-0"
+                            style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
+                        />
+                        <div
+                            className="relative z-10 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+                            style={{
+                                width: '64px',
+                                height: '64px',
+                                borderRadius: '20px',
+                                background: 'rgba(255,255,255,0.25)',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
+                                border: '1px solid rgba(255,255,255,0.2)'
+                            }}
+                        >
+                            <Icon className="text-white w-8 h-8" strokeWidth={1.5} />
+                        </div>
+                    </>
+                )}
 
                 {/* Ranking Badge (Top Right to mimic "Nuovo") */}
                 <div className="absolute top-3.5 left-3.5 z-10 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-white/95 backdrop-blur-md shadow-sm border border-slate-200/50 flex items-center justify-center">

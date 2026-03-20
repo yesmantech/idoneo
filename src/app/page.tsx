@@ -220,14 +220,7 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* 6. NEW ARRIVALS - Fresh content */}
-        {newArrivals.length > 0 && (
-          <section className="mb-8 lg:mb-10">
-            <Reveal width="100%" delay={0.8}>
-              <NewArrivalsSection quizzes={newArrivals} />
-            </Reveal>
-          </section>
-        )}
+
 
         {/* 7. POPULAR - Community favorites */}
         {popularQuizzes.length > 0 && (

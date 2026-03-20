@@ -17,9 +17,17 @@ export default function RecentlyUsedSection({ items, loading }: RecentlyUsedSect
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
-        if (scrollRef.current) {
-            const amount = direction === 'left' ? -280 : 280;
-            scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+        if (!scrollRef.current) return;
+        const container = scrollRef.current;
+        const firstCard = container.querySelector('[class*="snap-start"]') as HTMLElement;
+        if (!firstCard) return;
+        const gap = parseFloat(getComputedStyle(container).gap) || 12;
+        const cardWidth = firstCard.offsetWidth + gap;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        if (direction === 'left') {
+            container.scrollTo({ left: Math.max(0, container.scrollLeft - cardWidth), behavior: 'smooth' });
+        } else {
+            container.scrollTo({ left: Math.min(maxScroll, container.scrollLeft + cardWidth), behavior: 'smooth' });
         }
     };
 
@@ -146,25 +154,35 @@ function RecentlyUsedCard({ item, index }: { key?: string; item: RecentlyUsedIte
                 className="relative overflow-hidden flex items-center justify-center"
                 style={{ aspectRatio: '2 / 1', width: '100%' }}
             >
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
-                <div
-                    className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
-                />
-                <div
-                    className="relative z-10 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
-                    style={{
-                        width: '64px',
-                        height: '64px',
-                        borderRadius: '20px',
-                        background: 'rgba(255,255,255,0.25)',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
-                        border: '1px solid rgba(255,255,255,0.2)'
-                    }}
-                >
-                    <History className="text-white w-8 h-8" strokeWidth={1.5} />
-                </div>
+                {item.categoryBannerUrl ? (
+                    <img
+                        src={item.categoryBannerUrl}
+                        alt={item.categoryTitle}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                ) : (
+                    <>
+                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
+                        <div
+                            className="absolute inset-0"
+                            style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
+                        />
+                        <div
+                            className="relative z-10 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+                            style={{
+                                width: '64px',
+                                height: '64px',
+                                borderRadius: '20px',
+                                background: 'rgba(255,255,255,0.25)',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)',
+                                border: '1px solid rgba(255,255,255,0.2)'
+                            }}
+                        >
+                            <History className="text-white w-8 h-8" strokeWidth={1.5} />
+                        </div>
+                    </>
+                )}
 
                 {/* Attempt count badge */}
                 <div className="absolute top-3.5 right-3.5 bg-white/95 backdrop-blur-md text-slate-700 text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm z-10 border border-slate-200/50">

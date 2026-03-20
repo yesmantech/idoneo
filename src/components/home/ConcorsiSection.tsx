@@ -51,9 +51,10 @@ export function ConcorsoCard({ contest, index = 0 }: ConcorsoCardProps) {
     return (
         <Link
             to={`/concorsi/${contest.slug}`}
-            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full min-h-[180px] lg:min-h-[220px] lg:w-full"
+            className="group relative bg-[var(--card)] shadow-soft transition-all duration-500 lg:duration-700 hover:-translate-y-1.5 flex flex-col overflow-hidden rounded-[28px] lg:rounded-[32px] border border-[var(--card-border)] h-full lg:w-full"
             style={{
-                width: 'clamp(160px, calc((100vw - 32px) * 0.44), 300px)',
+                width: 'clamp(180px, calc((100vw - 32px) * 0.48), 300px)',
+                height: 'clamp(210px, 24vh, 280px)',
             } as React.CSSProperties}
         >
             {/* 1. HERO AREA - 2:1 panoramic aspect ratio */}
@@ -142,9 +143,17 @@ export default function ConcorsiSection({ title, contests, icon: IconOverride, i
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
-        if (scrollRef.current) {
-            const amount = direction === 'left' ? -300 : 300;
-            scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+        if (!scrollRef.current) return;
+        const container = scrollRef.current;
+        const firstCard = container.querySelector('[class*="snap-start"]') as HTMLElement;
+        if (!firstCard) return;
+        const gap = parseFloat(getComputedStyle(container).gap) || 12;
+        const cardWidth = firstCard.offsetWidth + gap;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        if (direction === 'left') {
+            container.scrollTo({ left: Math.max(0, container.scrollLeft - cardWidth), behavior: 'smooth' });
+        } else {
+            container.scrollTo({ left: Math.min(maxScroll, container.scrollLeft + cardWidth), behavior: 'smooth' });
         }
     };
 
