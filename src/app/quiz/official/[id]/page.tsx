@@ -10,6 +10,7 @@ import TierSLoader from "@/components/ui/TierSLoader";
 import { hapticLight, hapticSuccess } from "@/lib/haptics";
 import { Button } from "@/components/ui/Button";
 import BackButton from "@/components/ui/BackButton";
+import { getCategoryStyle } from "@/lib/categoryIcons";
 
 // V5 FIX: Fisher-Yates shuffle (replaces biased Array.sort(random))
 function shuffleArray<T>(array: T[]): T[] {
@@ -54,6 +55,7 @@ export default function OfficialQuizStarterPage() {
         points_wrong: number;
         points_blank: number;
         categoryIconUrl?: string;
+        categoryTitle?: string;
     } | null>(null);
 
     // Initial fetch of Quiz Details only
@@ -92,15 +94,17 @@ export default function OfficialQuizStarterPage() {
 
                 quiz = result.data;
 
-                // Fetch category icon separately
+                // Fetch category icon and title
                 let categoryIconUrl: string | undefined;
+                let categoryTitle: string | undefined;
                 if (quiz.category_id) {
                     const { data: cat } = await supabase
                         .from("categories")
-                        .select("home_banner_url")
+                        .select("home_banner_url, title")
                         .eq("id", quiz.category_id)
                         .single();
                     categoryIconUrl = cat?.home_banner_url || undefined;
+                    categoryTitle = cat?.title || undefined;
                 }
 
                 // 3. Fetch Rules for precise count
@@ -120,6 +124,7 @@ export default function OfficialQuizStarterPage() {
                     points_wrong: quiz.points_wrong ?? 0,
                     points_blank: quiz.points_blank ?? 0,
                     categoryIconUrl,
+                    categoryTitle,
                 };
 
                 setQuizDetails(details);
@@ -344,17 +349,15 @@ export default function OfficialQuizStarterPage() {
                         transition={{ type: "spring", damping: 15, delay: 0.1 }}
                         className="w-20 h-20 rounded-[24px] mx-auto flex items-center justify-center mb-4 shadow-xl shadow-brand-blue/20 relative overflow-hidden"
                     >
-                        {quizDetails?.categoryIconUrl ? (
-                            <img
-                                src={quizDetails.categoryIconUrl}
-                                alt={quizDetails.title}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-brand-blue to-cyan-400 flex items-center justify-center text-white">
-                                <Rocket className="w-10 h-10" />
-                            </div>
-                        )}
+                        {(() => {
+                            const catStyle = getCategoryStyle(quizDetails?.categoryTitle);
+                            const CatIcon = catStyle.Icon;
+                            return (
+                                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: catStyle.bg }}>
+                                    <CatIcon className="w-10 h-10" style={{ color: catStyle.color }} strokeWidth={1.5} />
+                                </div>
+                            );
+                        })()}
                     </motion.div>
 
                     <h1 className="text-2xl font-black tracking-tight text-[var(--foreground)] mb-2 leading-tight">{quizDetails?.title}</h1>
