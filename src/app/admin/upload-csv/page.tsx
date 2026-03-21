@@ -198,7 +198,7 @@ export default function AdminUploadCsvPage() {
       if (toInsert.length === 0) throw new Error("Nessuna riga valida da importare.");
 
       // SEC-026 FIX: Limit bulk insert size to prevent DoS
-      if (toInsert.length > 2000) throw new Error('Importazione limitata a 2000 domande per volta.');
+      if (toInsert.length > 10000) throw new Error('Importazione limitata a 10000 domande per volta.');
 
       const { error } = await supabase.from("questions").insert(toInsert);
       if (error) throw error;
